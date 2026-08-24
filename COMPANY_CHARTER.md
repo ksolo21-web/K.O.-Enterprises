@@ -2,13 +2,13 @@
 
 ## 1. Identity
 
-K.O. Enterprises is the working name of a venture-studio project owned and directed by Kaleb. Unless Kaleb completes the relevant legal formation, the name does not denote a separate legal person. Repository automation cannot own property, open accounts, sign agreements, employ people, or assume liability.
+K.O. Enterprises is the working name of a venture-studio project owned and directed by Kaleb, with Michigan, United States as its owner-declared principal operating jurisdiction. Unless Kaleb completes and verifies the relevant legal formation or assumed-name filings, the name does not denote a separate legal person. Repository automation cannot own property, open accounts, sign agreements, employ people, or assume liability.
 
 ## 2. Mission
 
 Discover economically meaningful problems, validate demand with current evidence, and build small lawful digital products that can produce durable net cash contribution with low recurring owner effort.
 
-Revenue is an outcome to verify, not a guarantee. The studio optimizes for customer value, truthful measurement, reversibility, low fixed cost, high gross-margin potential, and reuse of software and learning.
+Revenue is an outcome to verify, not a guarantee. The studio optimizes for customer value, truthful measurement, reversibility, low fixed cost, high gross-margin potential, low customer-interaction burden, and reuse of software and learning.
 
 ## 3. Governance
 
@@ -21,6 +21,8 @@ The constitution, approval policy, security policy, and privacy policy apply to 
 - Default external cash budget: `$0`.
 - Maximum active full builds: one until a validation signal justifies more.
 - Prefer a narrow self-serve digital utility, micro-SaaS, workflow asset, or open tool with a credible paid layer.
+- Deliver online and virtually. Prefer asynchronous discovery, product-led acquisition, self-service evaluation and onboarding, automated fulfillment, clear documentation, and bounded asynchronous support.
+- Reject opportunities whose normal operation depends on physical client interaction, recurring sales calls, live demos, bespoke onboarding, account management, custom consulting, or substantial per-customer human delivery.
 - Reject opportunities dependent on spam, deceptive tactics, restricted data, unlicensed content, speculative trading, large capital, continuous bespoke service, or hidden human labor.
 - Treat every free tier, plan allowance, compute minute, and API call as a scarce operating resource.
 

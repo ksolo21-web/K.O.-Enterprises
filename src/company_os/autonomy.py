@@ -62,7 +62,8 @@ class AutonomousCompany:
                 "title": "Validate one urgent, reachable, lawful customer problem",
                 "description": (
                     "Build current evidence, falsify weak theses quickly, and present only "
-                    "a decision-grade validation recommendation."
+                    "a decision-grade validation recommendation for a Michigan-based, "
+                    "online-only, low-customer-touch product."
                 ),
                 "owner_role_key": "strategy_portfolio_chief",
                 "priority": 95,
@@ -248,11 +249,13 @@ class AutonomousCompany:
                 description=(
                     "Search lawful current public sources for recurring, costly, specific "
                     "workarounds. Record sources, observation dates, buyer, budget holder, "
-                    "cost of inaction, reachability, and evidence expiry."
+                    "cost of inaction, reachability, evidence expiry, physical dependencies, "
+                    "and expected sales, onboarding, support, and exception-handling burden."
                 ),
                 acceptance=(
                     "At least three specific candidate dossiers; every material claim has "
                     "source URI, observation date, evidence type, confidence, and expiry; "
+                    "each dossier addresses online delivery and customer-interaction burden; "
                     "no generic idea-list entries or fabricated demand."
                 ),
                 priority=90,
@@ -300,7 +303,7 @@ class AutonomousCompany:
                 acceptance=(
                     "No more than three shortlisted candidates; each includes user, buyer, "
                     "workaround, urgency, reachable channel, smallest wedge, counter-signals, "
-                    "kill criteria, and explicit unknowns."
+                    "kill criteria, customer-interaction map, and explicit unknowns."
                 ),
                 priority=85,
                 objective_id=objective_id,
@@ -320,7 +323,8 @@ class AutonomousCompany:
                 title="Try to disprove the shortlisted opportunity theses",
                 description=(
                     "Independently identify false urgency, unreachable buyers, weak economics, "
-                    "crowded supply, regulatory risk, incumbent response, and maintenance traps."
+                    "crowded supply, regulatory risk, incumbent response, physical dependencies, "
+                    "high-touch delivery, and maintenance traps."
                 ),
                 acceptance=(
                     "A falsifiable counter-thesis for each candidate with disconfirming evidence, "
@@ -368,6 +372,7 @@ class AutonomousCompany:
                 title="Screen candidate categories and evidence collection boundaries",
                 description=(
                     "Identify terms, privacy, IP, claims, data, licensing, regulated-category, "
+                    "Michigan registration/tax baseline, multistate nexus, consumer protection, "
                     "and reputation risks. This is an internal control checklist, not legal advice."
                 ),
                 acceptance=(

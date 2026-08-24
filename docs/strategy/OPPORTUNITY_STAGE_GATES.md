@@ -16,6 +16,7 @@ Required:
 - lawful fit with the company charter;
 - no obvious constitutional hard stop;
 - named Strategy & Portfolio owner.
+- credible fit with the Michigan virtual, low-touch mandate; no physical client dependency or obviously high-touch delivery model.
 
 Authority: `D1` department lead. Duplicates, generic ideas, prohibited categories, and unsupported claims are rejected or held.
 
@@ -30,6 +31,7 @@ Required:
 - reachable permission-based channel;
 - evidence source, type, confidence, observation date, expiry, and limitations;
 - preliminary legal, platform, privacy, security, support, and capital flags.
+- customer-interaction map covering calls/demos, onboarding, custom setup, support minutes, exceptions, complaints, refunds, privacy requests, and the automation path.
 
 Authority: `D1`. Research may continue at `$0`; no external exposure is implied.
 
@@ -57,6 +59,7 @@ Required:
 - thresholds evaluated without retrospective weakening;
 - surviving counter-thesis and key uncertainty;
 - buyer, outcome, wedge, pricing hypothesis, distribution path, and support model;
+- evidence that acquisition, onboarding, delivery, and routine support can operate predominantly asynchronously and self-service;
 - preliminary unit economics and CEO-minute estimate;
 - portfolio capacity and opportunity-cost comparison;
 - President decision to select, hold, reposition, or kill.
@@ -72,6 +75,7 @@ Required:
 - approved internal resource budget and delivery timebox;
 - threat model, data classification, dependency/license review, analytics plan, accessibility/reliability criteria, and rollback design;
 - customer-support and incident path;
+- self-service documentation and automation plan, bounded asynchronous support model, and explicit high-touch rejection check;
 - explicit kill condition for build overrun or invalidated demand.
 
 Authority: `D2` inside the current mandate and budget. Paid services, new credentials, or production infrastructure remain reserved/gated.

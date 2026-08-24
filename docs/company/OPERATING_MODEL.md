@@ -84,6 +84,7 @@ Group charters are under `docs/company/departments/`; each charter names the per
 
 - Maintain a broad research funnel but a narrow execution portfolio.
 - Keep at most one full build active until verified evidence supports more.
+- Apply the Michigan virtual, low-touch mandate to every candidate: online delivery, no physical client dependency, and no business model that requires recurring high-touch sales or service.
 - Prefer short, reversible work packages with explicit resource ceilings.
 - Freeze experiment success and kill criteria before exposure to results.
 - Reassign or reduce scope before requesting routine CEO help.
