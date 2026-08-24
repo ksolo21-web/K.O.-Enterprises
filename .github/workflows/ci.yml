@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python 3.12 safety and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COMPANY_OS_PAUSED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: src
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Compile source and tests
+        run: python -m compileall -q -f src tests
+
+      - name: Run unit and safety tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Confirm tests did not alter tracked files
+        run: git diff --exit-code -- .
