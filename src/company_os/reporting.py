@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import html
+import json
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .storage import CompanyStore
+from .corporate import CorporateOperations
+from .errors import ValidationError
+from .policy import ApprovalClass
+from .storage import CompanyStore, normalize_owner_decision_packet
 
 
 def format_money(cents: int, currency: str = "USD") -> str:
@@ -37,10 +42,46 @@ def generate_ceo_report(
     state = store.status(repo_root=repo_root)
     opportunities = store.list_opportunities()
     experiments = store.list_experiments()
-    approvals = store.list_approvals(status="pending")
+    pending_approvals = store.list_approvals(status="pending")
+    ceo_approval_requests = [
+        approval
+        for approval in pending_approvals
+        if approval["approval_class"] == ApprovalClass.CEO_APPROVAL_REQUIRED.value
+    ]
+    complete_approval_packets: list[tuple[dict[str, object], dict[str, str]]] = []
+    approvals: list[dict[str, object]] = []
+    for approval in ceo_approval_requests:
+        try:
+            packet, digest = normalize_owner_decision_packet(
+                json.loads(str(approval.get("decision_packet_json") or "{}"))
+            )
+            if not secrets.compare_digest(str(approval.get("packet_digest") or ""), digest):
+                raise ValueError("packet digest mismatch")
+        except (TypeError, ValueError, json.JSONDecodeError, ValidationError):
+            approvals.append(approval)
+        else:
+            complete_approval_packets.append((approval, packet))
+    delegated_approvals = [
+        approval
+        for approval in pending_approvals
+        if approval["approval_class"] != ApprovalClass.CEO_APPROVAL_REQUIRED.value
+    ]
     risks = [risk for risk in store.list_risks() if risk["status"] != "closed"]
     decisions = store.list_decisions(limit=10)
     audit_valid, first_bad_audit_id = store.verify_audit_chain()
+    operations = CorporateOperations(store)
+    operations_state = operations.operations_summary()
+    objectives = operations.list_objectives()
+    owner_escalations = operations.list_escalations(
+        owner_attention=True, status="routed"
+    )
+    critical_alerts = [
+        item for item in owner_escalations if item["decision_class"] == "prohibited"
+    ]
+    owner_decision_escalations = [
+        item for item in owner_escalations if item["decision_class"] != "prohibited"
+    ]
+    workforce = operations.performance_report()
 
     lines = [
         f"# {title}",
@@ -49,13 +90,60 @@ def generate_ceo_report(
         f"Operating state: **{'PAUSED' if state['paused'] else 'ACTIVE'}**",
         f"Audit chain: **{'valid' if audit_valid else f'INVALID at event {first_bad_audit_id}'}**",
         "",
-        "## Financial truth",
+        "## Executive operating view",
         "",
-        "All-time ledger totals are shown; recorded transaction-status assertions and projections are deliberately separated. Phase 0 checks that actual-status entries have unique source references, but it does not independently authenticate those references against a bank or processor.",
+        f"- Active objectives: {operations_state['active_objectives']}",
+        f"- Open work: {sum(operations_state['active_work_by_department'].values())}",
+        f"- Open incidents: {operations_state['open_incidents']}",
+        f"- Owner-attention escalations: {operations_state['owner_attention']}",
+        f"- Pending delegated/policy approvals: {len(delegated_approvals)}",
         "",
-        "| Currency | Recorded realized revenue | Recorded cleared revenue | Recorded refunds | Recorded incurred costs | Recorded paid costs | Recorded net cash contribution | Projected revenue | Estimated/committed costs |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Objective | Owner | Key results | Priority | Status |",
+        "|---|---|---:|---:|---|",
     ]
+    if objectives:
+        for objective in objectives:
+            lines.append(
+                f"| {_cell(objective['title'])} | {_cell(objective['owner_role_key'])} | "
+                f"{objective['achieved_key_results']}/{objective['key_result_count']} | "
+                f"{objective['priority']} | {_cell(objective['status'])} |"
+            )
+    else:
+        lines.append("| No corporate objectives recorded | — | — | — | — |")
+
+    lines.extend(
+        [
+            "",
+            "### Work queue by state",
+            "",
+        ]
+    )
+    if operations_state["queue"]:
+        lines.append(
+            ", ".join(
+                f"`{_cell(status)}`: {count}"
+                for status, count in sorted(operations_state["queue"].items())
+            )
+        )
+    else:
+        lines.append("No work orders are recorded.")
+    lines.extend(
+        [
+            "",
+            "### Digital-workforce evidence",
+            "",
+            f"- Registered workers: {len(workforce)}",
+            f"- Workers with sufficient performance sample: {sum(1 for item in workforce if item['performance_state'] != 'insufficient_sample')}",
+            "- Performance remains `insufficient_sample` until at least five independently reviewed outcomes exist; activity alone is not success.",
+            "",
+            "## Financial truth",
+            "",
+            "All-time ledger totals are shown; recorded transaction-status assertions and projections are deliberately separated. The ledger checks that actual-status entries have unique source references, but it does not independently authenticate those references against a bank or processor.",
+            "",
+            "| Currency | Recorded realized revenue | Recorded cleared revenue | Recorded refunds | Recorded incurred costs | Recorded paid costs | Recorded net cash contribution | Projected revenue | Estimated/committed costs |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
     for currency, financials in state["financials"].items():
         lines.append(
             "| "
@@ -127,24 +215,92 @@ def generate_ceo_report(
     else:
         lines.append("| No experiments recorded | — | — | — | — | USD 0.00 |")
 
-    lines.extend(["", "## Approvals required", ""])
+    lines.extend(["", "## Critical alerts and containment", ""])
+    if critical_alerts:
+        lines.append(
+            "These are non-approvable alerts. The operating chain must contain and remediate them; CEO acknowledgement never authorizes the prohibited action."
+        )
+        lines.append("")
+        for escalation in critical_alerts:
+            lines.append(
+                f"- **Alert #{escalation['id']} - {_cell(escalation['title'])}:** "
+                f"{_cell(escalation['context'])} Containment/default: "
+                f"{_cell(escalation['safe_default'])}."
+            )
+    else:
+        lines.append("No prohibited-action or critical-integrity alerts are routed to the CEO.")
+
+    lines.extend(["", "## Held approval records awaiting packet completion", ""])
     if approvals:
         lines.append(
-            "These are unauthenticated ledger summaries, not executable authority; review the complete approval packet and authentic CEO decision before acting."
+            "These records are held requests, not independently decidable CEO packets and not executable authority. The accountable executive must attach the complete owner packet before requesting a decision."
         )
         lines.append("")
         for approval in approvals:
             lines.append(
-                f"- **#{approval['id']} — {_cell(approval['action'])}:** "
-                f"{_cell(approval['rationale'])} "
-                f"(class: `{_cell(approval['approval_class'])}`, maximum cost: "
+                f"- **Held request #{approval['id']} - {_cell(approval['action'])}:** "
+                f"{_cell(approval['rationale'])} (maximum cost: "
                 f"{format_money(approval['estimated_cost_cents'])}, risk: "
                 f"{_cell(approval['risk'])}, reversibility: "
-                f"{_cell(approval['reversibility'])}, expires: "
-                f"{_cell(approval['expires_at'])})"
+                f"{_cell(approval['reversibility'])}, expires: {_cell(approval['expires_at'])})"
             )
     else:
-        lines.append("No approvals are pending.")
+        lines.append("No incomplete CEO-class approval records are pending.")
+
+    lines.extend(["", "## Owner decisions required", ""])
+    if complete_approval_packets or owner_decision_escalations:
+        lines.append(
+            "These are complete owner-reserved decision packets, not executable authority; an authentic CEO decision must still be recorded before acting. Routine work is deliberately excluded."
+        )
+        lines.append("")
+        for approval, packet in complete_approval_packets:
+            lines.append(
+                f"- **Approval #{approval['id']} - {_cell(approval['action'])}:** "
+                f"{_cell(approval['rationale'])} (maximum cost: "
+                f"{format_money(int(approval['estimated_cost_cents']))})."
+            )
+            for field, label in (
+                ("exact_action", "Exact action"),
+                ("why_now", "Why now"),
+                ("source_evidence", "Source evidence"),
+                ("resource_ceiling", "Resource ceiling"),
+                ("accounts_data_public_surfaces", "Accounts/data/public surfaces"),
+                ("control_findings", "Control findings"),
+                ("reversibility", "Reversibility"),
+                ("success_threshold", "Success threshold"),
+                ("kill_threshold", "Kill threshold"),
+                ("monitoring", "Monitoring"),
+                ("expiry", "Expiry"),
+                ("consequence_of_rejection_or_delay", "Reject/delay consequence"),
+            ):
+                lines.append(f"  - {label}: {_cell(packet[field])}")
+        for escalation in owner_decision_escalations:
+            try:
+                packet = json.loads(escalation.get("decision_packet_json") or "{}")
+            except (TypeError, ValueError, json.JSONDecodeError):
+                packet = {}
+            lines.append(
+                f"- **Escalation #{escalation['id']} - {_cell(escalation['title'])}:** "
+                f"{_cell(escalation['context'])} Recommended: {_cell(escalation['recommendation'])}. "
+                f"Safe default: {_cell(escalation['safe_default'])}."
+            )
+            for field, label in (
+                ("exact_action", "Exact action"),
+                ("why_now", "Why now"),
+                ("source_evidence", "Source evidence"),
+                ("resource_ceiling", "Resource ceiling"),
+                ("accounts_data_public_surfaces", "Accounts/data/public surfaces"),
+                ("control_findings", "Control findings"),
+                ("reversibility", "Reversibility"),
+                ("success_threshold", "Success threshold"),
+                ("kill_threshold", "Kill threshold"),
+                ("monitoring", "Monitoring"),
+                ("expiry", "Expiry"),
+                ("consequence_of_rejection_or_delay", "Reject/delay consequence"),
+            ):
+                lines.append(f"  - {label}: {_cell(packet.get(field, 'MISSING'))}")
+    else:
+        lines.append("No complete owner decision packets are pending.")
 
     lines.extend(["", "## Open risks", ""])
     if risks:
@@ -180,14 +336,32 @@ def generate_ceo_report(
         ]
     )
     next_actions: list[str] = []
+    if not complete_approval_packets and not owner_decision_escalations:
+        next_actions.append(
+            "CEO action: none. The Company President and named departments own all routine actions below."
+        )
     if state["paused"]:
-        next_actions.append("Keep all external and scheduled work stopped until the CEO removes the pause intentionally.")
+        next_actions.append(
+            "Company President / Trust & Control: keep external and scheduled work stopped until an exact activation packet is approved and the corresponding bounded runtime is configured."
+        )
+    if complete_approval_packets or owner_decision_escalations:
+        next_actions.append("Resolve the bundled owner-reserved packets; routine work should continue below the CEO.")
     if approvals:
-        next_actions.append("Resolve pending approval packets before attempting their gated actions.")
+        next_actions.append(
+            "Company President: complete or withdraw held CEO-class approval requests before they reach the owner."
+        )
+    if critical_alerts:
+        next_actions.append(
+            "President / independent controls: maintain containment and remediate the critical alerts; do not seek approval for a prohibited action."
+        )
     if not opportunities:
-        next_actions.append("Record a small set of source-backed market-void candidates.")
+        next_actions.append(
+            "Opportunity Intelligence: record a small set of source-backed market-void candidates."
+        )
     elif state["counts"]["evidence"] == 0:
-        next_actions.append("Attach current, timestamped evidence to the highest-priority candidate before selecting it.")
+        next_actions.append(
+            "Opportunity Intelligence: attach current, timestamped evidence to the highest-priority candidate before selecting it."
+        )
     eligible_candidates: list[dict[str, object]] = []
     if opportunities:
         for opportunity in opportunities:

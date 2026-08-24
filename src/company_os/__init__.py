@@ -1,5 +1,8 @@
 """K.O. Enterprises' local-first company operating system."""
 
+from .autonomy import AutonomousCompany
+from .corporate import CorporateOperations, DecisionClass
+from .organization import DEPARTMENTS, ROLES, WORKERS
 from .policy import (
     ActionRequest,
     ApprovalClass,
@@ -27,9 +30,13 @@ __all__ = [
     "ActionRequest",
     "ApprovalClass",
     "ApprovalRequired",
+    "AutonomousCompany",
     "ADVANCEMENT_THRESHOLD",
     "COMPONENT_WEIGHTS",
     "CompanyStore",
+    "CorporateOperations",
+    "DEPARTMENTS",
+    "DecisionClass",
     "MarketVoidInput",
     "MarketVoidScore",
     "PENALTY_WEIGHTS",
@@ -37,6 +44,8 @@ __all__ = [
     "PolicyDecision",
     "PolicyViolation",
     "RiskPenalties",
+    "ROLES",
+    "WORKERS",
     "calculate_market_void_score",
     "enforce_action",
     "evaluate_action",
@@ -44,4 +53,4 @@ __all__ = [
     "score_from_evidence",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

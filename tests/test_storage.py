@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 import sqlite3
+import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from pathlib import Path
 
@@ -63,6 +68,47 @@ class CompanyStoreTests(unittest.TestCase):
                 "audit_events",
             }.issubset(tables)
         )
+
+    def test_concurrent_fresh_database_initialization_is_serialized(self) -> None:
+        database = self.root / "concurrent" / "company.db"
+
+        def initialize_once(_: int) -> int:
+            store = CompanyStore(database)
+            try:
+                return int(store.initialize()["schema_version"])
+            finally:
+                store.close()
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            versions = list(executor.map(initialize_once, range(8)))
+        self.assertEqual([MIGRATIONS[-1][0]] * 8, versions)
+
+    def test_concurrent_process_initialization_is_serialized(self) -> None:
+        database = self.root / "multiprocess" / "company.db"
+        source_root = Path(__file__).resolve().parents[1] / "src"
+        script = (
+            "from company_os.storage import CompanyStore; "
+            f"store=CompanyStore({str(database)!r}); "
+            "print(store.initialize()['schema_version']); store.close()"
+        )
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = str(source_root)
+
+        def initialize_process(_: int) -> subprocess.CompletedProcess[str]:
+            return subprocess.run(
+                [sys.executable, "-c", script],
+                capture_output=True,
+                text=True,
+                env=environment,
+                timeout=45,
+                check=False,
+            )
+
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            results = list(executor.map(initialize_process, range(4)))
+        for result in results:
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual(str(MIGRATIONS[-1][0]), result.stdout.strip())
 
     def test_unknown_future_schema_version_fails_closed(self) -> None:
         self.store.initialize()
@@ -260,10 +306,24 @@ class CompanyStoreTests(unittest.TestCase):
 
     def test_launched_status_is_reserved_for_a_future_external_workflow(self) -> None:
         opportunity = self.store.create_opportunity("Launch status test")
-        with self.assertRaisesRegex(ValidationError, "not implemented in Phase 0"):
+        with self.assertRaisesRegex(ValidationError, "internal-only runtime"):
             self.store.set_opportunity_status(opportunity["id"], "launched")
 
     def test_approval_lifecycle_prevents_self_approval_and_redecision(self) -> None:
+        decision_packet = {
+            "exact_action": "spend_money",
+            "why_now": "Run one capped validation test only if evidence justifies it.",
+            "source_evidence": "test:approval-lifecycle",
+            "resource_ceiling": "USD 25.00",
+            "accounts_data_public_surfaces": "Synthetic test account only",
+            "control_findings": "Test controls found no unresolved block.",
+            "reversibility": "The test can be stopped before spend.",
+            "success_threshold": "The exact approval record is accepted.",
+            "kill_threshold": "Any scope or ceiling mismatch.",
+            "monitoring": "Approval and audit ledgers.",
+            "expiry": "2099-01-01T00:00:00Z",
+            "consequence_of_rejection_or_delay": "The test remains held.",
+        }
         requested = self.store.request_approval(
             action="spend_money",
             rationale="Run a capped validation test.",
@@ -272,6 +332,7 @@ class CompanyStoreTests(unittest.TestCase):
             approval_class=ApprovalClass.CEO_APPROVAL_REQUIRED,
             requested_by="company_os",
             expires_at="2099-01-01",
+            decision_packet=decision_packet,
         )
         self.assertEqual("pending", requested["status"])
         self.assertEqual(1, len(self.store.list_approvals("pending")))
@@ -284,11 +345,11 @@ class CompanyStoreTests(unittest.TestCase):
         approved = self.store.decide_approval(
             requested["id"],
             decision="approved",
-            decided_by="Kaleb",
+            decided_by="kaleb_ceo",
             notes="Approved only up to the stated cap.",
         )
         self.assertEqual("approved", approved["status"])
-        self.assertEqual("Kaleb", approved["decided_by"])
+        self.assertEqual("kaleb_ceo", approved["decided_by"])
         self.assertEqual(
             requested["id"],
             self.store.find_approval_for_action("SPEND_MONEY")["id"],
@@ -296,6 +357,40 @@ class CompanyStoreTests(unittest.TestCase):
         with self.assertRaises(ConflictError):
             self.store.decide_approval(
                 requested["id"], decision="rejected", decided_by="Kaleb"
+            )
+
+        incomplete = self.store.request_approval(
+            action="spend_money",
+            rationale="A packetless CEO request must remain held.",
+            approval_class=ApprovalClass.CEO_APPROVAL_REQUIRED,
+            requested_by="finance_controller",
+            expires_at="2099-01-01",
+        )
+        with self.assertRaisesRegex(ConflictError, "complete valid owner decision packet"):
+            self.store.decide_approval(
+                incomplete["id"], decision="approved", decided_by="kaleb_ceo"
+            )
+
+        tampered_packet = dict(decision_packet)
+        tampered_packet["exact_action"] = "purchase_domain"
+        tampered = self.store.request_approval(
+            action="purchase_domain",
+            rationale="Packet digest tampering must fail closed.",
+            approval_class=ApprovalClass.CEO_APPROVAL_REQUIRED,
+            requested_by="company_president",
+            expires_at="2099-01-01",
+            decision_packet=tampered_packet,
+        )
+        tampered_packet["why_now"] = "This text was changed after the request."
+        with closing(sqlite3.connect(self.database)) as connection:
+            connection.execute(
+                "UPDATE approvals SET decision_packet_json = ? WHERE id = ?",
+                (json.dumps(tampered_packet), tampered["id"]),
+            )
+            connection.commit()
+        with self.assertRaisesRegex(ConflictError, "digest does not match"):
+            self.store.decide_approval(
+                tampered["id"], decision="approved", decided_by="kaleb_ceo"
             )
 
         rejected_request = self.store.request_approval(

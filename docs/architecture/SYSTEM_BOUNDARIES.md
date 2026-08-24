@@ -22,9 +22,9 @@ CEO approval record -> deterministic policy gate -> bounded connector -> externa
 
 No untrusted text may cross directly into approval, shell execution, SQL structure, credentials, or an external side effect. Model output remains an untrusted proposal until deterministic checks and required human review pass.
 
-## Phase 0 implementation boundary
+## Phase 1 internal-autonomy boundary
 
-SQLite is local durable state. The CLI can create and inspect internal records and reports. There are no production connectors, live accounts, payment rails, outbound messages, or autonomous deployments. `PAUSE_AUTONOMY` is expected to remain present.
+SQLite is local durable state. The CLI now runs a strict reporting hierarchy, durable objectives and work queues, independent acceptance, bounded recovery cycles, incidents, metrics, escalation packets, and executive reports. It can coordinate safe internal work without routine CEO intervention. There are no production connectors, authenticated service identities, live business accounts, payment rails, outbound messages, or autonomous deployments. `PAUSE_AUTONOMY` is expected to remain present.
 
 SQLite actor/decision labels and the audit hash chain are integrity aids, not cryptographic identity or tamper-proof security. A person with local repository/database access can potentially change code or state and recompute or bypass controls. Any future external executor therefore needs authenticated human approval and access controls outside the proposer-controlled database.
 
