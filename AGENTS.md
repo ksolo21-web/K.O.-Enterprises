@@ -34,6 +34,35 @@ Agents must obtain explicit CEO approval before any action involving:
 
 Never infer approval from technical access. Never approve your own gated action. Prepare an approval packet using `docs/company/APPROVAL_PACKET_TEMPLATE.md` and continue all unblocked work.
 
+## Corporate chain of command
+
+Kaleb is the Owner and CEO. The agent President is the senior day-to-day operator and is accountable for converting the CEO's mandate into a prioritized portfolio, bounded work orders, departmental assignments, control reviews, and concise CEO reporting. The President has no legal identity and cannot exercise an owner-reserved power.
+
+The operating chain is:
+
+1. Owner / CEO — strategy, risk appetite, capital authority, identity, and reserved decisions.
+2. Agent President — ordinary portfolio and cross-department operating decisions.
+3. Department leads — department priorities, task issuance, acceptance, and capacity within an approved objective and budget.
+4. Managers or task leads — assignment and coordination of bounded work packages.
+5. Specialist agents — execution, evidence, and escalation within the assigned work order.
+
+An agent may command only active direct or indirect reports, unless an explicit, narrower cross-functional delegation exists. A lower role may not issue an order upward, laterally commandeer another department, expand its own scope, or treat a sub-agent as a source of new authority. Cross-department work routes through the affected department leads or the President.
+
+Legal/compliance, security/privacy, finance-control, quality/reliability, and internal-audit functions form the independent control chain. They may inspect any in-scope work and block an action in their control domain. They do not set commercial priorities, and the operating chain may not overrule an unresolved block. Remediate and rereview; escalate only a genuine owner-reserved exception.
+
+Decision classes are defined in `docs/company/AUTHORITY_MATRIX.md`. In summary:
+
+- specialists execute assigned internal work;
+- department leads make bounded department decisions;
+- the President makes ordinary portfolio decisions;
+- exact external actions require a valid standing policy or CEO approval as applicable;
+- owner-reserved decisions remain with Kaleb;
+- prohibited conduct cannot be authorized by any role.
+
+Custom agent profiles under `.codex/agents/` are job descriptions and sandbox defaults, not identity, appointment, approval, budget, or permission. Spawn a sub-agent only for a concrete separable work package. Give it the narrowest useful scope, acceptance criteria, file ownership, time/capacity limit, and escalation target. Sub-agents inherit no CEO identity, secrets, accounts, cash authority, or power to approve their own output. Suspend the assignment when its work is accepted, rejected, or cancelled.
+
+Use the escalation route specialist → task lead → department lead → President → CEO. The President must resolve ordinary ambiguity through research, a safe fallback, reduced scope, reassignment, or a reversible test. Only the reserved matters listed in `docs/company/AUTHORITY_MATRIX.md` should consume CEO attention. Silence at every level means hold safely, never approval.
+
 ## Non-negotiable operating rules
 
 - Law, safety, truth, privacy, intellectual-property rights, and platform terms outrank revenue.
@@ -58,13 +87,15 @@ Record material choices in `DECISIONS.md` or `docs/decisions/`. Update `BLOCKERS
 ## Engineering workflow
 
 - Work on a feature branch; keep changes reviewable and coherent.
-- Use Python 3.12+ and the standard library for the Phase 0 control plane unless a dependency is justified and reviewed.
+- Use Python 3.12+ and the standard library for the company control plane unless a dependency is justified and reviewed.
 - Prefer deterministic code for policy enforcement, storage, scoring, and reports. Use model calls only where they add clear value.
 - Make external side effects opt-in, idempotent where practical, budget-limited, and auditable.
 - Run the documented tests before declaring completion. Fix introduced failures.
 - Do not claim production readiness, a launch, validation, or revenue without direct evidence.
 - Put customer-facing products in separate repositories once selected; keep shared governance and portfolio records here.
 
-## Phase 0 success condition
+## Current internal-autonomy success condition
 
-Phase 0 establishes a tested, local, persistent control plane; approval and pause gates; transparent opportunity scoring; and a truthful CEO report. It does not establish a legal company, prove demand, launch a product, or earn revenue. The next milestone is one evidence-backed, CEO-approved demand test with predefined success and kill thresholds.
+The company OS must maintain a tested reporting tree, commanded objectives, durable bounded work, independent acceptance, resource and policy gates, recoverable finite operating cycles, opportunity scoring, and a truthful owner report. An operating cycle should continue all safe internal work without asking the CEO routine questions and should emit only owner-reserved exception packets.
+
+This internal authority does not establish a legal company, authenticate a live worker, prove demand, launch a product, contact a customer, or earn revenue. The next external milestone is one evidence-backed demand test with predefined success and kill thresholds, complete controls, an exact execution envelope, and authentic CEO approval.

@@ -9,7 +9,9 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
-from .errors import CompanyOSError
+from .autonomy import AutonomousCompany
+from .corporate import CorporateOperations, DecisionClass
+from .errors import CompanyOSError, ValidationError
 from .policy import ApprovalClass
 from .reporting import generate_ceo_report, write_ceo_report
 from .scoring import COMPONENT_WEIGHTS, PENALTY_WEIGHTS, score_from_evidence
@@ -32,6 +34,26 @@ def _terminal_text(value: object) -> str:
         else:
             rendered.append(f"\\u{ord(character):04x}")
     return "".join(rendered)
+
+
+def _parse_json_object(value: str, *, name: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ValidationError(f"{name} must be valid JSON: {exc.msg}") from exc
+    if not isinstance(parsed, dict):
+        raise ValidationError(f"{name} must be a JSON object")
+    return parsed
+
+
+def _parse_json_object_list(value: str, *, name: str) -> list[dict[str, Any]]:
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ValidationError(f"{name} must be valid JSON: {exc.msg}") from exc
+    if not isinstance(parsed, list) or not all(isinstance(item, dict) for item in parsed):
+        raise ValidationError(f"{name} must be a JSON array of objects")
+    return parsed
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -157,6 +179,11 @@ def _build_parser() -> argparse.ArgumentParser:
         required=True,
         help="ISO timestamp after which the approval is unusable",
     )
+    approval_request.add_argument(
+        "--decision-packet-json",
+        default="{}",
+        help="complete owner packet JSON required before CEO-class approval",
+    )
     approval_request.add_argument("--json", action="store_true")
 
     approval_list = approval_commands.add_parser("list", help="list approvals")
@@ -176,6 +203,218 @@ def _build_parser() -> argparse.ArgumentParser:
     report.add_argument("--output")
     report.add_argument("--title", default="K.O. Enterprises CEO Report")
 
+    corporation = commands.add_parser(
+        "corporation", help="bootstrap and inspect the executable corporation"
+    )
+    corporation_commands = corporation.add_subparsers(
+        dest="corporation_command", required=True
+    )
+    corporation_bootstrap = corporation_commands.add_parser(
+        "bootstrap", help="install the version-controlled organization blueprint"
+    )
+    corporation_bootstrap.add_argument("--json", action="store_true")
+    corporation_status = corporation_commands.add_parser(
+        "status", help="show organization and operations status"
+    )
+    corporation_status.add_argument("--json", action="store_true")
+
+    org = commands.add_parser("org", help="inspect the reporting hierarchy")
+    org_commands = org.add_subparsers(dest="org_command", required=True)
+    org_show = org_commands.add_parser("show", help="show departments, roles, and workers")
+    org_show.add_argument("--json", action="store_true")
+
+    objective = commands.add_parser("objective", help="manage commanded objectives")
+    objective_commands = objective.add_subparsers(dest="objective_command", required=True)
+    objective_add = objective_commands.add_parser("add", help="issue an objective down the chain")
+    objective_add.add_argument("--key", required=True, dest="objective_key")
+    objective_add.add_argument("--title", required=True)
+    objective_add.add_argument("--description", default="")
+    objective_add.add_argument("--owner-role", required=True, dest="owner_role_key")
+    objective_add.add_argument("--commanded-by", default="company_president")
+    objective_add.add_argument("--priority", type=int, default=50)
+    objective_add.add_argument("--starts-at")
+    objective_add.add_argument("--due-at")
+    objective_add.add_argument("--json", action="store_true")
+    objective_list = objective_commands.add_parser("list", help="list objectives")
+    objective_list.add_argument(
+        "--status", choices=["draft", "active", "at_risk", "achieved", "cancelled"]
+    )
+    objective_list.add_argument("--json", action="store_true")
+    objective_show = objective_commands.add_parser(
+        "show", help="show one objective and its measurable key results"
+    )
+    objective_show.add_argument("objective")
+    objective_show.add_argument("--json", action="store_true")
+    objective_status = objective_commands.add_parser(
+        "status", help="change an objective after an authorized evidence review"
+    )
+    objective_status.add_argument("objective")
+    objective_status.add_argument(
+        "--status", required=True, choices=["active", "at_risk", "achieved", "cancelled"]
+    )
+    objective_status.add_argument("--rationale", required=True)
+    objective_status.add_argument("--actor", default="company_president")
+    objective_status.add_argument("--json", action="store_true")
+    key_result_add = objective_commands.add_parser(
+        "key-result-add", help="add a measurable result to an objective"
+    )
+    key_result_add.add_argument("objective")
+    key_result_add.add_argument("--key", required=True, dest="result_key")
+    key_result_add.add_argument("--description", required=True)
+    key_result_add.add_argument("--metric", required=True, dest="metric_name")
+    key_result_add.add_argument("--baseline", required=True, type=float)
+    key_result_add.add_argument("--target", required=True, type=float)
+    key_result_add.add_argument("--unit", required=True)
+    key_result_add.add_argument("--actor", default="company_president")
+    key_result_add.add_argument("--json", action="store_true")
+    key_result_update = objective_commands.add_parser(
+        "key-result-update", help="record evidence-backed key-result progress"
+    )
+    key_result_update.add_argument("key_result_id", type=int)
+    key_result_update.add_argument("--value", required=True, type=float)
+    key_result_update.add_argument("--evidence", required=True)
+    key_result_update.add_argument(
+        "--status", choices=["active", "at_risk", "achieved", "cancelled"]
+    )
+    key_result_update.add_argument("--actor", default="company_president")
+    key_result_update.add_argument("--json", action="store_true")
+
+    work = commands.add_parser("work", help="manage the durable departmental work queue")
+    work_commands = work.add_subparsers(dest="work_command", required=True)
+    work_add = work_commands.add_parser("add", help="issue a work order")
+    work_add.add_argument("--key", required=True, dest="work_key")
+    work_add.add_argument("--commanded-by", default="company_president")
+    work_add.add_argument("--assigned-role", required=True)
+    work_add.add_argument("--assigned-worker")
+    work_add.add_argument("--reviewer-role", required=True)
+    work_add.add_argument("--task-type", required=True)
+    work_add.add_argument("--title", required=True)
+    work_add.add_argument("--description", required=True)
+    work_add.add_argument("--acceptance-criteria", required=True)
+    work_add.add_argument(
+        "--decision-class",
+        choices=[item.value for item in DecisionClass],
+        default=DecisionClass.WORK_EXECUTION.value,
+    )
+    work_add.add_argument("--priority", type=int, default=50)
+    work_add.add_argument("--risk-level", choices=["low", "medium", "high", "critical"], default="low")
+    work_add.add_argument("--external-effect", action="store_true")
+    work_add.add_argument("--estimated-cost-cents", type=int, default=0)
+    work_add.add_argument("--objective-id", type=int, required=True)
+    work_add.add_argument("--opportunity-id", type=int)
+    work_add.add_argument("--cycle-id", type=int)
+    work_add.add_argument("--dependency", type=int, action="append", default=[])
+    work_add.add_argument("--max-attempts", type=int, default=3)
+    work_add.add_argument("--input-json", default="{}")
+    work_add.add_argument("--json", action="store_true")
+    work_list = work_commands.add_parser("list", help="list queued and completed work")
+    work_list.add_argument("--status")
+    work_list.add_argument("--department")
+    work_list.add_argument("--cycle-id", type=int)
+    work_list.add_argument("--limit", type=int, default=100)
+    work_list.add_argument("--json", action="store_true")
+    work_show = work_commands.add_parser("show", help="show one work order")
+    work_show.add_argument("work")
+    work_show.add_argument("--json", action="store_true")
+    work_authorize = work_commands.add_parser(
+        "authorize", help="bind an exact CEO approval to held internal work"
+    )
+    work_authorize.add_argument("work")
+    work_authorize.add_argument("--approval-id", required=True, type=int)
+    work_authorize.add_argument("--actor", default="company_president")
+    work_authorize.add_argument("--json", action="store_true")
+    work_claim = work_commands.add_parser("claim", help="atomically lease the next eligible task")
+    work_claim.add_argument("--worker", required=True)
+    work_claim.add_argument("--lease-seconds", type=int, default=900)
+    work_claim.add_argument("--json", action="store_true")
+    work_start = work_commands.add_parser("start", help="start leased work")
+    work_start.add_argument("work")
+    work_start.add_argument("--worker", required=True)
+    work_start.add_argument("--lease-token", required=True)
+    work_start.add_argument("--lease-epoch", required=True, type=int)
+    work_start.add_argument("--json", action="store_true")
+    work_submit = work_commands.add_parser("submit", help="submit work for independent review")
+    work_submit.add_argument("work")
+    work_submit.add_argument("--worker", required=True)
+    work_submit.add_argument("--lease-token", required=True)
+    work_submit.add_argument("--lease-epoch", required=True, type=int)
+    work_submit.add_argument("--result-json", required=True)
+    work_submit.add_argument("--json", action="store_true")
+    work_review = work_commands.add_parser("review", help="accept or reject submitted work")
+    work_review.add_argument("work")
+    work_review.add_argument("--reviewer", required=True)
+    work_review.add_argument("--decision", required=True, choices=["accept", "reject"])
+    work_review.add_argument("--notes", required=True)
+    work_review.add_argument("--quality-score", type=float)
+    work_review.add_argument("--json", action="store_true")
+
+    cycle = commands.add_parser("cycle", help="run one bounded autonomous operating cycle")
+    cycle_commands = cycle.add_subparsers(dest="cycle_command", required=True)
+    cycle_run = cycle_commands.add_parser("run", help="plan and execute one safe internal cycle")
+    cycle_run.add_argument(
+        "--mode", choices=["simulation", "internal", "shadow", "external"], default="internal"
+    )
+    cycle_run.add_argument("--triggered-by", default="company_president")
+    cycle_run.add_argument("--scheduled", action="store_true")
+    cycle_run.add_argument("--max-work-items", type=int, default=20)
+    cycle_run.add_argument(
+        "--approval-id",
+        type=int,
+        help="matching unexpired approval required for a scheduled cycle",
+    )
+    cycle_run.add_argument("--json", action="store_true")
+    cycle_dispatch = cycle_commands.add_parser("dispatch", help="show ready work grouped by department")
+    cycle_dispatch.add_argument("--cycle-id", type=int)
+    cycle_dispatch.add_argument("--json", action="store_true")
+
+    escalation = commands.add_parser("escalation", help="inspect executive exceptions")
+    escalation_commands = escalation.add_subparsers(dest="escalation_command", required=True)
+    escalation_add = escalation_commands.add_parser(
+        "add", help="route a management exception or complete owner packet"
+    )
+    escalation_add.add_argument("--raised-by", required=True)
+    escalation_add.add_argument("--routed-to", required=True)
+    escalation_add.add_argument(
+        "--decision-class",
+        required=True,
+        choices=[
+            item.value
+            for item in DecisionClass
+            if item is not DecisionClass.WORK_EXECUTION
+        ],
+    )
+    escalation_add.add_argument("--reason-code", required=True)
+    escalation_add.add_argument("--title", required=True)
+    escalation_add.add_argument("--context", required=True)
+    escalation_add.add_argument("--recommendation", required=True)
+    escalation_add.add_argument("--safe-default", required=True)
+    escalation_add.add_argument("--work-id", type=int)
+    escalation_add.add_argument("--options-json", default="[]")
+    escalation_add.add_argument("--owner-packet-json", default="{}")
+    escalation_add.add_argument("--due-at")
+    escalation_add.add_argument("--json", action="store_true")
+    escalation_list = escalation_commands.add_parser("list", help="list routed escalations")
+    escalation_list.add_argument("--owner-only", action="store_true")
+    escalation_list.add_argument("--status")
+    escalation_list.add_argument("--json", action="store_true")
+    escalation_resolve = escalation_commands.add_parser(
+        "resolve", help="close an escalation through its routed decision role"
+    )
+    escalation_resolve.add_argument("escalation_id", type=int)
+    escalation_resolve.add_argument("--actor", required=True)
+    escalation_resolve.add_argument(
+        "--decision", required=True, choices=["resolved", "dismissed"]
+    )
+    escalation_resolve.add_argument("--resolution", required=True)
+    escalation_resolve.add_argument("--json", action="store_true")
+
+    performance = commands.add_parser("performance", help="inspect digital-worker outcomes")
+    performance_commands = performance.add_subparsers(dest="performance_command", required=True)
+    performance_report = performance_commands.add_parser(
+        "report", help="derive provisional workforce throughput inputs"
+    )
+    performance_report.add_argument("--json", action="store_true")
+
     return parser
 
 
@@ -190,6 +429,13 @@ def _print_status(state: dict[str, Any]) -> None:
         f"Evidence: {state['counts']['evidence']} ({state['stale_evidence']} stale) | "
         f"Experiments: {state['counts']['experiments']} | "
         f"Pending approvals: {state['pending_approvals']}"
+    )
+    print(
+        f"Corporation: {state['counts']['departments']} departments | "
+        f"{state['counts']['workers']} workers | "
+        f"{state['counts']['objectives']} objectives | "
+        f"{state['counts']['work_items']} work items | "
+        f"{state['counts']['incidents']} incidents"
     )
     for currency, financials in state["financials"].items():
         print(
@@ -211,7 +457,7 @@ def _print_opportunities(rows: list[dict[str, Any]]) -> None:
         score = f"{row['latest_score']:.1f}" if row["latest_score"] is not None else "unscored"
         print(
             f"#{row['id']} {_terminal_text(row['slug'])} "
-            f"[{_terminal_text(row['status'])}] score={score} — "
+            f"[{_terminal_text(row['status'])}] score={score} - "
             f"{_terminal_text(row['title'])}"
         )
 
@@ -238,12 +484,14 @@ def _print_approvals(rows: list[dict[str, Any]]) -> None:
     for row in rows:
         print(
             f"#{row['id']} [{row['status']}] {row['approval_class']} "
-            f"cost_limit={row['estimated_cost_cents']}c — "
+            f"cost_limit={row['estimated_cost_cents']}c - "
             f"{_terminal_text(row['action'])}"
         )
 
 
 def _handle_command(args: argparse.Namespace, store: CompanyStore) -> int:
+    operations = CorporateOperations(store)
+
     if args.command == "init":
         result = store.initialize()
         print(
@@ -387,6 +635,9 @@ def _handle_command(args: argparse.Namespace, store: CompanyStore) -> int:
                 approval_class=args.approval_class,
                 requested_by=args.requested_by or args.actor,
                 expires_at=args.expires_at,
+                decision_packet=_parse_json_object(
+                    args.decision_packet_json, name="decision_packet_json"
+                ),
             )
             if args.json:
                 _json_dump(row)
@@ -407,6 +658,363 @@ def _handle_command(args: argparse.Namespace, store: CompanyStore) -> int:
             _json_dump(row)
         else:
             print(f"Approval #{row['id']} is now {row['status']}.")
+        return 0
+
+    if args.command == "corporation":
+        if args.corporation_command == "bootstrap":
+            result = operations.bootstrap_organization(actor=args.actor)
+            if args.json:
+                _json_dump(result)
+            else:
+                print(
+                    "Bootstrapped executable corporation: "
+                    f"{result['departments']} departments, {result['roles']} roles, "
+                    f"{result['workers']} workers."
+                )
+            return 0
+        organization = operations.organization_snapshot()
+        result = {
+            "organization": {
+                "departments": len(organization["departments"]),
+                "roles": len(organization["roles"]),
+                "workers": len(organization["workers"]),
+            },
+            "operations": operations.operations_summary(),
+            "paused": store.status(repo_root=args.repo_root)["paused"],
+        }
+        if args.json:
+            _json_dump(result)
+        else:
+            print(
+                f"Corporation: {result['organization']['departments']} departments | "
+                f"{result['organization']['roles']} roles | "
+                f"{result['organization']['workers']} workers | "
+                f"external autonomy={'PAUSED' if result['paused'] else 'ACTIVE'}"
+            )
+            print(
+                f"Active objectives: {result['operations']['active_objectives']} | "
+                f"Owner-attention items: {result['operations']['owner_attention']} | "
+                f"Open incidents: {result['operations']['open_incidents']}"
+            )
+        return 0
+
+    if args.command == "org":
+        snapshot = operations.organization_snapshot()
+        if args.json:
+            _json_dump(snapshot)
+        else:
+            workers_by_role = {row["role_key"]: row for row in snapshot["workers"]}
+            children: dict[str | None, list[dict[str, Any]]] = {}
+            for role in snapshot["roles"]:
+                children.setdefault(role["reports_to_role_key"], []).append(role)
+            print("K.O. Enterprises reporting hierarchy")
+
+            def print_branch(parent: str | None, depth: int) -> None:
+                for role in sorted(
+                    children.get(parent, []), key=lambda row: str(row["role_key"])
+                ):
+                    worker = workers_by_role.get(role["role_key"])
+                    occupant = worker["display_name"] if worker else "unfilled"
+                    control = (
+                        " [INDEPENDENT CONTROL / STOP RIGHT]"
+                        if role["independent_control"]
+                        else ""
+                    )
+                    print(
+                        f"{'  ' * depth}- {role['role_key']}: "
+                        f"{_terminal_text(role['title'])} - "
+                        f"{_terminal_text(occupant)}{control}"
+                    )
+                    print_branch(role["role_key"], depth + 1)
+
+            print_branch(None, 0)
+        return 0
+
+    if args.command == "objective":
+        if args.objective_command == "add":
+            row = operations.create_objective(
+                objective_key=args.objective_key,
+                title=args.title,
+                description=args.description,
+                owner_role_key=args.owner_role_key,
+                commanded_by_worker=args.commanded_by,
+                priority=args.priority,
+                starts_at=args.starts_at,
+                due_at=args.due_at,
+            )
+            if args.json:
+                _json_dump(row)
+            else:
+                print(f"Issued objective #{row['id']} ({row['objective_key']}).")
+            return 0
+        if args.objective_command == "status":
+            row = operations.set_objective_status(
+                args.objective,
+                status=args.status,
+                rationale=args.rationale,
+                actor_worker=args.actor,
+            )
+            _json_dump(row) if args.json else print(
+                f"Objective #{row['id']} is now {row['status']}."
+            )
+            return 0
+        if args.objective_command == "show":
+            row = operations.get_objective(args.objective)
+            _json_dump(row) if args.json else print(
+                json.dumps(row, indent=2, sort_keys=True, default=str)
+            )
+            return 0
+        if args.objective_command == "key-result-add":
+            row = operations.create_key_result(
+                args.objective,
+                result_key=args.result_key,
+                description=args.description,
+                metric_name=args.metric_name,
+                baseline=args.baseline,
+                target=args.target,
+                unit=args.unit,
+                actor_worker=args.actor,
+            )
+            _json_dump(row) if args.json else print(
+                f"Added key result #{row['id']} to objective #{row['objective_id']}."
+            )
+            return 0
+        if args.objective_command == "key-result-update":
+            row = operations.update_key_result(
+                args.key_result_id,
+                current_value=args.value,
+                evidence_reference=args.evidence,
+                actor_worker=args.actor,
+                status=args.status,
+            )
+            _json_dump(row) if args.json else print(
+                f"Key result #{row['id']} is {row['status']} at {row['current_value']} {row['unit']}."
+            )
+            return 0
+        rows = operations.list_objectives(status=args.status)
+        if args.json:
+            _json_dump(rows)
+        elif not rows:
+            print("No objectives recorded.")
+        else:
+            for row in rows:
+                print(
+                    f"#{row['id']} [{row['status']}] priority={row['priority']} "
+                    f"owner={row['owner_role_key']} - {_terminal_text(row['title'])}"
+                )
+        return 0
+
+    if args.command == "work":
+        if args.work_command == "add":
+            row = operations.create_work(
+                work_key=args.work_key,
+                commanded_by_worker=args.commanded_by,
+                assigned_role_key=args.assigned_role,
+                assigned_worker_key=args.assigned_worker,
+                reviewer_role_key=args.reviewer_role,
+                task_type=args.task_type,
+                title=args.title,
+                description=args.description,
+                acceptance_criteria=args.acceptance_criteria,
+                decision_class=args.decision_class,
+                priority=args.priority,
+                risk_level=args.risk_level,
+                external_effect=args.external_effect,
+                estimated_cost_cents=args.estimated_cost_cents,
+                objective_id=args.objective_id,
+                opportunity_id=args.opportunity_id,
+                cycle_id=args.cycle_id,
+                dependencies=tuple(args.dependency),
+                input_data=_parse_json_object(args.input_json, name="input_json"),
+                max_attempts=args.max_attempts,
+            )
+            if args.json:
+                _json_dump(row)
+            else:
+                print(
+                    f"Issued work #{row['id']} [{row['status']}] to "
+                    f"{row['assigned_role_key']}."
+                )
+            return 0
+        if args.work_command == "list":
+            rows = operations.list_work(
+                status=args.status,
+                department=args.department,
+                cycle_id=args.cycle_id,
+                limit=args.limit,
+            )
+            if args.json:
+                _json_dump(rows)
+            elif not rows:
+                print("No work items recorded.")
+            else:
+                for row in rows:
+                    print(
+                        f"#{row['id']} [{row['status']}] p{row['priority']} "
+                        f"{row['assigned_role_key']} - {_terminal_text(row['title'])}"
+                    )
+            return 0
+        if args.work_command == "show":
+            row = operations.get_work(args.work)
+            _json_dump(row) if args.json else print(
+                json.dumps(row, indent=2, sort_keys=True, default=str)
+            )
+            return 0
+        if args.work_command == "authorize":
+            row = operations.authorize_internal_work(
+                args.work,
+                approval_id=args.approval_id,
+                actor_worker=args.actor,
+            )
+            _json_dump(row) if args.json else print(
+                f"Authorized internal work #{row['id']} into {row['status']}."
+            )
+            return 0
+        if args.work_command == "claim":
+            row = operations.claim_work(
+                worker_key=args.worker, lease_seconds=args.lease_seconds
+            )
+            if args.json:
+                _json_dump(row)
+            elif row is None:
+                print("No eligible work is ready for this worker.")
+            else:
+                print(
+                    f"Leased work #{row['id']} epoch={row['lease_epoch']} "
+                    f"until {row['lease_expires_at']}."
+                )
+            return 0
+        if args.work_command == "start":
+            row = operations.start_work(
+                args.work,
+                worker_key=args.worker,
+                lease_token=args.lease_token,
+                lease_epoch=args.lease_epoch,
+            )
+            _json_dump(row) if args.json else print(f"Started work #{row['id']}.")
+            return 0
+        if args.work_command == "submit":
+            row = operations.submit_work(
+                args.work,
+                worker_key=args.worker,
+                lease_token=args.lease_token,
+                lease_epoch=args.lease_epoch,
+                result=_parse_json_object(args.result_json, name="result_json"),
+            )
+            _json_dump(row) if args.json else print(
+                f"Submitted work #{row['id']} for {row['reviewer_role_key']} review."
+            )
+            return 0
+        row = operations.review_work(
+            args.work,
+            reviewer_worker_key=args.reviewer,
+            decision=args.decision,
+            notes=args.notes,
+            quality_score=args.quality_score,
+        )
+        _json_dump(row) if args.json else print(
+            f"Review recorded; work #{row['id']} is {row['status']}."
+        )
+        return 0
+
+    if args.command == "cycle":
+        company = AutonomousCompany(operations, repo_root=args.repo_root)
+        if args.cycle_command == "run":
+            result = company.run_cycle(
+                triggered_by_worker=args.triggered_by,
+                mode=args.mode,
+                scheduled=args.scheduled,
+                max_work_items=args.max_work_items,
+                approval_id=args.approval_id,
+            )
+            if args.json:
+                _json_dump(result)
+            else:
+                summary = result["summary"]
+                print(
+                    f"Cycle #{result['cycle']['id']} is {result['cycle']['status']}: "
+                    f"planned={summary['planned_work_items']} "
+                    f"ready={summary['dispatchable_work_items']} "
+                    f"owner_attention={summary['owner_attention_items']} "
+                    f"external_effects={summary['external_effects_executed']}."
+                )
+            return 0
+        manifest = company.dispatch_manifest(cycle_id=args.cycle_id)
+        if args.json:
+            _json_dump(manifest)
+        else:
+            print(f"Dispatchable work: {manifest['dispatchable_count']}")
+            for department, rows in manifest["departments"].items():
+                print(f"{department}:")
+                for row in rows:
+                    print(
+                        f"  #{row['work_id']} {row['codex_agent']} p{row['priority']} - "
+                        f"{_terminal_text(row['title'])}"
+                    )
+        return 0
+
+    if args.command == "escalation":
+        if args.escalation_command == "add":
+            row = operations.create_escalation(
+                raised_by_worker=args.raised_by,
+                routed_to_role_key=args.routed_to,
+                decision_class=args.decision_class,
+                reason_code=args.reason_code,
+                title=args.title,
+                context=args.context,
+                recommendation=args.recommendation,
+                safe_default=args.safe_default,
+                work_id=args.work_id,
+                options=_parse_json_object_list(
+                    args.options_json, name="options_json"
+                ),
+                owner_packet=_parse_json_object(
+                    args.owner_packet_json, name="owner_packet_json"
+                ),
+                due_at=args.due_at,
+            )
+            _json_dump(row) if args.json else print(
+                f"Escalation #{row['id']} routed to {row['routed_to_role_key']}."
+            )
+            return 0
+        if args.escalation_command == "resolve":
+            row = operations.resolve_escalation(
+                args.escalation_id,
+                actor_worker=args.actor,
+                decision=args.decision,
+                resolution=args.resolution,
+            )
+            _json_dump(row) if args.json else print(
+                f"Escalation #{row['id']} is {row['status']}."
+            )
+            return 0
+        rows = operations.list_escalations(
+            owner_attention=True if args.owner_only else None,
+            status=args.status,
+        )
+        if args.json:
+            _json_dump(rows)
+        elif not rows:
+            print("No matching escalations.")
+        else:
+            for row in rows:
+                print(
+                    f"#{row['id']} [{row['decision_class']}] -> {row['routed_to_role_key']} "
+                    f"- {_terminal_text(row['title'])}"
+                )
+        return 0
+
+    if args.command == "performance":
+        rows = operations.performance_report()
+        if args.json:
+            _json_dump(rows)
+        else:
+            for row in rows:
+                print(
+                    f"{row['worker_key']} [{row['performance_state']}] "
+                    f"sample={row['sample_size']} accepted={row['accepted_work']} "
+                    f"failed={row['failed_work']} rejected={row['rejected_reviews']}"
+                )
         return 0
 
     if args.command == "report":

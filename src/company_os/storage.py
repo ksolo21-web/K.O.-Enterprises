@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
+import os
 import re
 import sqlite3
+import threading
+import time
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -42,6 +46,77 @@ EXPERIMENT_STATUSES = frozenset(
 EVIDENCE_STRENGTHS = frozenset({"weak", "moderate", "strong"})
 APPROVAL_STATUSES = frozenset({"pending", "approved", "rejected", "expired", "cancelled"})
 SQLITE_MAX_INTEGER = 9_223_372_036_854_775_807
+_INITIALIZE_LOCK = threading.RLock()
+OWNER_DECISION_PACKET_FIELDS = (
+    "exact_action",
+    "why_now",
+    "source_evidence",
+    "resource_ceiling",
+    "accounts_data_public_surfaces",
+    "control_findings",
+    "reversibility",
+    "success_threshold",
+    "kill_threshold",
+    "monitoring",
+    "expiry",
+    "consequence_of_rejection_or_delay",
+)
+
+
+@contextmanager
+def _cross_process_initialize_lock(db_path: str) -> Iterator[None]:
+    """Serialize migrations across independent CLI and worker processes."""
+
+    if db_path == ":memory:":
+        yield
+        return
+    lock_path = Path(f"{db_path}.initialize.lock").expanduser().resolve()
+    try:
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_file = lock_path.open("a+b")
+    except OSError as exc:
+        raise StorageError(f"cannot open migration lock for {db_path}: {exc}") from exc
+    with lock_file:
+        lock_file.seek(0, os.SEEK_END)
+        if lock_file.tell() == 0:
+            lock_file.write(b"\0")
+            lock_file.flush()
+        deadline = time.monotonic() + 30.0
+        while True:
+            try:
+                lock_file.seek(0)
+                if os.name == "nt":
+                    import msvcrt
+
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError as exc:
+                if time.monotonic() >= deadline:
+                    raise StorageError(
+                        f"timed out waiting for migration lock for {db_path}"
+                    ) from exc
+                time.sleep(0.05)
+        try:
+            yield
+        finally:
+            try:
+                lock_file.seek(0)
+                if os.name == "nt":
+                    import msvcrt
+
+                    msvcrt.locking(lock_file.fileno(), msvcrt.LK_UNLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+            except OSError:
+                # Closing the handle releases the OS lock even if explicit
+                # unlock reporting itself fails during interpreter shutdown.
+                pass
 
 
 MIGRATIONS: tuple[tuple[int, str, str], ...] = (
@@ -272,6 +347,480 @@ MIGRATIONS: tuple[tuple[int, str, str], ...] = (
             WHERE external_reference <> '';
         """,
     ),
+    (
+        5,
+        "corporate_organization_and_objectives",
+        """
+        CREATE TABLE IF NOT EXISTS departments (
+            slug TEXT PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE,
+            mission TEXT NOT NULL,
+            parent_slug TEXT REFERENCES departments(slug) ON DELETE RESTRICT,
+            executive_role_key TEXT NOT NULL,
+            service_level_cycles INTEGER NOT NULL DEFAULT 2,
+            wip_limit INTEGER NOT NULL DEFAULT 3,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (service_level_cycles >= 1),
+            CHECK (wip_limit >= 1),
+            CHECK (status IN ('active','paused','retired'))
+        );
+
+        CREATE TABLE IF NOT EXISTS roles (
+            role_key TEXT PRIMARY KEY,
+            department_slug TEXT NOT NULL REFERENCES departments(slug) ON DELETE RESTRICT,
+            title TEXT NOT NULL,
+            reports_to_role_key TEXT REFERENCES roles(role_key) ON DELETE RESTRICT,
+            authority_level TEXT NOT NULL,
+            worker_type TEXT NOT NULL DEFAULT 'digital',
+            mandate TEXT NOT NULL,
+            capabilities_json TEXT NOT NULL DEFAULT '[]',
+            kpis_json TEXT NOT NULL DEFAULT '[]',
+            max_active_work INTEGER NOT NULL DEFAULT 2,
+            independent_control INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (authority_level IN ('owner','company_executive','department_executive','specialist')),
+            CHECK (worker_type IN ('human','digital','service')),
+            CHECK (max_active_work >= 1),
+            CHECK (independent_control IN (0,1)),
+            CHECK (status IN ('active','paused','retired'))
+        );
+
+        CREATE TABLE IF NOT EXISTS workers (
+            worker_key TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            manager_worker_key TEXT REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            worker_type TEXT NOT NULL DEFAULT 'digital',
+            status TEXT NOT NULL DEFAULT 'active',
+            capacity_units INTEGER NOT NULL DEFAULT 10,
+            quality_floor REAL NOT NULL DEFAULT 0.80,
+            appointed_by TEXT NOT NULL,
+            appointed_at TEXT NOT NULL,
+            suspended_at TEXT,
+            CHECK (worker_type IN ('human','digital','service')),
+            CHECK (status IN ('active','probationary','coaching','suspended','disabled','retired')),
+            CHECK (capacity_units >= 0),
+            CHECK (quality_floor >= 0.0 AND quality_floor <= 1.0)
+        );
+
+        CREATE TABLE IF NOT EXISTS objectives (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            objective_key TEXT NOT NULL UNIQUE,
+            parent_objective_id INTEGER REFERENCES objectives(id) ON DELETE RESTRICT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            owner_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            department_slug TEXT NOT NULL REFERENCES departments(slug) ON DELETE RESTRICT,
+            commanded_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            priority INTEGER NOT NULL DEFAULT 50,
+            status TEXT NOT NULL DEFAULT 'active',
+            starts_at TEXT NOT NULL,
+            due_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (priority >= 0 AND priority <= 100),
+            CHECK (status IN ('draft','active','at_risk','achieved','cancelled'))
+        );
+
+        CREATE TABLE IF NOT EXISTS key_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            objective_id INTEGER NOT NULL REFERENCES objectives(id) ON DELETE RESTRICT,
+            result_key TEXT NOT NULL,
+            description TEXT NOT NULL,
+            metric_name TEXT NOT NULL,
+            baseline REAL NOT NULL DEFAULT 0,
+            target REAL NOT NULL,
+            current_value REAL NOT NULL DEFAULT 0,
+            unit TEXT NOT NULL,
+            evidence_reference TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'active',
+            updated_at TEXT NOT NULL,
+            UNIQUE(objective_id, result_key),
+            CHECK (status IN ('active','at_risk','achieved','cancelled'))
+        );
+
+        CREATE TABLE IF NOT EXISTS resource_allocations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            allocation_key TEXT NOT NULL UNIQUE,
+            parent_allocation_id INTEGER REFERENCES resource_allocations(id) ON DELETE RESTRICT,
+            department_slug TEXT REFERENCES departments(slug) ON DELETE RESTRICT,
+            objective_id INTEGER REFERENCES objectives(id) ON DELETE RESTRICT,
+            opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE RESTRICT,
+            resource_type TEXT NOT NULL,
+            unit TEXT NOT NULL,
+            ceiling INTEGER NOT NULL,
+            reserved INTEGER NOT NULL DEFAULT 0,
+            consumed INTEGER NOT NULL DEFAULT 0,
+            approved_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            starts_at TEXT NOT NULL,
+            expires_at TEXT,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (resource_type IN ('capacity','cash','compute','human_review','storage')),
+            CHECK (ceiling >= 0 AND reserved >= 0 AND consumed >= 0),
+            CHECK (reserved + consumed <= ceiling),
+            CHECK (status IN ('draft','active','exhausted','expired','closed'))
+        );
+
+        CREATE TABLE IF NOT EXISTS performance_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            worker_key TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            period_start TEXT NOT NULL,
+            period_end TEXT NOT NULL,
+            accepted_work INTEGER NOT NULL DEFAULT 0,
+            rejected_work INTEGER NOT NULL DEFAULT 0,
+            weighted_quality REAL,
+            objective_contribution REAL,
+            sla_reliability REAL,
+            resource_efficiency REAL,
+            audit_completeness REAL,
+            handoff_quality REAL,
+            composite_score REAL,
+            status TEXT NOT NULL,
+            reviewed_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            evidence_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            UNIQUE(worker_key, period_start, period_end),
+            CHECK (accepted_work >= 0 AND rejected_work >= 0),
+            CHECK (status IN ('insufficient_sample','effective','coaching','reassigned','disabled','red'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_roles_reports_to ON roles(reports_to_role_key);
+        CREATE INDEX IF NOT EXISTS idx_workers_role_status ON workers(role_key, status);
+        CREATE INDEX IF NOT EXISTS idx_objectives_department_status ON objectives(department_slug, status, priority DESC);
+        CREATE INDEX IF NOT EXISTS idx_allocations_scope_status ON resource_allocations(department_slug, status);
+        CREATE INDEX IF NOT EXISTS idx_performance_worker_period ON performance_snapshots(worker_key, period_end DESC);
+        """,
+    ),
+    (
+        6,
+        "autonomous_operations_runtime",
+        """
+        CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_key TEXT NOT NULL UNIQUE,
+            opportunity_id INTEGER NOT NULL REFERENCES opportunities(id) ON DELETE RESTRICT,
+            name TEXT NOT NULL,
+            value_proposition TEXT NOT NULL,
+            owner_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            stage TEXT NOT NULL DEFAULT 'concept',
+            acceptance_criteria TEXT NOT NULL DEFAULT '',
+            repository_uri TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (stage IN ('concept','prototype','validation','build','release_candidate','live','hold','retired'))
+        );
+
+        CREATE TABLE IF NOT EXISTS operating_cycles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cycle_key TEXT NOT NULL UNIQUE,
+            mode TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'running',
+            triggered_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            scheduled INTEGER NOT NULL DEFAULT 0,
+            max_work_items INTEGER NOT NULL DEFAULT 20,
+            plan_json TEXT NOT NULL DEFAULT '{}',
+            summary_json TEXT NOT NULL DEFAULT '{}',
+            started_at TEXT NOT NULL,
+            completed_at TEXT,
+            CHECK (mode IN ('simulation','internal','shadow','external')),
+            CHECK (status IN ('running','awaiting_workers','completed','failed','paused')),
+            CHECK (scheduled IN (0,1)),
+            CHECK (max_work_items >= 1 AND max_work_items <= 1000)
+        );
+
+        CREATE TABLE IF NOT EXISTS work_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            work_key TEXT NOT NULL UNIQUE,
+            parent_work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            cycle_id INTEGER REFERENCES operating_cycles(id) ON DELETE RESTRICT,
+            objective_id INTEGER REFERENCES objectives(id) ON DELETE RESTRICT,
+            opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE RESTRICT,
+            product_id INTEGER REFERENCES products(id) ON DELETE RESTRICT,
+            department_slug TEXT NOT NULL REFERENCES departments(slug) ON DELETE RESTRICT,
+            commanded_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            assigned_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            assigned_worker_key TEXT REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            reviewer_role_key TEXT REFERENCES roles(role_key) ON DELETE RESTRICT,
+            task_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            acceptance_criteria TEXT NOT NULL,
+            decision_class TEXT NOT NULL,
+            priority INTEGER NOT NULL DEFAULT 50,
+            risk_level TEXT NOT NULL DEFAULT 'low',
+            external_effect INTEGER NOT NULL DEFAULT 0,
+            estimated_cost_cents INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'proposed',
+            input_json TEXT NOT NULL DEFAULT '{}',
+            result_json TEXT NOT NULL DEFAULT '{}',
+            error_text TEXT NOT NULL DEFAULT '',
+            idempotency_key TEXT NOT NULL UNIQUE,
+            attempt_count INTEGER NOT NULL DEFAULT 0,
+            max_attempts INTEGER NOT NULL DEFAULT 3,
+            next_run_at TEXT,
+            lease_owner TEXT,
+            lease_token TEXT,
+            lease_epoch INTEGER NOT NULL DEFAULT 0,
+            lease_expires_at TEXT,
+            deadline_at TEXT,
+            submitted_at TEXT,
+            accepted_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (decision_class IN ('work_execution','department_operation','executive_portfolio','controlled_external','owner_reserved','prohibited')),
+            CHECK (priority >= 0 AND priority <= 100),
+            CHECK (risk_level IN ('low','medium','high','critical')),
+            CHECK (external_effect IN (0,1)),
+            CHECK (estimated_cost_cents >= 0),
+            CHECK (status IN ('proposed','waiting_dependency','waiting_policy','ready','leased','running','review','retry_wait','succeeded','failed','dead_letter','cancelled','blocked')),
+            CHECK (attempt_count >= 0 AND max_attempts >= 1)
+        );
+
+        CREATE TABLE IF NOT EXISTS work_dependencies (
+            work_id INTEGER NOT NULL REFERENCES work_items(id) ON DELETE RESTRICT,
+            depends_on_work_id INTEGER NOT NULL REFERENCES work_items(id) ON DELETE RESTRICT,
+            failure_policy TEXT NOT NULL DEFAULT 'block',
+            created_at TEXT NOT NULL,
+            PRIMARY KEY(work_id, depends_on_work_id),
+            CHECK (work_id <> depends_on_work_id),
+            CHECK (failure_policy IN ('block','cancel','continue'))
+        );
+
+        CREATE TABLE IF NOT EXISTS work_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            work_id INTEGER NOT NULL REFERENCES work_items(id) ON DELETE RESTRICT,
+            event_type TEXT NOT NULL,
+            actor_worker_key TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            from_status TEXT,
+            to_status TEXT,
+            detail_json TEXT NOT NULL DEFAULT '{}',
+            correlation_id TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS control_reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE RESTRICT,
+            product_id INTEGER REFERENCES products(id) ON DELETE RESTRICT,
+            control_domain TEXT NOT NULL,
+            reviewer_worker_key TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            status TEXT NOT NULL DEFAULT 'pending',
+            severity TEXT NOT NULL DEFAULT 'low',
+            finding TEXT NOT NULL DEFAULT '',
+            conditions TEXT NOT NULL DEFAULT '',
+            artifact_digest TEXT NOT NULL DEFAULT '',
+            expires_at TEXT,
+            created_at TEXT NOT NULL,
+            decided_at TEXT,
+            CHECK (control_domain IN ('finance','legal','compliance','security','privacy','quality','audit','claims')),
+            CHECK (status IN ('pending','passed','blocked','changes_required','expired')),
+            CHECK (severity IN ('low','medium','high','critical'))
+        );
+
+        CREATE TABLE IF NOT EXISTS escalations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            department_slug TEXT NOT NULL REFERENCES departments(slug) ON DELETE RESTRICT,
+            raised_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            routed_to_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            decision_class TEXT NOT NULL,
+            reason_code TEXT NOT NULL,
+            title TEXT NOT NULL,
+            context TEXT NOT NULL,
+            options_json TEXT NOT NULL DEFAULT '[]',
+            recommendation TEXT NOT NULL,
+            safe_default TEXT NOT NULL,
+            owner_attention INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'open',
+            resolution TEXT NOT NULL DEFAULT '',
+            due_at TEXT,
+            created_at TEXT NOT NULL,
+            resolved_at TEXT,
+            CHECK (decision_class IN ('department_operation','executive_portfolio','controlled_external','owner_reserved','prohibited')),
+            CHECK (owner_attention IN (0,1)),
+            CHECK (status IN ('open','routed','resolved','dismissed'))
+        );
+
+        CREATE TABLE IF NOT EXISTS metric_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            metric_name TEXT NOT NULL,
+            metric_type TEXT NOT NULL,
+            value REAL NOT NULL,
+            unit TEXT NOT NULL,
+            department_slug TEXT REFERENCES departments(slug) ON DELETE RESTRICT,
+            worker_key TEXT REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            objective_id INTEGER REFERENCES objectives(id) ON DELETE RESTRICT,
+            work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE RESTRICT,
+            source_reference TEXT NOT NULL,
+            evidence_type TEXT NOT NULL,
+            observed_at TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            CHECK (metric_type IN ('actual','estimate','forecast'))
+        );
+
+        CREATE TABLE IF NOT EXISTS incidents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            incident_key TEXT NOT NULL UNIQUE,
+            severity TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            affected_scope TEXT NOT NULL,
+            owner_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            status TEXT NOT NULL DEFAULT 'open',
+            containment TEXT NOT NULL DEFAULT '',
+            root_cause TEXT NOT NULL DEFAULT '',
+            resolution TEXT NOT NULL DEFAULT '',
+            ceo_notification_required INTEGER NOT NULL DEFAULT 0,
+            opened_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            opened_at TEXT NOT NULL,
+            resolved_at TEXT,
+            CHECK (severity IN ('sev0','sev1','sev2','sev3')),
+            CHECK (status IN ('open','contained','monitoring','resolved','closed')),
+            CHECK (ceo_notification_required IN (0,1))
+        );
+
+        CREATE TABLE IF NOT EXISTS incident_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            incident_id INTEGER NOT NULL REFERENCES incidents(id) ON DELETE RESTRICT,
+            event_type TEXT NOT NULL,
+            actor_worker_key TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            detail_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS schedules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            schedule_key TEXT NOT NULL UNIQUE,
+            task_type TEXT NOT NULL,
+            commanded_by_worker TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            assigned_role_key TEXT NOT NULL REFERENCES roles(role_key) ON DELETE RESTRICT,
+            interval_seconds INTEGER NOT NULL,
+            next_run_at TEXT NOT NULL,
+            max_catchup INTEGER NOT NULL DEFAULT 1,
+            external_effect INTEGER NOT NULL DEFAULT 0,
+            enabled INTEGER NOT NULL DEFAULT 0,
+            payload_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            CHECK (interval_seconds >= 60),
+            CHECK (max_catchup >= 0 AND max_catchup <= 100),
+            CHECK (external_effect IN (0,1)),
+            CHECK (enabled IN (0,1))
+        );
+
+        CREATE TABLE IF NOT EXISTS schedule_occurrences (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            schedule_id INTEGER NOT NULL REFERENCES schedules(id) ON DELETE RESTRICT,
+            scheduled_for TEXT NOT NULL,
+            work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            created_at TEXT NOT NULL,
+            UNIQUE(schedule_id, scheduled_for)
+        );
+
+        CREATE TRIGGER IF NOT EXISTS work_events_no_update
+        BEFORE UPDATE ON work_events BEGIN
+            SELECT RAISE(ABORT, 'work_events are append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS work_events_no_delete
+        BEFORE DELETE ON work_events BEGIN
+            SELECT RAISE(ABORT, 'work_events are append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS metric_events_no_update
+        BEFORE UPDATE ON metric_events BEGIN
+            SELECT RAISE(ABORT, 'metric_events are append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS metric_events_no_delete
+        BEFORE DELETE ON metric_events BEGIN
+            SELECT RAISE(ABORT, 'metric_events are append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS incident_events_no_update
+        BEFORE UPDATE ON incident_events BEGIN
+            SELECT RAISE(ABORT, 'incident_events are append-only');
+        END;
+        CREATE TRIGGER IF NOT EXISTS incident_events_no_delete
+        BEFORE DELETE ON incident_events BEGIN
+            SELECT RAISE(ABORT, 'incident_events are append-only');
+        END;
+
+        CREATE INDEX IF NOT EXISTS idx_work_queue ON work_items(status, priority DESC, next_run_at, created_at);
+        CREATE INDEX IF NOT EXISTS idx_work_assignment ON work_items(assigned_worker_key, assigned_role_key, status);
+        CREATE INDEX IF NOT EXISTS idx_work_cycle ON work_items(cycle_id, status);
+        CREATE INDEX IF NOT EXISTS idx_work_events_work ON work_events(work_id, id);
+        CREATE INDEX IF NOT EXISTS idx_control_reviews_scope ON control_reviews(work_id, opportunity_id, product_id, status);
+        CREATE INDEX IF NOT EXISTS idx_escalations_attention ON escalations(owner_attention, status, created_at);
+        CREATE INDEX IF NOT EXISTS idx_metric_name_time ON metric_events(metric_name, observed_at);
+        CREATE INDEX IF NOT EXISTS idx_incidents_status_severity ON incidents(status, severity, opened_at);
+        CREATE INDEX IF NOT EXISTS idx_schedules_due ON schedules(enabled, next_run_at);
+        """,
+    ),
+    (
+        7,
+        "expand_independent_control_domains",
+        """
+        DROP INDEX IF EXISTS idx_control_reviews_scope;
+        ALTER TABLE control_reviews RENAME TO control_reviews_v6;
+        CREATE TABLE control_reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            work_id INTEGER REFERENCES work_items(id) ON DELETE RESTRICT,
+            opportunity_id INTEGER REFERENCES opportunities(id) ON DELETE RESTRICT,
+            product_id INTEGER REFERENCES products(id) ON DELETE RESTRICT,
+            control_domain TEXT NOT NULL,
+            reviewer_worker_key TEXT NOT NULL REFERENCES workers(worker_key) ON DELETE RESTRICT,
+            status TEXT NOT NULL DEFAULT 'pending',
+            severity TEXT NOT NULL DEFAULT 'low',
+            finding TEXT NOT NULL DEFAULT '',
+            conditions TEXT NOT NULL DEFAULT '',
+            artifact_digest TEXT NOT NULL DEFAULT '',
+            expires_at TEXT,
+            created_at TEXT NOT NULL,
+            decided_at TEXT,
+            CHECK (control_domain IN (
+                'accessibility','audit','budget','claims','data','evidence_quality',
+                'finance','ip','legal','opportunity_advancement','performance',
+                'permissions','platform_policy','policy','privacy','quality',
+                'regulatory','release','reliability','risk','security','unit_economics'
+            )),
+            CHECK (status IN ('pending','passed','blocked','changes_required','expired')),
+            CHECK (severity IN ('low','medium','high','critical'))
+        );
+        INSERT INTO control_reviews(
+            id, work_id, opportunity_id, product_id, control_domain,
+            reviewer_worker_key, status, severity, finding, conditions,
+            artifact_digest, expires_at, created_at, decided_at
+        )
+        SELECT id, work_id, opportunity_id, product_id, control_domain,
+               reviewer_worker_key, status, severity, finding, conditions,
+               artifact_digest, expires_at, created_at, decided_at
+        FROM control_reviews_v6;
+        DROP TABLE control_reviews_v6;
+        CREATE INDEX idx_control_reviews_scope
+            ON control_reviews(work_id, opportunity_id, product_id, status);
+        """,
+    ),
+    (
+        8,
+        "bind_owner_packets_and_work_approvals",
+        """
+        ALTER TABLE escalations
+            ADD COLUMN decision_packet_json TEXT NOT NULL DEFAULT '{}';
+        ALTER TABLE work_items
+            ADD COLUMN approval_id INTEGER REFERENCES approvals(id) ON DELETE RESTRICT;
+        ALTER TABLE approvals
+            ADD COLUMN decision_packet_json TEXT NOT NULL DEFAULT '{}';
+        ALTER TABLE approvals
+            ADD COLUMN packet_digest TEXT NOT NULL DEFAULT '';
+        CREATE INDEX IF NOT EXISTS idx_work_approval
+            ON work_items(approval_id, status);
+        """,
+    ),
 )
 
 
@@ -300,6 +849,32 @@ def _normalize_timestamp(value: str | date | datetime | None, *, default_now: bo
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def normalize_owner_decision_packet(
+    packet: Mapping[str, Any],
+) -> tuple[dict[str, str], str]:
+    """Validate and canonicalize a complete, expiring CEO decision packet."""
+
+    if not isinstance(packet, Mapping):
+        raise ValidationError("owner decision packet must be a JSON object")
+    normalized: dict[str, str] = {}
+    missing: list[str] = []
+    for field in OWNER_DECISION_PACKET_FIELDS:
+        value = str(packet.get(field, "")).strip()
+        if not value:
+            missing.append(field)
+        else:
+            normalized[field] = value
+    if missing:
+        raise ValidationError("owner decision packet is missing: " + ", ".join(missing))
+    packet_expiry = _normalize_timestamp(normalized["expiry"])
+    if packet_expiry is None or packet_expiry <= _utc_now():
+        raise ValidationError("owner decision packet expiry must be in the future")
+    normalized["expiry"] = packet_expiry
+    canonical = json.dumps(normalized, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return normalized, digest
 
 
 def _require_text(name: str, value: Any) -> str:
@@ -374,13 +949,17 @@ class CompanyStore:
 
     @staticmethod
     def _new_connection(path: str) -> sqlite3.Connection:
-        connection = sqlite3.connect(path, timeout=10)
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA busy_timeout = 10000")
-        if path != ":memory:":
-            connection.execute("PRAGMA journal_mode = WAL")
-        return connection
+        connection = sqlite3.connect(path, timeout=30)
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA busy_timeout = 30000")
+            connection.execute("PRAGMA foreign_keys = ON")
+            if path != ":memory:":
+                connection.execute("PRAGMA journal_mode = WAL")
+            return connection
+        except sqlite3.Error as exc:
+            connection.close()
+            raise StorageError(f"cannot configure SQLite connection for {path}: {exc}") from exc
 
     @contextmanager
     def _connection(self) -> Iterator[sqlite3.Connection]:
@@ -409,6 +988,13 @@ class CompanyStore:
 
     def initialize(self) -> dict[str, Any]:
         """Create or migrate the database and return migration state."""
+
+        with _INITIALIZE_LOCK:
+            with _cross_process_initialize_lock(self.db_path):
+                return self._initialize_locked()
+
+    def _initialize_locked(self) -> dict[str, Any]:
+        """Initialize while serialized against other stores in this process."""
 
         if self.db_path != ":memory:":
             try:
@@ -629,7 +1215,7 @@ class CompanyStore:
         if status == "launched":
             raise ValidationError(
                 "launched status requires a governed external launch workflow "
-                "that is not implemented in Phase 0"
+                "that is not implemented by the internal-only runtime"
             )
         with self._transaction() as connection:
             existing = self._resolve_opportunity(connection, identifier)
@@ -898,6 +1484,7 @@ class CompanyStore:
         approval_class: ApprovalClass | str | None = None,
         requested_by: str = "company_os",
         expires_at: str | date | datetime | None = None,
+        decision_packet: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         action = _require_text("action", action)
         rationale = _require_text("rationale", rationale)
@@ -937,13 +1524,28 @@ class CompanyStore:
             raise ValidationError("expires_at is required for every approval request")
         if normalized_expiry <= now:
             raise ValidationError("expires_at must be in the future")
+        normalized_packet: dict[str, str] = {}
+        packet_digest = ""
+        if decision_packet:
+            normalized_packet, packet_digest = normalize_owner_decision_packet(
+                decision_packet
+            )
+            if normalized_packet["exact_action"].casefold() != action.casefold():
+                raise ValidationError(
+                    "owner decision packet exact_action must match the approval action"
+                )
+            if normalized_expiry > normalized_packet["expiry"]:
+                raise ValidationError(
+                    "approval expiry cannot exceed the owner decision packet expiry"
+                )
         with self._transaction() as connection:
             cursor = connection.execute(
                 """
                 INSERT INTO approvals(
                     action, rationale, risk, estimated_cost_cents, reversibility,
-                    approval_class, status, requested_by, requested_at, expires_at
-                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
+                    approval_class, status, requested_by, requested_at, expires_at,
+                    decision_packet_json, packet_digest
+                ) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?)
                 """,
                 (
                     action,
@@ -955,6 +1557,10 @@ class CompanyStore:
                     requested_by,
                     now,
                     normalized_expiry,
+                    json.dumps(
+                        normalized_packet, sort_keys=True, separators=(",", ":")
+                    ),
+                    packet_digest,
                 ),
             )
             approval_id = int(cursor.lastrowid)
@@ -969,6 +1575,8 @@ class CompanyStore:
                     "action": action,
                     "approval_class": inferred.value,
                     "estimated_cost_cents": estimated_cost_cents,
+                    "packet_digest": packet_digest,
+                    "packet_complete": bool(packet_digest),
                 },
             )
             row = connection.execute("SELECT * FROM approvals WHERE id = ?", (approval_id,)).fetchone()
@@ -1027,6 +1635,32 @@ class CompanyStore:
                 raise ValidationError("the requester cannot approve its own gated action")
             if (
                 decision == "approved"
+                and existing["approval_class"]
+                == ApprovalClass.CEO_APPROVAL_REQUIRED.value
+            ):
+                if decided_by != "kaleb_ceo":
+                    raise ConflictError(
+                        "CEO-class approval must be decided by the owner identity"
+                    )
+                try:
+                    packet = json.loads(existing["decision_packet_json"])
+                    normalized_packet, packet_digest = normalize_owner_decision_packet(
+                        packet
+                    )
+                except (TypeError, ValueError, json.JSONDecodeError, ValidationError) as exc:
+                    raise ConflictError(
+                        "CEO-class approval requires a complete valid owner decision packet"
+                    ) from exc
+                if not hmac.compare_digest(
+                    str(existing["packet_digest"]), packet_digest
+                ):
+                    raise ConflictError("owner decision packet digest does not match")
+                if existing["expires_at"] > normalized_packet["expiry"]:
+                    raise ConflictError(
+                        "approval expiry exceeds the owner decision packet expiry"
+                    )
+            if (
+                decision == "approved"
                 and existing["expires_at"] is not None
                 and str(existing["expires_at"]) <= _utc_now()
             ):
@@ -1044,7 +1678,11 @@ class CompanyStore:
                 entity_type="approval",
                 entity_id=approval_id,
                 action=decision,
-                details={"requested_by": existing["requested_by"], "action": existing["action"]},
+                details={
+                    "requested_by": existing["requested_by"],
+                    "action": existing["action"],
+                    "packet_digest": existing["packet_digest"],
+                },
             )
             row = connection.execute("SELECT * FROM approvals WHERE id = ?", (approval_id,)).fetchone()
         return dict(row)
@@ -1689,6 +2327,16 @@ class CompanyStore:
                 "revenues",
                 "risks",
                 "audit_events",
+                "departments",
+                "roles",
+                "workers",
+                "objectives",
+                "work_items",
+                "operating_cycles",
+                "control_reviews",
+                "escalations",
+                "metric_events",
+                "incidents",
             ):
                 table_counts[table] = int(
                     connection.execute(f"SELECT COUNT(*) AS count FROM {table}").fetchone()["count"]

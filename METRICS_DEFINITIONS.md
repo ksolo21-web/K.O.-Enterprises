@@ -39,4 +39,23 @@ Phase 0 has no bank or processor connector. Its financial rows and report totals
 | Revenue per CEO hour | Net cash contribution / measured CEO hours for the same period; `unknown` when time data is incomplete. |
 | Shared-asset reuse rate | Completed product/experiment units using at least one maintained shared asset / completed units in the period. |
 
+## Corporate operations and workforce
+
+| Metric | Definition |
+|---|---|
+| Queue depth | Nonterminal work orders by department and state at the observation time. Always report the oldest ready and blocked age with it. |
+| SLA adherence | Accepted work completed within its department service-level cycles / accepted eligible work. Approved policy or owner waits are excluded and reported separately. |
+| Independent acceptance rate | Work accepted on first submission by a different authorized reviewer / reviewed work. Self-review never counts. |
+| Review rejection rate | Submissions returned for unmet frozen acceptance criteria / reviewed submissions. A useful rejection is a quality-control outcome, not automatically a worker failure. |
+| Dead-letter rate | Work exhausting its safe retry budget / work attempted. Policy denials and owner waits are not retries. |
+| Autonomous completion rate | Independently accepted, pre-authorized work completed without human intervention / eligible work attempted. A deterministic integrity handler may count; merely creating a task may not. |
+| Owner-attention rate | Owner-reserved packets requiring Kaleb / total material decisions. Routine questions routed upward incorrectly are tracked as avoidable interruptions. |
+| CEO minutes | Measured Kaleb time on reserved decisions and exceptions. Strategy time is separated from operational interruption time. |
+| Evidence/audit completeness | Accepted material outcomes with required source, date, evidence type, confidence, expiry, work lineage, and reviewer record / accepted material outcomes. |
+| Resource efficiency | Accepted weighted outcome units / recorded capacity or compute units. Free-tier use still has a recorded resource unit even when cash cost is zero. |
+| Worker performance state | `insufficient_sample` until five independently accepted weighted outcomes; thereafter derived from quality, objective contribution, SLA reliability, resource efficiency, evidence/audit completeness, and handoff quality. Critical policy violations override averages with red status. |
+| Safe-denial rate | Correct policy/control denials / gated attempts. Safe denials must never lower an agent's performance score. |
+| Lease recovery count | Expired internal leases safely fenced and recovered. Stale workers must be unable to submit after a later lease epoch. |
+| Integrity gate | Combined SQLite integrity and audit-chain result for a cycle. Any failure blocks advancement and opens the applicable incident path. |
+
 Impressions, lines of code, files generated, agent turns, and projected market size are diagnostic activity—not evidence of business success.

@@ -17,3 +17,27 @@ Material policy, architecture, portfolio, and external-action decisions are appe
 - **Decision:** Phase 0 uses Python 3.12+, SQLite, and standard-library code with local persistent state. External connectors remain disabled and scheduled/external execution remains paused.
 - **Reason:** This provides testable policy enforcement and auditability without a paid dependency or credential.
 - **Consequences:** Initial capability is intentionally narrow. A dependency or hosted service needs evidence, security review, cost accounting, and any required approval.
+
+## DEC-0003 — Establish an executable chain of command
+
+- **Date:** 2026-08-24
+- **Status:** Accepted
+- **Decision:** Kaleb remains Owner/CEO. A digital Company President holds day-to-day internal operating authority and commands department executives, who command specialized digital workers. Commands travel downward; routine escalations travel to the next manager; cross-department conflicts route to the President. Independent finance, legal/compliance, security/privacy, quality/reliability, counter-thesis, and audit controls retain scoped stop rights and direct escalation routes.
+- **Reason:** Owner leverage requires delegated routine authority, while reliable autonomy requires machine-enforced responsibility, review independence, and control functions that revenue leadership cannot overrule.
+- **Consequences:** Every meaningful work order names a commander, accountable role, worker, reviewer, acceptance criteria, decision class, resource ceiling, and audit lineage. Kaleb receives only owner-reserved strategy, capital, identity/legal, access/data, reputation, or irreversible matters.
+
+## DEC-0004 — Use bounded durable cycles instead of an unbounded autonomous daemon
+
+- **Date:** 2026-08-24
+- **Status:** Accepted
+- **Decision:** The internal company runs finite, replay-safe operating cycles over SQLite. Standing and weekly portfolio work is deduplicated, while each invocation creates a fresh integrity record. Each cycle enforces a work ceiling, verifies integrity, recovers stale leases, reconciles objectives and opportunity work, executes allowlisted deterministic internal handlers, and emits department dispatches. Concrete queue items name the project agent a live Codex orchestrator may instantiate; every output requires independent acceptance.
+- **Reason:** Finite cycles are observable, recoverable, testable, and compatible with pause and budget controls. Chat sub-agents are ephemeral and must not be represented as a permanent hosted workforce.
+- **Consequences:** The public repository is source and governance, not a durable production database. External scheduling needs an approved protected coordinator host, authenticated model/runtime adapter, budget, backup/restore, incident channel, and standing-policy executor. GitHub Actions remains CI, not the company state store.
+
+## DEC-0005 — Preserve external pause through internal-autonomy build
+
+- **Date:** 2026-08-24
+- **Status:** Accepted
+- **Decision:** Internal planning, research assignments, code, tests, reviews, reporting, integrity checks, and safe recovery may operate autonomously. Spending, credentials, contracts, identity use, outreach, publishing, production deployment, sensitive data, and irreversible actions remain paused and owner-reserved unless an exact approved envelope and executor exist.
+- **Reason:** The current request establishes the corporation and delegated internal operations; it does not supply authenticated external accounts, cash authority, legal status, private state infrastructure, or a specific launch approval.
+- **Consequences:** `PAUSE_AUTONOMY` remains. Scheduled or external cycle attempts fail closed. This is an activation boundary, not incomplete internal authority.

@@ -1,0 +1,5 @@
+[agents]
+enabled = true
+# Project agents intentionally omit model settings and inherit the parent session.
+max_concurrent_threads_per_session = 8
+interrupt_message = true

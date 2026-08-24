@@ -27,9 +27,12 @@ state/*
 !state/.gitkeep
 *.db
 *.db-*
+*.db.initialize.lock
 *.sqlite
 *.sqlite3
 *.sqlite-*
+*.sqlite.initialize.lock
+*.sqlite3.initialize.lock
 
 # Generated or sensitive operating material
 reports/generated/
