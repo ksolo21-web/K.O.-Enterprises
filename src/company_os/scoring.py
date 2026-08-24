@@ -30,6 +30,7 @@ PENALTY_WEIGHTS: dict[str, int] = {
     "proprietary_data_dependency": 8,
     "security_exposure": 8,
     "support_burden": 6,
+    "customer_interaction_burden": 8,
     "weak_buyer_reach": 8,
     "evidence_staleness": 7,
 }
@@ -49,6 +50,7 @@ HARD_REJECTION_FLAGS = frozenset(
         "regulated_or_risky_data",
         "mvp_too_large",
         "maintenance_incompatible",
+        "high_touch_operating_model",
         "unlawful_advantage",
     }
 )
@@ -89,6 +91,7 @@ class MarketVoidInput:
     regulated_or_risky_data: bool = False
     mvp_too_large: bool = False
     maintenance_incompatible: bool = False
+    high_touch_operating_model: bool = False
     unlawful_advantage: bool = False
 
     def __post_init__(self) -> None:
@@ -118,6 +121,7 @@ class RiskPenalties:
     proprietary_data_dependency: float = 0.0
     security_exposure: float = 0.0
     support_burden: float = 0.0
+    customer_interaction_burden: float = 0.0
     weak_buyer_reach: float = 0.0
     evidence_staleness: float = 0.0
 
@@ -208,6 +212,10 @@ def calculate_market_void_score(
         rejection_reasons.append("MVP is too large for a bootstrap experiment")
     if normalized.maintenance_incompatible:
         rejection_reasons.append("maintenance burden conflicts with low-owner-time operation")
+    if normalized.high_touch_operating_model:
+        rejection_reasons.append(
+            "normal delivery requires high-touch or physical customer interaction"
+        )
     if normalized.unlawful_advantage:
         rejection_reasons.append("the primary advantage depends on unlawful or prohibited conduct")
 

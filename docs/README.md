@@ -2,6 +2,7 @@
 
 - `architecture/SYSTEM_BOUNDARIES.md` — control plane, product plane, trust flow, and current internal-autonomy boundary.
 - `company/OPERATING_MODEL.md` — roles, cadence, and capacity rules.
+- `company/MICHIGAN_VIRTUAL_OPERATING_MANDATE.md` — owner-approved Michigan, online-only, low-customer-touch portfolio constraints.
 - `company/APPROVAL_PACKET_TEMPLATE.md` — exact information required for a consequential action.
 - `strategy/PHASE_0.md` — founding scope, exit gate, and first validation path.
 - `decisions/` — detailed append-only decision records.

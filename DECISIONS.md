@@ -41,3 +41,11 @@ Material policy, architecture, portfolio, and external-action decisions are appe
 - **Decision:** Internal planning, research assignments, code, tests, reviews, reporting, integrity checks, and safe recovery may operate autonomously. Spending, credentials, contracts, identity use, outreach, publishing, production deployment, sensitive data, and irreversible actions remain paused and owner-reserved unless an exact approved envelope and executor exist.
 - **Reason:** The current request establishes the corporation and delegated internal operations; it does not supply authenticated external accounts, cash authority, legal status, private state infrastructure, or a specific launch approval.
 - **Consequences:** `PAUSE_AUTONOMY` remains. Scheduled or external cycle attempts fail closed. This is an activation boundary, not incomplete internal authority.
+
+## DEC-0006 — Adopt a Michigan virtual, low-touch portfolio mandate
+
+- **Date:** 2026-08-24
+- **Status:** Accepted
+- **Decision:** Treat Michigan, United States as the owner-declared principal operating jurisdiction. Target online-only products whose ordinary acquisition, onboarding, delivery, billing, support, and renewal can be predominantly asynchronous and self-service. Reject business models that require physical client interaction or recurring high-touch sales, implementation, consulting, or account-management labor.
+- **Reason:** The owner directed the company to minimize customer-facing work and physical interaction. Low-touch digital delivery better matches an agent-operated, low-owner-time venture studio.
+- **Consequences:** Opportunity research and scoring must measure customer-interaction burden explicitly. This mandate does not remove legal duties to customers, tax authorities, regulators, or counterparties; it does not prove entity formation, assumed-name registration, tax registration, licensing, or multistate compliance. Unavoidable support, notices, refunds, accessibility, privacy, security, and complaint handling must remain truthful and functional.

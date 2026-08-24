@@ -157,6 +157,7 @@ def _build_parser() -> argparse.ArgumentParser:
     score.add_argument("--regulated-or-risky-data", action="store_true")
     score.add_argument("--mvp-too-large", action="store_true")
     score.add_argument("--maintenance-incompatible", action="store_true")
+    score.add_argument("--high-touch-operating-model", action="store_true")
     score.add_argument("--unlawful-advantage", action="store_true")
     score.add_argument("--json", action="store_true")
 
@@ -587,6 +588,7 @@ def _handle_command(args: argparse.Namespace, store: CompanyStore) -> int:
                 "regulated_or_risky_data",
                 "mvp_too_large",
                 "maintenance_incompatible",
+                "high_touch_operating_model",
                 "unlawful_advantage",
             )
             if getattr(args, name)

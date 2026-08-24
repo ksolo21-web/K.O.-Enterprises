@@ -86,6 +86,25 @@ class MarketVoidScoringTests(unittest.TestCase):
         self.assertFalse(score.eligible_for_advancement)
         self.assertIn("no credible evidence of a real problem", score.rejection_reasons)
 
+    def test_high_touch_operating_model_is_a_hard_rejection(self) -> None:
+        inputs = MarketVoidInput(
+            **{name: 1.0 for name in COMPONENT_WEIGHTS},
+            strong_demand_signal=True,
+            independent_source_count=2,
+            high_touch_operating_model=True,
+        )
+        score = calculate_market_void_score(
+            inputs,
+            RiskPenalties(customer_interaction_burden=1.0),
+        )
+
+        self.assertFalse(score.eligible_for_advancement)
+        self.assertEqual(8.0, score.penalty_points["customer_interaction_burden"])
+        self.assertIn(
+            "normal delivery requires high-touch or physical customer interaction",
+            score.rejection_reasons,
+        )
+
     def test_low_competition_requires_demand_and_corroboration(self) -> None:
         uncorroborated = calculate_market_void_score(
             MarketVoidInput(

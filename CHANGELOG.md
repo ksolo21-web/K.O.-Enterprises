@@ -16,6 +16,7 @@ All notable repository changes are recorded here. This project does not yet prom
 - Finite autonomous internal cycle with integrity verification, stale-lease recovery, bounded planning, opportunity-work reconciliation, and department dispatch manifests.
 - Governance policies and runbooks for authority, delegation, budgets, work management, performance, standing policy, CEO interface, incidents, activation, and opportunity stage gates.
 - Cross-process migration locking, singleton cycle coordination, stale-cycle recovery, versioned standing objectives, finite metric validation, department WIP/deadline ordering, quality floors, fresh control-veto enforcement, complete owner packets, and exact approval-to-work binding.
+- Michigan virtual operating mandate with online-only delivery, explicit customer-interaction scoring, and hard rejection of physical or structurally high-touch business models.
 
 ### Safety posture
 

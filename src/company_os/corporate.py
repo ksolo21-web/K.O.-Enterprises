@@ -1725,7 +1725,9 @@ class CorporateOperations:
                 return None
             self._require_active_bound_approval(connection, candidate)
             require_task_transition(candidate["status"], "leased")
-            token = secrets.token_urlsafe(24)
+            # A raw URL-safe token may begin with "-", which command-line parsers
+            # can misread as an option when the token is passed as a value.
+            token = f"lease_{secrets.token_urlsafe(24)}"
             epoch = int(candidate["lease_epoch"]) + 1
             updated = connection.execute(
                 """
