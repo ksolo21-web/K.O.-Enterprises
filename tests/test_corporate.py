@@ -464,6 +464,7 @@ class CorporateOperationsTests(unittest.TestCase):
         work = self._work(assigned_worker_key="software_engineer")
         claimed = self.operations.claim_work(worker_key="software_engineer")
         self.assertEqual(work["id"], claimed["id"])
+        self.assertTrue(claimed["lease_token"].startswith("lease_"))
         with self.assertRaises(ConflictError):
             self.operations.start_work(
                 work["id"],
