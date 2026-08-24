@@ -53,27 +53,31 @@ class AutonomousCompanyTests(unittest.TestCase):
 
     def test_scheduled_internal_cycle_requires_and_accepts_matching_approval(self) -> None:
         (self.repo_root / "PAUSE_AUTONOMY").unlink()
-        with self.assertRaises(ApprovalRequired):
-            self.company.run_cycle(mode="internal", scheduled=True)
-        approval = self.store.request_approval(
-            action="internal_analysis",
-            rationale="Authorize one bounded scheduled internal operating cycle.",
-            risk="Local internal records only.",
-            approval_class="policy_gated",
-            expires_at=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
-            requested_by="test-requester",
-        )
-        self.store.decide_approval(
-            approval["id"],
-            decision="approved",
-            decided_by="test-owner",
-            notes="Synthetic test approval.",
-        )
-        result = self.company.run_cycle(
-            mode="internal", scheduled=True, approval_id=approval["id"], max_work_items=1
-        )
-        self.assertEqual(1, result["cycle"]["scheduled"])
-        self.assertEqual(0, result["summary"]["external_effects_executed"])
+        with patch.dict("os.environ", {"COMPANY_OS_PAUSED": "0"}):
+            with self.assertRaises(ApprovalRequired):
+                self.company.run_cycle(mode="internal", scheduled=True)
+            approval = self.store.request_approval(
+                action="internal_analysis",
+                rationale="Authorize one bounded scheduled internal operating cycle.",
+                risk="Local internal records only.",
+                approval_class="policy_gated",
+                expires_at=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+                requested_by="test-requester",
+            )
+            self.store.decide_approval(
+                approval["id"],
+                decision="approved",
+                decided_by="test-owner",
+                notes="Synthetic test approval.",
+            )
+            result = self.company.run_cycle(
+                mode="internal",
+                scheduled=True,
+                approval_id=approval["id"],
+                max_work_items=1,
+            )
+            self.assertEqual(1, result["cycle"]["scheduled"])
+            self.assertEqual(0, result["summary"]["external_effects_executed"])
 
     def test_non_executive_cannot_trigger_presidential_workflow(self) -> None:
         with self.assertRaises(ConflictError):
