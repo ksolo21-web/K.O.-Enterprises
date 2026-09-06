@@ -13,7 +13,7 @@ The first customer-facing validation test will require a specific proposal and C
 
 ## ImportScope / OANDA connections — 2026-09-06
 
-- Taking payments: no merchant/payout account or checkout is connected. Stripe is available but not installed/connected. The working prototype and exact unpublished $29 checkout packet are available; ordinary processing and potential refund/dispute costs leave the $0 exposure decision unresolved.
+- Taking payments: Stripe connection succeeded, but neither the coordinator nor a fresh advisor session exposes callable Stripe account actions. Account mode and charge/payout capabilities remain unverified; no checkout was created. Do not request installation/connection again. The exact unpublished $29 checkout packet is available; ordinary processing and potential refund/dispute costs leave the $0 exposure decision unresolved.
 - Public Site access: the ImportScope preview remains owner-only. The Sites access operation requires an explicit request for the proposed public audience.
 - Measured repository reach: the current GitHub reader does not support the traffic endpoint. The prepared reach test has no verified observable traffic source and has not started.
 - OANDA practice data: no demo token/account ID has been supplied. A read-only laboratory and manual workflow are prepared; no account activity has occurred.
