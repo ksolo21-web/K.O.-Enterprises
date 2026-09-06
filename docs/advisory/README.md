@@ -13,6 +13,12 @@ The following personal skills are installed for reuse in chats that can load the
 | Revenue | `ko-revenue-advisor` | Offer, checkout, fulfillment and collected revenue | [Revenue](reviews/2026-09-06/revenue.md) |
 | Coordinator | `ko-advisory-board` | Independent assignments, evidence resolution and completed next actions | [Board decision](BOARD_DECISION.md) |
 
+## Idea Panel
+
+Use **`@ko-idea-panel`** to find and challenge opportunities before selecting a business. It is installed alongside the operating advisors and can resume from the latest checkpoint in another chat with skill access. Its five reviewer roles cover buyer demand, competition/supply, distribution, profit/scale and adversarial review. The six gates separately assess demand, suitable competition, unmet supply, free distribution, profitability/owner effort and reachable upside. Unknowns do not earn passing scores; the panel can reject every candidate.
+
+The [first screen](reviews/2026-09-06-idea-panel.md) held the publisher puzzle build and procurement alerts, then closed a Stocky archive lead after investigating existing free supply. This first application was coordinator work because earlier independent reviews hit usage limits. Separate role instructions are saved; no claim is made that five new independent agents ran or that a background panel is continuously operating.
+
 ## Working method
 
 Give each advisor the same raw revision, a bounded question and an exclusive report path. Collect independent first findings before sharing conclusions. Resolve disagreements from source evidence, not votes. Carry out useful authorized repairs and drafts; seek a focused rereview of a material fix. Stop the assignment when its deliverable is accepted. Read the current user mandate before applying an older business record.

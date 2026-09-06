@@ -1,20 +1,22 @@
 # Current business checkpoint
 
-Updated 2026-09-06 after Kaleb questioned the purpose of the Detailer Promo Pack and challenged the quality of the choice. This is the continuation entry point. Review base: faccefdae30ee456bab49bb7669a62d21b78e5d8; use the latest default branch for later checkpoints.
+Updated 2026-09-06 after Kaleb requested an Idea Panel for high demand, low competition, limited supply, substantial upside and profitability. This is the continuation entry point. Review base: 9f0f7e79fd8e13a3f12c9690a7cd147b11a295cf; use the latest default branch for later checkpoints.
 
 ## Active decision
 
-**Pause the Detailer Promo Pack.** Kaleb's goal is a scalable owned business with low owner involvement, and bespoke creative delivery is a poor fit. The [new comparison](reviews/2026-09-06-owned-product-reset.md) selects a **publisher puzzle engine** as the next bounded feasibility and buyer experiment, while holding a procurement-alert subscription. One original daily logic game could be licensed to multiple publishers and operate without per-play paid API calls. This is a proposed design, not a completed product or validated demand. Existing free and paid substitutes make originality, reliability and buyer adoption essential. No price is selected and no new product has been built.
+**No candidate currently passes the requested opportunity screen. Hold the publisher puzzle build.** The [Idea Panel screen](reviews/2026-09-06-idea-panel.md) supersedes the prior feasibility-first choice. Publisher use and supplier prices do not establish high demand for our game; free substitutes weaken the generic offer. Generic procurement alerts remain on hold. A fresh Stocky purchasing-history archive lead was investigated and closed after a free replacement and merchant-reported history imports weakened the supposed supply gap. Keep the Detailer Promo Pack paused and preserve ImportScope. No new product or price is selected.
 
-Previously, one independent [business review](reviews/2026-09-06-advertising/business.md) completed for the creative service. Four other advisor runs stopped at the account usage limit. Both the earlier [synthesis](reviews/2026-09-06-advertising/coordinator.md) and the current reset are coordinator work, not five-advisor consensus. Do not retry agents or buy credits to evade the limit.
+The installed **ko-idea-panel** adds five reviewer roles for demand, competition/supply, distribution, profit/scale and adversarial review. It complements the five existing operating advisors. Its six evidence gates keep unknowns visible and allow no qualifying winner. Use `@ko-idea-panel` in a chat that can load saved skills, then resume from this checkpoint.
+
+Previously, one independent [business review](reviews/2026-09-06-advertising/business.md) completed for the creative service. Four other advisor runs stopped at the account usage limit. Both the earlier [synthesis](reviews/2026-09-06-advertising/coordinator.md) and the current idea screen are coordinator work, not five-advisor consensus. No independent forward-test of the new panel ran. Do not retry agents or buy credits to evade the limit; use separate reviewers when available without routing around a reported limit.
 
 ## Preserved sample and next action
 
 One fictional sample is complete: two generated illustrative photos, three concepts, six PNGs at 1080 x 1080 and 1080 x 1920, three captions, a blank customer brief, an unsent sales-message draft, source/provenance files and a three-page proof. All six exports carry a fictional-demo/generated-visual notice. Rendered layouts, dimensions and the ZIP were checked. Owner artifacts are named **Detailer-Promo-Pack.pdf** and **Detailer-Promo-Pack.zip**; see the [venture record](../ventures/detailer-promo-pack/README.md).
 
-**Next: the capped publisher-game feasibility test in the reset review.** Verify an original generator/solver, host-page isolation and operation without paid runtime services before building a storefront or additional games. WordPress.org is a documented free distribution option, but no publisher account, submitted plugin, accepted listing, audience or buyer exists. It requires manual review and compliant licensing; free hosting does not guarantee acquisition. Messages to others still require explicit authorization under developer rules.
+**Next: buyer evidence for a distinct costly recurring workflow, before product implementation.** The first panel screen and Stocky follow-through are complete. Seek independent current buyer problems plus a credible economic signal, compare free/native/paid workarounds, and establish a plausible free route to qualified buyers. Apply the bounded screening and stop conditions in the report. Do not reopen a rejected generic idea without new evidence or invent a smaller segment to make competition disappear. No audience or buyer is verified. Messages to others still require explicit authorization under developer rules.
 
-The detailer buyer test is unstarted and now paused. The proposed publisher test needs three unrelated evaluations and at least one paid delivery before expansion; price and a limited support scope still need selection. Its clock also has not started. No missing audience or inaccessible checkout is counted as failed demand.
+The detailer and publisher buyer tests remain unstarted and paused. No missing audience or inaccessible checkout is counted as failed demand. Reopening either requires evidence that addresses its failed screen before any previously proposed build or test resumes.
 
 ## Observed actuals
 
@@ -24,7 +26,8 @@ The detailer buyer test is unstarted and now paused. The proposed publisher test
 | Initiated external cash spending | $0 |
 | Economic profit | Unestablished; total time/resource costs not fully measured |
 | Creative sample | Six PNGs and three-page proof preserved; experiment paused |
-| Publisher product | Research and bounded next test only; no code or launch |
+| Publisher product | Build held after demand screen; no code or launch |
+| Idea Panel | Saved; three-candidate coordinator screen complete; no qualified winner |
 | Qualified exposures / accepted orders | Unknown / 0 |
 | Live checkout / paid launch / outreach | None / none / 0 |
 | OANDA API reads / orders / returns | 0 / 0 / no result |
@@ -48,6 +51,6 @@ After both secrets are configured, the owner can choose **Run workflow** on **ma
 
 ## Resume without rebuilding
 
-The five individual advisor skills and board coordinator remain saved for future chats. Load the requested skill and this checkpoint, then only the relevant evidence. Do not repeat the full panel for routine edits. Respect current usage limits.
+The Idea Panel, five individual advisor skills and board coordinator are saved for future chats. Load the requested skill and this checkpoint, then only the relevant evidence. Saved roles are reusable instructions, not permanently running agents. Do not repeat the full panel for routine edits. Respect current usage limits.
 
-ImportScope's product, private Site, 188 previously passing tests and original reviews remain intact: [historical board decision](BOARD_DECISION.md), [checkout packet](../ventures/importscope/CHECKOUT_ACTIVATION.md), [actuals](../ventures/importscope/ACTUALS.json). Its native GitHub traffic access remains unsupported, and public Site access still needs the audience request required by Sites. Stop further portfolio, publisher, bounty and sample expansion until new buyer or distribution evidence warrants it.
+ImportScope's product, private Site, 188 previously passing tests and original reviews remain intact: [historical board decision](BOARD_DECISION.md), [checkout packet](../ventures/importscope/CHECKOUT_ACTIVATION.md), [actuals](../ventures/importscope/ACTUALS.json). Its native GitHub traffic access remains unsupported, and public Site access still needs the audience request required by Sites. Continue bounded demand research; hold additional product, storefront and sample expansion until new buyer evidence warrants it.

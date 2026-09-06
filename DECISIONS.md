@@ -84,3 +84,11 @@ Stripe tools are now available and account listing succeeded, superseding the ea
 ## 2026-09-06 — Reset toward a repeatable owned product
 
 Kaleb questioned the creative pack and challenged the quality of the business choice. Pause that experiment and preserve its files. A bounded coordinator comparison favors one original publisher puzzle engine over continued bespoke creative work or a generic procurement-alert subscription. Current publisher use, commercial alternatives and free WordPress distribution are documented alongside strong free substitutes and unproven adoption. This is a feasibility and buyer-test choice, not evidence of income or an approved launch. No new product, purchase, account, outreach or background operation was created. See `docs/advisory/reviews/2026-09-06-owned-product-reset.md`.
+
+## 2026-09-06 — Save Idea Panel and require buyer evidence before building
+
+Kaleb requested an idea panel targeting high demand, low competition, limited supply, substantial upside and profitability. Saved and verified the reusable `ko-idea-panel` skill with five reviewer roles and six evidence gates. It complements the existing advisors and resolves current state from the default-branch checkpoint. Earlier agent usage limits were respected; this first screen is coordinator work, with no independent panel consensus or forward-test claimed.
+
+Supersede the prior publisher feasibility-first choice: hold the puzzle build because high demand for our offer and an underserved gap are unverified. Generic procurement alerts remain held. Investigated a fresh Stocky purchasing-history archive lead, including focused follow-through; current free replacement supply and merchant reports of historical imports weakened the proposed advantage. Close that lead without a build. No candidate passes all required gates. Continue bounded discovery from current buyer problems and economic behavior; do not turn an unknown into a passing score or relabel a failed generic idea.
+
+See `docs/advisory/reviews/2026-09-06-idea-panel.md` for source dates, limitations, contrary evidence and stop conditions. No product, ad, external message, account, checkout, trade or background operation was created. Recorded revenue and initiated external cash spending remain $0; economic profit is unestablished. Existing pause and controls remain.
