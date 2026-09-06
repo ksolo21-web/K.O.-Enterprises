@@ -41,5 +41,8 @@ jobs:
       - name: Run unit and safety tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
 
+      - name: Check ImportScope comparison and export behavior
+        run: node --test products/importscope/test-engine.cjs
+
       - name: Confirm tests did not alter tracked files
         run: git diff --exit-code -- .

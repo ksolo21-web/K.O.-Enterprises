@@ -49,3 +49,8 @@ Material policy, architecture, portfolio, and external-action decisions are appe
 - **Decision:** Treat Michigan, United States as the owner-declared principal operating jurisdiction. Target online-only products whose ordinary acquisition, onboarding, delivery, billing, support, and renewal can be predominantly asynchronous and self-service. Reject business models that require physical client interaction or recurring high-touch sales, implementation, consulting, or account-management labor.
 - **Reason:** The owner directed the company to minimize customer-facing work and physical interaction. Low-touch digital delivery better matches an agent-operated, low-owner-time venture studio.
 - **Consequences:** Opportunity research and scoring must measure customer-interaction burden explicitly. This mandate does not remove legal duties to customers, tax authorities, regulators, or counterparties; it does not prove entity formation, assumed-name registration, tax registration, licensing, or multistate compliance. Unavoidable support, notices, refunds, accessibility, privacy, security, and complaint handling must remain truthful and functional.
+
+
+## 2026-09-06 — Fresh zero-capital venture
+
+Kaleb authorized fresh ideas using public GitHub branches as the build workspace, with $0 capital. The prior-project camera direction was shelved. Built ImportScope as a bounded new catalog-comparison experiment and prepared a separate read-only OANDA demo research lab. No checkout, customer outreach, spending, corporate scheduler or broker orders were activated. See `docs/decisions/2026-09-06-zero-capital-fresh-venture.md` and `docs/ventures/importscope/`.

@@ -1,0 +1,4 @@
+Source Site revision: 7a86a858b87ccf6b6294179eb00c69909f3e78c9
+Source captured: 2026-09-06
+This folder is the public GitHub source snapshot authorized by Kaleb.
+Hosting identity and source credentials are deliberately excluded.

@@ -1,0 +1,17 @@
+{
+  "as_of": "2026-09-06",
+  "venture": "ImportScope",
+  "status": "prototype_demand_unvalidated",
+  "verified_customers": 0,
+  "verified_sales": 0,
+  "verified_revenue_usd": 0,
+  "external_cash_expenditure_initiated_usd": 0,
+  "proposed_test_price_usd": 29,
+  "payment_rail_connected": false,
+  "public_paid_launch": false,
+  "customer_outreach_sent": 0,
+  "oanda_api_reads": 0,
+  "oanda_orders": 0,
+  "autonomous_background_operation": false,
+  "notes": "Zero values record verified activity in this build only, not an audit of the owner's entire financial history. Included session-resource consumption is not independently metered here."
+}
