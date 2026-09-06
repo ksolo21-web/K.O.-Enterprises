@@ -1,42 +1,52 @@
 # Current business checkpoint
 
-Updated 2026-09-06 after the owner directed execution toward profits and successfully connected Stripe. This file is the continuation entry point; its latest repository revision is authoritative for this checkpoint. Review base: `37c9975ae89981c3664d922a31c80228362b81ed`. Product source: `7a86a858b87ccf6b6294179eb00c69909f3e78c9`. [PR 4](https://github.com/ksolo21-web/K.O.-Enterprises/pull/4) was merged to main at `482b13e5713e215b9ec61a0bb3f709d00e484788` after all 188 tests and GitHub CI passed. Check the latest default branch for subsequent checkpoints.
+Updated 2026-09-06 after Kaleb asked to consider advertising, renewed the zero-spend profit mandate, directed continuation, and reported adding an OANDA demo key. This is the continuation entry point. Review base: a6dc1c6eabaae0ced347cb81d49ec8906eff20bb; use the latest default branch for later checkpoints.
 
-## Decision and next action
+## Active decision
 
-Keep **ImportScope** as the sole bounded commercial experiment. Freeze feature and portfolio expansion. Test the value of a readable before/after catalog report for freelancers handling repeated Shopify CSV updates. This segment and the $29 one-time price remain hypotheses. See [the board's reasoning and resolutions](BOARD_DECISION.md).
+Test one **Detailer Promo Pack** for independent car detailers. Proposed $49 one-time scope: three original static concepts, each in square and vertical formats, three caption drafts and one consolidated revision. Pause incremental ImportScope checkout work; preserve its completed assets. Hold an ad-funded publisher because no eligible audience is established.
 
-The product, [comparative validation packet](../ventures/importscope/validation/README.md), synthetic fixtures and sample report are prepared. The exact next commercial handoff is the [checkout activation packet](../ventures/importscope/CHECKOUT_ACTIVATION.md): inspect the already connected Stripe account when its actions are exposed, resolve sale-related costs under $0, and obtain the explicit public Site audience request required by the Sites access operation. Complete the specified delivery/terms checks against that real setup. No evaluation participants, channel audience or willingness to pay are established. Browser appearance and real imports remain untested; Sites does not require unsolicited browser QA as a publication gate.
+One independent [business review](reviews/2026-09-06-advertising/business.md) completed. Financial, tax, growth and revenue advisor runs stopped at the account usage limit. The [coordinator synthesis](reviews/2026-09-06-advertising/coordinator.md) is explicitly not five-advisor consensus. Do not retry agents or buy credits to evade the limit.
 
-The growth advisor's [IS-REACH-01 specification](reviews/2026-09-06/growth.md) offers a small owned-repository reach test. It has not started. Its prerequisite is an exact placement with observable native aggregate traffic; the available GitHub reader rejects the traffic endpoint as unsupported. A private preview, source publication, or this report date does not start its clock. Missing traffic is not failed product demand. The [experiment record](../ventures/importscope/EXPERIMENT_STATUS.json) keeps unmeasured quantities null.
+## Completed handoff and next action
 
-A bounded [first-revenue route screen](reviews/2026-09-06/first-revenue-route.md) found no eligible funded coding task we could verify. No bounty was claimed or patch submitted. The [Algora cash review](reviews/2026-09-06/bounty-cash-review.md) found a potentially useful sponsor-paid fee model, but no applicable award, settled money or blanket zero-recourse guarantee. Do not resume an open-ended bounty search or portfolio expansion without a new concrete lead.
+One fictional sample is complete: two generated illustrative photos, three concepts, six PNGs at 1080 x 1080 and 1080 x 1920, three captions, a blank customer brief, an unsent sales-message draft, source/provenance files and a three-page proof. All six exports carry a fictional-demo/generated-visual notice. Rendered layouts, dimensions and the ZIP were checked. Owner artifacts are named **Detailer-Promo-Pack.pdf** and **Detailer-Promo-Pack.zip**; see the [venture record](../ventures/detailer-promo-pack/README.md).
 
-## Observed actuals and hard limits
+**Next: one permitted placement or opt-in buyer conversation using the completed sample.** No sender/channel, permitted audience, qualified exposure, functioning checkout or buyer has been verified. The sales-message draft is included. Developer rules require explicit authorization before messaging others; the general build mandate does not supply an exact external-send instruction. Resolve the real placement and sender, without rebuilding the sample.
 
-| Measure | Current evidenced state |
+The proposed test seeks two unrelated $49 paid orders accepted within scope with positive measured contribution. Re-scope if both exceed 90 minutes all-in or need campaign management. Reject only after 20 verified qualified exposures produce zero orders during 14 days with a functioning checkout. That clock has not started. Missing audience is not failed demand.
+
+## Observed actuals
+
+| Measure | Evidenced state in this work |
 | --- | --- |
-| Verified customers / sales / revenue | 0 / 0 / $0 in this build |
-| Initiated external cash spend | $0 |
-| Economic profit | Not established; time and total resource costs are not fully measured |
-| Stripe integration / operational checkout | Connection succeeded / no checkout created; account mode and charge/payout capabilities unverified |
-| Qualified audience / activation / support burden | Unmeasured |
-| Paid public launch / customer outreach | None |
-| OANDA API reads / orders / performance | 0 / 0 / no result |
-| Background business operations | None; `PAUSE_AUTONOMY` remains |
+| Verified customers / sales / collected revenue | 0 / 0 / $0 |
+| Initiated external cash spending | $0 |
+| Economic profit | Unestablished; total time/resource costs not fully measured |
+| Creative sample | Six PNGs and three-page proof completed; fictional portfolio demonstration |
+| Qualified exposures / accepted orders | Unknown / 0 |
+| Live checkout / paid launch / outreach | None / none / 0 |
+| OANDA API reads / orders / returns | 0 / 0 / no result |
+| Background operations | None; PAUSE_AUTONOMY remains |
 
-These records do not audit Kaleb's other financial activity. Included session-resource use is not independently metered. Source: [ACTUALS.json](../ventures/importscope/ACTUALS.json).
+These are venture-work records, not an audit of Kaleb's other finances. Included session-resource use is not independently metered. A simulated trade, test payment or generated ad is not revenue. See [ACTUALS.json](../ventures/detailer-promo-pack/ACTUALS.json).
 
-## Real commerce boundary
+## Stripe: corrected access state
 
-The current Gumroad model has transaction deductions, retained processing costs on refunds, possible negative-balance bank debits and payout holds. A $29 direct-card scenario yields $24.46 before other deductions; it is neither received cash nor profit. The strict $0 exposure mandate has not been shown compatible with that rail. No costs or terms were accepted. See [the financial review](reviews/2026-09-06/financial.md).
+Stripe is installed and connected. **Tools are now exposed and account listing succeeded**, superseding the earlier tools-unavailable checkpoint. The list includes a dedicated K.O. Enterprise sandbox and K.O. Enterprise test/live contexts. The owner has not selected the account/context requested by the integration. No account-specific capability read, product, price, payment link, charge or payout occurred. Do not request installation again or publish account identifiers.
 
-Stripe connection succeeded during the active turn, and the plugin directory subsequently confirmed it was installed. Both the coordinator and a fresh financial-advisor turn found no callable Stripe actions or tool-search capability in their exposed tool registries. No account read or mutation was possible. **Do not ask Kaleb to install/connect Stripe again.** In the next capable session, discover the actual Stripe tools, inspect minimum account/mode/capability facts, and continue the prepared sequence. Do not hunt credentials or bypass the integration through browser/account workarounds.
+Kaleb reported saving two Stripe keys and later an OANDA demo key. Secret names/values cannot be inspected through the current GitHub connector. No credential value was read, logged or committed. Do not claim the keys were independently verified or request them in chat.
 
-Its ordinary US domestic-card illustration leaves $27.86 from $29 before other deductions; refunds and disputes still create possible costs. A lower fee is not proof of zero exposure. Current sources, exact configuration, limits and the owner decision are in [checkout activation](../ventures/importscope/CHECKOUT_ACTIVATION.md). Connection alone does not establish test/live mode, legal seller configuration, an active checkout or acceptance of costs under $0.
+The ordinary US domestic-card illustration for $49 is a $1.72 processing fee and $47.28 before other deductions, labor and taxes. That is arithmetic, not receipts or profit. Retained processing costs after refunds and possible bank recovery matter to the zero-spend constraint. Actual seller/account setup, service tax treatment and customer terms remain unresolved; the earlier software tax review does not classify this creative service. No commerce was activated.
 
-Supplier identity, actual seller/merchant configuration, applicable tax treatment, usage/support/refund terms and buyer delivery checks remain unresolved for commerce. Michigan is owner-declared; K.O. Enterprises is a working name. Do not require entity formation without evidence, invent identity information or infer that a merchant of record removes income-tax obligations. See [tax findings](reviews/2026-09-06/tax.md) and [the concrete launch requirements](../ventures/importscope/LAUNCH_REQUIREMENTS.md).
+## OANDA: key reported; connection unverified
 
-## Resume without rebuilding context
+The owner reports adding a demo API key. No OANDA variables are present locally. The existing [manual practice workflow](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml) expects **OANDA_DEMO_TOKEN** and **OANDA_DEMO_ACCOUNT_ID**. The repository run listing showed 14 runs, all CI, and no OANDA run. Current GitHub tools can read run results but expose no dispatch action. No alternate credential route or automatic trigger was introduced.
 
-Load `ko-advisory-board` or the requested individual skill, read this checkpoint and the active user request, then inspect the linked actuals and relevant evidence. Use the public repository as building infrastructure; the older camera project remains shelved. Revalidate changing sources before decisions. Do not repeat the full panel merely to make a small routine edit. Keep completing unblocked internal work while the specific external action remains unresolved.
+After both secrets are configured, the owner can choose **Run workflow** on **main**. Inspect that run's sanitized results before claiming a successful connection or performance. The lab is restricted to practice-host GET requests and historical simulations; broker orders are not implemented. Demo gains never count as business revenue. See the [lab README](../../experiments/oanda_demo/README.md).
+
+## Resume without rebuilding
+
+The five individual advisor skills and board coordinator remain saved for future chats. Load the requested skill and this checkpoint, then only the relevant evidence. Do not repeat the full panel for routine edits. Respect current usage limits.
+
+ImportScope's product, private Site, 188 previously passing tests and original reviews remain intact: [historical board decision](BOARD_DECISION.md), [checkout packet](../ventures/importscope/CHECKOUT_ACTIVATION.md), [actuals](../ventures/importscope/ACTUALS.json). Its native GitHub traffic access remains unsupported, and public Site access still needs the audience request required by Sites. Stop further portfolio, publisher, bounty and sample expansion until new buyer or distribution evidence warrants it.

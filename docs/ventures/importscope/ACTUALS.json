@@ -1,7 +1,7 @@
 {
   "as_of": "2026-09-06",
   "venture": "ImportScope",
-  "status": "prototype_demand_unvalidated",
+  "status": "preserved_checkout_work_paused_for_detailer_test",
   "verified_customers": 0,
   "verified_sales": 0,
   "verified_revenue_usd": 0,
@@ -17,5 +17,5 @@
   "oanda_api_reads": 0,
   "oanda_orders": 0,
   "autonomous_background_operation": false,
-  "notes": "Zero values record verified activity in this build only, not an audit of the owner's entire financial history. Stripe connection succeeded, but no account actions were exposed in the session; payment-rail readiness and mode remain unknown. Included session-resource consumption is not independently metered here."
+  "notes": "Zero values describe this build, not an audit of the owner's other finances. Stripe tools are now exposed and account listing succeeded, but no account/context was selected and payment-rail capabilities remain unverified. Incremental ImportScope checkout work is paused for the bounded Detailer Promo Pack test; its assets remain intact. Included session resources are not independently metered."
 }
