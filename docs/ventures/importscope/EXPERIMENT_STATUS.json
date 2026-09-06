@@ -1,0 +1,22 @@
+{
+  "as_of": "2026-09-06",
+  "experiment_id": "IS-REACH-01",
+  "status": "prepared_not_started",
+  "started_at_utc": null,
+  "ended_at_utc": null,
+  "repository_unique_visitors": null,
+  "guide_unique_visitors": null,
+  "qualified_visits": null,
+  "sample_activations": null,
+  "verified_purchases": 0,
+  "independent_successful_users": null,
+  "repeat_users_30d": null,
+  "referrals": null,
+  "support_minutes": null,
+  "source_window": null,
+  "evidence_reference": null,
+  "known_internal_activity": "not_measured",
+  "qualified_visit_kill_rule_enabled": false,
+  "paid_demand_test_started": false,
+  "notes": "Source documentation is not a measured acquisition experiment. Null means unmeasured. A disconnected checkout cannot produce a valid demand-failure result."
+}

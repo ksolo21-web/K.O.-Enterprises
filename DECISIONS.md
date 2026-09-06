@@ -54,3 +54,9 @@ Material policy, architecture, portfolio, and external-action decisions are appe
 ## 2026-09-06 — Fresh zero-capital venture
 
 Kaleb authorized fresh ideas using public GitHub branches as the build workspace, with $0 capital. The prior-project camera direction was shelved. Built ImportScope as a bounded new catalog-comparison experiment and prepared a separate read-only OANDA demo research lab. No checkout, customer outreach, spending, corporate scheduler or broker orders were activated. See `docs/decisions/2026-09-06-zero-capital-fresh-venture.md` and `docs/ventures/importscope/`.
+
+## 2026-09-06 — Save and use five independent business advisors
+
+Kaleb explicitly requested separate business, financial, tax, growth and revenue advisors reusable across chats. Installed five personal advisor skills and one board coordinator with senior analytical standards, truthful credentials and bounded assignments. Five separate first reviews are preserved under `docs/advisory/reviews/2026-09-06/`.
+
+The coordinator accepts their recommendation to retain one ImportScope experiment and freeze feature expansion while testing a specific report workflow. The current fee illustration now includes published card processing; refund and bank-debit exposure leaves paid commerce unresolved under $0. Qualification and activation remain unmeasured, and no disconnected-checkout period counts as failed demand. A concrete comparative packet is prepared. No entity, merchant account, payment, outreach, public sales launch, recurring operation or OANDA activity was created. The pause and existing controls remain. See `docs/advisory/CURRENT_STATE.md` and `BOARD_DECISION.md` for the resume point, evidence and next action. This records the active task, not an amendment or invented CEO approval for external commerce.

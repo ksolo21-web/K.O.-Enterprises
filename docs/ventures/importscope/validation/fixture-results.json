@@ -1,0 +1,85 @@
+{
+  "generated_from": "products/importscope/dist/engine.js",
+  "source_revision": "7a86a858b87ccf6b6294179eb00c69909f3e78c9",
+  "scope": "Synthetic engine behavior only; no browser or live importer QA",
+  "sample_stats": {
+    "priority": 3,
+    "changes": 4,
+    "absent": 1,
+    "newVariants": 1,
+    "newProducts": 1,
+    "matchedVariants": 4,
+    "products": 4,
+    "beforeRows": 5,
+    "afterRows": 5
+  },
+  "cases": [
+    {
+      "case": "blank-price",
+      "synthetic": true,
+      "codes": [
+        "blank_price"
+      ],
+      "stats": {
+        "priority": 1,
+        "changes": 1,
+        "absent": 0,
+        "newVariants": 0,
+        "newProducts": 0,
+        "matchedVariants": 1,
+        "products": 1,
+        "beforeRows": 1,
+        "afterRows": 1
+      },
+      "changes": [
+        {
+          "handle": "mug",
+          "sku": "MUG",
+          "variant": "Blue",
+          "field": "Price",
+          "before": "20.00",
+          "after": "",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "case": "omitted-price",
+      "synthetic": true,
+      "codes": [],
+      "stats": {
+        "priority": 0,
+        "changes": 0,
+        "absent": 0,
+        "newVariants": 0,
+        "newProducts": 0,
+        "matchedVariants": 1,
+        "products": 1,
+        "beforeRows": 1,
+        "afterRows": 1
+      },
+      "changes": []
+    },
+    {
+      "case": "changed-option",
+      "synthetic": true,
+      "codes": [
+        "sku_option_change",
+        "new_variant",
+        "absent_variant"
+      ],
+      "stats": {
+        "priority": 1,
+        "changes": 0,
+        "absent": 1,
+        "newVariants": 1,
+        "newProducts": 0,
+        "matchedVariants": 0,
+        "products": 1,
+        "beforeRows": 1,
+        "afterRows": 1
+      },
+      "changes": []
+    }
+  ]
+}

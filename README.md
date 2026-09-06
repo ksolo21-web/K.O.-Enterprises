@@ -79,6 +79,8 @@ The `PAUSE_AUTONOMY` file is the emergency stop. While it exists, scheduled and 
 
 ## Repository map
 
+- `docs/advisory/` — five reusable business advisors, independent reviews and the [current business checkpoint](docs/advisory/CURRENT_STATE.md)
+- `docs/ventures/importscope/` — current product hypothesis, actuals and the prepared comparative validation packet
 - `src/company_os/` — local control-plane code and CLI
 - `.codex/agents/` — project-scoped specialist profiles used for real work orders
 - `state/` — ignored runtime database and generated state
