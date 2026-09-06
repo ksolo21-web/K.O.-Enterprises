@@ -1,0 +1,32 @@
+name: OANDA practice research (read only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oanda-practice-research
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Read practice account and hourly bid-ask candles
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_DEMO_TOKEN }}
+          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_DEMO_ACCOUNT_ID }}
+        run: python -m experiments.oanda_demo.lab fetch
+      - name: Run fixed virtual-$50 holdout simulations
+        run: python -m experiments.oanda_demo.lab replay --input state/oanda-demo-candles.json

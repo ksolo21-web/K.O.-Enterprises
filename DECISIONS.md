@@ -49,3 +49,20 @@ Material policy, architecture, portfolio, and external-action decisions are appe
 - **Decision:** Treat Michigan, United States as the owner-declared principal operating jurisdiction. Target online-only products whose ordinary acquisition, onboarding, delivery, billing, support, and renewal can be predominantly asynchronous and self-service. Reject business models that require physical client interaction or recurring high-touch sales, implementation, consulting, or account-management labor.
 - **Reason:** The owner directed the company to minimize customer-facing work and physical interaction. Low-touch digital delivery better matches an agent-operated, low-owner-time venture studio.
 - **Consequences:** Opportunity research and scoring must measure customer-interaction burden explicitly. This mandate does not remove legal duties to customers, tax authorities, regulators, or counterparties; it does not prove entity formation, assumed-name registration, tax registration, licensing, or multistate compliance. Unavoidable support, notices, refunds, accessibility, privacy, security, and complaint handling must remain truthful and functional.
+
+
+## 2026-09-06 — Fresh zero-capital venture
+
+Kaleb authorized fresh ideas using public GitHub branches as the build workspace, with $0 capital. The prior-project camera direction was shelved. Built ImportScope as a bounded new catalog-comparison experiment and prepared a separate read-only OANDA demo research lab. No checkout, customer outreach, spending, corporate scheduler or broker orders were activated. See `docs/decisions/2026-09-06-zero-capital-fresh-venture.md` and `docs/ventures/importscope/`.
+
+## 2026-09-06 — Save and use five independent business advisors
+
+Kaleb explicitly requested separate business, financial, tax, growth and revenue advisors reusable across chats. Installed five personal advisor skills and one board coordinator with senior analytical standards, truthful credentials and bounded assignments. Five separate first reviews are preserved under `docs/advisory/reviews/2026-09-06/`.
+
+The coordinator accepts their recommendation to retain one ImportScope experiment and freeze feature expansion while testing a specific report workflow. The current fee illustration now includes published card processing; refund and bank-debit exposure leaves paid commerce unresolved under $0. Qualification and activation remain unmeasured, and no disconnected-checkout period counts as failed demand. A concrete comparative packet is prepared. No entity, merchant account, payment, outreach, public sales launch, recurring operation or OANDA activity was created. The pause and existing controls remain. See `docs/advisory/CURRENT_STATE.md` and `BOARD_DECISION.md` for the resume point, evidence and next action. This records the active task, not an amendment or invented CEO approval for external commerce.
+
+## 2026-09-06 — Execute the first-revenue handoff
+
+The owner directed the team to proceed toward profits. A bounded independent screen of advertised coding bounties found no eligible open task we could verify; a separate cash review distinguished sponsor-paid contributor awards from operating a seller checkout. No bounty was claimed, submitted or paid. ImportScope remains the single experiment.
+
+Prepared `docs/ventures/importscope/CHECKOUT_ACTIVATION.md` with the exact $29 offer, candidate Stripe connection, provider test/live sequence, delivery evidence, public Site audience request, ordinary-fee arithmetic and refund/dispute exposure. Stripe is available but not installed/connected. The current GitHub reader rejects native traffic access, so the reach test remains unstarted with unknown counts. No policy, pause, identity, commercial terms, audience, payment, outreach or actuals were changed by preparing this packet. Routine repository delivery proceeds under existing user authority; commercial connection and exposure decisions remain specific owner dependencies.
