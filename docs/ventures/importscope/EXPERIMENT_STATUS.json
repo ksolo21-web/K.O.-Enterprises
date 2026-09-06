@@ -18,5 +18,6 @@
   "known_internal_activity": "not_measured",
   "qualified_visit_kill_rule_enabled": false,
   "paid_demand_test_started": false,
-  "notes": "Source documentation is not a measured acquisition experiment. Null means unmeasured. A disconnected checkout cannot produce a valid demand-failure result."
+  "traffic_evidence_access": "unsupported_by_current_github_reader",
+  "notes": "Source documentation is not a measured acquisition experiment. Null means unmeasured. A disconnected checkout cannot produce a valid demand-failure result. On 2026-09-06 the connected GitHub reader rejected traffic/views as an unsupported endpoint; no accessible aggregate traffic source has been verified."
 }
