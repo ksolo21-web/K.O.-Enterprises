@@ -2,6 +2,8 @@
 
 Status: a concrete setup proposal, not an active checkout or an owner approval. Verified revenue and initiated external cash spend remain $0. The current user instruction is to pursue profits with $0 capital; ordinary development and repository delivery continue under that authority.
 
+Connection update: the owner successfully connected Stripe later on 2026-09-06; the plugin directory confirmed installation. The coordinator and a fresh advisor session still received no callable Stripe account actions. Do not ask for reconnection. Resume with a minimal account/mode/capability read when the tools are exposed. No product, price or payment link was created.
+
 ## Exact offer and destination
 
 | Setting | Prepared choice |
@@ -13,7 +15,7 @@ Status: a concrete setup proposal, not an active checkout or an owner approval. 
 | Source revision | `7a86a858b87ccf6b6294179eb00c69909f3e78c9` |
 | Existing evaluation destination | https://importscope.ksolo21.chatgpt.site — currently owner-only |
 | Existing package | [importscope-offline.zip](../../../products/importscope/dist/importscope-offline.zip) |
-| Checkout provider candidate | Stripe Payment Links; plugin available, not installed/connected when checked |
+| Checkout provider candidate | Stripe Payment Links; plugin connected, account actions not exposed in the current session |
 | Initial sales limit | Proposed five completed purchases, then review delivery, deductions and buyer use; not a promise of finite liability |
 | Initial setup window | Through 2026-09-13, or revalidate this packet first |
 | Seller and payment account | Not verified; use the actual individual or existing entity, selected securely by the owner |
@@ -31,7 +33,7 @@ No new subscription, ad purchase, domain, paid add-on or bank top-up is proposed
 
 ## Ready execution sequence
 
-1. The owner installs and connects Stripe and completes its identity/payout setup in the provider's secure flow. Do not put credentials, bank details, tax IDs or customer records in this public repository or chat. Inspect the connected account's mode, seller details and actual capabilities before writing any objects.
+1. Stripe installation/connection is complete. When its tools are exposed, inspect the connected account's mode, seller details and actual capabilities before writing any objects. If the provider reports incomplete identity/payout setup, the owner completes those specific requirements in its secure flow. Do not put credentials, bank details, tax IDs or customer records in this public repository or chat.
 2. Bind the draft offer to the actual seller, lawful tax configuration, verified software rights, contact and adopted usage/refund terms. A new entity is not automatically required. Do not promise staffed support without an operator.
 3. In a verified sandbox, create the named product, USD 2,900-cent one-time price and quantity-one Payment Link. Use provider-hosted confirmation and the existing package destination, or a reviewed delivery page. Preserve test/live separation and save real provider object identifiers privately. Never invent a payment URL.
 4. Verify successful, cancelled and failed payment states with provider test data; verify the actual download and receipt path. Only provider-confirmed payments count as sales. A return URL, query parameter or download click is not payment evidence. Public file access must not be presented as a paid entitlement.
@@ -52,4 +54,4 @@ Before live activation, missing identity, a wrong account/mode, unexpected fees,
 
 Engineering evidence remains 175 Python tests plus 13 comparison/export tests passed on the reviewed implementation. Browser/report appearance and real Shopify imports remain untested. The Sites skill restricts browser QA unless explicitly requested; it does not itself require browser QA before publication. Do not misstate that distinction or turn optional visual inspection into a new policy. The draft's broader release checks are still visible in [delivery status](DELIVERY.md).
 
-Owner decision: **not received**. Account connection, the explicit public-audience request and the interpretation/acceptance of sale-related exposure remain unresolved. This packet creates no financial authority, identity, approval row, standing policy or scheduled business activity.
+Owner decision on public audience and sale-related exposure: **not received**. Stripe connection is complete; callable account actions, verified account setup, the explicit public-audience request and the interpretation/acceptance of sale-related exposure remain unresolved. This packet creates no financial authority, identity, approval row, standing policy or scheduled business activity.

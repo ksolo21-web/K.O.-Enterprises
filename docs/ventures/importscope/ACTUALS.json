@@ -7,11 +7,15 @@
   "verified_revenue_usd": 0,
   "external_cash_expenditure_initiated_usd": 0,
   "proposed_test_price_usd": 29,
-  "payment_rail_connected": false,
+  "payment_rail_connected": null,
+  "stripe_plugin_connected": true,
+  "stripe_account_mode": null,
+  "stripe_account_capabilities_verified": false,
+  "operational_checkout_created": false,
   "public_paid_launch": false,
   "customer_outreach_sent": 0,
   "oanda_api_reads": 0,
   "oanda_orders": 0,
   "autonomous_background_operation": false,
-  "notes": "Zero values record verified activity in this build only, not an audit of the owner's entire financial history. Included session-resource consumption is not independently metered here."
+  "notes": "Zero values record verified activity in this build only, not an audit of the owner's entire financial history. Stripe connection succeeded, but no account actions were exposed in the session; payment-rail readiness and mode remain unknown. Included session-resource consumption is not independently metered here."
 }
