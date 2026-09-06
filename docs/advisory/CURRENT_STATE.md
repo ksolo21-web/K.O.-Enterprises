@@ -1,20 +1,20 @@
 # Current business checkpoint
 
-Updated 2026-09-06 after Kaleb asked to consider advertising, renewed the zero-spend profit mandate, directed continuation, and reported adding an OANDA demo key. This is the continuation entry point. Review base: a6dc1c6eabaae0ced347cb81d49ec8906eff20bb; use the latest default branch for later checkpoints.
+Updated 2026-09-06 after Kaleb questioned the purpose of the Detailer Promo Pack and challenged the quality of the choice. This is the continuation entry point. Review base: faccefdae30ee456bab49bb7669a62d21b78e5d8; use the latest default branch for later checkpoints.
 
 ## Active decision
 
-Test one **Detailer Promo Pack** for independent car detailers. Proposed $49 one-time scope: three original static concepts, each in square and vertical formats, three caption drafts and one consolidated revision. Pause incremental ImportScope checkout work; preserve its completed assets. Hold an ad-funded publisher because no eligible audience is established.
+**Pause the Detailer Promo Pack.** Kaleb's goal is a scalable owned business with low owner involvement, and bespoke creative delivery is a poor fit. The [new comparison](reviews/2026-09-06-owned-product-reset.md) selects a **publisher puzzle engine** as the next bounded feasibility and buyer experiment, while holding a procurement-alert subscription. One original daily logic game could be licensed to multiple publishers and operate without per-play paid API calls. This is a proposed design, not a completed product or validated demand. Existing free and paid substitutes make originality, reliability and buyer adoption essential. No price is selected and no new product has been built.
 
-One independent [business review](reviews/2026-09-06-advertising/business.md) completed. Financial, tax, growth and revenue advisor runs stopped at the account usage limit. The [coordinator synthesis](reviews/2026-09-06-advertising/coordinator.md) is explicitly not five-advisor consensus. Do not retry agents or buy credits to evade the limit.
+Previously, one independent [business review](reviews/2026-09-06-advertising/business.md) completed for the creative service. Four other advisor runs stopped at the account usage limit. Both the earlier [synthesis](reviews/2026-09-06-advertising/coordinator.md) and the current reset are coordinator work, not five-advisor consensus. Do not retry agents or buy credits to evade the limit.
 
-## Completed handoff and next action
+## Preserved sample and next action
 
 One fictional sample is complete: two generated illustrative photos, three concepts, six PNGs at 1080 x 1080 and 1080 x 1920, three captions, a blank customer brief, an unsent sales-message draft, source/provenance files and a three-page proof. All six exports carry a fictional-demo/generated-visual notice. Rendered layouts, dimensions and the ZIP were checked. Owner artifacts are named **Detailer-Promo-Pack.pdf** and **Detailer-Promo-Pack.zip**; see the [venture record](../ventures/detailer-promo-pack/README.md).
 
-**Next: one permitted placement or opt-in buyer conversation using the completed sample.** No sender/channel, permitted audience, qualified exposure, functioning checkout or buyer has been verified. The sales-message draft is included. Developer rules require explicit authorization before messaging others; the general build mandate does not supply an exact external-send instruction. Resolve the real placement and sender, without rebuilding the sample.
+**Next: the capped publisher-game feasibility test in the reset review.** Verify an original generator/solver, host-page isolation and operation without paid runtime services before building a storefront or additional games. WordPress.org is a documented free distribution option, but no publisher account, submitted plugin, accepted listing, audience or buyer exists. It requires manual review and compliant licensing; free hosting does not guarantee acquisition. Messages to others still require explicit authorization under developer rules.
 
-The proposed test seeks two unrelated $49 paid orders accepted within scope with positive measured contribution. Re-scope if both exceed 90 minutes all-in or need campaign management. Reject only after 20 verified qualified exposures produce zero orders during 14 days with a functioning checkout. That clock has not started. Missing audience is not failed demand.
+The detailer buyer test is unstarted and now paused. The proposed publisher test needs three unrelated evaluations and at least one paid delivery before expansion; price and a limited support scope still need selection. Its clock also has not started. No missing audience or inaccessible checkout is counted as failed demand.
 
 ## Observed actuals
 
@@ -23,7 +23,8 @@ The proposed test seeks two unrelated $49 paid orders accepted within scope with
 | Verified customers / sales / collected revenue | 0 / 0 / $0 |
 | Initiated external cash spending | $0 |
 | Economic profit | Unestablished; total time/resource costs not fully measured |
-| Creative sample | Six PNGs and three-page proof completed; fictional portfolio demonstration |
+| Creative sample | Six PNGs and three-page proof preserved; experiment paused |
+| Publisher product | Research and bounded next test only; no code or launch |
 | Qualified exposures / accepted orders | Unknown / 0 |
 | Live checkout / paid launch / outreach | None / none / 0 |
 | OANDA API reads / orders / returns | 0 / 0 / no result |
