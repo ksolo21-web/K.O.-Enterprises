@@ -1,4 +1,4 @@
-name: OANDA Wave 4 sealed JPY momentum preholdout
+name: OANDA Wave 4 sealed JPY momentum evaluation
 
 on:
   push:
@@ -10,16 +10,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: oanda-wave4-preholdout
+  group: oanda-wave4-evaluation
   cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
-  preholdout:
+  evaluate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -31,8 +31,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run Wave 4 safety tests
-        run: python -m unittest tests.test_oanda_wave4_jpy_data -v
+      - name: Run all Wave 4 safety tests
+        run: python -m unittest discover -s tests -p "test_oanda_wave4*.py" -v
 
       - name: Resolve the authorized Practice account
         env:
@@ -59,11 +59,19 @@ jobs:
           --input state/oanda-wave4-full.json
           --output state/oanda-wave4-preholdout.json
 
-      - name: Upload sanitized preholdout data only
+      - name: Open sealed holdout only after all fixed preholdout gates pass
+        run: >-
+          python -m experiments.oanda_demo.wave4_evaluate
+          --input state/oanda-wave4-full.json
+          --output state/oanda-wave4-results.json
+
+      - name: Upload sanitized research outputs only
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: oanda-wave4-preholdout-${{ github.run_id }}
-          path: state/oanda-wave4-preholdout.json
+          name: oanda-wave4-evaluation-${{ github.run_id }}
+          path: |
+            state/oanda-wave4-preholdout.json
+            state/oanda-wave4-results.json
           if-no-files-found: error
           retention-days: 1
           compression-level: 9
@@ -74,3 +82,4 @@ jobs:
           rm -f state/oanda-wave4-account-id.txt
           state/oanda-wave4-full.json
           state/oanda-wave4-preholdout.json
+          state/oanda-wave4-results.json
