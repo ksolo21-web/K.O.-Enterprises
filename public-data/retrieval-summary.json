@@ -1,0 +1,53 @@
+[
+  {
+    "name": "county-roads",
+    "url": "https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0",
+    "bounds": [
+      -83.225,
+      42.64,
+      -83.075,
+      42.77
+    ],
+    "retrieved_utc": "2026-09-07T22:07:10.939016+00:00",
+    "complete": true,
+    "expected_count": 5657,
+    "actual_count": 5657
+  },
+  {
+    "name": "county-parcels",
+    "url": "https://gisservices.oakgov.com/arcgis2/rest/services/Applications/PivotPointAppMapService/FeatureServer/1",
+    "bounds": [
+      -83.225,
+      42.64,
+      -83.075,
+      42.77
+    ],
+    "retrieved_utc": "2026-09-07T22:07:10.939862+00:00",
+    "complete": true,
+    "expected_count": 33777,
+    "actual_count": 33777
+  },
+  {
+    "name": "rochester-street-map-2022.pdf",
+    "url": "https://rochestermi.org/DocumentCenter/View/4254",
+    "success": true
+  },
+  {
+    "name": "rochester-precinct-map-2024.pdf",
+    "url": "https://rochestermi.org/DocumentCenter/View/5482/Voter-Precinct-1",
+    "success": true
+  },
+  {
+    "name": "rochester-hills-map-index.html",
+    "url": "https://atlas.rochesterhills.org/IndexMapsofInterest/",
+    "success": true
+  },
+  {
+    "name": "osm",
+    "url": "https://overpass-api.de/api/interpreter",
+    "query": "[out:json][timeout:100];(way[highway](42.64,-83.225,42.77,-83.075);nwr[landuse](42.64,-83.225,42.77,-83.075);nwr[building](42.64,-83.225,42.77,-83.075););out body geom;",
+    "complete": true,
+    "count": 32788,
+    "remark": null
+  }
+]
