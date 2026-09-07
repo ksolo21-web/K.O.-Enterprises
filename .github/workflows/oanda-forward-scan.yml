@@ -51,12 +51,16 @@ jobs:
           export OANDA_DEMO_ACCOUNT_ID
           python -m experiments.oanda_demo.forward_lab scan \
             --output state/oanda-forward-plan.json
+          python -m experiments.oanda_demo.forward_snapshot \
+            --output state/oanda-forward-snapshot.json
 
-      - name: Upload sanitized current plan
+      - name: Upload sanitized current plan and snapshot
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: oanda-forward-plan-${{ github.run_id }}
-          path: state/oanda-forward-plan.json
+          path: |
+            state/oanda-forward-plan.json
+            state/oanda-forward-snapshot.json
           if-no-files-found: error
           retention-days: 1
           compression-level: 9
@@ -66,3 +70,4 @@ jobs:
         run: >-
           rm -f state/oanda-forward-account-id.txt
           state/oanda-forward-plan.json
+          state/oanda-forward-snapshot.json
