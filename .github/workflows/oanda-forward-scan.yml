@@ -31,11 +31,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run forward-lab and microprobe safety tests
+      - name: Run forward-lab, microprobe, and audit safety tests
         run: >-
           python -m unittest
           tests.test_oanda_forward_lab
           tests.test_oanda_forward_probe
+          tests.test_oanda_account_audit
           -v
 
       - name: Resolve the authorized Practice account
@@ -45,6 +46,16 @@ jobs:
         run: >-
           python -m experiments.oanda_demo.token_probe
           --output state/oanda-forward-account-id.txt
+
+      - name: Audit current Practice trades and pending orders
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+        run: |
+          OANDA_DEMO_ACCOUNT_ID="$(tr -d '\r\n' < state/oanda-forward-account-id.txt)"
+          test -n "$OANDA_DEMO_ACCOUNT_ID"
+          export OANDA_DEMO_ACCOUNT_ID
+          python -m experiments.oanda_demo.account_audit \
+            --output state/oanda-practice-account-audit.json
 
       - name: Scan regular selector, microprobe, and current candles
         env:
@@ -60,11 +71,12 @@ jobs:
           python -m experiments.oanda_demo.forward_snapshot \
             --output state/oanda-forward-snapshot.json
 
-      - name: Upload sanitized current plans and snapshot
+      - name: Upload sanitized current audit, plans, and snapshot
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: oanda-forward-plan-${{ github.run_id }}
           path: |
+            state/oanda-practice-account-audit.json
             state/oanda-forward-plan.json
             state/oanda-forward-probe-plan.json
             state/oanda-forward-snapshot.json
@@ -76,6 +88,7 @@ jobs:
         if: always()
         run: >-
           rm -f state/oanda-forward-account-id.txt
+          state/oanda-practice-account-audit.json
           state/oanda-forward-plan.json
           state/oanda-forward-probe-plan.json
           state/oanda-forward-snapshot.json
