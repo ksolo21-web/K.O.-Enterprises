@@ -1,0 +1,98 @@
+name: OANDA fresh strategy tournament (practice only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oanda-fresh-tournament
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  tournament:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Run OANDA research safety tests
+        run: python -m unittest discover -s tests -p "test_oanda_*.py" -v
+
+      - name: Resolve the authorized Practice account
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_demo_account_ID }}
+        run: >-
+          python -m experiments.oanda_demo.token_probe
+          --output state/oanda-resolved-account-id.txt
+
+      - name: Fetch four-pair Practice market data
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+        run: |
+          OANDA_DEMO_ACCOUNT_ID="$(tr -d '\r\n' < state/oanda-resolved-account-id.txt)"
+          test -n "$OANDA_DEMO_ACCOUNT_ID"
+          export OANDA_DEMO_ACCOUNT_ID
+          python -m experiments.oanda_demo.tournament fetch \
+            --count 5000 \
+            --output state/oanda-tournament-data.json
+
+      - name: Export sanitized development and validation data only
+        run: >-
+          python -m experiments.oanda_demo.preholdout_export
+          --input state/oanda-tournament-data.json
+          --output state/oanda-preholdout-market.json
+
+      - name: Diagnose development and validation failures without inspecting holdout
+        run: >-
+          python -m experiments.oanda_demo.tournament_diagnostics
+          --input state/oanda-tournament-data.json
+          --output state/oanda-tournament-diagnostics.json
+
+      - name: Run broad Wave 1 gates
+        run: >-
+          python -m experiments.oanda_demo.tournament evaluate
+          --input state/oanda-tournament-data.json
+          --output state/oanda-tournament-results.json
+
+      - name: Run predeclared sealed Wave 2 gate
+        run: >-
+          python -m experiments.oanda_demo.wave2
+          --input state/oanda-tournament-data.json
+          --output state/oanda-wave2-results.json
+
+      - name: Upload sanitized research outputs only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oanda-fresh-tournament-${{ github.run_id }}
+          path: |
+            state/oanda-preholdout-market.json
+            state/oanda-tournament-diagnostics.json
+            state/oanda-tournament-results.json
+            state/oanda-wave2-results.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+
+      - name: Remove ephemeral broker-derived state
+        if: always()
+        run: >-
+          rm -f state/oanda-resolved-account-id.txt
+          state/oanda-tournament-data.json
+          state/oanda-preholdout-market.json
+          state/oanda-tournament-diagnostics.json
+          state/oanda-tournament-results.json
+          state/oanda-wave2-results.json
