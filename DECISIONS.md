@@ -104,3 +104,8 @@ Kaleb now reports the OANDA demo keys are present. The local environment-name ch
 ## 2026-09-07 — Map the owner's existing OANDA secret names
 
 Kaleb confirmed `OANDA_demo_API_token` is the practice token and `OANDA_demo_account_ID` is the account ID, and explicitly directed that neither name change. Correct the workflow secret references while keeping internal process variable names stable. This authorized connection repair requires no secret-value access or broker-code change. Run 34079246692 and two retries failed before broker access; the token input remained empty while the account ID became present. A new manual run on main after merge is needed to execute the repaired revision. Do not repeat the old revision, claim a successful connection or change workflow triggers to work around the missing dispatch tool. Existing practice-only, read-only and zero-spend boundaries remain.
+
+
+## 2026-09-07 — Correct overly fixed account-ID validation
+
+New run 34081410690 received both secrets but stopped before network access at the account-ID validator. Official OANDA AccountID documentation specifies four hyphen-separated components without the fixed widths our code assumed. Remove that unsupported width assumption and trim surrounding whitespace, retaining ASCII numeric groups, a length bound, the fixed practice host and path/query-injection defenses. Add regression coverage for the legitimate inputs and malformed values. Do not claim the hidden account ID is correct or that this explains its exact rejection until a fresh run validates it. Owner secret names remain unchanged. No broker calls, orders or results occurred; a new manual run of the merged revision is required.

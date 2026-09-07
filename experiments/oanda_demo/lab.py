@@ -47,8 +47,11 @@ class PracticeReader:
     def __init__(self, token, account_id):
         if not isinstance(token, str) or not token or any(c.isspace() for c in token):
             raise LabError("Missing or invalid OANDA_DEMO_TOKEN; use secret storage.")
-        if not isinstance(account_id, str) or not re.fullmatch(r"\d{3}-\d{3}-\d{7}-\d{3}", account_id):
-            raise LabError("Missing or invalid v20 OANDA_DEMO_ACCOUNT_ID.")
+        # OANDA documents four hyphen-separated identifier components, without
+        # fixed digit widths. Trim copy/paste whitespace, never alter the ID.
+        account_id = account_id.strip() if isinstance(account_id, str) else ""
+        if not account_id or len(account_id) > 128 or not re.fullmatch(r"[0-9]+(?:-[0-9]+){3}", account_id):
+            raise LabError("Practice account ID must contain four numeric groups separated by hyphens. Check the value of OANDA_demo_account_ID; keep its secret name unchanged.")
         self._token = token
         self._account = account_id
         self._opener = build_opener(NoRedirects())
