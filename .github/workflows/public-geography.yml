@@ -1,20 +1,26 @@
-name: Public map reference supplement
+name: Transfer retained public geographic references
 on:
   push:
     branches: [public-geography-reference-20260907]
-    paths: ['retrieve_public_supplement.py', '.github/workflows/public-geography.yml']
+    paths: ['.github/workflows/public-geography.yml']
 permissions:
   contents: read
 jobs:
-  retrieve:
+  transfer:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - run: python retrieve_public_supplement.py
+      - name: Verify retained reference archive is present
+        run: |
+          test -s public-data/rochester-public-geography.zip
+          sha256sum public-data/rochester-public-geography.zip
+          python -c "import zipfile; z=zipfile.ZipFile('public-data/rochester-public-geography.zip'); assert z.testzip() is None; print(len(z.namelist()), 'verified members')"
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: public-reference-supplement
-          path: public-supplement.zip
-          retention-days: 1
+          name: territory-public-geography-full
+          path: |
+            public-data/rochester-public-geography.zip
+            public-data/manifest.json
+            public-data/retrieval-summary.json
+          retention-days: 2
