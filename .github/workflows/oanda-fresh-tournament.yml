@@ -65,11 +65,17 @@ jobs:
           --input state/oanda-tournament-data.json
           --output state/oanda-tournament-diagnostics.json
 
-      - name: Run development, validation, and untouched holdout gates
+      - name: Run broad Wave 1 gates
         run: >-
           python -m experiments.oanda_demo.tournament evaluate
           --input state/oanda-tournament-data.json
           --output state/oanda-tournament-results.json
+
+      - name: Run predeclared sealed Wave 2 gate
+        run: >-
+          python -m experiments.oanda_demo.wave2
+          --input state/oanda-tournament-data.json
+          --output state/oanda-wave2-results.json
 
       - name: Upload sanitized research outputs only
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -79,6 +85,7 @@ jobs:
             state/oanda-preholdout-market.json
             state/oanda-tournament-diagnostics.json
             state/oanda-tournament-results.json
+            state/oanda-wave2-results.json
           if-no-files-found: error
           retention-days: 1
           compression-level: 9
@@ -91,3 +98,4 @@ jobs:
           state/oanda-preholdout-market.json
           state/oanda-tournament-diagnostics.json
           state/oanda-tournament-results.json
+          state/oanda-wave2-results.json
