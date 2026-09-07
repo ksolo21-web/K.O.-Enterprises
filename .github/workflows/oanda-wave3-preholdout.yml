@@ -1,0 +1,82 @@
+name: OANDA Wave 3 sealed cross-pair evaluation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oanda-wave3-evaluation
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: "3.12"
+
+      - name: Run all Wave 3 safety tests
+        run: python -m unittest discover -s tests -p "test_oanda_wave3*.py" -v
+
+      - name: Resolve the authorized Practice account
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_demo_account_ID }}
+        run: >-
+          python -m experiments.oanda_demo.token_probe
+          --output state/oanda-wave3-account-id.txt
+
+      - name: Fetch ephemeral full H4 cross-pair data
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+        run: |
+          OANDA_DEMO_ACCOUNT_ID="$(tr -d '\r\n' < state/oanda-wave3-account-id.txt)"
+          test -n "$OANDA_DEMO_ACCOUNT_ID"
+          export OANDA_DEMO_ACCOUNT_ID
+          python -m experiments.oanda_demo.wave3_cross_data fetch \
+            --count 5000 \
+            --output state/oanda-wave3-full.json
+
+      - name: Export only the first eighty percent
+        run: >-
+          python -m experiments.oanda_demo.wave3_cross_data export-preholdout
+          --input state/oanda-wave3-full.json
+          --output state/oanda-wave3-preholdout.json
+
+      - name: Open sealed holdout only after the fixed preholdout gate passes
+        run: >-
+          python -m experiments.oanda_demo.wave3_evaluate
+          --input state/oanda-wave3-full.json
+          --output state/oanda-wave3-results.json
+
+      - name: Upload sanitized research outputs only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oanda-wave3-evaluation-${{ github.run_id }}
+          path: |
+            state/oanda-wave3-preholdout.json
+            state/oanda-wave3-results.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+
+      - name: Remove all broker-derived runner state
+        if: always()
+        run: >-
+          rm -f state/oanda-wave3-account-id.txt
+          state/oanda-wave3-full.json
+          state/oanda-wave3-preholdout.json
+          state/oanda-wave3-results.json
