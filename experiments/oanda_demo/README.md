@@ -1,6 +1,6 @@
 # OANDA demo laboratory — key reported, connection unverified
 
-Kaleb offered a demo API with $50 virtual funds and a $500 target, and reported adding a demo API key on 2026-09-06, then confirmed the keys are present on 2026-09-07. This is a separate research experiment, not company revenue. The reported GitHub secrets cannot be independently inspected through the current connector. The 2026-09-07 local environment-name check found no OANDA variables. No market dataset was fetched, no broker orders were sent, and no performance result is claimed.
+Kaleb supplied practice credentials for a separate research experiment, not company revenue. On 2026-09-07, three attempts of run 34079246692 stopped before contacting OANDA: initially both workflow inputs were empty, then the account ID was present but the token remained empty. Kaleb identified the existing repository secret names and directed that they remain unchanged. The workflow now maps those names to the lab's internal environment variables. No broker connection, market dataset, orders or performance result has been verified.
 
 The first stage is deliberately read-only: it checks the USD practice account and obtains up to 5000 completed EUR_USD hourly bid/ask candles. A deterministic historical replay compares fixed 1%, 2% and 5% risk scenarios from separate $50 virtual starting balances. A 70/30 chronological split separates development and holdout periods. Returns, settled balance drawdown, trade count and first attainment of $500 are reported, including non-attainment.
 
@@ -8,11 +8,11 @@ The baseline is a test instrument, not a claimed profitable strategy. It models 
 
 ## Secure connection
 
-No OANDA plugin was found in the connected plugin directory on 2026-09-06. Keep the token out of chats, source code, issue/PR text and logs. Use GitHub Actions repository secrets named `OANDA_DEMO_TOKEN` and `OANDA_DEMO_ACCOUNT_ID`, restricted to a dedicated practice account. A token can be powerful even when our code is read-only; do not use a live-account token.
+No OANDA plugin was found in the connected plugin directory on 2026-09-06. Keep the token out of chats, source code, issue/PR text and logs. Use the existing GitHub Actions repository secrets `OANDA_demo_API_token` (practice API token) and `OANDA_demo_account_ID` (practice account ID), restricted to a dedicated practice account. The workflow maps them to internal process variables `OANDA_DEMO_TOKEN` and `OANDA_DEMO_ACCOUNT_ID`; the owner does not need to rename the stored secrets. A token can be powerful even when our code is read-only; do not use a live-account token.
 
 The supplied workflow is manual-only and bounded. It becomes runnable from GitHub's Actions interface once merged to the default branch. Adding secrets alone does not launch anything. Review the code before running it. It has no recurring schedule, no artifact upload and no broker-write capability. It uses standard public-repository runners, not larger paid runners. No billing or paid plan is enabled.
 
-The workflow is now on `main`. After both secret names above are configured, open [OANDA practice research (read only)](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml), choose **Run workflow**, select `main`, and run once. The connected GitHub tools expose result reads but no dispatch action. The 2026-09-07 repository run listing showed 20 CI runs and no OANDA run at inspection. This is a missing dispatch capability, not an approval rejection or evidence that the reported GitHub secrets are absent. Do not put the token or account ID into chat or public logs; the workflow passes them privately from secrets to the bounded process.
+After this fix is merged to `main`, open [OANDA practice research (read only)](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml), choose **Run workflow**, select `main`, and start a new run. Re-running the old failed run reuses its old revision and cannot test the corrected secret mapping. The connected tools can re-run existing failed jobs and inspect results, but do not expose a new-run dispatch. Keep credentials out of chat and public logs.
 
 ```sh
 python -m experiments.oanda_demo.lab fetch

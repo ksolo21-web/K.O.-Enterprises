@@ -43,11 +43,13 @@ Kaleb reported saving two Stripe keys and later an OANDA demo key. Secret names/
 
 The ordinary US domestic-card illustration for $49 is a $1.72 processing fee and $47.28 before other deductions, labor and taxes. That is arithmetic, not receipts or profit. Retained processing costs after refunds and possible bank recovery matter to the zero-spend constraint. Actual seller/account setup, service tax treatment and customer terms remain unresolved; the earlier software tax review does not classify this creative service. No commerce was activated.
 
-## OANDA: key reported; connection unverified
+## OANDA: owner secret names mapped; fresh run required
 
-On 2026-09-07 the owner again reported that the demo keys are present. Their GitHub secret presence is not independently verifiable through this connector. A local environment-name check found no OANDA variables. The existing [manual practice workflow](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml) expects **OANDA_DEMO_TOKEN** and **OANDA_DEMO_ACCOUNT_ID**. The 2026-09-07 repository run listing showed 20 runs, all CI, and no OANDA run at the time of inspection. Current GitHub tools can read run results but expose no dispatch action. No alternate credential route or automatic trigger was introduced.
+On 2026-09-07 Kaleb confirmed the GitHub Actions repository secrets are named **OANDA_demo_API_token** and **OANDA_demo_account_ID**, and explicitly directed that these names remain unchanged. The workflow now maps those existing names into the lab's internal `OANDA_DEMO_TOKEN` and `OANDA_DEMO_ACCOUNT_ID` variables. No secret value was read, printed or committed.
 
-With both expected secrets configured, the remaining owner step is to choose **Run workflow** on **main**. Inspect that run's sanitized results before claiming a successful connection or performance. The lab is restricted to practice-host GET requests and historical simulations; broker orders are not implemented. Demo gains never count as business revenue. See the [lab README](../../experiments/oanda_demo/README.md).
+Run [34079246692](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/34079246692) and two retries failed before broker access. The initial attempt received both variables empty; later attempts received a masked account ID and an empty token. These failures reflect the old workflow mapping, not an OANDA authentication rejection.
+
+After merge, start a **new Run workflow on main** from the [practice workflow page](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml). Re-running the old run uses its original revision. Current tools can retry failed jobs and read results but cannot dispatch a new run. No alternate trigger was introduced. Practice-host GET reads and historical simulations remain the only implemented broker operations; no connection, orders or returns have been verified. See the [lab README](../../experiments/oanda_demo/README.md).
 
 ## Resume without rebuilding
 
