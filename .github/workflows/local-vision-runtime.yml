@@ -1,0 +1,67 @@
+name: Prepare local-only vision review runtime
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: ['.github/workflows/local-vision-runtime.yml']
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 18
+    steps:
+      - name: Build CPU vision runtime from public upstream
+        run: |
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp.git /tmp/llama.cpp
+          cd /tmp/llama.cpp
+          git rev-parse HEAD > /tmp/runtime-commit.txt
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DGGML_FMA=ON -DGGML_F16C=ON -DLLAMA_CURL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=ON -DLLAMA_BUILD_SERVER=ON -DLLAMA_OPENSSL=OFF
+          cmake --build build --target llama-server llama-mtmd-cli -j 4
+          mkdir -p /tmp/transfer/runtime
+          cp -a build/bin/. /tmp/transfer/runtime/
+          cp /tmp/runtime-commit.txt /tmp/transfer/runtime/
+          cp LICENSE /tmp/transfer/runtime/llama-LICENSE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-vision-runtime
+          path: /tmp/transfer/runtime/
+          retention-days: 1
+  public_weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Download official public weights and split for local transfer
+        run: |
+          python - <<'PY'
+          import pathlib,urllib.request,json,hashlib,concurrent.futures
+          root=pathlib.Path('/tmp/weights');root.mkdir()
+          repo='Qwen/Qwen3-VL-4B-Instruct-GGUF'
+          files=['Qwen3VL-4B-Instruct-Q4_K_M.gguf','mmproj-Qwen3VL-4B-Instruct-Q8_0.gguf']
+          manifest={'model_repository':repo,'private_user_content_submitted':False,'purpose':'Run a separate vision model entirely in the local working container; no user files are transmitted to a model service.','files':[]}
+          def fetch(name):
+              url='https://huggingface.co/'+repo+'/resolve/main/'+name+'?download=true'
+              p=root/name
+              with urllib.request.urlopen(url,timeout=90) as r,p.open('wb') as f:
+                  while True:
+                      b=r.read(8*1024*1024)
+                      if not b:break
+                      f.write(b)
+              h=hashlib.sha256();parts=[]
+              with p.open('rb') as f:
+                  n=0
+                  while True:
+                      b=f.read(440000000)
+                      if not b:break
+                      h.update(b);n+=1
+                      part=root/(name+'.part%02d'%n);part.write_bytes(b)
+                      parts.append({'name':part.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+              d={'name':name,'url':url,'bytes':p.stat().st_size,'sha256':h.hexdigest(),'parts':parts};p.unlink();return d
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:manifest['files']=list(ex.map(fetch,files))
+          (root/'manifest.json').write_text(json.dumps(manifest,indent=2));print(json.dumps(manifest,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-vision-public-weights
+          path: /tmp/weights/
+          compression-level: 0
+          retention-days: 1
