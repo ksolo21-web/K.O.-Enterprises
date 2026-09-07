@@ -14,9 +14,45 @@ import math
 from pathlib import Path
 import sys
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request
 
 from .forward_lab import ForwardPracticeClient
-from .lab import LabError
+from .lab import LabError, MAX_RESPONSE, PRACTICE_ORIGIN
+
+
+class PracticeAuditClient(ForwardPracticeClient):
+    """Forward client plus one fixed read-only pending-order endpoint."""
+
+    def pending_orders(self) -> list[dict[str, Any]]:
+        url = f"{PRACTICE_ORIGIN}/v3/accounts/{self._account}/pendingOrders"
+        request = Request(
+            url,
+            headers={
+                "Authorization": "Bearer " + self._token,
+                "Accept": "application/json",
+            },
+            method="GET",
+        )
+        try:
+            with self._opener.open(request, timeout=25) as response:
+                raw = response.read(MAX_RESPONSE + 1)
+                if len(raw) > MAX_RESPONSE:
+                    raise LabError("OANDA Practice pending-order response exceeded the size limit.")
+        except HTTPError as error:
+            raise LabError(
+                f"OANDA Practice pending-order audit returned HTTP {error.code}."
+            ) from None
+        except (URLError, TimeoutError):
+            raise LabError("OANDA Practice pending-order audit failed.") from None
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            raise LabError("OANDA Practice returned invalid pending-order JSON.") from None
+        rows = payload.get("orders") if isinstance(payload, dict) else None
+        if not isinstance(rows, list):
+            raise LabError("Invalid OANDA Practice pending-order response.")
+        return [row for row in rows if isinstance(row, dict)]
 
 
 def _number(value: object, name: str) -> float:
@@ -76,7 +112,11 @@ def _trade_row(trade: object) -> dict[str, Any]:
         "entry_price": entry_price,
         "open_time": opened.astimezone(timezone.utc).isoformat(),
         "age_hours": round(
-            max(0.0, (datetime.now(timezone.utc) - opened.astimezone(timezone.utc)).total_seconds() / 3600),
+            max(
+                0.0,
+                (datetime.now(timezone.utc) - opened.astimezone(timezone.utc)).total_seconds()
+                / 3600,
+            ),
             4,
         ),
         "unrealized_virtual_pl_usd": round(unrealized, 5),
@@ -102,14 +142,22 @@ def _pending_row(order: object) -> dict[str, Any]:
         "order_reference": _digest(order.get("id", "missing")),
         "type": order_type,
         "instrument": instrument or None,
-        "absolute_units": abs(_number(units, "pending-order units")) if units is not None else None,
+        "absolute_units": (
+            abs(_number(units, "pending-order units")) if units is not None else None
+        ),
         "price": str(price) if price is not None else None,
-        "time_in_force": str(order.get("timeInForce")) if order.get("timeInForce") is not None else None,
-        "dependent_trade_reference": _digest(order["tradeID"]) if order.get("tradeID") is not None else None,
+        "time_in_force": (
+            str(order.get("timeInForce"))
+            if order.get("timeInForce") is not None
+            else None
+        ),
+        "dependent_trade_reference": (
+            _digest(order["tradeID"]) if order.get("tradeID") is not None else None
+        ),
     }
 
 
-def build_audit(client: ForwardPracticeClient) -> dict[str, Any]:
+def build_audit(client: PracticeAuditClient) -> dict[str, Any]:
     summary = client.summary()
     trades = client.open_trades()
     pending = client.pending_orders()
@@ -127,7 +175,9 @@ def build_audit(client: ForwardPracticeClient) -> dict[str, Any]:
         "observed_pending_order_count": len(pending_rows),
         "open_trades": trade_rows,
         "pending_orders": pending_rows,
-        "unprotected_open_trade_count": sum(not row["fully_protected"] for row in trade_rows),
+        "unprotected_open_trade_count": sum(
+            not row["fully_protected"] for row in trade_rows
+        ),
         "aggregate_unrealized_virtual_pl_usd": round(
             sum(row["unrealized_virtual_pl_usd"] for row in trade_rows), 5
         ),
@@ -136,14 +186,18 @@ def build_audit(client: ForwardPracticeClient) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Audit current OANDA Practice positions without mutation.")
+    parser = argparse.ArgumentParser(
+        description="Audit current OANDA Practice positions without mutation."
+    )
     parser.add_argument("--output", default="state/oanda-practice-account-audit.json")
     args = parser.parse_args(argv)
     try:
-        report = build_audit(ForwardPracticeClient.from_environment())
+        report = build_audit(PracticeAuditClient.from_environment())
         target = Path(args.output)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        target.write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         print(
             "OANDA Practice audit: "
             f"open={report['observed_open_trade_count']}, "
@@ -153,7 +207,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     except (LabError, OSError, json.JSONDecodeError) as error:
-        print(str(error) if isinstance(error, LabError) else "Practice account audit failed.", file=sys.stderr)
+        print(
+            str(error)
+            if isinstance(error, LabError)
+            else "Practice account audit failed.",
+            file=sys.stderr,
+        )
         return 2
 
 
