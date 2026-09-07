@@ -32,7 +32,7 @@ jobs:
           python-version: "3.12"
 
       - name: Run fresh tournament tests
-        run: python -m unittest tests.test_oanda_tournament -v
+        run: python -m unittest discover -s tests -p "test_oanda_tournament*.py" -v
 
       - name: Resolve the authorized Practice account
         env:
@@ -53,17 +53,25 @@ jobs:
             --count 5000 \
             --output state/oanda-tournament-data.json
 
+      - name: Diagnose development and validation failures without inspecting holdout
+        run: >-
+          python -m experiments.oanda_demo.tournament_diagnostics
+          --input state/oanda-tournament-data.json
+          --output state/oanda-tournament-diagnostics.json
+
       - name: Run development, validation, and untouched holdout gates
         run: >-
           python -m experiments.oanda_demo.tournament evaluate
           --input state/oanda-tournament-data.json
           --output state/oanda-tournament-results.json
 
-      - name: Upload sanitized tournament results only
+      - name: Upload sanitized tournament reports only
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: oanda-fresh-tournament-${{ github.run_id }}
-          path: state/oanda-tournament-results.json
+          path: |
+            state/oanda-tournament-diagnostics.json
+            state/oanda-tournament-results.json
           if-no-files-found: error
           retention-days: 3
           compression-level: 9
@@ -73,4 +81,5 @@ jobs:
         run: >-
           rm -f state/oanda-resolved-account-id.txt
           state/oanda-tournament-data.json
+          state/oanda-tournament-diagnostics.json
           state/oanda-tournament-results.json
