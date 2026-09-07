@@ -31,8 +31,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run forward-lab safety tests
-        run: python -m unittest tests.test_oanda_forward_lab -v
+      - name: Run forward-lab and microprobe safety tests
+        run: >-
+          python -m unittest
+          tests.test_oanda_forward_lab
+          tests.test_oanda_forward_probe
+          -v
 
       - name: Resolve the authorized Practice account
         env:
@@ -42,7 +46,7 @@ jobs:
           python -m experiments.oanda_demo.token_probe
           --output state/oanda-forward-account-id.txt
 
-      - name: Scan current completed candles and executable price
+      - name: Scan regular selector, microprobe, and current candles
         env:
           OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
         run: |
@@ -51,15 +55,18 @@ jobs:
           export OANDA_DEMO_ACCOUNT_ID
           python -m experiments.oanda_demo.forward_lab scan \
             --output state/oanda-forward-plan.json
+          python -m experiments.oanda_demo.forward_probe scan \
+            --output state/oanda-forward-probe-plan.json
           python -m experiments.oanda_demo.forward_snapshot \
             --output state/oanda-forward-snapshot.json
 
-      - name: Upload sanitized current plan and snapshot
+      - name: Upload sanitized current plans and snapshot
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: oanda-forward-plan-${{ github.run_id }}
           path: |
             state/oanda-forward-plan.json
+            state/oanda-forward-probe-plan.json
             state/oanda-forward-snapshot.json
           if-no-files-found: error
           retention-days: 1
@@ -70,4 +77,5 @@ jobs:
         run: >-
           rm -f state/oanda-forward-account-id.txt
           state/oanda-forward-plan.json
+          state/oanda-forward-probe-plan.json
           state/oanda-forward-snapshot.json
