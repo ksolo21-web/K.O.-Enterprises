@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
             "OANDA Practice account authenticated. Captured completed EUR/USD bid-ask candles for local historical simulation. No orders sent."
         )
         return 0
-    except (LabError, OSError, TypeError, KeyError) as error:
+    except (LabError, OSError, TypeError, KeyError, ValueError) as error:
         print(
             str(error) if isinstance(error, LabError) else "Read-only practice fetch failed safely.",
             file=sys.stderr,
