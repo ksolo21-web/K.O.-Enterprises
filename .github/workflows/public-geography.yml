@@ -1,0 +1,22 @@
+name: Public geography reference snapshot
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: ['retrieve_public_geography.py', '.github/workflows/public-geography.yml']
+permissions:
+  contents: write
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: python retrieve_public_geography.py
+      - name: Retain only public-source reference data on isolated branch
+        if: always()
+        run: |
+          git config user.name 'Public geography snapshot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public-data
+          git diff --cached --quiet || git commit -m 'Retain dated public government and OSM reference data'
+          git push origin HEAD:public-geography-reference-20260907
