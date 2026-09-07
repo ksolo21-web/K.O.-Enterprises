@@ -5,6 +5,16 @@ from experiments.oanda_demo.tournament import INSTRUMENTS
 from tests.test_oanda_tournament import payload
 
 
+def all_keys(value):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            yield key
+            yield from all_keys(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from all_keys(child)
+
+
 class OandaPreholdoutExportTests(TestCase):
     def test_export_contains_only_first_eighty_percent_and_no_account_data(self):
         bundle = {
@@ -25,9 +35,10 @@ class OandaPreholdoutExportTests(TestCase):
         self.assertEqual(exported["status"], "pre_holdout_market_data")
         self.assertFalse(exported["holdout_exported"])
         self.assertNotIn("summary", exported)
-        serialized = str(exported)
-        self.assertNotIn("12345", serialized)
-        self.assertNotIn("101-001-1234567-001", serialized)
+        self.assertTrue(
+            {"summary", "balance", "nav", "account_id"}.isdisjoint(all_keys(exported))
+        )
+        self.assertNotIn("101-001-1234567-001", str(exported))
         for instrument in INSTRUMENTS:
             original = bundle["candles"][instrument]["candles"]
             selected = exported["candles"][instrument]["candles"]
