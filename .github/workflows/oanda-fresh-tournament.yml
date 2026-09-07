@@ -31,8 +31,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run fresh tournament tests
-        run: python -m unittest discover -s tests -p "test_oanda_tournament*.py" -v
+      - name: Run OANDA research safety tests
+        run: python -m unittest discover -s tests -p "test_oanda_*.py" -v
 
       - name: Resolve the authorized Practice account
         env:
@@ -53,6 +53,12 @@ jobs:
             --count 5000 \
             --output state/oanda-tournament-data.json
 
+      - name: Export sanitized development and validation data only
+        run: >-
+          python -m experiments.oanda_demo.preholdout_export
+          --input state/oanda-tournament-data.json
+          --output state/oanda-preholdout-market.json
+
       - name: Diagnose development and validation failures without inspecting holdout
         run: >-
           python -m experiments.oanda_demo.tournament_diagnostics
@@ -65,15 +71,16 @@ jobs:
           --input state/oanda-tournament-data.json
           --output state/oanda-tournament-results.json
 
-      - name: Upload sanitized tournament reports only
+      - name: Upload sanitized research outputs only
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: oanda-fresh-tournament-${{ github.run_id }}
           path: |
+            state/oanda-preholdout-market.json
             state/oanda-tournament-diagnostics.json
             state/oanda-tournament-results.json
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1
           compression-level: 9
 
       - name: Remove ephemeral broker-derived state
@@ -81,5 +88,6 @@ jobs:
         run: >-
           rm -f state/oanda-resolved-account-id.txt
           state/oanda-tournament-data.json
+          state/oanda-preholdout-market.json
           state/oanda-tournament-diagnostics.json
           state/oanda-tournament-results.json
