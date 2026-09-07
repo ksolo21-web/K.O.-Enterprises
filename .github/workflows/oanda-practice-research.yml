@@ -25,8 +25,8 @@ jobs:
           python-version: '3.12'
       - name: Read practice account and hourly bid-ask candles
         env:
-          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_DEMO_TOKEN }}
-          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_DEMO_ACCOUNT_ID }}
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_demo_account_ID }}
         run: python -m experiments.oanda_demo.lab fetch
       - name: Run fixed virtual-$50 holdout simulations
         run: python -m experiments.oanda_demo.lab replay --input state/oanda-demo-candles.json
