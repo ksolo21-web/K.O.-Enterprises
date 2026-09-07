@@ -1,9 +1,6 @@
 name: OANDA Wave 3 sealed cross-pair evaluation
 
 on:
-  push:
-    branches:
-      - feature/oanda-wave3-cross-pairs
   workflow_dispatch:
 
 permissions:
