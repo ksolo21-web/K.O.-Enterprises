@@ -1,9 +1,6 @@
 name: OANDA Wave 4 sealed JPY momentum evaluation
 
 on:
-  push:
-    branches:
-      - feature/oanda-wave4-jpy-momentum
   workflow_dispatch:
 
 permissions:
