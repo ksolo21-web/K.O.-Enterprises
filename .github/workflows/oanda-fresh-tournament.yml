@@ -1,9 +1,6 @@
 name: OANDA fresh strategy tournament (practice only)
 
 on:
-  push:
-    branches:
-      - feature/oanda-fresh-strategy-tournament
   workflow_dispatch:
 
 permissions:
