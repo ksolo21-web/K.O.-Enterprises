@@ -1,10 +1,10 @@
 # Current business checkpoint
 
-Updated 2026-09-06 after Kaleb requested an Idea Panel for high demand, low competition, limited supply, substantial upside and profitability. This is the continuation entry point. Review base: 9f0f7e79fd8e13a3f12c9690a7cd147b11a295cf; use the latest default branch for later checkpoints.
+Updated 2026-09-07 after continued opportunity research and Kaleb renewed the report that OANDA demo keys are present. This is the continuation entry point. Review base: 34f030108921c1ce587373580e96cd2e8081e839; use the latest default branch for later checkpoints.
 
 ## Active decision
 
-**No candidate currently passes the requested opportunity screen. Hold the publisher puzzle build.** The [Idea Panel screen](reviews/2026-09-06-idea-panel.md) supersedes the prior feasibility-first choice. Publisher use and supplier prices do not establish high demand for our game; free substitutes weaken the generic offer. Generic procurement alerts remain on hold. A fresh Stocky purchasing-history archive lead was investigated and closed after a free replacement and merchant-reported history imports weakened the supposed supply gap. Keep the Detailer Promo Pack paused and preserve ImportScope. No new product or price is selected.
+**No candidate currently passes the requested opportunity screen. Hold the publisher puzzle build.** The [Idea Panel screen](reviews/2026-09-06-idea-panel.md) supersedes the prior feasibility-first choice. Publisher use and supplier prices do not establish high demand for our game; free substitutes weaken the generic offer. Generic procurement alerts remain on hold. A fresh Stocky purchasing-history archive lead was investigated and closed after a free replacement and merchant-reported history imports weakened the supposed supply gap. Keep the Detailer Promo Pack paused and preserve ImportScope. No new product or price is selected. The [second screen](reviews/2026-09-07-payment-workflow-screen.md) covered supplier reconciliation, construction billing and detention evidence. It found one specific glazing-shop buyer request (CON-001), but existing alternatives and missing economic intent leave no qualified build. Retain that problem record for discovery.
 
 The installed **ko-idea-panel** adds five reviewer roles for demand, competition/supply, distribution, profit/scale and adversarial review. It complements the five existing operating advisors. Its six evidence gates keep unknowns visible and allow no qualifying winner. Use `@ko-idea-panel` in a chat that can load saved skills, then resume from this checkpoint.
 
@@ -14,7 +14,7 @@ Previously, one independent [business review](reviews/2026-09-06-advertising/bus
 
 One fictional sample is complete: two generated illustrative photos, three concepts, six PNGs at 1080 x 1080 and 1080 x 1920, three captions, a blank customer brief, an unsent sales-message draft, source/provenance files and a three-page proof. All six exports carry a fictional-demo/generated-visual notice. Rendered layouts, dimensions and the ZIP were checked. Owner artifacts are named **Detailer-Promo-Pack.pdf** and **Detailer-Promo-Pack.zip**; see the [venture record](../ventures/detailer-promo-pack/README.md).
 
-**Next: buyer evidence for a distinct costly recurring workflow, before product implementation.** The first panel screen and Stocky follow-through are complete. Seek independent current buyer problems plus a credible economic signal, compare free/native/paid workarounds, and establish a plausible free route to qualified buyers. Apply the bounded screening and stop conditions in the report. Do not reopen a rejected generic idea without new evidence or invent a smaller segment to make competition disappear. No audience or buyer is verified. Messages to others still require explicit authorization under developer rules.
+**Next: buyer evidence for a distinct costly recurring workflow, before product implementation.** Both bounded three-candidate screens and the Stocky follow-through are complete. Start the next packet from a current unmet purchase/work request with a budget or evidence of existing spend. Seek independent current buyer problems plus a credible economic signal, compare free/native/paid workarounds, and establish a plausible free route to qualified buyers. Apply the bounded screening and stop conditions in the report. Do not reopen a rejected generic idea without new evidence or invent a smaller segment to make competition disappear. No audience or buyer is verified. Messages to others still require explicit authorization under developer rules.
 
 The detailer and publisher buyer tests remain unstarted and paused. No missing audience or inaccessible checkout is counted as failed demand. Reopening either requires evidence that addresses its failed screen before any previously proposed build or test resumes.
 
@@ -27,7 +27,7 @@ The detailer and publisher buyer tests remain unstarted and paused. No missing a
 | Economic profit | Unestablished; total time/resource costs not fully measured |
 | Creative sample | Six PNGs and three-page proof preserved; experiment paused |
 | Publisher product | Build held after demand screen; no code or launch |
-| Idea Panel | Saved; three-candidate coordinator screen complete; no qualified winner |
+| Idea Panel | Saved; two three-candidate coordinator screens complete; no qualified winner |
 | Qualified exposures / accepted orders | Unknown / 0 |
 | Live checkout / paid launch / outreach | None / none / 0 |
 | OANDA API reads / orders / returns | 0 / 0 / no result |
@@ -45,9 +45,9 @@ The ordinary US domestic-card illustration for $49 is a $1.72 processing fee and
 
 ## OANDA: key reported; connection unverified
 
-The owner reports adding a demo API key. No OANDA variables are present locally. The existing [manual practice workflow](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml) expects **OANDA_DEMO_TOKEN** and **OANDA_DEMO_ACCOUNT_ID**. The repository run listing showed 14 runs, all CI, and no OANDA run. Current GitHub tools can read run results but expose no dispatch action. No alternate credential route or automatic trigger was introduced.
+On 2026-09-07 the owner again reported that the demo keys are present. Their GitHub secret presence is not independently verifiable through this connector. A local environment-name check found no OANDA variables. The existing [manual practice workflow](https://github.com/ksolo21-web/K.O.-Enterprises/actions/workflows/oanda-practice-research.yml) expects **OANDA_DEMO_TOKEN** and **OANDA_DEMO_ACCOUNT_ID**. The 2026-09-07 repository run listing showed 20 runs, all CI, and no OANDA run at the time of inspection. Current GitHub tools can read run results but expose no dispatch action. No alternate credential route or automatic trigger was introduced.
 
-After both secrets are configured, the owner can choose **Run workflow** on **main**. Inspect that run's sanitized results before claiming a successful connection or performance. The lab is restricted to practice-host GET requests and historical simulations; broker orders are not implemented. Demo gains never count as business revenue. See the [lab README](../../experiments/oanda_demo/README.md).
+With both expected secrets configured, the remaining owner step is to choose **Run workflow** on **main**. Inspect that run's sanitized results before claiming a successful connection or performance. The lab is restricted to practice-host GET requests and historical simulations; broker orders are not implemented. Demo gains never count as business revenue. See the [lab README](../../experiments/oanda_demo/README.md).
 
 ## Resume without rebuilding
 
