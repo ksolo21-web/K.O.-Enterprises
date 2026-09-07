@@ -17,7 +17,7 @@ class OandaPreholdoutExportTests(TestCase):
                 "account_id": "101-001-1234567-001",
             },
             "candles": {
-                instrument: payload(instrument, 1200, phase=index)
+                instrument: payload(instrument, 1300, phase=index)
                 for index, instrument in enumerate(INSTRUMENTS)
             },
         }
@@ -31,9 +31,9 @@ class OandaPreholdoutExportTests(TestCase):
         for instrument in INSTRUMENTS:
             original = bundle["candles"][instrument]["candles"]
             selected = exported["candles"][instrument]["candles"]
-            self.assertEqual(len(selected), 960)
-            self.assertEqual(selected[-1]["time"], original[959]["time"])
+            self.assertEqual(len(selected), 1040)
+            self.assertEqual(selected[-1]["time"], original[1039]["time"])
             self.assertEqual(
                 exported["ranges"][instrument]["first_withheld_time"],
-                original[960]["time"],
+                original[1040]["time"],
             )
