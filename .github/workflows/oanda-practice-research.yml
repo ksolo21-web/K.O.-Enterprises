@@ -23,10 +23,26 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.12'
-      - name: Read practice account and hourly bid-ask candles
+      - name: Validate practice token and resolve authorized account
         env:
           OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
           OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_demo_account_ID }}
-        run: python -m experiments.oanda_demo.lab fetch
+        run: >-
+          python -m experiments.oanda_demo.token_probe
+          --output state/oanda-resolved-account-id.txt
+      - name: Read practice account and hourly bid-ask candles
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+        run: |
+          OANDA_DEMO_ACCOUNT_ID="$(tr -d '\r\n' < state/oanda-resolved-account-id.txt)"
+          test -n "$OANDA_DEMO_ACCOUNT_ID"
+          export OANDA_DEMO_ACCOUNT_ID
+          python -m experiments.oanda_demo.lab fetch
       - name: Run fixed virtual-$50 holdout simulations
         run: python -m experiments.oanda_demo.lab replay --input state/oanda-demo-candles.json
+      - name: Remove ephemeral broker-derived state
+        if: always()
+        run: >-
+          rm -f state/oanda-resolved-account-id.txt
+          state/oanda-demo-candles.json
+          state/oanda-demo-replay.json
