@@ -38,6 +38,19 @@ class PracticeSafetyTests(TestCase):
             self.assertEqual(request.get_method(), "GET")
             self.assertEqual(request.full_url, "https://api-fxpractice.oanda.com/v3/accounts/101-001-1234567-001/summary")
 
+    def test_account_id_accepts_variable_widths_and_outer_whitespace_safely(self):
+        reader = PracticeReader("test-token", " \n101-001-12345678-001\t")
+        response = io.BytesIO(json.dumps({"account": {"currency": "USD", "NAV": "50", "balance": "50", "openTradeCount": 0}}).encode())
+        with patch.object(reader._opener, "open", return_value=response) as opened:
+            reader.summary()
+            request = opened.call_args.args[0]
+            self.assertEqual(request.get_method(), "GET")
+            self.assertEqual(request.full_url, "https://api-fxpractice.oanda.com/v3/accounts/101-001-12345678-001/summary")
+        for value in [None, "", "12345678", "101-001-12 345678-001", "101-001-12345678-001?x=1", "101-001-12345678-001/orders", "101-001-12345678-001#fragment", "101-001-%31-001", "101-001-１２３-001", "1-2-3-4-5", "1-2-3-" + "4" * 129]:
+            with self.subTest(value=value), self.assertRaises(LabError) as caught:
+                PracticeReader("test-token", value)
+            self.assertNotIn("test-token", str(caught.exception))
+
     def test_redirect_and_http_error_never_disclose_credentials(self):
         with self.assertRaises(LabError):
             NoRedirects().redirect_request(None, None, 302, "", {}, "https://api-fxtrade.oanda.com")

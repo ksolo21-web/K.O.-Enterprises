@@ -1,6 +1,6 @@
 # OANDA demo laboratory — key reported, connection unverified
 
-Kaleb supplied practice credentials for a separate research experiment, not company revenue. On 2026-09-07, three attempts of run 34079246692 stopped before contacting OANDA: initially both workflow inputs were empty, then the account ID was present but the token remained empty. Kaleb identified the existing repository secret names and directed that they remain unchanged. The workflow now maps those names to the lab's internal environment variables. No broker connection, market dataset, orders or performance result has been verified.
+Both existing owner-named secrets reached run 34081410690 on 2026-09-07. The run stopped locally before any broker request because the account-ID validator required fixed 3-3-7-3 digit widths. The current parser removes surrounding whitespace and accepts four numeric groups without those fixed widths, with a length bound and strict path/query-injection rejection. OANDA's published AccountID definition specifies four hyphen-separated components, not those exact widths. The actual secret remains unread, so the precise cause and successful broker connection are still unverified. Earlier attempts of run 34079246692 used the old secret mapping and received an empty token. No market data, broker orders or performance results exist yet.
 
 The first stage is deliberately read-only: it checks the USD practice account and obtains up to 5000 completed EUR_USD hourly bid/ask candles. A deterministic historical replay compares fixed 1%, 2% and 5% risk scenarios from separate $50 virtual starting balances. A 70/30 chronological split separates development and holdout periods. Returns, settled balance drawdown, trade count and first attainment of $500 are reported, including non-attainment.
 
@@ -31,3 +31,5 @@ The next stage, after credentials arrive and data integrity is checked, is a for
 - Account summary: https://developer.oanda.com/rest-live-v20/account-ep/
 
 Revalidate endpoint behavior against the actual practice account on first connection. Revalidate the protocol before a forward demo phase; a replay is not broker-execution validation.
+
+Account-ID format inspected 2026-09-07: [official AccountID definition](https://developer.oanda.com/rest-live-v20/account-df/). Regression coverage checks variable widths, pasted whitespace and malformed/path-injecting values.
