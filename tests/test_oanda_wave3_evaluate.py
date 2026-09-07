@@ -16,10 +16,11 @@ def feature_with_extreme(signal_index: int = 50):
     start = datetime(2025, 1, 6, 1, tzinfo=timezone.utc)
     bars = []
     for index in range(90):
-        opening = 1.5000
-        close = 1.5001
-        high = 1.5005
-        low = 1.4995
+        baseline = 1.5000 + (index % 7) * 0.00001
+        opening = baseline - 0.00002
+        close = baseline
+        high = max(opening, close) + 0.00040
+        low = min(opening, close) - 0.00040
         if index == signal_index:
             opening = 1.4800
             close = 1.4850
@@ -78,6 +79,8 @@ class OandaWave3EvaluateTests(TestCase):
         self.assertIsNotNone(signal)
         self.assertEqual(signal["direction"], 1)
         self.assertEqual(signal["signal_index"], 50)
+        self.assertEqual(signal["signal_time"], features.bars[50].time)
+        self.assertEqual(signal["entry_time"], features.bars[51].time)
         self.assertLess(signal["zscore"], -1.7)
 
     def test_extra_cost_is_deducted_in_risk_units(self):
