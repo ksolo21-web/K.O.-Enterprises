@@ -1,0 +1,98 @@
+name: Public open-weight local-review package
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: [.github/workflows/public-local-review-model-35.yml]
+permissions:
+  contents: read
+jobs:
+  fetch-public-weights:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Require public standard runner only
+        env:
+          IS_PRIVATE: ${{ github.event.repository.private }}
+        run: test "$IS_PRIVATE" = 'false'
+      - run: python -m pip install --quiet huggingface-hub hf-xet requests
+      - name: Retrieve and validate public model files; never load private user data
+        shell: python
+        run: |
+          import requests,pathlib,json,hashlib,tarfile,os
+          from huggingface_hub import hf_hub_download
+          repo='unsloth/Qwen3.5-4B-GGUF'
+          response=requests.get('https://huggingface.co/api/models/'+repo,params={'blobs':'true'},timeout=90);response.raise_for_status();meta=response.json();revision=meta['sha']
+          root=pathlib.Path('/tmp/open-review-model');root.mkdir(exist_ok=True)
+          def digest(p):
+            h=hashlib.sha256()
+            with open(p,'rb') as f:
+              for b in iter(lambda:f.read(8388608),b''):h.update(b)
+            return h.hexdigest()
+          files=[]
+          for name in ['Qwen3.5-4B-Q4_K_S.gguf','mmproj-F16.gguf']:
+            row=next(x for x in meta['siblings'] if x['rfilename']==name)
+            path=pathlib.Path(hf_hub_download(repo,name,revision=revision,local_dir=root))
+            assert path.stat().st_size==row['lfs']['size'] and digest(path)==row['lfs']['sha256']
+            files.append({'name':name,'bytes':path.stat().st_size,'sha256':digest(path)})
+          archive=pathlib.Path('/tmp/model35.tar')
+          with tarfile.open(archive,'w') as z:
+            for row in files:z.add(root/row['name'],arcname=row['name'])
+          out=pathlib.Path('/tmp/transfer35');out.mkdir(exist_ok=True);parts=[]
+          with archive.open('rb') as r:
+            i=0
+            while b:=r.read(430000000):
+              i+=1;p=out/f'part-{i:02d}';p.mkdir();f=p/'model-chunk.bin';f.write_bytes(b);parts.append({'part':i,'file':'model-chunk.bin','bytes':len(b),'sha256':digest(f)})
+          m=out/'manifest';m.mkdir();(m/'manifest.json').write_text(json.dumps({'upstream_model':'Qwen/Qwen3.5-4B','gguf_repository':repo,'revision':revision,'files':files,'parts':parts,'archive_sha256':digest(archive),'run_id':os.environ['GITHUB_RUN_ID'],'private_user_files_received':False,'inference_api_calls':0},indent=2))
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-manifest
+          path: /tmp/transfer35/manifest
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-01
+          path: /tmp/transfer35/part-01
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-02
+          path: /tmp/transfer35/part-02
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-03
+          path: /tmp/transfer35/part-03
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-04
+          path: /tmp/transfer35/part-04
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-05
+          path: /tmp/transfer35/part-05
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-06
+          path: /tmp/transfer35/part-06
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-07
+          path: /tmp/transfer35/part-07
+          compression-level: 0
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-review-35-part-08
+          path: /tmp/transfer35/part-08
+          compression-level: 0
+          retention-days: 1
