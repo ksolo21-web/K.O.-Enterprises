@@ -1,0 +1,40 @@
+name: Public native local-review runtime
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: [.github/workflows/public-local-review-native-ice.yml]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Restrict preparation to free public standard runner
+        env:
+          IS_PRIVATE: ${{ github.event.repository.private }}
+        run: test "$IS_PRIVATE" = 'false'
+      - name: Build pinned upstream source for the verified Intel Ice Lake CPU
+        run: |
+          set -euo pipefail
+          rev=67672dc5b76f8bc17785a19d3dc6d1463fc2902c
+          mkdir -p /tmp/native-review
+          curl -fL --retry 3 "https://codeload.github.com/ggml-org/llama.cpp/tar.gz/$rev" -o /tmp/native-review/source.tar.gz
+          mkdir -p /tmp/llama-src
+          tar -xzf /tmp/native-review/source.tar.gz -C /tmp/llama-src --strip-components=1
+          cmake -S /tmp/llama-src -B /tmp/llama-build -DCMAKE_BUILD_TYPE=Release -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_TOOLS=ON -DLLAMA_CURL=OFF -DGGML_NATIVE=OFF -DGGML_AVX512=ON -DGGML_AVX512_VNNI=ON -DGGML_AVX512_VBMI=ON
+          cmake --build /tmp/llama-build --config Release -j 4 --target llama-server llama-quantize
+          cp /tmp/llama-build/bin/llama-server /tmp/llama-build/bin/llama-quantize /tmp/native-review/
+          find /tmp/llama-build -name '*.so*' -type f -exec cp -L {} /tmp/native-review/ \;
+          cp /tmp/llama-src/LICENSE /tmp/native-review/UPSTREAM-LICENSE
+          cp /tmp/llama-build/CMakeCache.txt /tmp/native-review/
+          printf '%s\n' "$rev" > /tmp/native-review/runtime-commit.txt
+          cd /tmp/native-review
+          sha256sum * > SHA256SUMS
+          printf '%s\n' 'Public source and binaries only. No user maps, no card inputs, no inference API calls. Compiled for AVX512 Ice Lake host, not executed on this runner.' > PREPARATION-NOTE.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-native-review-ice
+          path: /tmp/native-review
+          compression-level: 1
+          retention-days: 1
