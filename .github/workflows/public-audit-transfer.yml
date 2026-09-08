@@ -1,0 +1,80 @@
+name: Transfer public audit references and local-review weights
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: ['.github/workflows/public-audit-transfer.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  geographic_evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve current public parcel classification, addresses, and recorded subdivisions
+        run: python -u retrieve_public_supplement.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: territory-public-geography-complete
+          path: |
+            public-data/rochester-public-geography.zip
+            public-data/manifest.json
+            public-data/retrieval-summary.json
+            public-neighborhoods/
+            public-supplement.zip
+          compression-level: 0
+          retention-days: 1
+  weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: local-vision-official-weights
+          run-id: 34172172643
+          github-token: ${{ github.token }}
+          path: /tmp/public-weights
+      - name: Split exact public weights into bounded transfer parts
+        run: |
+          python -u - <<'PY'
+          import pathlib,tarfile,json,hashlib
+          root=pathlib.Path('/tmp/public-weights');dest=pathlib.Path('/tmp/weight-parts');dest.mkdir()
+          archive=pathlib.Path('/tmp/public-weights.tar')
+          with tarfile.open(archive,'w') as tar:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():tar.add(p,arcname=p.name)
+          receipt={'source_artifact_id':10036056978,'source_run_id':34172172643,'public_weights_only':True,'files':[],'parts':[]}
+          for p in sorted(root.rglob('*.gguf')):
+              h=hashlib.sha256()
+              with p.open('rb') as f:
+                  for b in iter(lambda:f.read(8388608),b''):h.update(b)
+              receipt['files'].append({'name':p.name,'bytes':p.stat().st_size,'sha256':h.hexdigest()})
+          whole=hashlib.sha256()
+          with archive.open('rb') as f:
+              n=0
+              while True:
+                  b=f.read(440000000)
+                  if not b:break
+                  n+=1;whole.update(b);p=dest/('weights-part-%02d.bin'%n);p.write_bytes(b)
+                  receipt['parts'].append({'name':p.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          receipt['archive_bytes']=archive.stat().st_size;receipt['archive_sha256']=whole.hexdigest()
+          (dest/'WEIGHTS-MANIFEST.json').write_text(json.dumps(receipt,indent=2));print(json.dumps(receipt,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-manifest, path: /tmp/weight-parts/WEIGHTS-MANIFEST.json, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-01, path: /tmp/weight-parts/weights-part-01.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-02, path: /tmp/weight-parts/weights-part-02.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-03, path: /tmp/weight-parts/weights-part-03.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-04, path: /tmp/weight-parts/weights-part-04.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-05, path: /tmp/weight-parts/weights-part-05.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-06, path: /tmp/weight-parts/weights-part-06.bin, compression-level: 0, retention-days: 1}
+      - uses: actions/upload-artifact@v4
+        with: {name: weights-part-07, path: /tmp/weight-parts/weights-part-07.bin, compression-level: 0, retention-days: 1}
