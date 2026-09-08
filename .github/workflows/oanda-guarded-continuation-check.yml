@@ -1,0 +1,55 @@
+name: OANDA guarded continuation check (read only)
+
+on:
+  push:
+    branches: [fix/oanda-practice-risk-reconciliation-20260908]
+    paths: [.github/workflows/oanda-guarded-continuation-check.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oanda-guarded-continuation-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Compile and run thirty focused risk and account tests
+        run: |
+          python -m compileall -q experiments/oanda_demo tests
+          python -m unittest tests.test_oanda_forward_lab tests.test_oanda_forward_probe tests.test_oanda_account_audit tests.test_oanda_practice_risk tests.test_oanda_guarded_continuation -v
+      - name: Reconcile existing Practice position and run corrected read-only scan
+        env:
+          OANDA_DEMO_TOKEN: ${{ secrets.OANDA_demo_API_token }}
+          OANDA_DEMO_ACCOUNT_ID: ${{ secrets.OANDA_demo_account_ID }}
+        run: |
+          umask 077
+          python -m experiments.oanda_demo.account_audit --output state/oanda-current-audit.json
+          python -m experiments.oanda_demo.first_probe_reconcile --output state/oanda-first-probe-reconciled.json
+          python -m experiments.oanda_demo.guarded_probe scan --output state/oanda-guarded-next-plan.json
+          python -m experiments.oanda_demo.forward_snapshot --output state/oanda-current-signals.json
+      - name: Save sanitized results only
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: oanda-guarded-check-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            state/oanda-current-audit.json
+            state/oanda-first-probe-reconciled.json
+            state/oanda-guarded-next-plan.json
+            state/oanda-current-signals.json
+          if-no-files-found: warn
+          retention-days: 1
+      - name: Remove ephemeral Practice files
+        if: always()
+        run: rm -f state/oanda-current-audit.json state/oanda-first-probe-reconciled.json state/oanda-guarded-next-plan.json state/oanda-current-signals.json
