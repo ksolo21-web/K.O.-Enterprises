@@ -1,0 +1,63 @@
+name: Retrieve dated public county imagery
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: [.github/workflows/public-imagery-reference.yml]
+permissions:
+  contents: read
+jobs:
+  imagery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Retrieve public imagery only
+        run: |
+          mkdir -p aerial
+          python - <<'PY'
+          import requests, json, hashlib, math, time, pathlib, concurrent.futures
+          out=pathlib.Path('aerial')
+          service='https://gisservices.oakgov.com/arcgis/rest/services/BaseMap/EnterpriseOrthoTC2025BasemapMap/MapServer'
+          s=requests.Session()
+          meta=s.get(service,params={'f':'json'},timeout=90);meta.raise_for_status();out.joinpath('SERVICE.json').write_bytes(meta.content)
+          regions={
+          'courtland':[-83.137,42.6853,-83.110,42.6995],
+          'oaklandvalley':[-83.139,42.710,-83.121,42.722],
+          'bedlington':[-83.135,42.652,-83.110,42.661],
+          'claremont':[-83.197,42.720,-83.189,42.726],
+          'cloisters':[-83.192,42.720,-83.184,42.727],
+          'addison':[-83.198,42.713,-83.185,42.726],
+          'murfield':[-83.198,42.708,-83.182,42.721],
+          'wyngate':[-83.106,42.682,-83.093,42.699],
+          'dunham':[-83.109,42.695,-83.091,42.707],
+          'stonypointe':[-83.137,42.684,-83.108,42.699],
+          'ansal':[-83.175,42.672,-83.159,42.683],
+          'campus':[-83.175,42.663,-83.161,42.675],
+          'avoncircle':[-83.173,42.657,-83.156,42.668],
+          'wilwood':[-83.184,42.662,-83.170,42.674],
+          'bellevernon':[-83.185,42.669,-83.170,42.6825],
+          'maryknoll':[-83.196,42.665,-83.173,42.683],
+          'quarry':[-83.127,42.697,-83.100,42.712],
+          'willowtree':[-83.154,42.697,-83.135,42.711],
+          'honeycrisp':[-83.106,42.667,-83.094,42.676],
+          'wimpole-detail':[-83.1710,42.6767,-83.1695,42.6801]}
+          def fetch(item):
+            name,b=item
+            def merc(lon,lat):return lon*20037508.342789244/180,6378137*math.log(math.tan(math.pi/4+math.radians(lat)/2))
+            x0,y0=merc(*b[:2]);x1,y1=merc(*b[2:]);ratio=(x1-x0)/(y1-y0);w,h=(4096,max(300,round(4096/ratio))) if ratio>=1 else (max(300,round(4096*ratio)),4096)
+            params={'f':'json','bbox':','.join(map(str,[x0,y0,x1,y1])),'bboxSR':'3857','imageSR':'3857','size':f'{w},{h}','format':'jpg','dpi':96,'transparent':'false'}
+            r=requests.get(service+'/export',params=params,timeout=120);r.raise_for_status();data=r.json()
+            if 'error' in data:raise RuntimeError((name,data))
+            image=requests.get(data['href'],timeout=120);image.raise_for_status()
+            if not image.content.startswith(b'\xff\xd8'):raise RuntimeError((name,image.headers.get('Content-Type'),image.text[:100]))
+            out.joinpath(name+'.jpg').write_bytes(image.content)
+            rec={'name':name,'geographic_bounds':b,'request_url':r.url,'retrieved_epoch':time.time(),'service_year':2025,'export':data,'bytes':len(image.content),'sha256':hashlib.sha256(image.content).hexdigest()}
+            out.joinpath(name+'.json').write_text(json.dumps(rec,indent=2));print(name,len(image.content),flush=True);return rec
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool: records=list(pool.map(fetch,regions.items()))
+          out.joinpath('RECEIPTS.json').write_text(json.dumps(records,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-county-imagery-2025
+          path: aerial/
+          retention-days: 1
+          if-no-files-found: error
