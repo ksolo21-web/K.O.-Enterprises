@@ -1,0 +1,325 @@
+{
+  "fields": [
+    {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID",
+      "domain": null
+    },
+    {
+      "name": "LowAddressLeft",
+      "type": "esriFieldTypeInteger",
+      "alias": "LowAddressLeft",
+      "domain": null
+    },
+    {
+      "name": "HighAddressLeft",
+      "type": "esriFieldTypeInteger",
+      "alias": "HighAddressLeft",
+      "domain": null
+    },
+    {
+      "name": "LowAddressRight",
+      "type": "esriFieldTypeInteger",
+      "alias": "LowAddressRight",
+      "domain": null
+    },
+    {
+      "name": "HighAddressRight",
+      "type": "esriFieldTypeInteger",
+      "alias": "HighAddressRight",
+      "domain": null
+    },
+    {
+      "name": "DirectionalPrefix",
+      "type": "esriFieldTypeString",
+      "alias": "DirectionalPrefix",
+      "length": 2,
+      "domain": null
+    },
+    {
+      "name": "StreetName",
+      "type": "esriFieldTypeString",
+      "alias": "StreetName",
+      "length": 30,
+      "domain": null
+    },
+    {
+      "name": "StreetType",
+      "type": "esriFieldTypeString",
+      "alias": "StreetType",
+      "length": 5,
+      "domain": null
+    },
+    {
+      "name": "DirectionalSuffix",
+      "type": "esriFieldTypeString",
+      "alias": "DirectionalSuffix",
+      "length": 2,
+      "domain": null
+    },
+    {
+      "name": "CartographicName",
+      "type": "esriFieldTypeString",
+      "alias": "CartographicName",
+      "length": 250,
+      "domain": null
+    },
+    {
+      "name": "CVTTaxCodeLeft",
+      "type": "esriFieldTypeString",
+      "alias": "CVTTaxCodeLeft",
+      "length": 2,
+      "domain": null
+    },
+    {
+      "name": "CVTTaxCodeRight",
+      "type": "esriFieldTypeString",
+      "alias": "CVTTaxCodeRight",
+      "length": 2,
+      "domain": null
+    },
+    {
+      "name": "PostalZip5Left",
+      "type": "esriFieldTypeString",
+      "alias": "PostalZip5Left",
+      "length": 5,
+      "domain": null
+    },
+    {
+      "name": "PostalZip5Right",
+      "type": "esriFieldTypeString",
+      "alias": "PostalZip5Right",
+      "length": 5,
+      "domain": null
+    },
+    {
+      "name": "RouteNumber",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "RouteNumber",
+      "domain": null
+    },
+    {
+      "name": "SpeedLimit",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "SpeedLimit",
+      "domain": null
+    },
+    {
+      "name": "SpeedLimitSource",
+      "type": "esriFieldTypeString",
+      "alias": "SpeedLimitSource",
+      "length": 50,
+      "domain": null
+    },
+    {
+      "name": "TCONumber",
+      "type": "esriFieldTypeString",
+      "alias": "TCONumber",
+      "length": 15,
+      "domain": null
+    },
+    {
+      "name": "SurfaceType",
+      "type": "esriFieldTypeString",
+      "alias": "SurfaceType",
+      "length": 10,
+      "domain": null
+    },
+    {
+      "name": "RoadCode",
+      "type": "esriFieldTypeString",
+      "alias": "RoadCode",
+      "length": 10,
+      "domain": null
+    },
+    {
+      "name": "Act51RoadType",
+      "type": "esriFieldTypeString",
+      "alias": "Act51RoadType",
+      "length": 30,
+      "domain": null
+    },
+    {
+      "name": "JurisdictionName",
+      "type": "esriFieldTypeString",
+      "alias": "JurisdictionName",
+      "length": 50,
+      "domain": null
+    },
+    {
+      "name": "FromElevation",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "FromElevation",
+      "domain": null
+    },
+    {
+      "name": "ToElevation",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "ToElevation",
+      "domain": null
+    },
+    {
+      "name": "MILeftTurn",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "MILeftTurn",
+      "domain": null
+    },
+    {
+      "name": "TravelDirection",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "TravelDirection",
+      "domain": null
+    },
+    {
+      "name": "RevisionDate",
+      "type": "esriFieldTypeDate",
+      "alias": "RevisionDate",
+      "length": 8,
+      "domain": null
+    },
+    {
+      "name": "Shape",
+      "type": "esriFieldTypeGeometry",
+      "alias": "Shape",
+      "domain": null
+    },
+    {
+      "name": "CVTTaxNameLeft",
+      "type": "esriFieldTypeString",
+      "alias": "CVTTaxNameLeft",
+      "length": 50,
+      "domain": null
+    },
+    {
+      "name": "CVTTaxNameRight",
+      "type": "esriFieldTypeString",
+      "alias": "CVTTaxNameRight",
+      "length": 50,
+      "domain": null
+    },
+    {
+      "name": "Shape.STLength()",
+      "type": "esriFieldTypeDouble",
+      "alias": "Shape.STLength()",
+      "domain": null
+    },
+    {
+      "name": "MasterROWWidthFeet",
+      "type": "esriFieldTypeSmallInteger",
+      "alias": "Master ROW Width Feet",
+      "domain": null
+    },
+    {
+      "name": "NFC",
+      "type": "esriFieldTypeString",
+      "alias": "NFC",
+      "length": 50,
+      "domain": null
+    }
+  ],
+  "examples": [
+    {
+      "OBJECTID": 1564,
+      "LowAddressLeft": 1901,
+      "HighAddressLeft": 1999,
+      "LowAddressRight": 1900,
+      "HighAddressRight": 1998,
+      "DirectionalPrefix": "N",
+      "StreetName": "Rochester",
+      "StreetType": "Rd",
+      "DirectionalSuffix": " ",
+      "CartographicName": "N Rochester Rd",
+      "CVTTaxCodeLeft": "N",
+      "CVTTaxCodeRight": "N",
+      "PostalZip5Left": "48363",
+      "PostalZip5Right": "48363",
+      "RouteNumber": 0,
+      "SpeedLimit": 50,
+      "SpeedLimitSource": "Assumed Speed Limit",
+      "TCONumber": "N/A",
+      "SurfaceType": "Paved",
+      "RoadCode": "Major",
+      "Act51RoadType": "County Primary",
+      "JurisdictionName": "Road Commission for Oakland County",
+      "FromElevation": 0,
+      "ToElevation": 0,
+      "MILeftTurn": 1,
+      "TravelDirection": 0,
+      "RevisionDate": 1776430774000,
+      "CVTTaxNameLeft": "Charter Township of Oakland",
+      "CVTTaxNameRight": "Charter Township of Oakland",
+      "Shape.STLength()": 437.29322546718555,
+      "MasterROWWidthFeet": null,
+      "NFC": "None"
+    },
+    {
+      "OBJECTID": 2499,
+      "LowAddressLeft": 2,
+      "HighAddressLeft": 250,
+      "LowAddressRight": 1,
+      "HighAddressRight": 249,
+      "DirectionalPrefix": " ",
+      "StreetName": "Natalie Marie",
+      "StreetType": "St",
+      "DirectionalSuffix": " ",
+      "CartographicName": "Natalie Marie St",
+      "CVTTaxCodeLeft": "N",
+      "CVTTaxCodeRight": "N",
+      "PostalZip5Left": "48363",
+      "PostalZip5Right": "48363",
+      "RouteNumber": 0,
+      "SpeedLimit": 25,
+      "SpeedLimitSource": "Assumed Speed Limit",
+      "TCONumber": "N/A",
+      "SurfaceType": "Paved",
+      "RoadCode": "Minor",
+      "Act51RoadType": "County Sublocal",
+      "JurisdictionName": "Road Commission for Oakland County",
+      "FromElevation": 0,
+      "ToElevation": 0,
+      "MILeftTurn": 1,
+      "TravelDirection": 0,
+      "RevisionDate": 1776430761000,
+      "CVTTaxNameLeft": "Charter Township of Oakland",
+      "CVTTaxNameRight": "Charter Township of Oakland",
+      "Shape.STLength()": 743.3657529056029,
+      "MasterROWWidthFeet": null,
+      "NFC": "None"
+    },
+    {
+      "OBJECTID": 2514,
+      "LowAddressLeft": 1601,
+      "HighAddressLeft": 1799,
+      "LowAddressRight": 1620,
+      "HighAddressRight": 1940,
+      "DirectionalPrefix": " ",
+      "StreetName": "Rush",
+      "StreetType": "Rd",
+      "DirectionalSuffix": " ",
+      "CartographicName": "Rush Rd",
+      "CVTTaxCodeLeft": "N",
+      "CVTTaxCodeRight": "N",
+      "PostalZip5Left": "48363",
+      "PostalZip5Right": "48363",
+      "RouteNumber": 0,
+      "SpeedLimit": 45,
+      "SpeedLimitSource": "Assumed Speed Limit",
+      "TCONumber": "N/A",
+      "SurfaceType": "Gravel",
+      "RoadCode": "Major",
+      "Act51RoadType": "County Natural Beauty",
+      "JurisdictionName": "Road Commission for Oakland County",
+      "FromElevation": 0,
+      "ToElevation": 0,
+      "MILeftTurn": 1,
+      "TravelDirection": 0,
+      "RevisionDate": 1776430776000,
+      "CVTTaxNameLeft": "Charter Township of Oakland",
+      "CVTTaxNameRight": "Charter Township of Oakland",
+      "Shape.STLength()": 2133.4906312923013,
+      "MasterROWWidthFeet": null,
+      "NFC": "None"
+    }
+  ]
+}

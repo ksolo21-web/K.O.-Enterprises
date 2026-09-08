@@ -1,0 +1,403 @@
+[
+  {
+    "area": "glenmoor",
+    "bounds": [
+      -83.13451801788585,
+      42.68517173662371,
+      -83.09502638299905,
+      42.69629846814267
+    ],
+    "roads": 260,
+    "seed_names": [
+      "Courtland Blvd",
+      "Glenmoor Dr",
+      "Lysander St",
+      "Red Oak Ln",
+      "Sycamore Dr"
+    ],
+    "bytes": 31474
+  },
+  {
+    "area": "oaklandvalley",
+    "bounds": [
+      -83.13512209947449,
+      42.71113235805729,
+      -83.12475871610668,
+      42.71819350009801
+    ],
+    "roads": 41,
+    "seed_names": [
+      "Beechview Dr",
+      "Beechview Dr S",
+      "Birch Hill Dr",
+      "Broadleaf Dr",
+      "Cedarwald Dr",
+      "Kennebunk Dr",
+      "Oakland Valley Dr",
+      "Reddingwood Dr",
+      "Thorny Ash Rd"
+    ],
+    "bytes": 4570
+  },
+  {
+    "area": "bedlington",
+    "bounds": [
+      -83.13089185000892,
+      42.65539739401563,
+      -83.11218509508086,
+      42.65995456263767
+    ],
+    "roads": 56,
+    "seed_names": [
+      "Arcadian Ct",
+      "Arcadian Dr",
+      "Bedlington Ct",
+      "Bedlington Dr",
+      "Bliss Ct",
+      "Bliss Dr",
+      "Blushing Ct",
+      "Blushing Dr",
+      "Enchantment Dr",
+      "Windrift Ln",
+      "Windsong Dr"
+    ],
+    "bytes": 6718
+  },
+  {
+    "area": "claremont",
+    "bounds": [
+      -83.19528236079798,
+      42.721020276104326,
+      -83.191296604145,
+      42.724785474385996
+    ],
+    "roads": 21,
+    "seed_names": [
+      "Antrim Ct",
+      "Birnam Ct",
+      "Brecon Ct",
+      "Castlemartin Ct",
+      "Claremont Blvd"
+    ],
+    "bytes": 2218
+  },
+  {
+    "area": "cloisters",
+    "bounds": [
+      -83.19043531376389,
+      42.722273292125514,
+      -83.18671409383813,
+      42.724862142205026
+    ],
+    "roads": 17,
+    "seed_names": [
+      "Cloisters Blvd",
+      "Monarch Ct",
+      "Stoneykirk Ct"
+    ],
+    "bytes": 2123
+  },
+  {
+    "area": "addison",
+    "bounds": [
+      -83.19658838770196,
+      42.71509577263177,
+      -83.1872975775933,
+      42.72117397598297
+    ],
+    "roads": 24,
+    "seed_names": [
+      "Addison Cir N",
+      "Addison Cir S",
+      "Ambleside Ct",
+      "Ashburton Ct",
+      "Carlisle Ct",
+      "Croftshire Ct"
+    ],
+    "bytes": 3267
+  },
+  {
+    "area": "murfield",
+    "bounds": [
+      -83.19607984276016,
+      42.70977230255058,
+      -83.18454249349384,
+      42.71651933475606
+    ],
+    "roads": 39,
+    "seed_names": [
+      "Baytree Ct",
+      "Carrollton Ct",
+      "Lancewood Blvd",
+      "Ledgewood Ct",
+      "Lochmoor Ct",
+      "Murfield Ct",
+      "Murfield Dr",
+      "Shorebrook Ct",
+      "Wellwood Dr",
+      "Westchester Ct"
+    ],
+    "bytes": 4812
+  },
+  {
+    "area": "wyngate",
+    "bounds": [
+      -83.1043370564045,
+      42.684823902591006,
+      -83.09423021767894,
+      42.69706550863961
+    ],
+    "roads": 71,
+    "seed_names": [
+      "Beaver Creek Dr",
+      "Caribou Ct",
+      "Hollow Corners Ct",
+      "Loggers Cir",
+      "Millecoquins Ct",
+      "Ring Neck Dr",
+      "Rock Valley Dr",
+      "Snowy Owl Ct",
+      "Wyngate Dr"
+    ],
+    "bytes": 10513
+  },
+  {
+    "area": "dunham",
+    "bounds": [
+      -83.10687703287705,
+      42.696053159803334,
+      -83.09450412396846,
+      42.70575816847415
+    ],
+    "roads": 63,
+    "seed_names": [
+      "Boulder Ct",
+      "Catlin Dr",
+      "Christenbury Ct",
+      "Copper Cir",
+      "Dunham Dr",
+      "Garnet Ct",
+      "Maple Creek Ct",
+      "Miners Run",
+      "Tulberry Cir",
+      "Tulberry Ct",
+      "Watson Cir"
+    ],
+    "bytes": 8029
+  },
+  {
+    "area": "stonypointe",
+    "bounds": [
+      -83.14571003103633,
+      42.686163676381106,
+      -83.10840886025267,
+      42.76993961901648
+    ],
+    "roads": 703,
+    "seed_names": [
+      "Creek View Dr",
+      "Creekview Ct",
+      "Kentfield Dr",
+      "Pebble Creek Dr",
+      "Pebble Pointe Dr",
+      "Pointe Place Blvd",
+      "Pointe Place Ct",
+      "Putnam Cir",
+      "Roundview Dr",
+      "Stony Creek Dr",
+      "Stony Pointe Blvd"
+    ],
+    "bytes": 84708
+  },
+  {
+    "area": "ansal",
+    "bounds": [
+      -83.2241257466007,
+      42.67311247409461,
+      -83.1623012155155,
+      42.71929252159864
+    ],
+    "roads": 1286,
+    "seed_names": [
+      "Ansal Dr",
+      "Black Maple Dr",
+      "Nesbit Ln",
+      "Sugar Pine Rd",
+      "Sumac Dr",
+      "Tanglewood Ct",
+      "Tanglewood Dr",
+      "Tanglewood Ln",
+      "Wimpole Dr"
+    ],
+    "bytes": 158012
+  },
+  {
+    "area": "campus",
+    "bounds": [
+      -83.17277395204398,
+      42.6649651536108,
+      -83.16304085759114,
+      42.67340994513993
+    ],
+    "roads": 59,
+    "seed_names": [
+      "Baylor Rd",
+      "Bucknell Ct",
+      "Campus Ct",
+      "Campus Rd",
+      "Croydon Rd",
+      "Fair Oak Ct",
+      "Fair Oak Dr",
+      "Kingstree Ct",
+      "Rutgers Rd",
+      "Spartan Ct",
+      "Spartan Dr",
+      "Yale Ct"
+    ],
+    "bytes": 6649
+  },
+  {
+    "area": "avoncircle",
+    "bounds": [
+      -83.17092891547738,
+      42.65875291929339,
+      -83.15808286753816,
+      42.66618697762292
+    ],
+    "roads": 24,
+    "seed_names": [
+      "Avon Cir E",
+      "Avon Cir W",
+      "Rochester Hills Dr",
+      "Seville Rd"
+    ],
+    "bytes": 3237
+  },
+  {
+    "area": "wildwood",
+    "bounds": [
+      -83.2153780645703,
+      42.66222957712681,
+      -83.17145165093305,
+      42.736720856365366
+    ],
+    "roads": 1328,
+    "seed_names": [
+      "Alpine Ct",
+      "Briar Ct",
+      "Briarbrooke Ln",
+      "Castlebar Dr",
+      "Hampstead Ln",
+      "Leinster Rd",
+      "Lynndale Ct",
+      "Lynndale Dr",
+      "Munster Rd",
+      "Pedal Ct",
+      "Redwood Ct",
+      "Ulster Rd"
+    ],
+    "bytes": 160048
+  },
+  {
+    "area": "bellevernon",
+    "bounds": [
+      -83.18271858808528,
+      42.670802899744984,
+      -83.17094988288943,
+      42.680396539686285
+    ],
+    "roads": 60,
+    "seed_names": [
+      "Avoncrest Ct",
+      "Avoncrest Dr",
+      "Belle Vernon Ct",
+      "Belle Vernon Dr",
+      "Chalet Dr",
+      "Clair Hill Dr",
+      "Wayward Dr"
+    ],
+    "bytes": 6901
+  },
+  {
+    "area": "maryknolle",
+    "bounds": [
+      -83.1942552845749,
+      42.666155599012704,
+      -83.17660172145918,
+      42.68140254577299
+    ],
+    "roads": 144,
+    "seed_names": [
+      "Canterbury Trail Dr",
+      "Hillendale Dr",
+      "Knollcrest Rd",
+      "Longford Dr",
+      "Stratford Dr",
+      "Stratford Ln",
+      "Sussex Fair"
+    ],
+    "bytes": 15568
+  },
+  {
+    "area": "quarry",
+    "bounds": [
+      -83.12504785207291,
+      42.69902036732419,
+      -83.1031121835713,
+      42.708163013163286
+    ],
+    "roads": 66,
+    "seed_names": [
+      "Galena",
+      "Majestic",
+      "Mill Race",
+      "Panorama",
+      "Passive",
+      "Placid Ct",
+      "Quarry",
+      "Serene Ct",
+      "Tranquility Ct"
+    ],
+    "bytes": 7888
+  },
+  {
+    "area": "willowtree",
+    "bounds": [
+      -83.15167196686428,
+      42.69864607748491,
+      -83.13760720225153,
+      42.70808073352963
+    ],
+    "roads": 100,
+    "seed_names": [
+      "Apple Hill Ln",
+      "Apple Orchard Ln",
+      "Cherry Blossom Ln",
+      "Cherry Tree Ct",
+      "Cherry Tree Ln",
+      "Elmhill Rd",
+      "Maplehill Ct",
+      "Maplehill Rd",
+      "Willow Tree Ln"
+    ],
+    "bytes": 11474
+  },
+  {
+    "area": "honeycrisp",
+    "bounds": [
+      -83.10368894830111,
+      42.66924462177819,
+      -83.09859684998118,
+      42.67406708985463
+    ],
+    "roads": 31,
+    "seed_names": [
+      "Crispin",
+      "Goldrush",
+      "Hawkeye",
+      "Honeycrisp",
+      "Winesap"
+    ],
+    "bytes": 3449
+  }
+]
