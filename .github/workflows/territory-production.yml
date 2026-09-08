@@ -1,0 +1,62 @@
+name: Territory production - zero paid services
+
+on:
+  push:
+    branches: [territory-card-production]
+    paths: ['territory/**', '.github/workflows/territory-production.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: territory-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  orchestration-tests:
+    name: Synthetic orchestration tests - not card approval
+    if: ${{ github.event.repository.private == false && github.repository == 'ksolo21-web/K.O.-Enterprises' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: territory/production
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      PIP_NO_CACHE_DIR: '1'
+      OLLAMA_NO_CLOUD: '1'
+      COMPANY_OS_PAUSED: '1'
+    steps:
+      - name: Check out this branch without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Install fixed dependencies without artifact cache
+        run: python -m pip install -r requirements.txt
+      - name: Install exact recovered sources when the capsule is present
+        shell: bash
+        run: |
+          if test -f Territory-Skills-Source-Capsule.zip; then
+            python engine.py install-skills Territory-Skills-Source-Capsule.zip
+            python engine.py doctor
+          else
+            echo '::warning::Recovered source capsule has not been committed. Real-card release is BLOCKED.'
+            echo 'Source status: not installed. No real card is approved.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Execute synthetic positive and adversarial tests
+        run: python -m unittest test_engine -v
+      - name: Record scope of evidence
+        if: always()
+        shell: bash
+        run: |
+          echo 'These are orchestration tests, not independent visual review of real territory cards.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No paid AI APIs, Work, Codex, private inputs, artifact uploads, or caches are used.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Private production and uncalibrated model-only releases remain disabled.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Confirm tracked inputs were not changed
+        run: git diff --exit-code -- .

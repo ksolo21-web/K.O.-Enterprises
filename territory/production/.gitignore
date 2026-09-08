@@ -1,0 +1,13 @@
+vendor/
+skills-manifest.json
+__pycache__/
+.pytest_cache/
+.venv/
+private/
+candidates/
+released/
+evidence/
+*.pdf
+*.png
+*.jpg
+*.jpeg

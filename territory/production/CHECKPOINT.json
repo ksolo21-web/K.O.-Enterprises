@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-08",
+  "branch": "territory-card-production",
+  "base_commit": "61ca9202fbfe45aae4a0ed29326df44cf7b25c9e",
+  "additional_service_spend_authorized": 0,
+  "paid_model_calls_authorized": false,
+  "work_or_codex_authorized": false,
+  "source_files_recovered_locally": 138,
+  "source_archive_committed": false,
+  "local_orchestration_tests": {"passed": 27, "failed": 0},
+  "recovered_legacy_suite": "some positive fixtures omit newer mandatory evidence; not certified",
+  "independent_critic_runtime": "local Ollama connector implemented; real inference not yet verified",
+  "github_run": "not_yet_verified",
+  "private_card_data_committed": false,
+  "real_cards_released_this_migration": 0,
+  "release_ready": false,
+  "pending": ["Commit the pinned source capsule", "Verify hosted test execution", "Validate local vision calibration and independent review provenance", "Connect private job data without publishing it", "Complete the real-card builder/review/repair/retest cycle"]
+}

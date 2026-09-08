@@ -1,0 +1,8 @@
+{
+  "file_count": 138,
+  "archive_sha256": "49809b315b7dd9939912eca9a716a196abc67a8e649e74c44e1613d5cbc5deb9",
+  "manifest_sha256": "00760b2cbcf8deaf1f2a1d288f470174eaa0840d350568d9287c1a58db242c83",
+  "archive_bytes": 419980,
+  "required_skills": ["territory-map-card-builder", "territory-card-critic", "kaleb-quality-loop"],
+  "source_archive": "Territory-Skills-Source-Capsule.zip"
+}
