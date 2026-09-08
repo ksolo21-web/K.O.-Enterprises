@@ -1,0 +1,42 @@
+name: Retrieve public vision weights for local-only review
+on:
+  push:
+    branches: [public-geography-reference-20260907]
+    paths: ['.github/workflows/local-vision-weights.yml']
+permissions:
+  contents: read
+jobs:
+  weights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HF_HUB_DOWNLOAD_TIMEOUT: '180'
+      HF_XET_HIGH_PERFORMANCE: '1'
+    steps:
+      - run: pip -q install -U huggingface_hub hf_xet
+      - name: Download official weights with progress
+        run: |
+          python -u - <<'PY'
+          from huggingface_hub import snapshot_download
+          import pathlib,hashlib,json,time
+          repo='Qwen/Qwen3-VL-4B-Instruct-GGUF'
+          names=['Qwen3VL-4B-Instruct-Q4_K_M.gguf','mmproj-Qwen3VL-4B-Instruct-Q8_0.gguf']
+          root=pathlib.Path('/tmp/weights');root.mkdir()
+          print('Downloading',repo,names,flush=True)
+          path=snapshot_download(repo_id=repo,allow_patterns=names,local_dir=str(root),max_workers=8)
+          result={'model_repository':repo,'user_content_submitted':False,'files':[]}
+          for n in names:
+            p=root/n;h=hashlib.sha256()
+            with p.open('rb') as f:
+              for b in iter(lambda:f.read(8*1024*1024),b''):h.update(b)
+            result['files'].append({'name':n,'bytes':p.stat().st_size,'sha256':h.hexdigest()})
+          (root/'manifest.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local-vision-official-weights
+          path: |
+            /tmp/weights/*.gguf
+            /tmp/weights/manifest.json
+          compression-level: 0
+          retention-days: 1
