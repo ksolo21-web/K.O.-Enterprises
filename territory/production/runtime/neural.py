@@ -6,8 +6,8 @@ import base64, hashlib, json, os, urllib.request
 from pathlib import Path
 import jsonschema
 
-MODEL = 'qwen2.5vl:7b'
-MODEL_DIGEST_PREFIX = '5ced39dfa4ba'
+MODEL = 'qwen3-vl:8b-instruct'
+MODEL_DIGEST_PREFIX = '0533d74300e4'
 
 class ReviewError(RuntimeError):
     pass
@@ -37,7 +37,7 @@ def model_identity() -> dict:
     if record is None or not record.get('digest', '').startswith(MODEL_DIGEST_PREFIX):
         raise ReviewError('Required locally installed model identity differs from the verified registry version')
     version = call_api('/api/version').get('version')
-    if version != '0.11.10':
+    if version != '0.33.3':
         raise ReviewError('Local inference runtime is not the pinned version')
     return {'model': MODEL, 'digest': record['digest'], 'runtime': 'ollama', 'version': version}
 

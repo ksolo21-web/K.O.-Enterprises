@@ -6,9 +6,9 @@ from PIL import Image, ImageDraw, ImageFont
 from neural import infer, model_identity
 
 SCHEMA = {'type': 'object', 'properties': {
-    'label_collision': {'type': 'boolean'}, 'broken_road': {'type': 'boolean'},
-    'observation': {'type': 'string'}},
-    'required': ['label_collision', 'broken_road', 'observation'], 'additionalProperties': False}
+    'observation': {'type': 'string'},
+    'label_collision': {'type': 'boolean'}, 'broken_road': {'type': 'boolean'}},
+    'required': ['observation', 'label_collision', 'broken_road'], 'additionalProperties': False}
 PROMPT = ('Inspect this map crop. The green road is intended to be one closed continuous loop. '
           'broken_road is true only when a white cut interrupts that green loop. '
           'label_collision is true only when dark letters from the two different street names touch or overlap each other. '
@@ -22,7 +22,6 @@ def fixtures(folder: Path) -> list[dict]:
     if font_path is None:
         raise RuntimeError('A normal test font is required; do not replace it with an unreadably small fallback')
     result = []
-    # Fixed development and held-out cases. Ground truth and filenames are never sent to the model.
     for index, (overlap, broken, variant) in enumerate([
             (False, False, 0), (True, False, 0), (False, True, 0), (True, True, 0),
             (False, True, 1), (False, False, 1), (True, True, 1), (True, False, 1)]):
@@ -53,7 +52,7 @@ def main() -> int:
     identity = model_identity(); records = []
     for case in cases:
         try:
-            receipt = infer([case['file']], PROMPT, SCHEMA, identity=identity, max_tokens=160)
+            receipt = infer([case['file']], PROMPT, SCHEMA, identity=identity, max_tokens=256)
             passed = all(receipt['result'][k] is v for k, v in case['expected'].items())
             records.append({'id': case['id'], 'split': case['split'], 'expected': case['expected'],
                             'passed': passed, 'receipt': receipt})
@@ -61,7 +60,7 @@ def main() -> int:
             records.append({'id': case['id'], 'split': case['split'], 'expected': case['expected'],
                             'passed': False, 'error': type(error).__name__ + ': ' + str(error)})
         print(json.dumps({k: records[-1].get(k) for k in ('id', 'passed', 'error')}, sort_keys=True), flush=True)
-        report = {'schema_version': 2, 'source_commit': os.environ.get('GITHUB_SHA'),
+        report = {'schema_version': 3, 'source_commit': os.environ.get('GITHUB_SHA'),
                   'run_id': os.environ.get('GITHUB_RUN_ID'), 'model_identity': identity,
                   'program_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                   'completed': len(records), 'required': len(cases),
