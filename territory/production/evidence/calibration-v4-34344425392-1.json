@@ -1,0 +1,1304 @@
+{
+  "schema_version": 4,
+  "source_commit": "3f33599b2cdf36a2b8430724fdf3624a5e1000d4",
+  "run_id": "34344425392",
+  "model_identity": {
+    "model": "qwen3-vl:8b-instruct",
+    "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+    "runtime": "ollama",
+    "version": "0.33.3"
+  },
+  "program_sha256": "b09382b890a1dcc8f9307110782cc115d8b55ac341009b604c28b991571faec6",
+  "required": 12,
+  "cases": [
+    {
+      "id": "8cfd02ac55c7f4af",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "image_sha256": "679c498c7ff89fbdb2931c4bb9b1d73655b84a6f1afc798798f439b00c635ed3",
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "679c498c7ff89fbdb2931c4bb9b1d73655b84a6f1afc798798f439b00c635ed3"
+        ],
+        "request_sha256": "82c920c18bfa99fb30a65c2c55c4c7333a028bf4d6bdabbc2d3ff99522f2281a",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:17:16.277879123Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous loop with rounded corners, enclosing two separate street names without any visual overlap or collision between the text.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 180873526421,
+          "load_duration": 4665724375,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 0,
+          "prompt_eval_duration": 163938373000,
+          "eval_count": 73,
+          "eval_duration": 12238075000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous loop with rounded corners, enclosing two separate street names without any visual overlap or collision between the text."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "703ea876208d6a9f",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "image_sha256": "e8fbe33bb6ddcb4df41994c408c0285cb17da6b82e1571f103f49062f79aad4a",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "e8fbe33bb6ddcb4df41994c408c0285cb17da6b82e1571f103f49062f79aad4a"
+        ],
+        "request_sha256": "724045b7dc8107e1201d42627f61ae821ea498f5daf080fc7436a6fa9210da13",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:20:07.543144657Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous, rounded rectangle with no gaps, and the two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 171229062223,
+          "load_duration": 1508841,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158711284000,
+          "eval_count": 73,
+          "eval_duration": 12372344000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous, rounded rectangle with no gaps, and the two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "18079f36439411eb",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "image_sha256": "d71e068fe64a2a3fa9f888d0cd1db19a0412fd88cbd1f5ae91189551977911c2",
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "d71e068fe64a2a3fa9f888d0cd1db19a0412fd88cbd1f5ae91189551977911c2"
+        ],
+        "request_sha256": "ac1ef4ffbcd92185ec84743de523fe84237cbc91927174dd881c566811d9d0bb",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:23:00.651014919Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"white_gap\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green stroke on the top edge is broken by a white gap, while the other three edges are continuous. The two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 173073148353,
+          "load_duration": 1266605,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158468225000,
+          "eval_count": 82,
+          "eval_duration": 14475812000
+        },
+        "result": {
+          "top_edge": "white_gap",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green stroke on the top edge is broken by a white gap, while the other three edges are continuous. The two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "uncertain": false
+    },
+    {
+      "id": "d8ed388b4b9fda96",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "image_sha256": "daf3e876e68436257eef46db79baa210cde3a64d4d93d82729f61c1d3dc90a21",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "daf3e876e68436257eef46db79baa210cde3a64d4d93d82729f61c1d3dc90a21"
+        ],
+        "request_sha256": "f2780c1b53e1ae3be48feafe0495ebc83c335e39de400e382d22d55b42b7701c",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:25:52.807875599Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"white_gap\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green stroke on the top edge is broken by a white gap, while the other three edges are continuous. The two street names do not overlap visually.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 172113906379,
+          "load_duration": 1527270,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158708355000,
+          "eval_count": 79,
+          "eval_duration": 13273228000
+        },
+        "result": {
+          "top_edge": "white_gap",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green stroke on the top edge is broken by a white gap, while the other three edges are continuous. The two street names do not overlap visually."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "uncertain": false
+    },
+    {
+      "id": "9123f449f0fad469",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "image_sha256": "79940c9e68cd07704165ff45300ecb2c93e349eebb88e21d04b77bc1eb12c142",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "79940c9e68cd07704165ff45300ecb2c93e349eebb88e21d04b77bc1eb12c142"
+        ],
+        "request_sha256": "4174b17440a4fa557e2e4846e6e180c7dfaf089f5c3a236ca4f7dd358a5d1e75",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:28:44.549735991Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous loop with rounded corners, enclosing two separate lines of text without any visual overlap between the letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 171705052554,
+          "load_duration": 1224557,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158859156000,
+          "eval_count": 72,
+          "eval_duration": 12677071000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous loop with rounded corners, enclosing two separate lines of text without any visual overlap between the letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "4c186ea60d693efa",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "image_sha256": "babe38137cf9af8829b10c3c279491941640dd424fa6c2eac8fd04b4b37bdc00",
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "babe38137cf9af8829b10c3c279491941640dd424fa6c2eac8fd04b4b37bdc00"
+        ],
+        "request_sha256": "450fdde208b2159820d0abe2dcf58d29d7851e8865220bb8ec1cb0e5eb7f36ef",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:31:35.8944352Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous, rounded rectangle with no gaps, and the two street names are clearly separated with no overlapping text.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 171305611612,
+          "load_duration": 1296753,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158616352000,
+          "eval_count": 73,
+          "eval_duration": 12518368000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous, rounded rectangle with no gaps, and the two street names are clearly separated with no overlapping text."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "486638bb24443e81",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "image_sha256": "f52e70d46e1181e4e01613842c00aa046731f2f0a11ca84bf3a2026b31a22fed",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "f52e70d46e1181e4e01613842c00aa046731f2f0a11ca84bf3a2026b31a22fed"
+        ],
+        "request_sha256": "f4260fe0fa30ee8efe7100d366bcb769214e6bad3a8abf7116021b206b5f83c5",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:34:26.930266313Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous loop with rounded corners, and the two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 170998024320,
+          "load_duration": 1690213,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158745641000,
+          "eval_count": 71,
+          "eval_duration": 12083381000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous loop with rounded corners, and the two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "b4a767472dd8127c",
+      "split": "retained_v3_regression",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "image_sha256": "7a2eb94278d9fa93bf7faafc72fa4fceb3b83004dbcc6a515647d4e1938701e8",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "7a2eb94278d9fa93bf7faafc72fa4fceb3b83004dbcc6a515647d4e1938701e8"
+        ],
+        "request_sha256": "c0a3e6c2e87028606005eaf810d31c51cce11c4f87457c8fbecadcc8b9a2619f",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:37:18.144995379Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous loop with rounded corners, and the two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 171177396667,
+          "load_duration": 1540691,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158574799000,
+          "eval_count": 71,
+          "eval_duration": 12474470000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous loop with rounded corners, and the two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "bdc353315b5e1d8a",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "image_sha256": "dc66aec1dbe46e13931cafaa538fd010ac8851be4d0b21138f36ea3438b481d9",
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "dc66aec1dbe46e13931cafaa538fd010ac8851be4d0b21138f36ea3438b481d9"
+        ],
+        "request_sha256": "1102e5d17c3d60281eb58085be8127cb7a85b8594947430f99d86e61b8d62fac",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:40:09.628026229Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous loop with rounded corners, enclosing two separate street names without any visual overlap or collision between the text.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 171444921266,
+          "load_duration": 1324334,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158621620000,
+          "eval_count": 73,
+          "eval_duration": 12681582000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous loop with rounded corners, enclosing two separate street names without any visual overlap or collision between the text."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    },
+    {
+      "id": "fb1aabbb400f6ec7",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "image_sha256": "57aa632242d87e31e0f2bf73d9a12452b3ca126be7e0a745efb56bc45536b1c7",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "57aa632242d87e31e0f2bf73d9a12452b3ca126be7e0a745efb56bc45536b1c7"
+        ],
+        "request_sha256": "d6d26cce2669bd96ed7186d44a7c2f0a0355dfbb62c42075cfec0633bd91be47",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:43:02.002902873Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"white_gap\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green stroke is continuous on top, right, and left edges, but has a white gap on the bottom edge. The street names do not overlap visually.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 172338702787,
+          "load_duration": 1271787,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158489259000,
+          "eval_count": 80,
+          "eval_duration": 13686545000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "white_gap",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green stroke is continuous on top, right, and left edges, but has a white gap on the bottom edge. The street names do not overlap visually."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "uncertain": false
+    },
+    {
+      "id": "3a806ba7ef805d07",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "image_sha256": "334ebd7708126e4fc5519121c8dd52812963de433c764aa2ab1010a2ab3bd550",
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "334ebd7708126e4fc5519121c8dd52812963de433c764aa2ab1010a2ab3bd550"
+        ],
+        "request_sha256": "e7109104de1f291ce0a0dc1fc6bfeee7718425efb7a21ba8640ba1163ce9a05e",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:45:54.361486732Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"white_gap\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green stroke on the right edge is broken by a white gap, while the other three edges are continuous. The two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 172321329242,
+          "load_duration": 1664857,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158347517000,
+          "eval_count": 82,
+          "eval_duration": 13828712000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "white_gap",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green stroke on the right edge is broken by a white gap, while the other three edges are continuous. The two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "uncertain": false
+    },
+    {
+      "id": "09cbc05ca607f433",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "image_sha256": "c70230bdf2e52a4d3ac7c4f2873376e197dcaf9010ced44103e01037e3d796d3",
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "c70230bdf2e52a4d3ac7c4f2873376e197dcaf9010ced44103e01037e3d796d3"
+        ],
+        "request_sha256": "1b481030182740503751838ce63ce5c9f6dfcadf6eb838393e4f80d6164d4acf",
+        "prompt": "Read-only inspection of the supplied map pixels. There are two dark street names inside a green road loop. Inspect EACH of its four edges separately: top, right, bottom, left. For each edge report continuous when the green stroke is uninterrupted, white_gap when a white cut severs that stroke, or uncertain when you cannot determine it. Check the LEFT vertical edge as carefully as the other three; do not infer it from the top edge. Rounded corners are normal. Separately report label_collision true only if letters from the TWO DIFFERENT street names touch or overlap each other; overlapping bounding boxes alone are not a collision. Give one short observation describing actual visible evidence. Do not infer answers from filenames or from how often another answer occurred.",
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "right_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "bottom_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "left_edge": {
+              "type": "string",
+              "enum": [
+                "continuous",
+                "white_gap",
+                "uncertain"
+              ]
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "observation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "top_edge",
+            "right_edge",
+            "bottom_edge",
+            "left_edge",
+            "label_collision",
+            "observation"
+          ]
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T11:48:45.233383176Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"top_edge\": \"continuous\",\n  \"right_edge\": \"continuous\",\n  \"bottom_edge\": \"continuous\",\n  \"left_edge\": \"continuous\",\n  \"label_collision\": false,\n  \"observation\": \"The green border is a continuous rectangle with rounded corners, and the two street names are clearly separated with no overlapping letters.\"\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 170834994185,
+          "load_duration": 1266435,
+          "prompt_eval_count": 1447,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 158521964000,
+          "eval_count": 71,
+          "eval_duration": 12157536000
+        },
+        "result": {
+          "top_edge": "continuous",
+          "right_edge": "continuous",
+          "bottom_edge": "continuous",
+          "left_edge": "continuous",
+          "label_collision": false,
+          "observation": "The green border is a continuous rectangle with rounded corners, and the two street names are clearly separated with no overlapping letters."
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "interpreted": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "uncertain": false
+    }
+  ],
+  "real_card_qualification": false,
+  "release_authorized": false,
+  "completed": 12,
+  "passed": 5,
+  "synthetic_calibration_passed": false
+}
