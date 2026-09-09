@@ -1,0 +1,74 @@
+name: Territory systematic local critic calibration
+on:
+  push:
+    branches: [territory-card-production]
+    paths: ['.github/workflows/territory-systematic-calibration.yml']
+permissions:
+  contents: read
+concurrency:
+  group: territory-multiview-calibration
+  cancel-in-progress: true
+jobs:
+  calibrate:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        split: [regression, new_holdout]
+    env:
+      OLLAMA_NO_CLOUD: '1'
+      OLLAMA_HOST: '127.0.0.1:11434'
+      OLLAMA_NUM_PARALLEL: '1'
+      PIP_NO_CACHE_DIR: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      COMPANY_OS_PAUSED: '1'
+      TEST_SPLIT: ${{ matrix.split }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Create isolated Python environment
+        run: |
+          python3 -m venv "$RUNNER_TEMP/critic-venv"
+          "$RUNNER_TEMP/critic-venv/bin/python" -m pip install Pillow==12.3.0 jsonschema==4.26.0
+      - name: Install the verified local runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 2 --max-time 240 -o "$RUNNER_TEMP/ollama.tar.zst" https://github.com/ollama/ollama/releases/download/v0.33.3/ollama-linux-amd64.tar.zst
+          echo "c13cea8f3389db4145f8a6cb88d1747242a48639d7c13e3bda7c1ebdc6eebb2f  $RUNNER_TEMP/ollama.tar.zst" | sha256sum --check
+          mkdir -p "$RUNNER_TEMP/ollama"
+          tar --zstd -xf "$RUNNER_TEMP/ollama.tar.zst" -C "$RUNNER_TEMP/ollama"
+          rm "$RUNNER_TEMP/ollama.tar.zst"
+      - name: Actual independent local inference
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$RUNNER_TEMP/ollama/bin:$PATH"
+          ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:11434/api/version && break || sleep 1; done
+          timeout 480 ollama pull qwen3-vl:8b-instruct > "$RUNNER_TEMP/model-pull.log" 2>&1
+          timeout 2400 "$RUNNER_TEMP/critic-venv/bin/python" territory/production/runtime/calibrate_multiview.py --split "$TEST_SPLIT" --out "$RUNNER_TEMP/systematic.json"
+      - name: Preserve only synthetic receipts
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$RUNNER_TEMP/systematic.json" || { echo 'Critic receipt missing; no qualification.' >> "$GITHUB_STEP_SUMMARY"; exit 1; }
+          endpoint="repos/ksolo21-web/K.O.-Enterprises/contents/territory/production/evidence/systematic-${TEST_SPLIT}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          saved=0
+          for attempt in 1 2 3; do
+            if gh api --method PUT "$endpoint" -f message="Retain systematic ${TEST_SPLIT} evidence" -f branch=territory-card-production -f content="$(base64 -w0 "$RUNNER_TEMP/systematic.json")" > "$RUNNER_TEMP/publish.json"; then saved=1; break; fi
+            sleep 2
+          done
+          test "$saved" = 1
+          "$RUNNER_TEMP/critic-venv/bin/python" -c 'import json,os; r=json.load(open(os.environ["RUNNER_TEMP"]+"/systematic.json")); print(str(r["passed"])+"/"+str(r["required"])+" synthetic cases passed. Real-card qualification is not asserted.")' >> "$GITHUB_STEP_SUMMARY"
