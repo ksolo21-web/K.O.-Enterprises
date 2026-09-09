@@ -1,0 +1,129 @@
+name: Install territory continuation kit
+on:
+  push:
+    branches: [territory-card-production]
+    paths: ['territory/incoming/Territory-GitHub-Continuation-Kit.zip']
+permissions:
+  contents: read
+concurrency:
+  group: territory-kit-installation
+  cancel-in-progress: false
+jobs:
+  install-and-test:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PIP_NO_CACHE_DIR: '1'
+      COMPANY_OS_PAUSED: '1'
+      OLLAMA_NO_CLOUD: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate the complete kit and preserve concurrent edits
+        run: |
+          python3 - <<'PYTHON'
+          from pathlib import Path, PurePosixPath
+          import hashlib, io, json, os, zipfile
+          source_sha='49809b315b7dd9939912eca9a716a196abc67a8e649e74c44e1613d5cbc5deb9'
+          manifest_sha='00760b2cbcf8deaf1f2a1d288f470174eaa0840d350568d9287c1a58db242c83'
+          incoming=Path('territory/incoming/Territory-GitHub-Continuation-Kit.zip')
+          assert incoming.stat().st_size <= 8000000, 'Kit size exceeds limit'
+          digest=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(incoming) as z:
+              infos=z.infolist(); names=[i.filename for i in infos if not i.is_dir()]
+              assert len(names)==len(set(names)) and len(names)<=400, 'Duplicate or excessive members'
+              assert sum(i.file_size for i in infos)<=12000000, 'Expanded kit exceeds limit'
+              for i in infos:
+                  q=PurePosixPath(i.filename)
+                  assert not q.is_absolute() and '..' not in q.parts and '\\' not in i.filename
+                  assert ((i.external_attr >> 16) & 0o170000) != 0o120000, 'Symlinks forbidden'
+              manifest=json.loads(z.read('PACKAGE-MANIFEST.json'))
+              expected=manifest['files']
+              assert set(names)==set(expected)|{'PACKAGE-MANIFEST.json'}, 'Unmanifested kit member'
+              for name,checksum in expected.items():
+                  assert digest(z.read(name))==checksum, 'Kit member identity mismatch'
+              capsule=z.read('territory/production/Territory-Skills-Source-Capsule.zip')
+              assert digest(capsule)==source_sha, 'Wrong original source capsule'
+              with zipfile.ZipFile(io.BytesIO(capsule)) as originals:
+                  raw=originals.read('manifest.json'); assert digest(raw)==manifest_sha
+                  original_manifest=json.loads(raw); assert len(original_manifest['files'])==138
+                  assert set(originals.namelist())==set(original_manifest['files'])|{'manifest.json'}
+                  for name,checksum in original_manifest['files'].items():
+                      assert digest(originals.read(name))==checksum, 'Original source hash mismatch'
+              deployment=json.loads(z.read('DEPLOYMENT-FILES.json'))['files']
+              baseline=json.loads(z.read('territory/production/BASELINE-SHA256.json'))
+              if isinstance(baseline.get('files'),dict): baseline=baseline['files']
+              pending=[]
+              for name in deployment:
+                  q=PurePosixPath(name)
+                  allowed=name.startswith('territory/production/') or (name.startswith('.github/workflows/territory-') and name.endswith('.yml'))
+                  assert allowed and name in expected and '..' not in q.parts, 'Out-of-scope deployment'
+                  assert '/evidence/' not in name and '/vendor/' not in name, 'Deployment list contains runtime data'
+                  target=Path(name); data=z.read(name)
+                  if target.exists():
+                      assert target.is_file() and not target.is_symlink()
+                      current=digest(target.read_bytes())
+                      if current==expected[name]: continue
+                      assert baseline.get(name)==current, 'Concurrent edit preserved: '+name
+                  pending.append((target,data))
+              for target,data in pending:
+                  target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
+          Path(os.environ['RUNNER_TEMP'],'territory-install-paths.json').write_text(json.dumps(deployment))
+          Path(os.environ['RUNNER_TEMP'],'territory-kit-sha.txt').write_text(digest(incoming.read_bytes()))
+          print('Original capsule and all 138 source members verified; branch edits preserved.')
+          PYTHON
+      - name: Install isolated dependencies and original skills
+        run: |
+          python3 -m venv "$RUNNER_TEMP/territory-venv"
+          "$RUNNER_TEMP/territory-venv/bin/python" -m pip install -r territory/production/requirements.txt
+          "$RUNNER_TEMP/territory-venv/bin/python" - <<'PYTHON'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'territory/production')
+          import engine
+          print(engine.install_skills(Path('territory/production/Territory-Skills-Source-Capsule.zip')))
+          PYTHON
+      - name: Execute synthetic candidate-tooling tests
+        env:
+          GITHUB_ACTIONS: 'false'
+        run: '"$RUNNER_TEMP/territory-venv/bin/python" territory/production/audit_kit.py'
+      - name: Commit only verified sources and tested implementation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PYTHON'
+          from pathlib import Path
+          import hashlib,json,os,subprocess
+          root=Path('territory/production')
+          manifest=json.loads((root/'skills-manifest.json').read_text())
+          paths=json.loads(Path(os.environ['RUNNER_TEMP'],'territory-install-paths.json').read_text())
+          paths += ['territory/production/vendor/'+p for p in manifest['files']]
+          paths += ['territory/production/skills-manifest.json', 'territory/production/evidence/continuation-kit-audit.json', 'territory/production/evidence/continuation-kit-audit.txt']
+          for name,check in manifest['files'].items():
+              assert hashlib.sha256((root/'vendor'/name).read_bytes()).hexdigest()==check
+          audit=json.loads((root/'evidence/continuation-kit-audit.json').read_text())
+          assert audit['software_tests_passed'] is True and audit['card_release_approved'] is False
+          subprocess.run(['git','add','-f','--',*paths],check=True)
+          changed=subprocess.check_output(['git','diff','--cached','--name-only','-z']).decode().split('\0')
+          assert set(filter(None,changed))<=set(paths), 'Unexpected staged path'
+          PYTHON
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git diff --cached --quiet; then
+            git commit -m 'Install exact territory skill sources and tested continuation tooling'
+            git -c credential.helper='!gh auth git-credential' push origin HEAD:refs/heads/territory-card-production
+          fi
+          expected="$(git rev-parse HEAD)"
+          actual="$(git ls-remote origin refs/heads/territory-card-production | cut -f1)"
+          test "$expected" = "$actual"
+          printf 'Installed and tested branch commit: `%s`\n\nThis is candidate-tooling verification, not real-card approval.\n' "$actual" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve the distinction between software tests and release
+        if: always()
+        run: |
+          echo 'No real territory card is approved by this installation. Original geographic gates, fresh independent visual evidence, and the final-file release gate remain mandatory.' >> "$GITHUB_STEP_SUMMARY"
