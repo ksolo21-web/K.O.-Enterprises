@@ -1,0 +1,885 @@
+{
+  "schema_version": 4,
+  "source_commit": "8225eec5e6c95d44a6eca61a6251919b63b77ce4",
+  "run_id": "34349935571",
+  "split": "new_holdout",
+  "model_identity": {
+    "model": "qwen3-vl:8b-instruct",
+    "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+    "runtime": "ollama",
+    "version": "0.33.3"
+  },
+  "program_sha256": "205e492b8bcf878ca4513fd60f92fd8fdf821b5bcd0f2228bf0787bc4d6b4962",
+  "completed": 8,
+  "required": 8,
+  "passed": 2,
+  "cases": [
+    {
+      "id": "994a65f4b32b6196",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "view_provenance": {
+        "source_sha256": "1e1c7b9318dff5fc6410bfec03fe9970f4a6c9df627586e925af76bd84f7c787",
+        "sheet_sha256": "5b7ea721b49978c4651da2c295b0bb749d1d9ddd1dc2d2518913dbe6b3b32aba",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "5b7ea721b49978c4651da2c295b0bb749d1d9ddd1dc2d2518913dbe6b3b32aba"
+        ],
+        "request_sha256": "c4dddcd0ac0cf313bc797284a0ecb6151f4521633ff95f52153746884786e9c7",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:18:54.659773234Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"No label collision or broken road visible in any strip.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 162942652384,
+          "load_duration": 4434699764,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 0,
+          "prompt_eval_duration": 153764837000,
+          "eval_count": 29,
+          "eval_duration": 4680434000
+        },
+        "result": {
+          "observation": "No label collision or broken road visible in any strip.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": true
+    },
+    {
+      "id": "582a81f635f88c46",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "view_provenance": {
+        "source_sha256": "bc125748c59e4ad1cdc1f932c67875cf8f07549de299bf9113a2ec78cd6b4ef7",
+        "sheet_sha256": "8b5a1e08d36a604bcc248718d3462904083fea2b4fa81de352ad627742d26175",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "8b5a1e08d36a604bcc248718d3462904083fea2b4fa81de352ad627742d26175"
+        ],
+        "request_sha256": "db6bcad4f54864b92570c6d5e9e4b08cbb8c782af7c714e420d5f05f78239e17",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:21:30.020872868Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"Street names show no overlap or breaks in road segments.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 155325894270,
+          "load_duration": 1931050,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 150386486000,
+          "eval_count": 29,
+          "eval_duration": 4839589000
+        },
+        "result": {
+          "observation": "Street names show no overlap or breaks in road segments.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    },
+    {
+      "id": "1c30a03e343f182f",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "view_provenance": {
+        "source_sha256": "b4595e05f3bda026336908ba0cf606c9fee0525258929c637d771aabd533204f",
+        "sheet_sha256": "610c7bb5214b25037096016ff12d78c032cd8f2da123f268af0ba26da4a9d62f",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "610c7bb5214b25037096016ff12d78c032cd8f2da123f268af0ba26da4a9d62f"
+        ],
+        "request_sha256": "c5a0d9bf302220e6df20a9c11b806345263b9096c94b071d2be300c196cb3c67",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:24:04.346697721Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"No label collision or broken road visible in any strip.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 154290776952,
+          "load_duration": 2105052,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149493043000,
+          "eval_count": 29,
+          "eval_duration": 4667203000
+        },
+        "result": {
+          "observation": "No label collision or broken road visible in any strip.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    },
+    {
+      "id": "962675aba6352289",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "view_provenance": {
+        "source_sha256": "6ed30fa17fe3cea191dbb44a9fb33e321fad443f3c7f50ee36d19e618fa36ed2",
+        "sheet_sha256": "148d805cc6f5ab15af3f8dab561c6ce464a802634bd2e8c36648e52dc0a80b82",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "148d805cc6f5ab15af3f8dab561c6ce464a802634bd2e8c36648e52dc0a80b82"
+        ],
+        "request_sha256": "a4ef7aae0e47efd9306bbd0adf38980528add16ff1950b33c374c85cf6a88f49",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:26:38.223280932Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"Street names show no overlap or breaks in road segments.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 153839568183,
+          "load_duration": 1843804,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149056850000,
+          "eval_count": 29,
+          "eval_duration": 4626781000
+        },
+        "result": {
+          "observation": "Street names show no overlap or breaks in road segments.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    },
+    {
+      "id": "ca5c7ed2216ac410",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "view_provenance": {
+        "source_sha256": "ad4db1103ec19da37d38a8045c998bb152526540b0ff7a2e9fe9364212fbf196",
+        "sheet_sha256": "47e619a382167c8672a191067e9a9c2395db6e5f928125d24e36bcf8a14df794",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "47e619a382167c8672a191067e9a9c2395db6e5f928125d24e36bcf8a14df794"
+        ],
+        "request_sha256": "2c3b7cfb4441e794215453b171ad5c7e2a9cb6d1e4d9212e4d4659f5f4ea77c2",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:29:12.315898057Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"No label collision or broken road visible in any strip.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 154059383347,
+          "load_duration": 2162564,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149142191000,
+          "eval_count": 29,
+          "eval_duration": 4790705000
+        },
+        "result": {
+          "observation": "No label collision or broken road visible in any strip.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": true
+    },
+    {
+      "id": "efdd9552785d74da",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "view_provenance": {
+        "source_sha256": "b022f455dbbc49e81d5f856ecdce301b86aa4cd7a76dfd616d76f1c857614ca9",
+        "sheet_sha256": "18af07ab0b73ad848fbfcee94a7f5bf4a95751090fd4d1f971e14e30aebdaf29",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "18af07ab0b73ad848fbfcee94a7f5bf4a95751090fd4d1f971e14e30aebdaf29"
+        ],
+        "request_sha256": "11d09e4758bb25b729f3af168aab7c82b47ae1c7326807caa1d9ee4321baf326",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:31:47.037307287Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"Street names show no overlap or breaks in road segments.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 154677299757,
+          "load_duration": 1863986,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149771879000,
+          "eval_count": 29,
+          "eval_duration": 4753550000
+        },
+        "result": {
+          "observation": "Street names show no overlap or breaks in road segments.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    },
+    {
+      "id": "cf834dbe56499be8",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "view_provenance": {
+        "source_sha256": "a6e726285b3168ba0c3d4f68687351eb42e03edb5a7f16d79af4348da33e5e78",
+        "sheet_sha256": "ae97f936c86f360994c656973abb065cf50cc7750a7fad82d965b8e403348459",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "ae97f936c86f360994c656973abb065cf50cc7750a7fad82d965b8e403348459"
+        ],
+        "request_sha256": "f7af1b3d625ceaa1a8f973dcf8a7b3145881850cb872da418264b414577de9af",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:34:20.951756627Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"No label collision or broken road visible in any strip.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 153881498513,
+          "load_duration": 2034032,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149075041000,
+          "eval_count": 29,
+          "eval_duration": 4697432000
+        },
+        "result": {
+          "observation": "No label collision or broken road visible in any strip.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    },
+    {
+      "id": "d5c7250ca0efaab5",
+      "split": "new_holdout",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "view_provenance": {
+        "source_sha256": "25fcec2bca2534fe29c4e98f2f0248efed1073527c12449c38daba53241d7f83",
+        "sheet_sha256": "eb76c1a47744b647951bd34f330fa68e6f2607d37805288a369f2fea41c5eea8",
+        "crops": [
+          {
+            "box": [
+              60,
+              52,
+              613,
+              76
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              60,
+              377,
+              613,
+              401
+            ],
+            "rotation_degrees": 0
+          },
+          {
+            "box": [
+              56,
+              88,
+              80,
+              365
+            ],
+            "rotation_degrees": 90
+          },
+          {
+            "box": [
+              593,
+              88,
+              617,
+              365
+            ],
+            "rotation_degrees": 90
+          }
+        ]
+      },
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "eb76c1a47744b647951bd34f330fa68e6f2607d37805288a369f2fea41c5eea8"
+        ],
+        "request_sha256": "84da7a49135ee008b9d8cff2d0ff85a5adc9eac65203bb355751468a9bde7ced",
+        "prompt": "Inspect this evidence sheet. The upper image is the whole map. The next image is a close-up of its street names. The four lower strips show ALL FOUR sides of the green road loop; vertical sides were rotated to read horizontally. A white interruption INSIDE any green strip is a broken road; the normal ends of a crop are not breaks. Check EVERY strip. label_collision means that letters belonging to DIFFERENT street names touch or overlap. Look at the enlarged names, not the caption text. Judge both checks independently; do not assume that a sample is damaged. Describe actual visible evidence in observation, at most 30 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T12:36:55.691930822Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\"observation\": \"Street names show no overlap or breaks in road segments.\", \"label_collision\": false, \"broken_road\": false}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 154707038824,
+          "load_duration": 2047271,
+          "prompt_eval_count": 1332,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 149686517000,
+          "eval_count": 29,
+          "eval_duration": 4925477000
+        },
+        "result": {
+          "observation": "Street names show no overlap or breaks in road segments.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      },
+      "passed": false
+    }
+  ],
+  "synthetic_calibration_passed": false,
+  "real_card_qualification": false,
+  "release_authorized": false
+}
