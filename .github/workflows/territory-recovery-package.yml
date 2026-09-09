@@ -1,0 +1,40 @@
+name: Territory recovery audit package
+on:
+  push:
+    branches: [territory-card-production]
+    paths: ['.github/workflows/territory-recovery-package.yml']
+permissions:
+  contents: read
+jobs:
+  recover:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            territory
+            .github/workflows
+          sparse-checkout-cone-mode: false
+      - name: Package only the territory implementation and workflow definitions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, zipfile
+          files = [p for p in Path('territory').rglob('*') if p.is_file()]
+          files += list(Path('.github/workflows').glob('territory*.yml'))
+          manifest = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}
+          with zipfile.ZipFile('territory-recovery.zip', 'w', zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(files):
+                  z.write(p, str(p))
+              z.writestr('RECOVERY_MANIFEST.json', json.dumps(manifest, indent=2))
+          print(json.dumps({'file_count':len(files),'sha256':hashlib.sha256(Path('territory-recovery.zip').read_bytes()).hexdigest()}))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: territory-recovery-${{ github.sha }}
+          path: territory-recovery.zip
+          retention-days: 1
+          if-no-files-found: error
