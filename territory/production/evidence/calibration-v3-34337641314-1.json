@@ -1,0 +1,548 @@
+{
+  "schema_version": 3,
+  "source_commit": "4f4d298c5e386b33fd5c78e5baddd6925d7ee7a6",
+  "run_id": "34337641314",
+  "model_identity": {
+    "model": "qwen3-vl:8b-instruct",
+    "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+    "runtime": "ollama",
+    "version": "0.33.3"
+  },
+  "program_sha256": "cb545c367d30fb323fe57955fdc91e28feb73f4eaa1197f37d1c975bb9115a5f",
+  "completed": 8,
+  "required": 8,
+  "passed": 7,
+  "cases": [
+    {
+      "id": "8cfd02ac55c7f4af",
+      "split": "development",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "679c498c7ff89fbdb2931c4bb9b1d73655b84a6f1afc798798f439b00c635ed3"
+        ],
+        "request_sha256": "ef330f6460e03317cb3adcfb085c3124d0e5cedad9a2b420bd39c7bde14a5d5e",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:01:16.350744337Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms continuous loop. Text labels are separate and do not touch.\",\n  \"label_collision\": false,\n  \"broken_road\": false\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 159553839683,
+          "load_duration": 4690526067,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 0,
+          "prompt_eval_duration": 148624336000,
+          "eval_count": 38,
+          "eval_duration": 6207104000
+        },
+        "result": {
+          "observation": "Green border forms continuous loop. Text labels are separate and do not touch.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "703ea876208d6a9f",
+      "split": "development",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "e8fbe33bb6ddcb4df41994c408c0285cb17da6b82e1571f103f49062f79aad4a"
+        ],
+        "request_sha256": "437ebb96b0b15cf5e0d42aa5be2d604496d52f3be0c3501312fab108280348a8",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:03:45.942954826Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green rectangle contains two street names with overlapping text.\",\n  \"label_collision\": true,\n  \"broken_road\": false\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 149554911309,
+          "load_duration": 1411097,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 144053969000,
+          "eval_count": 33,
+          "eval_duration": 5396139000
+        },
+        "result": {
+          "observation": "Green rectangle contains two street names with overlapping text.",
+          "label_collision": true,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "18079f36439411eb",
+      "split": "development",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "d71e068fe64a2a3fa9f888d0cd1db19a0412fd88cbd1f5ae91189551977911c2"
+        ],
+        "request_sha256": "409dfb58f2df9a2e5b91cda1683d0b17616b560f4e16ab31f671e7c1b3034295",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:06:16.564912515Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms two separate segments with white space between, not one continuous loop.\",\n  \"label_collision\": false,\n  \"broken_road\": true\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 150588099269,
+          "load_duration": 1116006,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 144089426000,
+          "eval_count": 39,
+          "eval_duration": 6391843000
+        },
+        "result": {
+          "observation": "Green border forms two separate segments with white space between, not one continuous loop.",
+          "label_collision": false,
+          "broken_road": true
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "d8ed388b4b9fda96",
+      "split": "development",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "daf3e876e68436257eef46db79baa210cde3a64d4d93d82729f61c1d3dc90a21"
+        ],
+        "request_sha256": "707cf751e9353066077e653a0e79f868b8747acbeea0857a74eef55bd8b18e14",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:08:46.894242571Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms incomplete loop with white gap. Text labels overlap slightly.\",\n  \"label_collision\": true,\n  \"broken_road\": true\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 150294906668,
+          "load_duration": 3730817,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 144048158000,
+          "eval_count": 37,
+          "eval_duration": 6141749000
+        },
+        "result": {
+          "observation": "Green border forms incomplete loop with white gap. Text labels overlap slightly.",
+          "label_collision": true,
+          "broken_road": true
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "9123f449f0fad469",
+      "split": "held_out",
+      "expected": {
+        "label_collision": false,
+        "broken_road": true
+      },
+      "passed": false,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "79940c9e68cd07704165ff45300ecb2c93e349eebb88e21d04b77bc1eb12c142"
+        ],
+        "request_sha256": "c79d6e11395d2cd4fd2c12d4f17224d1af03fa051a32a19512bbfada7c758bfa",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:11:16.795885281Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms continuous loop. Text lines are separated with space.\",\n  \"label_collision\": false,\n  \"broken_road\": false\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 149862983244,
+          "load_duration": 1518167,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 143976302000,
+          "eval_count": 36,
+          "eval_duration": 5798358000
+        },
+        "result": {
+          "observation": "Green border forms continuous loop. Text lines are separated with space.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "4c186ea60d693efa",
+      "split": "held_out",
+      "expected": {
+        "label_collision": false,
+        "broken_road": false
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "babe38137cf9af8829b10c3c279491941640dd424fa6c2eac8fd04b4b37bdc00"
+        ],
+        "request_sha256": "36aae09b5c734d1e41653fb846cdaeafacb2f72ce2a2d596670a3f59ff4099c6",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:13:46.438244002Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms continuous loop. Text lines are separated with space.\",\n  \"label_collision\": false,\n  \"broken_road\": false\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 149605640719,
+          "load_duration": 1236052,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 143577944000,
+          "eval_count": 36,
+          "eval_duration": 5890850000
+        },
+        "result": {
+          "observation": "Green border forms continuous loop. Text lines are separated with space.",
+          "label_collision": false,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "486638bb24443e81",
+      "split": "held_out",
+      "expected": {
+        "label_collision": true,
+        "broken_road": true
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "f52e70d46e1181e4e01613842c00aa046731f2f0a11ca84bf3a2026b31a22fed"
+        ],
+        "request_sha256": "d894147ed5e30850003434ea5ed183cf911e9bce40821dd2292bcf42e1edeb92",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:16:16.455051637Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green border forms incomplete loop with white cut. Text labels overlap slightly.\",\n  \"label_collision\": true,\n  \"broken_road\": true\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 149980830043,
+          "load_duration": 1489966,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 143759950000,
+          "eval_count": 37,
+          "eval_duration": 6057908000
+        },
+        "result": {
+          "observation": "Green border forms incomplete loop with white cut. Text labels overlap slightly.",
+          "label_collision": true,
+          "broken_road": true
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    },
+    {
+      "id": "b4a767472dd8127c",
+      "split": "held_out",
+      "expected": {
+        "label_collision": true,
+        "broken_road": false
+      },
+      "passed": true,
+      "receipt": {
+        "identity": {
+          "model": "qwen3-vl:8b-instruct",
+          "digest": "0533d74300e4f9bc367d675d4e64ffd073d50ff16a2b4096cc2e8a1cf8c96319",
+          "runtime": "ollama",
+          "version": "0.33.3"
+        },
+        "image_sha256": [
+          "7a2eb94278d9fa93bf7faafc72fa4fceb3b83004dbcc6a515647d4e1938701e8"
+        ],
+        "request_sha256": "e0a983d4b22f8c9730f6103fc4234a0a8e3403deabb7b31153a27477d8451efb",
+        "prompt": "Inspect this map crop. The green road is intended to be one closed continuous loop. broken_road is true only when a white cut interrupts that green loop. label_collision is true only when dark letters from the two different street names touch or overlap each other. Judge both checks independently. In observation describe what you can actually see in at most 20 words.",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "observation": {
+              "type": "string"
+            },
+            "label_collision": {
+              "type": "boolean"
+            },
+            "broken_road": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "observation",
+            "label_collision",
+            "broken_road"
+          ],
+          "additionalProperties": false
+        },
+        "raw_response": {
+          "model": "qwen3-vl:8b-instruct",
+          "created_at": "2026-09-09T10:18:45.709257258Z",
+          "message": {
+            "role": "assistant",
+            "content": "{\n  \"observation\": \"Green rectangle with two street names. Letters overlap slightly.\",\n  \"label_collision\": true,\n  \"broken_road\": false\n}"
+          },
+          "done": true,
+          "done_reason": "stop",
+          "total_duration": 149221187434,
+          "load_duration": 1446705,
+          "prompt_eval_count": 1271,
+          "prompt_eval_cached_count": 47,
+          "prompt_eval_duration": 143574822000,
+          "eval_count": 34,
+          "eval_duration": 5546022000
+        },
+        "result": {
+          "observation": "Green rectangle with two street names. Letters overlap slightly.",
+          "label_collision": true,
+          "broken_road": false
+        },
+        "kind": "actual_local_model_inference",
+        "release_authorized": false
+      }
+    }
+  ],
+  "synthetic_calibration_passed": false,
+  "real_card_qualification": false,
+  "release_authorized": false
+}
