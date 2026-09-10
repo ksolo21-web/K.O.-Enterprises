@@ -1,0 +1,56 @@
+{
+  "kind": "internal_software_review",
+  "date_utc": "2026-09-10T19:00:31.983780+00:00",
+  "source_integrity_before": {
+    "passed": true,
+    "verified_files": 138,
+    "archive_sha256": "49809b315b7dd9939912eca9a716a196abc67a8e649e74c44e1613d5cbc5deb9",
+    "archive_manifest_sha256": "00760b2cbcf8deaf1f2a1d288f470174eaa0840d350568d9287c1a58db242c83",
+    "installed_originals_verified": 138
+  },
+  "source_integrity_after": {
+    "passed": true,
+    "verified_files": 138,
+    "archive_sha256": "49809b315b7dd9939912eca9a716a196abc67a8e649e74c44e1613d5cbc5deb9",
+    "archive_manifest_sha256": "00760b2cbcf8deaf1f2a1d288f470174eaa0840d350568d9287c1a58db242c83",
+    "installed_originals_verified": 138
+  },
+  "tests_run": 120,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "source_sha256": {
+    "client.py": "160cf481adedd859fa6dc488d34297a4c72b96c935342a2d253b78e08b71ad80",
+    "upload_capsule.py": "4154863e9f49c85cbf55b5f507041f5fe079484756203f6d8d84dee43cc6ba91",
+    "verify_originals.py": "c2e1b888fc06471371d76fcfd318ae5c6c1f84acfb0a863a766954c04ce6116c",
+    "test_privacy.py": "8641f0353cc1ac5eed13dc14ffc8d6b6f34403e2db002fd0761f1ed3ae04f783",
+    "transport.py": "29c4fc82e7712ed6a56601c809f857655ce4531e3de91c8f9f8117c56e1ac8ef",
+    "readiness.py": "85576a55caaf3191677138995ace4341157211c8b0310e33822063c6219e3773",
+    "test_engine.py": "5568851af2666669a7f4576fe28694de855cc819c7659d679b31c90a6ee8d524",
+    "test_transport.py": "b62d727a7238e3e3e9352f3164fd30713f6d1f98fb0f13b80f3741c55156e94f",
+    "batch.py": "880dc20f6e6fe5acc57cf652852a385d142de4e0846c8d822227090ce378d0c5",
+    "test_readiness.py": "9e14fdbc5d7aa5173d3e964d54203ab82ecb33f7f4c95cf672c1e67d6aeeaf49",
+    "test_sealed.py": "a85becbc644cc8177eb1d3d8a5a3d07546ef82ea719f3980a5c7432954867592",
+    "engine.py": "3d8747416e9623a5cfd7d5f723ef6054a316438d3e26d456abebaecf5c7caa35",
+    "vision_closeups.py": "073873f96666f5f17539ead195b721e7f845b96cf47e76cc9658f43e7d620736",
+    "audit_kit.py": "12df8628f2912d206ad71329f40d8f85b4dcb91b42b0052a6333adda42380707",
+    "vision_smoke.py": "13cc7a3d2d777661b101495a14d31f093be3a7f12639f4715c7058fb0c6e4700",
+    "sealed.py": "782cbdf2e9f3968be7fc8be4bc71e820d3e215eaafd94bdfff916a8fbf90eeb2",
+    "test_repair.py": "b407e76728f013009a0a68df4db5a91a91586c30970fc06bebd5ae708b44cd00",
+    "privacy.py": "064fe9a8e382c4dfab43c181c5b1d3c5780cd0ab9641067287ad0a6b439c408b",
+    "worker.py": "f453a0ff24c948844bffd425276f650c77cf198a9997712265e2968af441b4da",
+    "repair.py": "85db37954eaf486da50dd74deb034cc37d88ce855aab12dc6538443a3919446c",
+    "runtime/calibrate.py": "cb545c367d30fb323fe57955fdc91e28feb73f4eaa1197f37d1c975bb9115a5f",
+    "runtime/calibrate_v4.py": "b09382b890a1dcc8f9307110782cc115d8b55ac341009b604c28b991571faec6",
+    "runtime/calibrate_multiview.py": "205e492b8bcf878ca4513fd60f92fd8fdf821b5bcd0f2228bf0787bc4d6b4962",
+    "runtime/neural.py": "27b1790d95f54fae2db9260cf2e9c0f5f477ae22581db5717d237a7b6bac81e3"
+  },
+  "software_tests_passed": true,
+  "mandatory_real_card_checks_passed": false,
+  "card_release_approved": false,
+  "limits": [
+    "Not a model-review score",
+    "No actual territory card approved by this audit",
+    "Does not certify an unobserved remote deployment or private end-to-end run"
+  ]
+}

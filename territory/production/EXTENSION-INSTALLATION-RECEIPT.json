@@ -1,0 +1,14 @@
+{
+  "kind": "verified_candidate_extension_installation",
+  "source_commit": "0bac32b91e09fb4b682286ee9caa9f86f227e7a3",
+  "run_id": "34517748796",
+  "tests_run": 120,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "original_files_verified": 138,
+  "software_tests_passed": true,
+  "live_encrypted_job_verified": false,
+  "independent_real_card_critic_qualified": false,
+  "card_release_authorized": false
+}

@@ -78,7 +78,9 @@ def pinned(root: Path, record: dict) -> Path:
 def private_guard() -> None:
     # A public runner must never ingest real territory files, even by accident.
     if os.environ.get('GITHUB_ACTIONS') == 'true':
-        raise GateError('private production inputs cannot be processed by public CI; run on a trusted local machine')
+        from privacy import active
+        if not active():
+            raise GateError('private CI inputs require an authenticated encrypted session; ordinary public CI remains blocked')
 
 def source_root() -> Path:
     return ROOT / 'vendor'
