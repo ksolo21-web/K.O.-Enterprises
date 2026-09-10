@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "scope": "Published incremental client delivery-race repair; not real-card release approval",
+  "repository": "ksolo21-web/K.O.-Enterprises",
+  "branch": "territory-card-production",
+  "verified_software_commit": "695369b3e64f25cc7b6255ce5f6f1bf4019b4118",
+  "preserved_parent_commit": "6a11a151bb1487e6beddae8bcf89922649366506",
+  "do_not_repeat_completed_source_transfer": true,
+  "do_not_install_obsolete_local_recovery_patch": true,
+  "fixed_defect": "A directory created after the client's existence check could be replaced by os.rename; final delivery now uses an atomic no-replace operation.",
+  "changed_paths": [
+    "territory/production/client.py",
+    "territory/production/atomic_delivery.py",
+    "territory/production/test_atomic_delivery.py",
+    ".github/workflows/territory-recovery-tests.yml"
+  ],
+  "verification": {
+    "run_id": 34531988240,
+    "job_id": 103054655089,
+    "job_conclusion": "success",
+    "actual_job_log_read": true,
+    "receipt_path": "territory/production/evidence/recovery-34531988240.json",
+    "receipt_blob_sha": "d3814f2d73221d342a41e2fe7c8eb6e68f40e30d",
+    "original_tests_passed": 137,
+    "existing_visual_recovery_tests_passed": 70,
+    "new_atomic_delivery_tests_passed": 34,
+    "total_tests_passed": 241,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "original_files_verified_before": 138,
+    "original_files_verified_after": 138,
+    "real_process_kill_restart_cases": 18,
+    "client_modes_tested": ["candidates", "visual"],
+    "all_four_remote_source_hashes_match_local_tested_files": true
+  },
+  "evidence_limits": {
+    "reviewer_mode": "internal_software_review",
+    "independent_agent_executed": false,
+    "independent_score": null,
+    "real_crypto_and_filesystem": true,
+    "github_boundary_in_recovery_tests": "disk-backed simulation, also executed inside the real Actions job",
+    "live_network_client_worker_interruption_proof": false,
+    "windows_runtime_tested": false,
+    "power_loss_certification": false,
+    "real_model_inference_in_this_regression": false,
+    "real_cards_released_by_this_work": 0,
+    "real_card_approval_established_by_this_work": false
+  },
+  "cost_and_privacy": {
+    "runner": "ubuntu-24.04",
+    "single_standard_public_job": true,
+    "paid_model_calls": 0,
+    "billing_settings_changed": false,
+    "private_plaintext_or_recovery_keys_published": false,
+    "original_card_release_gates_changed": false,
+    "force_push_used": false
+  },
+  "remaining_dependency_order": [
+    "Inspect the existing encrypted real-image review session and its actual evidence; do not launch a duplicate merely because another chat has stale state.",
+    "Qualify the independent critic against actual accepted and rejected examples, including wrong-side labels, detached/wrong-target arrows, clutter and altered road geometry.",
+    "Prove build, independent review, authorized repair, fresh review and every original source/geography/coverage/export gate on one real card.",
+    "Demonstrate live interruption recovery and exact retained-file delivery for that card before batch execution."
+  ]
+}
