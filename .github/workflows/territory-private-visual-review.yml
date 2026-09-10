@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 2
           persist-credentials: false
       - name: Install fixed test dependencies without caches
         run: |
@@ -60,15 +61,18 @@ jobs:
         run: |
           gh api --method PUT "repos/ksolo21-web/K.O.-Enterprises/contents/territory/production/evidence/visual-controller-${GITHUB_RUN_ID}.json" -f message='Retain verified visual-controller software tests [skip ci]' -f branch='territory-card-production' -f content="$(base64 -w0 "$RUNNER_TEMP/controller-tests.json")" > "$RUNNER_TEMP/test-receipt-upload.json"
       - id: select
-        name: Select only one owner-created opaque review request
+        name: Select only one changed owner-created opaque review request
         run: |
           python3 - <<'PY'
-          import json,os,re
-          event=json.load(open(os.environ['GITHUB_EVENT_PATH']))
-          names=set(n for c in event.get('commits',[]) for k in ('added','modified') for n in c.get(k,[]))
+          import os,re,subprocess
+          sha=os.environ['GITHUB_SHA']
+          if not re.fullmatch(r'[0-9a-f]{40}',sha):raise SystemExit('Invalid commit identity.')
+          result=subprocess.run(['git','diff','--name-only','--diff-filter=AM','-z',sha+'^',sha,'--'],check=True,capture_output=True)
+          names=set(result.stdout.decode().split('\0'))
           sessions=[n.rsplit('/',1)[-1] for n in names if re.fullmatch(r'territory/transport/visual-requests/[0-9a-f]{32}',n)]
           if len(sessions)>1:raise SystemExit('One private review session per run is permitted.')
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('session='+(sessions[0] if sessions else '')+'\n')
+          print('Selected opaque review requests:',len(sessions))
           PY
   review:
     needs: verify
