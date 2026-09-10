@@ -65,17 +65,32 @@ jobs:
           print(json.dumps(receipt))
           if not passed:raise SystemExit('Mandatory software regression checks failed.')
           PY
-      - name: Preserve only the nonprivate software-test receipt
+      - name: Preserve and read back the nonprivate software-test receipt
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if test -f "$RUNNER_TEMP/recovery-tests.json"; then
-            gh api --method PUT "repos/ksolo21-web/K.O.-Enterprises/contents/territory/production/evidence/recovery-${GITHUB_RUN_ID}.json" -f message='Retain actual recovery regression result [skip ci]' -f branch='territory-card-production' -f content="$(base64 -w0 "$RUNNER_TEMP/recovery-tests.json")" > "$RUNNER_TEMP/receipt-upload.json"
-          else
-            echo 'No complete test receipt exists; do not infer a pass.'
-            exit 1
-          fi
+          python3 - <<'PY'
+          import base64,json,os,subprocess,time
+          from pathlib import Path
+          path=Path(os.environ['RUNNER_TEMP'],'recovery-tests.json')
+          if not path.is_file():raise SystemExit('No complete test receipt; no inferred pass.')
+          raw=path.read_bytes()
+          endpoint='repos/ksolo21-web/K.O.-Enterprises/contents/territory/production/evidence/recovery-'+os.environ['GITHUB_RUN_ID']+'.json'
+          body=json.dumps({'message':'Retain actual recovery regression result [skip ci]','branch':'territory-card-production','content':base64.b64encode(raw).decode()})
+          for attempt in range(4):
+              written=subprocess.run(['gh','api','--method','PUT',endpoint,'--input','-'],input=body,capture_output=True,text=True,timeout=60)
+              read=subprocess.run(['gh','api',endpoint+'?ref=territory-card-production'],capture_output=True,text=True,timeout=60)
+              if read.returncode==0:
+                  actual=json.loads(read.stdout)
+                  if base64.b64decode(actual['content'])!=raw:raise SystemExit('Existing receipt differs; never overwrite evidence.')
+                  print('Exact regression receipt readback verified.')
+                  break
+              if written.returncode==0:raise SystemExit('Write succeeded but readback unavailable; result not verified.')
+              if 'HTTP 409' not in written.stderr:raise SystemExit('Receipt publication failed; no blind retry.')
+              time.sleep(attempt+1)
+          else:raise SystemExit('Concurrent publication did not settle; no force update used.')
+          PY
       - name: No artifact, cache, paid model, or real-card release
         if: always()
         run: echo 'Software regression evidence only. Original card release gates remain unchanged.' >> "$GITHUB_STEP_SUMMARY"
