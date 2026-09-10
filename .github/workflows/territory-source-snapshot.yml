@@ -1,0 +1,38 @@
+name: Territory source snapshot
+'on':
+  push:
+    branches: [territory-card-production]
+    paths: ['.github/workflows/territory-source-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            territory/production
+            .github/workflows
+      - name: Snapshot public code only, excluding job transport
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          files=sorted(p for p in Path('territory/production').rglob('*') if p.is_file())
+          files+=sorted(Path('.github/workflows').glob('territory*.yml'))
+          manifest={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+          with zipfile.ZipFile('source-snapshot.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for p in files:z.write(p,str(p))
+              z.writestr('SNAPSHOT.json',json.dumps({'source_commit':os.environ['GITHUB_SHA'],'files':manifest},indent=2))
+          print(json.dumps({'public_files':len(files),'sha256':hashlib.sha256(Path('source-snapshot.zip').read_bytes()).hexdigest()}))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: territory-source-${{ github.sha }}
+          path: source-snapshot.zip
+          retention-days: 1
+          if-no-files-found: error
