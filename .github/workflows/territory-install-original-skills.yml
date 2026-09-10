@@ -1,0 +1,131 @@
+name: Territory original skills installation
+on:
+  push:
+    branches: [territory-card-production]
+    paths:
+      - 'territory/production/Territory-Skills-Source-Capsule.zip'
+      - 'Territory-Skills-Source-Capsule.zip'
+      - '.github/workflows/territory-install-original-skills.yml'
+permissions:
+  contents: read
+concurrency:
+  group: territory-original-skills-installation
+  cancel-in-progress: false
+jobs:
+  install:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: territory-card-production
+          persist-credentials: false
+      - name: Verify the exact original archive before importing source code
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, zipfile
+          root = Path('territory/production')
+          options = [root/'Territory-Skills-Source-Capsule.zip', Path('Territory-Skills-Source-Capsule.zip')]
+          present = [p for p in options if p.is_file() and not p.is_symlink()]
+          if not present:
+              raise SystemExit('Original source capsule is still missing. Installation and card approval remain blocked.')
+          expected = '49809b315b7dd9939912eca9a716a196abc67a8e649e74c44e1613d5cbc5deb9'
+          for p in present:
+              raw = p.read_bytes()
+              if len(raw) != 419980 or hashlib.sha256(raw).hexdigest() != expected:
+                  raise SystemExit('Original capsule identity differs. No substitute or partial source is permitted.')
+          target = options[0]
+          if not target.exists():
+              target.write_bytes(present[0].read_bytes())
+          with zipfile.ZipFile(target) as archive:
+              if len(archive.infolist()) != 139 or archive.testzip() is not None:
+                  raise SystemExit('Original archive member count or CRC check failed.')
+              manifest_raw = archive.read('manifest.json')
+              if hashlib.sha256(manifest_raw).hexdigest() != '00760b2cbcf8deaf1f2a1d288f470174eaa0840d350568d9287c1a58db242c83':
+                  raise SystemExit('Original source manifest differs.')
+              manifest = json.loads(manifest_raw)
+              if len(manifest['files']) != 138:
+                  raise SystemExit('Original source manifest is incomplete.')
+              for name, digest in manifest['files'].items():
+                  if hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                      raise SystemExit('A preserved source file differs.')
+          print('Verified exact archive and all 138 original source file hashes.')
+          PY
+      - name: Install and reverify immutable skills
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+          root = Path('territory/production').resolve()
+          sys.path.insert(0, str(root))
+          import engine
+          result = engine.install_skills(root/'Territory-Skills-Source-Capsule.zip')
+          if result.get('verified_files') != 138 or result.get('source_integrity') is not True:
+              raise SystemExit('Original skill installation verification failed.')
+          print(result)
+          PY
+      - name: Install test-only dependencies without caches
+        run: |
+          python3 -m venv "$RUNNER_TEMP/territory-source-test-env"
+          "$RUNNER_TEMP/territory-source-test-env/bin/python" -m pip install --disable-pip-version-check --no-cache-dir PyMuPDF==1.26.7 Pillow==12.3.0 numpy==2.3.5 scipy==1.17.0 jsonschema==4.26.0 shapely==2.1.2 pytest==9.0.2 cryptography==46.0.4
+      - name: Run existing source and orchestration tests
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          "$RUNNER_TEMP/territory-source-test-env/bin/python" -m unittest discover -s territory/production -p 'test_engine.py' -v
+      - name: Save source-only installation receipt
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os
+          root=Path('territory/production')
+          manifest=json.loads((root/'skills-manifest.json').read_text())
+          for name,digest in manifest['files'].items():
+              if hashlib.sha256((root/'vendor'/name).read_bytes()).hexdigest()!=digest:
+                  raise SystemExit('Installed original source changed during tests.')
+          result={'kind':'verified_original_skill_installation','original_files_verified':138,
+                  'source_commit':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],
+                  'source_integrity':True,'card_release_authorized':False,
+                  'remaining':['Independent critic qualification on real accepted/rejected cards',
+                               'Encrypted job end-to-end test',
+                               'Complete review, authorized repair, retest and release integration']}
+          (root/'SOURCE-INSTALLATION-RECEIPT.json').write_text(json.dumps(result,indent=2)+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Original skills installation\nAll 138 original files passed exact-hash verification.\n\nSource installation is not approval of unattended card production.\n')
+          PY
+      - name: Commit only the original skill sources and their installation receipt
+        env:
+          GH_INSTALL_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, os, subprocess
+          prefix='territory/production/'
+          allowed=[prefix+'Territory-Skills-Source-Capsule.zip',prefix+'vendor',prefix+'skills-manifest.json',prefix+'SOURCE-INSTALLATION-RECEIPT.json']
+          def run(args,**kwargs):
+              return subprocess.run(args,check=True,text=True,capture_output=True,**kwargs)
+          run(['git','add','-f','--',*allowed])
+          staged=run(['git','diff','--cached','--name-only','-z']).stdout.split('\0')
+          for name in filter(None,staged):
+              if name not in allowed and not name.startswith(prefix+'vendor/'):
+                  raise SystemExit('Unexpected staged file. No commit or push permitted.')
+          if not any(staged):
+              raise SystemExit(0)
+          run(['git','-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','commit','-m','Preserve verified 138-file original territory skills installation [skip ci]'])
+          token=os.environ.pop('GH_INSTALL_TOKEN')
+          env=os.environ.copy()
+          env.update({'GIT_TERMINAL_PROMPT':'0','GIT_CONFIG_COUNT':'1',
+                      'GIT_CONFIG_KEY_0':'http.https://github.com/.extraheader',
+                      'GIT_CONFIG_VALUE_0':'AUTHORIZATION: basic '+base64.b64encode(('x-access-token:'+token).encode()).decode()})
+          # Normal fast-forward push; a concurrent update is never overwritten.
+          run(['git','push','origin','HEAD:refs/heads/territory-card-production'],env=env)
+          local=run(['git','rev-parse','HEAD']).stdout.strip()
+          remote=run(['git','ls-remote','origin','refs/heads/territory-card-production'],env=env).stdout.split()[0]
+          if local!=remote:
+              raise SystemExit('Remote branch readback changed; source installation must be rechecked.')
+          print('Verified source installation commit: '+local)
+          PY
