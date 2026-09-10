@@ -1,0 +1,130 @@
+{
+  "module_sha256": "39485bb9a1c8404e06e3d592b7cec230cc18be8c98d08f40564317b5386c680e",
+  "tests": [
+    {
+      "name": "current_44",
+      "expected_accept": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "name": "current_45A",
+      "expected_accept": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "name": "current_46A",
+      "expected_accept": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "name": "current_77A",
+      "expected_accept": true,
+      "passed": true,
+      "errors": []
+    },
+    {
+      "name": "actual_prior_false_positive_44",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: OSM property eligibility requires actual hash-bound raw Overpass elements"
+      ]
+    },
+    {
+      "name": "missing_context_ref",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: relevant and supporting context must partition all raw elements exactly"
+      ]
+    },
+    {
+      "name": "invalid_raw_path",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: OSM property eligibility requires actual hash-bound raw Overpass elements"
+      ]
+    },
+    {
+      "name": "stale_raw_hash",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: OSM property eligibility requires actual hash-bound raw Overpass elements"
+      ]
+    },
+    {
+      "name": "missing_raw_binding",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: OSM property eligibility requires actual hash-bound raw Overpass elements"
+      ]
+    },
+    {
+      "name": "wrong_raw_tags",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm/way/967499825: raw tags must equal the retained source element"
+      ]
+    },
+    {
+      "name": "shed_promoted",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm/way/967499825: eligible housing requires independently resolved residence use, excluding sheds/offices"
+      ]
+    },
+    {
+      "name": "stale_use_evidence",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm/way/967499825: residence use requires hash-bound independent evidence and review method"
+      ]
+    },
+    {
+      "name": "intersection_only",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm/way/967499825: intersection alone cannot establish whole-property assignment"
+      ]
+    },
+    {
+      "name": "actual_landuse_cannot_become_residence_even_with_use_assertion",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: relevant and supporting context must partition all raw elements exactly",
+        "current_inventory_review raw source osm/way/1081290186: land use, recreation, utility and other context are not residential buildings"
+      ]
+    },
+    {
+      "name": "malformed_raw_tags",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm: malformed or duplicate raw elements"
+      ]
+    },
+    {
+      "name": "eligible_context_smuggling",
+      "expected_accept": false,
+      "passed": true,
+      "errors": [
+        "current_inventory_review raw source osm/node/61864389: supporting context cannot contain eligible housing or assigned roads",
+        "current_inventory_review raw source osm/node/61864389: land use, recreation, utility and other context are not residential buildings",
+        "current_inventory_review raw source osm/node/61864389: eligible housing requires independently resolved residence use, excluding sheds/offices",
+        "current_inventory_review raw source osm/node/61864389: residence use requires hash-bound independent evidence and review method"
+      ]
+    }
+  ],
+  "scope": "Contract regression tests only; no batch remeasurement or new independent visual release approval."
+}

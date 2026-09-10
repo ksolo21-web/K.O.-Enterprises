@@ -1,0 +1,14 @@
+interface:
+  display_name: Territory Map Card Builder
+  short_description: Build and verify source-preserved territory cards
+  default_prompt: Use $territory-map-card-builder to create or revise this territory
+    card while preserving the approved map and enforcing every release gate.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

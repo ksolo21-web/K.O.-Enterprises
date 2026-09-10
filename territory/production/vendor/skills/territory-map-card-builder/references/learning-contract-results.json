@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "executed": "2026-09-07",
+  "fixture_pdf_sha256": "1481a7dbd3d18796cc35f42e7356c8d6a30f362ec4097ff5a0896960509b1cce",
+  "executed_contract_tests": [
+    {
+      "case": "accept_real_10",
+      "expected_release_ready": true,
+      "passed": true
+    },
+    {
+      "case": "reject_9_99",
+      "expected_release_ready": false,
+      "passed": true
+    },
+    {
+      "case": "reject_rounds_to_10",
+      "expected_release_ready": false,
+      "passed": true
+    },
+    {
+      "case": "reject_missing_evidence",
+      "expected_release_ready": false,
+      "passed": true
+    }
+  ],
+  "visual_pair_replays": {
+    "28": "original rejected; candidate visually/export eligible; geography unverified",
+    "31B": "original rejected; candidate visually/export eligible; geography unverified",
+    "39": "original visually rejected; candidate and retained rejected concealed obsolete text; replacement positive pending",
+    "remaining": "pending"
+  },
+  "replay_command": "python scripts/test_exact_ten.py CORRECTED_028_PDF SAVED_028_REVIEW --output RESULT_JSON"
+}

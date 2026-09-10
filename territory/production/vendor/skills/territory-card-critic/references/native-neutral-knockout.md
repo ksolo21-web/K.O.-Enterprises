@@ -1,0 +1,11 @@
+# Native neutral paint knockout
+
+Use `neutral_paint_knockout` only for an independently approved single CMYK-white fill inserted into an existing native stream. It changes visible paint, without moving, deleting, recoloring or restyling an original path. Keep `contains_stroke_repair=true`; the separate knockout contract is mandatory. Existing-path and topology contracts are unchanged.
+
+Before implementation, independently approve the immutable source-authored polygon, original narrow mask, insertion anchor and complete original/textfree/colored/baseline authority chain. Bind the registration-plan hash in the authority record. The operation receipt must follow approval and bind the actual output. No enlarged mask, reconstructed baseline, arbitrary script, supplied PASS report, optional scale list or raster-disable option substitutes for direct replay.
+
+`neutral_knockout_contract.py` regenerates the single neutral command from numeric vertices, compares all other stream bytes/object dictionaries/native paths/styles/order, proves source-to-final transform, and requires zero outside-mask RGB differences in source and final at 1/2/4/8. Independent actual-size and paired 4x images must bind the current file and plan. Decode each as an RGB PNG and compare dimensions and exact pixels against a fresh actual final 1x full-page render, and baseline/final 4x crops from the frozen transformed mask with a fixed eight-final-point margin. Hashes or claimed filenames alone are insufficient. The contract returns errors to the ordinary gate; it never grants release on its own. All geography, OSM property scope, labels, navigation, housing, source comparison and export requirements remain in force.
+
+The source-authored plan and independent authority are evidence records, not executable extension code. Keep failed earlier proof and repair representations separate.
+
+For a saved delivery PDF, the optional `neutral-knockout-delivery-wrapper-1` contract first replays the immutable receipt-bound operation through the unchanged strict validator, then verifies exact delivery-envelope custody and separately bound current visual PNG evidence. Nested wrappers, extra metadata, rewritten receipts, or rendering/geometry changes fail.

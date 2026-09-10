@@ -1,0 +1,33 @@
+{
+  "scope": "Executed bounded scientific/chain/contract tests, not final42 approval or batch rerun",
+  "positive": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/positive42-v6/report.json",
+    "sha256": "191781d1dba176549aa418e717ca90d0cb87084b003d62ce3e55206a6d9345fc"
+  },
+  "negative_cases": 12,
+  "negative_results": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/negative-results-v6.json",
+    "sha256": "29bcf51539dcb6b0bfaefe3fbc734c4df012d4fe39e60f4d1e6114bb07125e90"
+  },
+  "contract_cases": 4,
+  "contract_results": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/contract-results.json",
+    "sha256": "c4d2eb685346eedc3a6d714de257562fcf57d1f0abc64cd2df6daa72bd367a31"
+  },
+  "unchanged_single_and_multi_view_contracts": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/unchanged-topology-contracts.json",
+    "sha256": "1ffceff6fde8a203556a83dd3faf337da44974c0da81c608a352eb7dbae99f0e"
+  },
+  "actual_project_integration_pending_visual_only_for_chain": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/project-integration-results.json",
+    "sha256": "f1b4e6cd2408ec10ffb5dbe4b756f1989da0cf8d98ce14eb9090111ff723ef61"
+  },
+  "independent_estimator_review": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/cards/42/repair-round2/independent-estimator-review.json",
+    "sha256": "f56b5ee36e90577df4e9f680051e73183d529d2d6e89c50e56db839f62a06b95"
+  },
+  "independent_full_code_review": {
+    "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/cards/42/repair-round2/mixed-chain-v6-code-review.json",
+    "sha256": "eb756e13a0913f83236bad01be80c94512486fa4d639d5325815137046a5c3b4"
+  }
+}

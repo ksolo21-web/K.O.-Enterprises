@@ -1,0 +1,36 @@
+{
+  "positive": [
+    "Create a new territory card for 255A.",
+    "Redraw this old territory map using the real streets.",
+    "Fix the yellow perimeter roads and make all interior streets visible.",
+    "Convert this territory PDF into our current card design.",
+    "Find the gaps where we do not have territory cards.",
+    "The top of the territory map is cut off.",
+    "Make the perimeter streets work inside only and internal streets work both sides.",
+    "Put this neighborhood into a territory map.",
+    "Update the Canva territory card but keep the verified street geometry.",
+    "Compare Territory 252A to the live map and correct missing roads.",
+    "Add the verified apartment-complex name and label its north and west entrances.",
+    "Shrink the supplied territory map uniformly and add connected major cross roads."
+  ],
+  "negative": [
+    "Explain the territorial history of Michigan.",
+    "Draw a fantasy kingdom map.",
+    "Make a sales territory dashboard.",
+    "Give me directions to the nearest store.",
+    "Summarize a border dispute.",
+    "Create a fictional city map for a game."
+  ],
+  "boundary": [
+    {
+      "prompt": "Resize the front of this territory card without changing the map.",
+      "expected": true,
+      "reason": "Any territory-card artifact revision should route through this skill so geometry is protected."
+    },
+    {
+      "prompt": "Map our regional sales territories.",
+      "expected": false,
+      "reason": "Business sales territories are outside scope."
+    }
+  ]
+}

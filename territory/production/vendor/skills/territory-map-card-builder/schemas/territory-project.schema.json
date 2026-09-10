@@ -1,0 +1,1312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/territory-project.schema.json",
+  "title": "Territory Map Card Project",
+  "type": "object",
+  "required": ["navigation_presentation_review", "housing_instruction_review", "coverage_review", "current_inventory_review", "major_crossroad_review", "schema_version", "map_mode", "territory_id", "locality", "sources", "boundary", "roads", "labels", "sites", "entrances", "navigation_context", "source_transform", "preservation_audit", "directions", "corrections", "qa", "sidebar_qa", "output"],
+  "$defs": {
+    "auditExtent": {
+      "type": "object",
+      "required": [
+        "crs",
+        "bounds",
+        "evidence"
+      ],
+      "properties": {
+        "crs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "assignmentSegment": {
+      "type": "object",
+      "required": [
+        "road_id",
+        "source_feature_id",
+        "from_ref",
+        "to_ref",
+        "classification",
+        "work_rule",
+        "inside_side",
+        "verified",
+        "assignment_evidence"
+      ],
+      "properties": {
+        "road_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_feature_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "enum": [
+            "interior",
+            "perimeter",
+            "excluded"
+          ]
+        },
+        "work_rule": {
+          "enum": [
+            "both_sides",
+            "inside_only",
+            "do_not_work"
+          ]
+        },
+        "inside_side": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verified": {
+          "const": true
+        },
+        "assignment_evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "inventorySource": {
+      "type": "object",
+      "required": [
+        "id",
+        "url",
+        "retrieved_at",
+        "source_recency",
+        "query",
+        "retrieval_evidence",
+        "complete",
+        "returned_count",
+        "retrieved_feature_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https?://"
+        },
+        "retrieved_at": {
+          "type": "string",
+          "minLength": 1,
+          "format": "date"
+        },
+        "source_recency": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retrieval_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "complete": {
+          "const": true
+        },
+        "returned_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retrieved_feature_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "inventoryFeature": {
+      "type": "object",
+      "required": [
+        "source_id",
+        "feature_id",
+        "kind",
+        "location",
+        "disposition",
+        "eligibility",
+        "assignment_evidence",
+        "evidence"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feature_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "road",
+            "access",
+            "property"
+          ]
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "disposition": {
+          "enum": [
+            "matched",
+            "verified_addition",
+            "excluded"
+          ]
+        },
+        "eligibility": {
+          "enum": [
+            "eligible",
+            "ineligible",
+            "not_applicable"
+          ]
+        },
+        "assignment_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "coverage_review": {
+            "properties": {
+              "representation": {
+                "const": "explicit_road_segment_assignment"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "map_mode": {
+            "const": "preserve_supplied_map"
+          },
+          "boundary": {
+            "properties": {
+              "closed": {
+                "type": "null"
+              },
+              "no_self_intersections": {
+                "type": "null"
+              },
+              "geometry_verified": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "boundary": {
+            "properties": {
+              "closed": {
+                "const": true
+              },
+              "no_self_intersections": {
+                "const": true
+              },
+              "geometry_verified": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "neutral_knockout_review": {
+      "type": "object",
+      "required": ["plan", "authority", "operation_receipt", "source_after", "report", "independent_visual_review"],
+      "description": "One native neutral fill; mandatory direct native/RGB custody replay plus independent source-plan and visual review."
+    },
+    "housing_instruction_review": {"type": "object", "required": ["rule_precedence", "user_decision", "assignment_source_ref", "assignment_source_sha256", "assigned_housing", "included_housing_types", "legacy_housing_exclusions", "legacy_instruction_evidence", "resolutions", "rendered_instructions_text", "unresolved_conflicts", "assignment_scope_preserved", "work_colors_preserved", "inside_only_sides_preserved", "map_exclusions_preserved", "instructions_review_completed", "evidence", "excluded_property_review"], "properties": {"assignment_source_ref": {"type": "string", "minLength": 1}, "legacy_instruction_evidence": {"type": "string", "minLength": 1}, "rendered_instructions_text": {"type": "string", "minLength": 1}, "evidence": {"type": "string", "minLength": 1}, "rule_precedence": {"const": "marked_assignment_over_legacy_housing_exclusions"}, "user_decision": {"type": "object", "required": ["date", "instruction", "source_ref"], "properties": {"date": {"type": "string", "minLength": 1}, "instruction": {"type": "string", "minLength": 1}, "source_ref": {"type": "string", "minLength": 1}}}, "assignment_source_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"}, "unresolved_conflicts": {"const": []}, "assignment_scope_preserved": {"const": true}, "work_colors_preserved": {"const": true}, "inside_only_sides_preserved": {"const": true}, "map_exclusions_preserved": {"const": true}, "instructions_review_completed": {"const": true}, "included_housing_types": {"type": "array", "uniqueItems": true, "items": {"enum": ["single_family_homes", "apartments", "condominiums", "townhomes", "mobile_homes", "other_residential"]}}, "legacy_housing_exclusions": {"type": "array", "uniqueItems": true, "items": {"enum": ["single_family_homes", "apartments", "condominiums", "townhomes", "mobile_homes", "other_residential"]}}, "assigned_housing": {"type": "array", "items": {"type": "object", "required": ["housing_type", "feature_refs", "assignment_evidence"], "properties": {"housing_type": {"enum": ["single_family_homes", "apartments", "condominiums", "townhomes", "mobile_homes", "other_residential"]}, "feature_refs": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["source_id", "feature_id"], "properties": {"source_id": {"type": "string", "minLength": 1}, "feature_id": {"type": "string", "minLength": 1}}}}, "assignment_evidence": {"type": "string", "minLength": 1}}}}, "excluded_property_review": {"type": "array", "items": {"type": "object", "required": ["basis", "feature_refs", "evidence"], "properties": {"basis": {"enum": ["map_exclusion", "outside_assignment", "inside_only_other_side", "assigned_other_territory", "access_rule", "nonresidential"]}, "feature_refs": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["source_id", "feature_id"], "properties": {"source_id": {"type": "string", "minLength": 1}, "feature_id": {"type": "string", "minLength": 1}}}}, "evidence": {"type": "string", "minLength": 1}}}}, "resolutions": {"type": "array", "items": {"type": "object", "required": ["housing_type", "previous_instruction", "revised_instruction", "assignment_evidence", "decision_ref"], "properties": {"housing_type": {"enum": ["single_family_homes", "apartments", "condominiums", "townhomes", "mobile_homes", "other_residential"]}, "previous_instruction": {"type": "string", "minLength": 1}, "revised_instruction": {"type": "string", "minLength": 1}, "assignment_evidence": {"type": "string", "minLength": 1}, "decision_ref": {"type": "string", "minLength": 1}}}}}},
+    "coverage_review": {
+      "type": "object",
+      "required": [
+        "representation",
+        "map_mode",
+        "source_ref",
+        "source_sha256",
+        "geometry_verified",
+        "full_coverage_resolved",
+        "audit_extent",
+        "edges_reviewed",
+        "edge_evidence",
+        "unresolved_edges"
+      ],
+      "properties": {
+        "representation": {
+          "enum": [
+            "closed_polygon",
+            "explicit_road_segment_assignment"
+          ]
+        },
+        "map_mode": {
+          "enum": [
+            "preserve_supplied_map",
+            "vector_rebuild"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "geometry_verified": {
+          "const": true
+        },
+        "full_coverage_resolved": {
+          "const": true
+        },
+        "audit_extent": {
+          "$ref": "#/$defs/auditExtent"
+        },
+        "edges_reviewed": {
+          "const": true
+        },
+        "edge_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unresolved_edges": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "segment_assignments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assignmentSegment"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "representation": {
+                "const": "explicit_road_segment_assignment"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "segment_assignments"
+            ],
+            "properties": {
+              "map_mode": {
+                "const": "preserve_supplied_map"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "current_inventory_review": {
+      "type": "object",
+      "required": [
+        "check_date",
+        "full_boundary_and_edges_checked",
+        "source_retrieval_complete",
+        "relevant_property_eligibility_resolved",
+        "unresolved_discrepancies",
+        "unresolved_candidates",
+        "evidence",
+        "audit_extent",
+        "sources",
+        "feature_dispositions"
+      ],
+      "properties": {
+        "check_date": {
+          "type": "string",
+          "minLength": 1,
+          "format": "date"
+        },
+        "full_boundary_and_edges_checked": {
+          "const": true
+        },
+        "source_retrieval_complete": {
+          "const": true
+        },
+        "relevant_property_eligibility_resolved": {
+          "const": true
+        },
+        "unresolved_discrepancies": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "unresolved_candidates": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audit_extent": {
+          "$ref": "#/$defs/auditExtent"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/inventorySource"
+          }
+        },
+        "feature_dispositions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inventoryFeature"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "schema_version": {"const": "2.2"},
+    "map_mode": {"enum": ["preserve_supplied_map", "vector_rebuild"]},
+    "territory_id": {"type": "string", "minLength": 1},
+    "locality": {"type": "string", "minLength": 1},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["organization", "dataset", "tier", "retrieved", "license_checked"],
+        "properties": {
+          "organization": {"type": "string", "minLength": 1},
+          "dataset": {"type": "string", "minLength": 1},
+          "tier": {"enum": ["user_supplied_map", "user_supplied_design_reference", "county_municipal", "state", "openstreetmap", "tiger_line", "live_map_name_verification", "legacy_reference"]},
+          "retrieved": {"type": "string", "format": "date"},
+          "license_checked": {"type": "boolean"},
+          "url": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "required": ["source", "closed", "no_self_intersections", "geometry_verified"],
+      "properties": {
+        "source": {"type": "string", "minLength": 1},
+        "closed": {"type": ["boolean", "null"]},
+        "no_self_intersections": {"type": ["boolean", "null"]},
+        "geometry_verified": {"type": "boolean"},
+        "georeferenced_from_legacy": {"type": "boolean"},
+        "control_point_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": true
+    },
+    "roads": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "source_feature_id", "geometry_source", "classification", "work_rule", "inside_side", "geometry_verified", "visible", "label_status"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "source_feature_id": {"type": "string", "minLength": 1},
+          "geometry_source": {"type": "string", "minLength": 1},
+          "classification": {"enum": ["interior", "perimeter", "excluded", "context"]},
+          "work_rule": {"enum": ["both_sides", "inside_only", "do_not_work", "context_only"]},
+          "inside_side": {"enum": ["left", "right", "north", "south", "east", "west", "mixed", "not_applicable"]},
+          "geometry_verified": {"type": "boolean"},
+          "visible": {"type": "boolean"},
+          "label_status": {"enum": ["placed", "repeated", "not_required", "unresolved"]},
+          "role": {"enum": ["standard", "major_context", "approach_context", "access_stem"]},
+          "exception_reason": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "labels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "road_id", "text", "method", "direct_fit_available",
+          "font_family", "font_weight", "guide_gap_min_px", "guide_gap_max_px",
+          "guide_gap_spread_px", "covers_street", "overlaps_label", "clipped",
+          "follows_street_shape"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "road_id": {"type": "string", "minLength": 1},
+          "text": {"type": "string", "minLength": 1},
+          "method": {"enum": ["direct", "curved", "callout", "repeated"]},
+          "direct_fit_available": {"type": "boolean"},
+          "font_family": {"type": "string", "minLength": 1},
+          "font_weight": {"type": "integer"},
+          "guide_gap_min_px": {"type": "number", "minimum": 0},
+          "guide_gap_max_px": {"type": "number", "minimum": 0},
+          "guide_gap_spread_px": {"type": "number", "minimum": 0},
+          "covers_street": {"type": "boolean"},
+          "overlaps_label": {"type": "boolean"},
+          "clipped": {"type": "boolean"},
+          "follows_street_shape": {"type": "boolean"},
+          "arrow": {
+            "type": ["object", "null"],
+            "properties": {
+              "target_road_id": {"type": "string", "minLength": 1},
+              "target_kind": {"const": "street_stem"},
+              "filled_triangular_head": {"type": "boolean"},
+              "leader_length_px": {"type": "number", "minimum": 0},
+              "start_gap_px": {"type": "number", "minimum": 0},
+              "overlaps_label": {"type": "boolean"},
+              "overlaps_arrow": {"type": "boolean"},
+              "crosses_unrelated_road": {"type": "boolean"}
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "kind", "verified", "source_ref", "verified_entrance_count", "label"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["apartment_complex", "condominium_community", "mobile_home_park", "campus", "named_property", "other"]},
+          "verified": {"type": "boolean"},
+          "source_ref": {"type": "string", "minLength": 1},
+          "verified_entrance_count": {"type": "integer", "minimum": 0},
+          "label": {
+            "type": "object",
+            "required": ["text", "font_family", "font_weight", "centered_in_site_zone", "covers_route", "covers_building_or_work_shape", "overlaps_label", "clipped"],
+            "properties": {
+              "text": {"type": "string", "minLength": 1},
+              "font_family": {"type": "string", "minLength": 1},
+              "font_weight": {"type": "integer"},
+              "centered_in_site_zone": {"type": "boolean"},
+              "covers_route": {"type": "boolean"},
+              "covers_building_or_work_shape": {"type": "boolean"},
+              "overlaps_label": {"type": "boolean"},
+              "clipped": {"type": "boolean"}
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "navigation_presentation_review": {"type": "object", "required": ["artifact_sha256", "actual_size_screenshot", "closeup_screenshots", "entrances", "street_paths", "label_placement"]},
+    "entrances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "site_id",
+          "verified",
+          "source_ref",
+          "public_road_id",
+          "target_access_road_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "site_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label_text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "source_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "public_road_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_access_road_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label_font_family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label_font_weight": {
+            "type": "integer"
+          },
+          "label_overlaps_feature": {
+            "type": "boolean"
+          },
+          "clipped": {
+            "type": "boolean"
+          },
+          "target_box": {
+            "type": "object",
+            "required": [
+              "x_min",
+              "y_min",
+              "x_max",
+              "y_max"
+            ],
+            "properties": {
+              "x_min": {
+                "type": "number"
+              },
+              "y_min": {
+                "type": "number"
+              },
+              "x_max": {
+                "type": "number"
+              },
+              "y_max": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          },
+          "arrow": {
+            "type": "object",
+            "required": [
+              "target_access_road_id",
+              "target_x",
+              "target_y",
+              "target_in_verified_box",
+              "distance_to_access_px",
+              "target_tolerance_px",
+              "leader_length_px",
+              "leader_min_px",
+              "leader_max_px",
+              "shaft_segment_count",
+              "filled_triangular_head",
+              "marker_bound",
+              "overlaps_label",
+              "overlaps_arrow",
+              "crosses_unrelated_road",
+              "route_overlap_outside_target_radius"
+            ],
+            "properties": {
+              "target_access_road_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target_x": {
+                "type": "number"
+              },
+              "target_y": {
+                "type": "number"
+              },
+              "target_in_verified_box": {
+                "type": "boolean"
+              },
+              "distance_to_access_px": {
+                "type": "number",
+                "minimum": 0
+              },
+              "target_tolerance_px": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "leader_length_px": {
+                "type": "number",
+                "minimum": 0
+              },
+              "leader_min_px": {
+                "type": "number",
+                "minimum": 0
+              },
+              "leader_max_px": {
+                "type": "number",
+                "minimum": 0
+              },
+              "shaft_segment_count": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "filled_triangular_head": {
+                "type": "boolean"
+              },
+              "marker_bound": {
+                "type": "boolean"
+              },
+              "overlaps_label": {
+                "type": "boolean"
+              },
+              "overlaps_arrow": {
+                "type": "boolean"
+              },
+              "crosses_unrelated_road": {
+                "type": "boolean"
+              },
+              "route_overlap_outside_target_radius": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          },
+          "representation": {
+            "enum": [
+              "named_street",
+              "feature_callout",
+              "numbered_key",
+              "descriptive_access"
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "allOf": [
+          {"if":{"required":["representation"],"properties":{"representation":{"const":"descriptive_access"}}},"then":{"required":["visible","descriptive_access_contract"],"properties":{"visible":{"const":true},"descriptive_access_contract":{"type":"object","required":["path","sha256"],"properties":{"path":{"type":"string","minLength":1},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}},"additionalProperties":false}}}},
+          {
+            "if": {
+              "required": [
+                "representation"
+              ],
+              "properties": {
+                "representation": {
+                  "enum": ["named_street", "descriptive_access"]
+                }
+              }
+            },
+            "then": {},
+            "else": {
+              "required": [
+                "id",
+                "site_id",
+                "label_text",
+                "verified",
+                "source_ref",
+                "public_road_id",
+                "target_access_road_id",
+                "label_font_family",
+                "label_font_weight",
+                "label_overlaps_feature",
+                "clipped",
+                "target_box",
+                "arrow"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "major_crossroad_review": {
+      "type": "object",
+      "required": [
+        "actual_size_review_completed",
+        "closeup_review_completed",
+        "distinct_physical_roads_verified",
+        "directions_reference_both",
+        "directions_text",
+        "roads"
+      ],
+      "properties": {
+        "actual_size_review_completed": {
+          "const": true
+        },
+        "closeup_review_completed": {
+          "const": true
+        },
+        "distinct_physical_roads_verified": {
+          "const": true
+        },
+        "directions_reference_both": {
+          "const": true
+        },
+        "directions_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "roads": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "canonical_road_id",
+              "name",
+              "identity_verified",
+              "road_ids",
+              "label_ids",
+              "visible",
+              "readable_at_output_size",
+              "major_qualification",
+              "source_evidence",
+              "drawing_evidence",
+              "label_evidence",
+              "approach"
+            ],
+            "properties": {
+              "canonical_road_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "identity_verified": {
+                "const": true
+              },
+              "road_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "label_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "visible": {
+                "const": true
+              },
+              "readable_at_output_size": {
+                "const": true
+              },
+              "major_qualification": {
+                "type": "object",
+                "required": [
+                  "class",
+                  "evidence"
+                ],
+                "properties": {
+                  "class": {
+                    "enum": [
+                      "motorway",
+                      "trunk",
+                      "primary",
+                      "secondary",
+                      "arterial",
+                      "major_connector"
+                    ]
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": true
+              },
+              "source_evidence": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "url",
+                    "retrieved_at",
+                    "feature_ids",
+                    "evidence"
+                  ],
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "^https?://"
+                    },
+                    "retrieved_at": {
+                      "type": "string",
+                      "minLength": 1,
+                      "format": "date"
+                    },
+                    "feature_ids": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "evidence": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "drawing_evidence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label_evidence": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approach": {
+                "type": "object",
+                "required": [
+                  "road_ids",
+                  "connected",
+                  "geometry_verified",
+                  "drawn",
+                  "evidence"
+                ],
+                "properties": {
+                  "road_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "connected": {
+                    "const": true
+                  },
+                  "geometry_verified": {
+                    "const": true
+                  },
+                  "drawn": {
+                    "const": true
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "navigation_context": {
+      "type": "object",
+      "required": ["required", "major_road_ids", "approach_paths", "minimum_context_only", "verified"],
+      "properties": {
+        "required": {"const": true},
+        "major_road_ids": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "approach_paths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "major_road_id", "territory_road_id", "via_road_ids", "connected", "geometry_verified"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "major_road_id": {"type": "string", "minLength": 1},
+              "territory_road_id": {"type": "string", "minLength": 1},
+              "via_road_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+              "connected": {"type": "boolean"},
+              "geometry_verified": {"type": "boolean"}
+            },
+            "additionalProperties": true
+          }
+        },
+        "minimum_context_only": {"type": "boolean"},
+        "verified": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "source_transform": {
+      "type": ["object", "null"],
+      "required": ["scale_x", "scale_y", "translate_x_px", "translate_y_px", "aspect_ratio_preserved", "all_supplied_geometry_visible", "colored_pixels_preserved", "crop_contains_only_blank_context"],
+      "properties": {
+        "scale_x": {"type": "number", "exclusiveMinimum": 0},
+        "scale_y": {"type": "number", "exclusiveMinimum": 0},
+        "translate_x_px": {"type": "number"},
+        "translate_y_px": {"type": "number"},
+        "aspect_ratio_preserved": {"type": "boolean"},
+        "all_supplied_geometry_visible": {"type": "boolean"},
+        "colored_pixels_preserved": {"type": "boolean"},
+        "crop_contains_only_blank_context": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "topology_patch_review": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "plan_path",
+        "plan_sha256",
+        "report_path",
+        "report_sha256",
+        "independent_visual_review"
+      ],
+      "properties": {
+        "plan_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "report_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "independent_visual_review": {
+          "type": "object",
+          "required": [
+            "independent",
+            "source_plan_review_completed",
+            "actual_size_review_completed",
+            "paired_4x_review_completed",
+            "no_visible_style_mismatch",
+            "artifact_sha256",
+            "plan_sha256",
+            "evidence"
+          ],
+          "properties": {
+            "independent": {
+              "const": true
+            },
+            "source_plan_review_completed": {
+              "const": true
+            },
+            "actual_size_review_completed": {
+              "const": true
+            },
+            "paired_4x_review_completed": {
+              "const": true
+            },
+            "no_visible_style_mismatch": {
+              "const": true
+            },
+            "artifact_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{64}$"
+            },
+            "plan_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{64}$"
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "preservation_audit": {
+      "type": ["object", "null"],
+      "required": ["approved_base_present", "approved_base_sha256", "original_map_mode", "full_redraw_authorized", "correction_masks", "rendered_comparison_completed", "pixels_changed_outside_masks", "stroke_style_check_required", "stroke_style_report", "stroke_style_report_sha256", "stroke_style_visual_review_completed", "repaired_stroke_style_mismatches", "stroke_style_checks"],
+      "properties": {
+        "approved_base_present": {"type": "boolean"},
+        "approved_base_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "original_map_mode": {"enum": ["preserve_supplied_map", "vector_rebuild"]},
+        "full_redraw_authorized": {"type": "boolean"},
+        "correction_masks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "x", "y", "width", "height", "contains_stroke_repair"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "x": {"type": "number", "minimum": 0},
+              "y": {"type": "number", "minimum": 0},
+              "width": {"type": "number", "exclusiveMinimum": 0},
+              "height": {"type": "number", "exclusiveMinimum": 0},
+              "reason": {"type": "string", "minLength": 1},
+              "contains_stroke_repair": {"type": "boolean"},
+              "edit_kind": {"enum": ["existing_path_repair", "native_topology_addition", "native_topology_removal", "neutral_paint_knockout"]},
+              "statuses": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+                "uniqueItems": true
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "rendered_comparison_completed": {"type": "boolean"},
+        "pixels_changed_outside_masks": {"type": "integer", "minimum": 0},
+        "stroke_style_check_required": {"type": "boolean"},
+        "stroke_style_report": {"type": ["string", "null"]},
+        "stroke_style_report_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-fA-F]{64}$"},
+        "stroke_style_visual_review_completed": {"type": "boolean"},
+        "repaired_stroke_style_mismatches": {"type": "integer", "minimum": 0},
+        "stroke_style_checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["mask_id", "passed", "median_width_delta_px", "maximum_color_delta_rgb", "edge_softness_delta_px", "centerline_p95_deviation_px", "boundary_presence_mismatch_pixels", "texture_delta", "unexpected_status_pixel_count"],
+            "properties": {
+              "mask_id": {"type": "string", "minLength": 1},
+              "passed": {"type": "boolean"},
+              "median_width_delta_px": {"type": "number", "minimum": 0},
+              "maximum_color_delta_rgb": {"type": "number", "minimum": 0},
+              "edge_softness_delta_px": {"type": "number", "minimum": 0},
+              "centerline_p95_deviation_px": {"type": "number", "minimum": 0},
+              "boundary_presence_mismatch_pixels": {"type": "integer", "minimum": 0},
+              "texture_delta": {"type": "number", "minimum": 0},
+              "unexpected_status_pixel_count": {"type": "integer", "minimum": 0}
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "directions": {
+      "type": "object",
+      "required": ["text", "major_road_ids", "entrance_access"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "major_road_ids": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "entrance_access": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entrance_id", "public_road_id"],
+            "properties": {
+              "entrance_id": {"type": "string", "minLength": 1},
+              "public_road_id": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["revision", "target", "change", "reason"],
+        "properties": {
+          "revision": {"type": "integer", "minimum": 1},
+          "target": {"type": "string", "minLength": 1},
+          "change": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": true
+      }
+    },
+    "unresolved_items": {"type": "array", "items": {"type": "string"}},
+    "sidebar_qa": {
+      "type": "object",
+      "required": [
+        "legend_reference",
+        "legend_heading_present",
+        "legend_content_and_order_verified",
+        "legend_label_minimum_font_pt",
+        "legend_swatch_width_pt",
+        "legend_swatch_height_pt",
+        "legend_row_center_spacing_pt",
+        "legend_rows_left_aligned",
+        "legend_labels_left_aligned",
+        "legend_swatch_alignment_delta_px",
+        "legend_label_alignment_delta_px",
+        "lower_divider_present",
+        "calendar_icon_present",
+        "updated_date_present",
+        "excessive_dead_space",
+        "visual_review_completed"
+      ],
+      "properties": {
+        "legend_reference": {"type": "string", "minLength": 1},
+        "legend_heading_present": {"type": "boolean"},
+        "legend_content_and_order_verified": {"type": "boolean"},
+        "legend_label_minimum_font_pt": {"type": "number", "minimum": 9.5},
+        "legend_swatch_width_pt": {"type": "number", "minimum": 18, "maximum": 24},
+        "legend_swatch_height_pt": {"type": "number", "minimum": 18, "maximum": 24},
+        "legend_row_center_spacing_pt": {"type": "number", "minimum": 36, "maximum": 50},
+        "legend_rows_left_aligned": {"type": "boolean"},
+        "legend_labels_left_aligned": {"type": "boolean"},
+        "legend_swatch_alignment_delta_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "legend_label_alignment_delta_px": {"type": "number", "minimum": 0, "maximum": 2},
+        "lower_divider_present": {"type": "boolean"},
+        "calendar_icon_present": {"type": "boolean"},
+        "updated_date_present": {"type": "boolean"},
+        "excessive_dead_space": {"type": "boolean"},
+        "visual_review_completed": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "qa": {
+      "type": "object",
+      "required": [
+        "missing_source_roads", "extra_generated_roads", "disconnected_intersections",
+        "unnamed_required_roads", "unclassified_roads", "perimeter_without_inside_side",
+        "hidden_internal_roads", "mixed_status_overlaps", "colored_endpoint_artifacts",
+        "branch_endpoint_overshoots", "label_collisions", "avoidable_label_clusters", "clipped_elements", "unresolved_rules",
+        "unresolved_source_conflicts", "rasterized_street_geometry", "unattributed_sources",
+        "altered_supplied_linework", "wrong_road_labels", "label_street_overlaps",
+        "label_gap_violations", "partially_lifted_labels", "unnecessary_callouts",
+        "malformed_arrowheads", "arrow_label_overlaps", "arrow_arrow_overlaps",
+        "arrow_wrong_targets", "arrow_unrelated_road_crossings", "bold_street_labels",
+        "inconsistent_label_fonts", "back_page_present", "do_not_work_list_present",
+        "missing_verified_site_names", "unverified_site_names", "site_label_obstructions",
+        "missing_verified_entrances", "extra_unverified_entrances", "entrance_wrong_targets",
+        "entrance_arrow_label_overlaps", "entrance_arrow_arrow_overlaps",
+        "entrance_arrow_unrelated_road_crossings", "entrance_arrow_route_overlap_outside_target_radius",
+        "disconnected_navigation_context", "isolated_major_road_labels", "nonuniform_source_scaling",
+        "supplied_geometry_clipped", "directions_entrance_mismatches", "unauthorized_map_mode_change",
+        "pixels_changed_outside_declared_correction_masks", "repaired_stroke_style_mismatches",
+        "overlay_review_completed", "final_render_inspected", "label_by_label_review_completed", "label_cluster_review_completed",
+        "street_names_live_verified", "source_map_preservation_verified", "site_name_inventory_verified",
+        "entrance_inventory_verified", "entrance_target_review_completed", "navigation_context_verified",
+        "directions_access_verified", "source_transform_verified", "approved_map_base_preserved",
+        "correction_masks_verified", "repaired_stroke_style_verified"
+      ],
+      "properties": {
+        "missing_source_roads": {"type": "integer", "minimum": 0},
+        "extra_generated_roads": {"type": "integer", "minimum": 0},
+        "disconnected_intersections": {"type": "integer", "minimum": 0},
+        "unnamed_required_roads": {"type": "integer", "minimum": 0},
+        "unclassified_roads": {"type": "integer", "minimum": 0},
+        "perimeter_without_inside_side": {"type": "integer", "minimum": 0},
+        "hidden_internal_roads": {"type": "integer", "minimum": 0},
+        "mixed_status_overlaps": {"type": "integer", "minimum": 0},
+        "colored_endpoint_artifacts": {"type": "integer", "minimum": 0},
+        "branch_endpoint_overshoots": {"type": "integer", "minimum": 0},
+        "label_collisions": {"type": "integer", "minimum": 0},
+        "avoidable_label_clusters": {"type": "integer", "minimum": 0},
+        "clipped_elements": {"type": "integer", "minimum": 0},
+        "unresolved_rules": {"type": "integer", "minimum": 0},
+        "unresolved_source_conflicts": {"type": "integer", "minimum": 0},
+        "rasterized_street_geometry": {"type": "integer", "minimum": 0},
+        "unattributed_sources": {"type": "integer", "minimum": 0},
+        "altered_supplied_linework": {"type": "integer", "minimum": 0},
+        "wrong_road_labels": {"type": "integer", "minimum": 0},
+        "label_street_overlaps": {"type": "integer", "minimum": 0},
+        "label_gap_violations": {"type": "integer", "minimum": 0},
+        "partially_lifted_labels": {"type": "integer", "minimum": 0},
+        "unnecessary_callouts": {"type": "integer", "minimum": 0},
+        "malformed_arrowheads": {"type": "integer", "minimum": 0},
+        "arrow_label_overlaps": {"type": "integer", "minimum": 0},
+        "arrow_arrow_overlaps": {"type": "integer", "minimum": 0},
+        "arrow_wrong_targets": {"type": "integer", "minimum": 0},
+        "arrow_unrelated_road_crossings": {"type": "integer", "minimum": 0},
+        "bold_street_labels": {"type": "integer", "minimum": 0},
+        "inconsistent_label_fonts": {"type": "integer", "minimum": 0},
+        "back_page_present": {"type": "integer", "minimum": 0},
+        "do_not_work_list_present": {"type": "integer", "minimum": 0},
+        "missing_verified_site_names": {"type": "integer", "minimum": 0},
+        "unverified_site_names": {"type": "integer", "minimum": 0},
+        "site_label_obstructions": {"type": "integer", "minimum": 0},
+        "missing_verified_entrances": {"type": "integer", "minimum": 0},
+        "extra_unverified_entrances": {"type": "integer", "minimum": 0},
+        "entrance_wrong_targets": {"type": "integer", "minimum": 0},
+        "entrance_arrow_label_overlaps": {"type": "integer", "minimum": 0},
+        "entrance_arrow_arrow_overlaps": {"type": "integer", "minimum": 0},
+        "entrance_arrow_unrelated_road_crossings": {"type": "integer", "minimum": 0},
+        "entrance_arrow_route_overlap_outside_target_radius": {"type": "integer", "minimum": 0},
+        "disconnected_navigation_context": {"type": "integer", "minimum": 0},
+        "isolated_major_road_labels": {"type": "integer", "minimum": 0},
+        "nonuniform_source_scaling": {"type": "integer", "minimum": 0},
+        "supplied_geometry_clipped": {"type": "integer", "minimum": 0},
+        "directions_entrance_mismatches": {"type": "integer", "minimum": 0},
+        "unauthorized_map_mode_change": {"type": "integer", "minimum": 0},
+        "pixels_changed_outside_declared_correction_masks": {"type": "integer", "minimum": 0},
+        "repaired_stroke_style_mismatches": {"type": "integer", "minimum": 0},
+        "overlay_review_completed": {"type": "boolean"},
+        "final_render_inspected": {"type": "boolean"},
+        "label_by_label_review_completed": {"type": "boolean"},
+        "label_cluster_review_completed": {"type": "boolean"},
+        "street_names_live_verified": {"type": "boolean"},
+        "source_map_preservation_verified": {"type": "boolean"},
+        "site_name_inventory_verified": {"type": "boolean"},
+        "entrance_inventory_verified": {"type": "boolean"},
+        "entrance_target_review_completed": {"type": "boolean"},
+        "navigation_context_verified": {"type": "boolean"},
+        "directions_access_verified": {"type": "boolean"},
+        "source_transform_verified": {"type": "boolean"},
+        "approved_map_base_preserved": {"type": "boolean"},
+        "correction_masks_verified": {"type": "boolean"},
+        "repaired_stroke_style_verified": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "required": ["vector_geometry", "svg", "pdf", "preview_png", "audit_report", "page_fit_verified", "source_map_linework_preserved", "page_count", "back_included", "do_not_work_list_included", "pdf_size_bytes"],
+      "properties": {
+        "vector_geometry": {"type": "boolean"},
+        "svg": {"type": "string", "minLength": 1},
+        "pdf": {"type": "string", "minLength": 1},
+        "preview_png": {"type": "string", "minLength": 1},
+        "geodata": {"type": "string", "minLength": 1},
+        "audit_report": {"type": "string", "minLength": 1},
+        "page_fit_verified": {"type": "boolean"},
+        "source_map_linework_preserved": {"type": "boolean"},
+        "page_count": {"type": "integer", "minimum": 1},
+        "back_included": {"type": "boolean"},
+        "do_not_work_list_included": {"type": "boolean"},
+        "pdf_size_bytes": {"type": "integer", "minimum": 0, "maximum": 299999}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

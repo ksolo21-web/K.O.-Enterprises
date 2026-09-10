@@ -1,0 +1,28 @@
+{
+  "kind": "verified_original_skill_installation",
+  "original_files_verified": 138,
+  "transfer_segments_verified": 39,
+  "source_commit": "9f2de8c1bb2be1089938efebd256229b10f25914",
+  "run_id": "34515569637",
+  "tests_run": 27,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "source_integrity_before": {
+    "verified_files": 138,
+    "source_integrity": true,
+    "visual_approval": false
+  },
+  "source_integrity_after": {
+    "verified_files": 138,
+    "source_integrity": true,
+    "visual_approval": false
+  },
+  "card_release_authorized": false,
+  "remaining": [
+    "Deploy and verify candidate extensions",
+    "Independent critic qualification on real accepted and rejected cards",
+    "Encrypted job end-to-end test",
+    "Complete review, authorized repair, retest and release integration"
+  ]
+}

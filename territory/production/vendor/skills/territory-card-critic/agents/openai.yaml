@@ -1,0 +1,15 @@
+interface:
+  display_name: Territory Card Critic
+  short_description: Independent screenshot review and repair loops
+  default_prompt: Use $territory-card-critic to independently inspect this territory
+    card and repeat repair/review until it scores exactly 10/10 with all required
+    checks passed. Aim for 10/10.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

@@ -1,0 +1,266 @@
+{
+  "version": 5,
+  "scope": "Territory cards; preserve source-specific exceptions",
+  "fixtures": [
+    {
+      "territory": "28",
+      "defective_pdf": "cards/28/approved-base.pdf",
+      "defective_sha256": "40660ad722507e609bdb455ddb511bbcf9ffecd08d1934a58d3a5a1b2964b2fc",
+      "corrected_pdf": "retained/Territory - 028.pdf",
+      "corrected_sha256": "1481a7dbd3d18796cc35f42e7356c8d6a30f362ec4097ff5a0896960509b1cce",
+      "historical_pass_review": "saved-audit/28/review.json",
+      "root_cause": "Thin source paint survived beneath a second status; western loop lacked repeated name.",
+      "detection_rule": "Require one visible owner at every mixed-status seam and label each necessary branch.",
+      "new_blind_pair_replay": {
+        "executed": true,
+        "scope": "Independent visual regression evidence; not the complete critic release gate",
+        "original_rejected": true,
+        "candidate_visual_eligibility": true,
+        "candidate_export_content_eligibility": true,
+        "full_geography": "unverified",
+        "full_release_approval": false,
+        "reports": [
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/28/approved-base/review.json",
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/28/candidate/review.json"
+        ]
+      }
+    },
+    {
+      "territory": "31B",
+      "defective_pdf": "cards/31B/approved-base.pdf",
+      "defective_sha256": "42299837da8bd7e6b15b4564bac9b45709b1b2e74dec70b78cf07eeb7e5149bf",
+      "corrected_pdf": "retained/Territory - 031b.pdf",
+      "corrected_sha256": "70e9a7eb49f66144f68d5d7895b435f3cec4f8a5e02eee45cbcfdb36e7737a55",
+      "historical_pass_review": "saved-audit/31B/review.json",
+      "root_cause": "Square cap crossed green road; red main-building access lacked identity.",
+      "detection_rule": "Inspect perpendicular stroke sections and label unnamed approach with a truthful descriptor.",
+      "new_blind_pair_replay": {
+        "executed": true,
+        "scope": "Independent visual regression evidence; not the complete critic release gate",
+        "original_rejected": true,
+        "candidate_visual_eligibility": true,
+        "candidate_export_content_eligibility": true,
+        "full_geography": "unverified",
+        "full_release_approval": false,
+        "reports": [
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/31B/approved-base/review.json",
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/31B/candidate/review.json"
+        ]
+      }
+    },
+    {
+      "territory": "34",
+      "defective_pdf": "cards/34/approved-base.pdf",
+      "defective_sha256": "c87ae57e56d4eb56f512d3831423f7b9c77b6b914d2c570dc643fce6194461b0",
+      "corrected_pdf": "retained/Territory - 034.pdf",
+      "corrected_sha256": "d9181bb16abe88f7fb4423d87f70dece17ca8e808deed2b5801fe870904a68b8",
+      "historical_pass_review": "saved-audit/34/review.json",
+      "root_cause": "Two private drives omitted; Tienken junction had tab/notch.",
+      "detection_rule": "Inventory all distinct access branches and inspect edge junctions.",
+      "new_blind_pair_replay": "pending"
+    },
+    {
+      "territory": "29A",
+      "defective_pdf": "cards/29A/approved-base.pdf",
+      "defective_sha256": "fc0461273da4eb227c2ffb922852c707cacf5bd9e9e965e7418558eb6d393000",
+      "corrected_pdf": "retained/Territory - 029A.pdf",
+      "corrected_sha256": "5829b5c73dedcba4457d9e9dfccf0da3a92c06ab5fa282144b7594a27563deef",
+      "historical_pass_review": "saved-audit/29A/review.json",
+      "root_cause": "Oakmonte leader targeted a separate parking aisle.",
+      "detection_rule": "Bind each label to its actual source road, not the nearest plausible aisle.",
+      "new_blind_pair_replay": "pending"
+    },
+    {
+      "territory": "31AD",
+      "defective_pdf": "cards/31AD/approved-base.pdf",
+      "defective_sha256": "0253b43261969c96c2ea821333379ac745d59cc0368c108f9f2391395a88eb7a",
+      "corrected_pdf": "retained/Territory - 031Ad.pdf",
+      "corrected_sha256": "271c474581d5dc8528c028c706cab2f5a6bd82599f8b397966578da1db088a87",
+      "historical_pass_review": "saved-audit/31AD/review.json",
+      "root_cause": "Cloned endpoints, stream included as road, missing branch names and Adams overlap.",
+      "detection_rule": "Bind coverage endpoints per actual branch and exclude non-road features.",
+      "new_blind_pair_replay": "pending"
+    },
+    {
+      "territory": "33A",
+      "defective_pdf": "cards/33A/approved-base.pdf",
+      "defective_sha256": "70d1cfe52e217fe29188a9eba2e292efc3ff45248af9e2d9f9730ec482959805",
+      "corrected_pdf": "retained/Territory - 033A.pdf",
+      "corrected_sha256": "6abf8c1ac0412c7c2c96523f4200213744d0e9466fea7a38c42b13e28133e529",
+      "historical_pass_review": "saved-audit/33A/review.json",
+      "root_cause": "Loop label did not identify entry stem.",
+      "detection_rule": "Repeat verified road name at the distinct entry stem.",
+      "new_blind_pair_replay": "pending"
+    },
+    {
+      "territory": "39",
+      "defective_pdf": "cards/39/approved-base.pdf",
+      "defective_sha256": "ee5f14ae7117da1c83c9822569a5fbacad7fccb43aeab257622309450fb50729",
+      "corrected_pdf": "retained/Territory - 039.pdf",
+      "corrected_sha256": "2ec52c4b7c3a484bb2efa79e6000fd94dba86f568210ab55092b858dd2e066a1",
+      "historical_pass_review": "saved-audit/39/review.json",
+      "root_cause": "East labels crowded and generic omission claims concealed incomplete analysis.",
+      "detection_rule": "Review whole clusters at actual size and document branch-specific omissions.",
+      "new_blind_pair_replay": {
+        "executed": true,
+        "scope": "Independent visual regression evidence; not the complete critic release gate",
+        "original_rejected": true,
+        "candidate_visual_eligibility": true,
+        "candidate_export_content_eligibility": false,
+        "full_geography": "unverified",
+        "full_release_approval": false,
+        "reports": [
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/39/approved-base/review.json",
+          "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/39/candidate/review.json"
+        ]
+      },
+      "historical_positive_status": "SUPERSEDED: rejected concealed obsolete text; retain historical report unchanged",
+      "retained_visibility_experiment": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/regression-blind/39/retained-visibility-experiment.json",
+        "sha256": "56bac209311409183a69867392188936e5824389c89a7a9b3752e55fe3d7a4cf",
+        "result": "FAIL: extraction changes but zero rendered pixels change at 1x/2x/4x"
+      },
+      "replacement_positive_status": "pending repair and fresh independent review"
+    },
+    {
+      "territory": "T66",
+      "fixture_id": "batch12-66A-parcel-scope",
+      "root_cause": "Earlier geography10 omitted source-marked northern residence and loop on parcel330710,3280Walton; contract assigned only330709,3250Walton.",
+      "detection_rule": "Independently register every source-marked residence and internal access to county parcel geometry and current authoritative property evidence; never infer all buildings share the named or main-address parcel. Reconcile coverage, inventory and housing together.",
+      "evidence": [
+        {
+          "path": "territory-batch-12/critic/66A/round1/review.json",
+          "sha256": "8a425d58a8a49967c5e62a57e4e64b1ef943b98157943219cce8a51b3fdcf901"
+        },
+        {
+          "path": "territory-batch-12/critic/66A/round2/review.json",
+          "sha256": "bd7ecb1996e6d5502c76e19cd822792aa6745076e7f2d7ac47d62965aa967b6a"
+        },
+        {
+          "path": "territory-batch-12/saved-audit/66A/retained-byte-verification.json",
+          "sha256": "8ed4ba5a033fff5a7895a84e1e395f18ffa93070c76562a864dbb79b70ffd058"
+        }
+      ],
+      "observed_results": {
+        "round1": "geography8;releasefalse; earlier10overturned",
+        "round2": "allcategories10 working candidate after officialLARA+aerial confirm both parcels",
+        "retained_bytes": "BLOCKED HTTP502;no saved-positive approval"
+      },
+      "history": "territory-batch-12/geography/66A/history-before-330710-correction",
+      "full_release_approval": false
+    },
+    {
+      "territory": "42",
+      "fixture_id": "batch12-42-optional-content-catalog",
+      "root_cause": "PdfWriter.add_page lost catalog OCProperties and exposed4OFF Guide paints; source-catalog-preserved textfree page still lost destination visibility on show_pdf_page embedding.",
+      "detection_rule": "Preserve source optional-content default state through page extraction AND destination Form embedding; compare exact final native paint and actual renders, including hidden Guide state.",
+      "evidence": [
+        {
+          "path": "territory-batch-12/geography/42/textfree-source-preserved.pdf.verification.json",
+          "sha256": "2595c46fef3296d0fe238afbbe6ff0c7f7adba1242f38cb1659fe6045085046c"
+        },
+        {
+          "path": "territory-batch-12/geography/42/textfree-form-visibility-verification.json",
+          "sha256": "9bf475fe95bd7920f3918e9747c395e7f48b6e44f89bd48137cce395d706a016"
+        },
+        {
+          "path": "territory-batch-12/geography/42/textfree_preserve_catalog.py",
+          "sha256": "b453fea87a1209c7012afbe99bbbef87fa428cf61a0a244a91c1057020016c41"
+        }
+      ],
+      "observed_results": {
+        "catalog_preserved_textfree": "62original/62textfree;zero native differences",
+        "embedded_before_visibility_register": "66drawings;4unexpected Guide paints",
+        "embedded_after_visibility_register": "62drawings;zero differences;Guide OFF",
+        "final_card": "pending label repairs/review; no final pass claimed"
+      },
+      "full_release_approval": false
+    },
+    {
+      "territory": "44T",
+      "status": "historical_saved_pass_reopened_raw_feature_eligibility",
+      "root_cause": "OSM landuse and generic building tags promoted into assigned residences without resolving actual feature/use type.",
+      "detection_rule": "Hash-bound raw type and independently evidenced residential use precede eligibility; parcel intersection alone cannot assign a whole property.",
+      "tests_executed": 16,
+      "full_batch_remeasurement": false,
+      "evidence": [
+        {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/saved-audit44/regression-osm/PROJECT-prior.json",
+          "sha256": "79d5fdead62594d45ce1ef382c878ffdae165b549e1601373e2b6dc1edbf7929"
+        },
+        {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/saved-audit44/regression-osm/review-prior.json",
+          "sha256": "f3dd7d93a14ba12428bc9b22ca66e2103cb633dc6228f0b6c11389a22e58bee8"
+        },
+        {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/saved-audit44/regression-osm/raw-eligibility-review.json",
+          "sha256": "5298016c8aabfc55ed5266eb8fb319706b336c792c84427d9134ab875bf7eafb"
+        },
+        {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/raw-feature-types/results.json",
+          "sha256": "3e83790bb97848d1e535df45ef71698b2b55448651a3599b6dbcd685cdfff9ac"
+        }
+      ]
+    },
+    {
+      "territory": "42",
+      "status": "measured_false_negative_estimator_corrected_with_strict_source_chain",
+      "root_cause": "Disconnected terminal-tip fragments contaminated whole-ROI medial width median despite unchanged3pt connected stem.",
+      "evidence": {
+        "scope": "Executed bounded scientific/chain/contract tests, not final42 approval or batch rerun",
+        "positive": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/positive42-v6/report.json",
+          "sha256": "191781d1dba176549aa418e717ca90d0cb87084b003d62ce3e55206a6d9345fc"
+        },
+        "negative_cases": 12,
+        "negative_results": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/negative-results-v6.json",
+          "sha256": "29bcf51539dcb6b0bfaefe3fbc734c4df012d4fe39e60f4d1e6114bb07125e90"
+        },
+        "contract_cases": 4,
+        "contract_results": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/contract-results.json",
+          "sha256": "c4d2eb685346eedc3a6d714de257562fcf57d1f0abc64cd2df6daa72bd367a31"
+        },
+        "unchanged_single_and_multi_view_contracts": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/unchanged-topology-contracts.json",
+          "sha256": "1ffceff6fde8a203556a83dd3faf337da44974c0da81c608a352eb7dbae99f0e"
+        },
+        "actual_project_integration_pending_visual_only_for_chain": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/gate-learning/mixed-chain/project-integration-results.json",
+          "sha256": "f1b4e6cd2408ec10ffb5dbe4b756f1989da0cf8d98ce14eb9090111ff723ef61"
+        },
+        "independent_estimator_review": {
+          "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/cards/42/repair-round2/independent-estimator-review.json",
+          "sha256": "f56b5ee36e90577df4e9f680051e73183d529d2d6e89c50e56db839f62a06b95"
+        }
+      },
+      "full_release_approval": false
+    },
+    {
+      "territory": "72T",
+      "status": "independent_bad_gap_to_verified_retained_positive",
+      "root_cause": "Western entrance gap and subsequently protruding square cap survived visually tidy layout.",
+      "bad_review": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/critic/77A/round1/review.json",
+        "sha256": "8447e718916550275c1174e690f9aaa931eb9fce87f3c695b025f360b3ebd151"
+      },
+      "rejected_cap_plan": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/critic/77A/round1/western-entrance-subpath-plan-rejected-square-cap.json",
+        "sha256": "8e060b30586ec1882d5f839d8093606e82f279d0faf1289be98ceb38a84f0a47"
+      },
+      "approved_native_plan": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/critic/77A/round1/western-entrance-subpath-plan.json",
+        "sha256": "9ae15ff2d198726c0cf988e05c7a8f229b4b7d8d6c0e2fde4d1d43131eb9a02d"
+      },
+      "retained_review": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/saved-audit72/critic/independent-retained/review.json",
+        "sha256": "4117d74708db3d9970911bc27bdbc29d8adb67de1695a173740b1cc9d915479c"
+      },
+      "retained_gate": {
+        "path": "/workspace/scratch/9e6ec3f4f96f/territory-batch-12/saved-audit72/critic/independent-retained/release-gate.json",
+        "sha256": "9532af28ac8327a3cd1a1ed58a929dcd4dacf3a60b469502141bfc7a59a9806f"
+      }
+    }
+  ]
+}
