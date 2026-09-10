@@ -3,6 +3,8 @@ name: Territory interruption recovery regression
   push:
     branches: [territory-card-production]
     paths:
+      - 'territory/production/atomic_delivery.py'
+      - 'territory/production/test_atomic_delivery.py'
       - 'territory/production/client.py'
       - 'territory/production/transport.py'
       - 'territory/production/worker.py'
@@ -46,17 +48,19 @@ jobs:
           modules=['test_visual_review','test_client_recovery']
           suite=unittest.defaultTestLoader.loadTestsFromNames(modules)
           result=unittest.TextTestRunner(verbosity=2).run(suite)
+          atomic=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromName('test_atomic_delivery'))
           after=engine.verify_skills()
-          names=['client.py','transport.py','worker.py','visual_worker.py','test_client_recovery.py']
+          names=['client.py','transport.py','worker.py','visual_worker.py','test_client_recovery.py','atomic_delivery.py','test_atomic_delivery.py']
           identities={name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in names}
-          passed=(base_status==0 and base['tests_run']==137 and base['software_tests_passed'] and result.testsRun==70 and result.wasSuccessful() and not result.skipped and before['verified_files']==138 and after['verified_files']==138)
+          passed=(base_status==0 and base['tests_run']==137 and base['software_tests_passed'] and result.testsRun==70 and result.wasSuccessful() and not result.skipped and before['verified_files']==138 and after['verified_files']==138 and atomic.testsRun==34 and atomic.wasSuccessful() and not atomic.skipped)
           receipt={'kind':'internal_software_recovery_review','run_id':os.environ['GITHUB_RUN_ID'],
                    'source_commit':os.environ['GITHUB_SHA'],'source_sha256':identities,
                    'original_files_verified_before':before['verified_files'],'original_files_verified_after':after['verified_files'],
                    'baseline_tests_run':base['tests_run'],'visual_and_recovery_tests_run':result.testsRun,
-                   'tests_run':base['tests_run']+result.testsRun,
-                   'failures':base['failures']+len(result.failures),'errors':base['errors']+len(result.errors),
-                   'skipped':base['skipped']+len(result.skipped),'software_tests_passed':passed,
+                   'atomic_delivery_tests_run':atomic.testsRun,
+                   'tests_run':base['tests_run']+result.testsRun+atomic.testsRun,
+                   'failures':base['failures']+len(result.failures)+len(atomic.failures),'errors':base['errors']+len(result.errors)+len(atomic.errors),
+                   'skipped':base['skipped']+len(result.skipped)+len(atomic.skipped),'software_tests_passed':passed,
                    'actual_model_inference_in_this_run':False,'real_card_critic_qualified':False,
                    'real_cards_released':0,'release_ready':False,
                    'limits':['Crypto and recovery tests use controlled synthetic inputs, not card approval.',

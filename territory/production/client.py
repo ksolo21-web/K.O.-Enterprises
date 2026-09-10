@@ -17,6 +17,7 @@ import tempfile
 import time
 import sealed
 import transport
+from atomic_delivery import install_directory
 
 class RecoveryError(RuntimeError):
     pass
@@ -192,7 +193,7 @@ def result_ready(state, checkpoint):
         state['phase'] = 'delivery_prepared'; atomic_json(checkpoint, state)
         if output.exists() or output.is_symlink():
             raise RecoveryError('Output appeared while receiving; refusing overwrite')
-        os.rename(staged, output)
+        install_directory(staged, output)
     state['phase'] = 'received'; atomic_json(checkpoint, state)
     return True
 
