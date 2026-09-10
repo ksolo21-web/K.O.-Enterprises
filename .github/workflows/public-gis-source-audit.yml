@@ -1,0 +1,76 @@
+name: Public GIS source fingerprint audit
+on:
+  push:
+    branches: [map-source-audit-20260910]
+permissions:
+  contents: read
+jobs:
+  public-source-read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Refresh public county records and compare semantic fingerprints
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, urllib.request, urllib.parse, hashlib, time, datetime, concurrent.futures
+          B=[-83.225,42.64,-83.075,42.77]
+          BASE='https://gisservices.oakgov.com'
+          OPEN=BASE+'/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/'
+          DATA=[
+            ('county-roads',BASE+'/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0','*','OBJECTID',5657,'629941c4261ac1eacec7de8efc31ad59546456a3d61f7af2136076aa965e86d4'),
+            ('county-parcels',BASE+'/arcgis2/rest/services/Applications/PivotPointAppMapService/FeatureServer/1','*','OBJECTID',33777,'0e5d13065e5e964f337c3412dac10bdc35d34fceb9e377f5b4fac649e036d319'),
+            ('parcel-classification',OPEN+'1','OBJECTID_12,OBJECTID,KEYPIN,REVISIONDATE,CVTTAXCODE,CVTTAXDESCRIPTION,PIN,CLASSCODE,SITEADDRESS,SITECITY,SITESTATE,SITEZIP5,STRUCTURE_DESC','OBJECTID_12',34516,'9f4ef91636ea95d351ea68111d4a1c21aa574ba59985b89ddfd03ca0f4958fef'),
+            ('site-addresses',OPEN+'0','OBJECTID,TYPE,PIN,SITEPREFIXONE,SITESTREETNUMBER,SITESTREETNAME,SITESTREETTYPE,SITESUFFIXONE,SITESTREETADDRESS,SITECITY,SITESTATE,SITEZIPCODE','OBJECTID',40217,'9a3b71ec5d0477a50eb341c66ed3a571d01a682413d8ae841def1370f60cd2fe'),
+            ('recorded-subdivisions',OPEN+'4','OBJECTID,CondoType,NAME,OCCP,TYPE,LIBERPAGE,ACRESRECORDED,ACRES,ExhibitBLink,NumberOfUnits,PlatLink','OBJECTID',622,'309550d2e7a678845c74f76f6b56ea16f6348b4fb9f3d20861d6657953076fb7')
+          ]
+          def stamp(): return datetime.datetime.now(datetime.timezone.utc).isoformat()
+          def canon(x):
+            if isinstance(x,float): return round(x,8)
+            if isinstance(x,list): return [canon(i) for i in x]
+            if isinstance(x,dict): return {k:canon(v) for k,v in sorted(x.items())}
+            return x
+          def digest(x): return hashlib.sha256(json.dumps(canon(x),sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode()).hexdigest()
+          def get(url,params):
+            q=urllib.parse.urlencode({'f':'json',**params})
+            last=None
+            for attempt in range(3):
+              try:
+                req=urllib.request.Request(url+'?'+q,headers={'User-Agent':'Public-GIS-evidence-audit/1.0'})
+                with urllib.request.urlopen(req,timeout=65) as r: data=json.load(r)
+                if 'error' in data: raise RuntimeError(str(data['error']))
+                return data
+              except Exception as e:
+                last=e; time.sleep(1+attempt)
+            raise RuntimeError(str(last))
+          def audit(spec):
+            name,url,fields,oid,nold,oldsha=spec
+            out={'name':name,'url':url,'started_utc':stamp(),'bounds':B,'expected_retained_count':nold,'expected_retained_semantic_sha256':oldsha,'owner_names_requested':False,'private_card_files_used':False}
+            try:
+              meta=get(url,{})
+              spatial={'where':'1=1','geometry':','.join(map(str,B)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              n=get(url+'/query',{**spatial,'returnCountOnly':'true'})['count']
+              ids=sorted(get(url+'/query',{**spatial,'returnIdsOnly':'true'})['objectIds'])
+              if len(ids)!=n: raise RuntimeError('count/ID mismatch')
+              chunks=[ids[i:i+400] for i in range(0,len(ids),400)]
+              def page(chunk):
+                d=get(url+'/query',{'objectIds':','.join(map(str,chunk)),'outFields':fields,'returnGeometry':'true','outSR':4326,'returnZ':'false','returnM':'false'})
+                got=d.get('features',[])
+                if d.get('exceededTransferLimit'): raise RuntimeError('transfer limit exceeded')
+                if sorted(f['attributes'][oid] for f in got)!=chunk: raise RuntimeError('chunk ID mismatch')
+                return got
+              with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex: pages=list(ex.map(page,chunks))
+              features=sorted([f for p in pages for f in p],key=lambda f:f['attributes'][oid])
+              if len(features)!=n or len({f['attributes'][oid] for f in features})!=n: raise RuntimeError('incomplete or duplicate result')
+              h=digest(features)
+              rev=[v for f in features for k,v in f['attributes'].items() if 'REVISIONDATE' in k.upper() and isinstance(v,(int,float))]
+              out.update(status='complete',retrieved_count=n,unique_ids=n,requested_chunks=len(chunks),transfer_limit_exceeded=False,ids_sha256=digest(ids),semantic_sha256=h,retained_records_identical=(n==nold and h==oldsha),coordinate_rounding_decimals=8,attribute_comparison='all requested attributes; no omitted returned fields',source_revision_max_epoch_ms=max(rev) if rev else None,source_revision_recency='unknown' if not rev else 'maximum feature revision date reported separately',metadata_sha256=digest(meta),editing_info=meta.get('editingInfo'),completed_utc=stamp())
+              # Only source integrity and count evidence is logged; no private assignments or personal owner data.
+              out['buckets']=[{'first_oid':p[0]['attributes'][oid],'last_oid':p[-1]['attributes'][oid],'count':len(p),'sha256':digest(p)} for p in [features[i:i+1000] for i in range(0,len(features),1000)]]
+            except Exception as e: out.update(status='failed',error=str(e),completed_utc=stamp())
+            return out
+          results=[]
+          for spec in DATA:
+            result=audit(spec);results.append(result);print('PUBLIC_SOURCE_AUDIT '+json.dumps(result,sort_keys=True),flush=True)
+          print('PUBLIC_SOURCE_AUDIT_SUMMARY '+json.dumps({'checked_utc':stamp(),'datasets':len(results),'complete':sum(r['status']=='complete' for r in results),'identical':sum(r.get('retained_records_identical',False) for r in results),'no_card_review_or_score_performed':True}),flush=True)
+          PY
