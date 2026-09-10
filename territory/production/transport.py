@@ -7,6 +7,23 @@ REPO='ksolo21-web/K.O.-Enterprises'
 BRANCH='territory-card-production'
 CHUNK=250_000
 class TransportError(RuntimeError):pass
+class MissingObject(TransportError):pass
+class ProtocolError(TransportError):pass
+
+def validate_envelope(envelope,direction):
+    """Validate the current wire format before upload or model work; no key needed."""
+    if direction not in ('inputs','outputs'):raise ProtocolError('invalid envelope direction')
+    expected={'version','session','purpose','sender','receiver','nonce','ciphertext'}
+    if not isinstance(envelope,dict) or set(envelope)!=expected:raise ProtocolError('envelope_schema_invalid')
+    try:
+        required=sealed.metadata(envelope['session'],'job' if direction=='inputs' else 'result')
+        if any(type(envelope[k]) is not type(v) or envelope[k]!=v for k,v in required.items()):raise ProtocolError('envelope_context_invalid')
+        if any(len(sealed.unb64(envelope[k],100))!=32 for k in ('sender','receiver')):raise ProtocolError('envelope_key_invalid')
+        if len(sealed.unb64(envelope['nonce'],100))!=12:raise ProtocolError('envelope_nonce_invalid')
+        if not 16<len(sealed.unb64(envelope['ciphertext']))<=sealed.MAX_RAW+16:raise ProtocolError('envelope_size_invalid')
+    except sealed.EnvelopeError as error:raise ProtocolError('envelope_encoding_invalid') from error
+    return envelope
+
 
 def api(endpoint,data=None,method=None):
     base='repos/'+REPO
@@ -21,12 +38,15 @@ def api(endpoint,data=None,method=None):
         if method is None:args+=['--method','POST']
     try:r=subprocess.run(args,input=raw,capture_output=True,text=True,timeout=60,env={**os.environ,'GH_HOST':'github.com','GH_PROMPT_DISABLED':'1'})
     except (OSError,subprocess.TimeoutExpired) as error:raise TransportError('GitHub transport unavailable') from error
-    if r.returncode:raise TransportError('GitHub operation failed; no private request body is logged')
+    if r.returncode:
+        if re.search(r'\bHTTP 404\b',r.stderr or ''):raise MissingObject('GitHub object not available')
+        raise TransportError('GitHub operation failed; no private request body is logged')
     if len(r.stdout)>70_000_000:raise TransportError('oversized GitHub response')
     return json.loads(r.stdout)
 
 def safe_path(path):
     if not re.fullmatch(r'territory/transport/(requests|visual-requests|sessions|inputs|outputs)/[0-9a-f]{32}(/[A-Za-z0-9.-]+)?',path):raise TransportError('unsafe transport path')
+    if any(part in ('.','..') for part in path.split('/')):raise TransportError('unsafe transport path')
     return path
 
 def read(path):
@@ -51,6 +71,7 @@ def commit(files,message):
     return commit['sha']
 
 def send_envelope(envelope,direction):
+    validate_envelope(envelope,direction)
     session=envelope['session'];sealed.metadata(session,envelope['purpose'])
     if direction not in ('inputs','outputs'):raise TransportError('bad direction')
     root=f'territory/transport/{direction}/{session}';cipher=envelope['ciphertext'];files={};parts=[]
@@ -62,18 +83,26 @@ def send_envelope(envelope,direction):
     return commit(files,'Store opaque encrypted territory '+direction)
 
 def receive_envelope(session,direction):
-    sealed.metadata(session,'job' if direction=='inputs' else 'result')
-    if direction not in ('inputs','outputs'):raise TransportError('bad direction')
-    root=f'territory/transport/{direction}/{session}';manifest=read(root+'/manifest.json');parts=manifest['parts']
-    if not isinstance(parts,list) or not 1<=len(parts)<=200:raise TransportError('invalid part count')
+    if direction not in ('inputs','outputs'):raise ProtocolError('bad direction')
+    purpose='job' if direction=='inputs' else 'result'
+    sealed.metadata(session,purpose)
+    root=f'territory/transport/{direction}/{session}';manifest=read(root+'/manifest.json')
+    if not isinstance(manifest,dict) or set(manifest)!={'envelope','parts','ciphertext_sha256'}:raise ProtocolError('invalid manifest schema')
+    header=manifest['envelope']
+    fields={'version','session','purpose','sender','receiver','nonce'}
+    if not isinstance(header,dict) or set(header)!=fields:raise ProtocolError('envelope_schema_invalid')
+    if header.get('session')!=session or header.get('purpose')!=purpose:raise ProtocolError('envelope_context_invalid')
+    parts=manifest['parts']
+    if not isinstance(parts,list) or not 1<=len(parts)<=200:raise ProtocolError('invalid part count')
     chunks=[]
     for i,part in enumerate(parts):
-        if part['name']!=f'part-{i:04}.json':raise TransportError('invalid part ordering')
-        value=read(root+'/'+part['name'])['data']
-        if not isinstance(value,str) or len(value)>CHUNK or hashlib.sha256(value.encode()).hexdigest()!=part['sha256']:raise TransportError('encrypted part identity mismatch')
+        if not isinstance(part,dict) or set(part)!={'name','sha256'} or part['name']!=f'part-{i:04}.json':raise ProtocolError('invalid part ordering')
+        try:item=read(root+'/'+part['name'])
+        except MissingObject as error:raise ProtocolError('complete manifest references a missing part') from error
+        if not isinstance(item,dict) or set(item)!={'data'}:raise ProtocolError('invalid part schema')
+        value=item['data']
+        if not isinstance(value,str) or len(value)>CHUNK or hashlib.sha256(value.encode()).hexdigest()!=part['sha256']:raise ProtocolError('encrypted part identity mismatch')
         chunks.append(value)
     cipher=''.join(chunks)
-    if hashlib.sha256(cipher.encode()).hexdigest()!=manifest['ciphertext_sha256']:raise TransportError('encrypted bundle identity mismatch')
-    envelope={**manifest['envelope'],'ciphertext':cipher}
-    if envelope['session']!=session:raise TransportError('session mismatch')
-    return envelope
+    if hashlib.sha256(cipher.encode()).hexdigest()!=manifest['ciphertext_sha256']:raise ProtocolError('encrypted bundle identity mismatch')
+    return validate_envelope({**header,'ciphertext':cipher},direction)

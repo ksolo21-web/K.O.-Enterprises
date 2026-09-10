@@ -12,12 +12,12 @@ def run(session):
     history=transport.api(f'repos/{transport.REPO}/commits?path={request_path}&sha={transport.BRANCH}&per_page=1')
     if not history or (history[0].get('author') or {}).get('login')!='ksolo21-web':raise ValueError('session requester is not the authorized owner')
     if abs(time.time()-float(request['created_at']))>1800:raise ValueError('session request expired')
-    reply=request['reply_public_key'];key=sealed.new_key()
-    transport.commit({f'territory/transport/sessions/{session}/public.json':{'version':1,'session':session,'public_key':sealed.public(key),'source_commit':os.environ.get('GITHUB_SHA'),'expires_at':time.time()+2400}},'Publish ephemeral territory session public key')
+    reply=request['reply_public_key'];key=sealed.new_key();expires=time.time()+900
+    transport.commit({f'territory/transport/sessions/{session}/public.json':{'version':1,'session':session,'public_key':sealed.public(key),'source_commit':os.environ.get('GITHUB_SHA'),'expires_at':expires}},'Publish ephemeral territory session public key')
     deadline=time.monotonic()+900;envelope=None
     while time.monotonic()<deadline:
         try:envelope=transport.receive_envelope(session,'inputs');break
-        except transport.TransportError:time.sleep(5)
+        except transport.MissingObject:time.sleep(5)
     if envelope is None:raise ValueError('encrypted input window expired')
     payload=sealed.unseal(envelope,key,session,'job')
     with tempfile.TemporaryDirectory(prefix='territory-private-',dir=os.environ.get('RUNNER_TEMP')) as temp:

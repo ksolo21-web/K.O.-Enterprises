@@ -1,0 +1,81 @@
+name: Territory interruption recovery regression
+'on':
+  push:
+    branches: [territory-card-production]
+    paths:
+      - 'territory/production/client.py'
+      - 'territory/production/transport.py'
+      - 'territory/production/worker.py'
+      - 'territory/production/visual_worker.py'
+      - 'territory/production/test_client_recovery.py'
+      - '.github/workflows/territory-recovery-tests.yml'
+permissions:
+  contents: read
+concurrency:
+  group: territory-recovery-tests
+  cancel-in-progress: false
+jobs:
+  regression:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install existing pinned dependencies without caches
+        run: |
+          python3 -m venv "$RUNNER_TEMP/testenv"
+          "$RUNNER_TEMP/testenv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -r territory/production/requirements.txt
+      - name: Verify original files, existing suite and interruption recovery
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          "$RUNNER_TEMP/testenv/bin/python" - <<'PY'
+          import hashlib,json,os,sys,unittest
+          from pathlib import Path
+          root=Path('territory/production').resolve();sys.path.insert(0,str(root))
+          import engine,audit_kit
+          before=engine.verify_skills()
+          base_status=audit_kit.main()
+          base=json.loads((root/'evidence/continuation-kit-audit.json').read_text())
+          print((root/'evidence/continuation-kit-audit.txt').read_text())
+          modules=['test_visual_review','test_client_recovery']
+          suite=unittest.defaultTestLoader.loadTestsFromNames(modules)
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          after=engine.verify_skills()
+          names=['client.py','transport.py','worker.py','visual_worker.py','test_client_recovery.py']
+          identities={name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in names}
+          passed=(base_status==0 and base['tests_run']==137 and base['software_tests_passed'] and result.testsRun==70 and result.wasSuccessful() and not result.skipped and before['verified_files']==138 and after['verified_files']==138)
+          receipt={'kind':'internal_software_recovery_review','run_id':os.environ['GITHUB_RUN_ID'],
+                   'source_commit':os.environ['GITHUB_SHA'],'source_sha256':identities,
+                   'original_files_verified_before':before['verified_files'],'original_files_verified_after':after['verified_files'],
+                   'baseline_tests_run':base['tests_run'],'visual_and_recovery_tests_run':result.testsRun,
+                   'tests_run':base['tests_run']+result.testsRun,
+                   'failures':base['failures']+len(result.failures),'errors':base['errors']+len(result.errors),
+                   'skipped':base['skipped']+len(result.skipped),'software_tests_passed':passed,
+                   'actual_model_inference_in_this_run':False,'real_card_critic_qualified':False,
+                   'real_cards_released':0,'release_ready':False,
+                   'limits':['Crypto and recovery tests use controlled synthetic inputs, not card approval.',
+                             'Windows-specific runtime not exercised by this Ubuntu workflow.']}
+          Path(os.environ['RUNNER_TEMP'],'recovery-tests.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt))
+          if not passed:raise SystemExit('Mandatory software regression checks failed.')
+          PY
+      - name: Preserve only the nonprivate software-test receipt
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if test -f "$RUNNER_TEMP/recovery-tests.json"; then
+            gh api --method PUT "repos/ksolo21-web/K.O.-Enterprises/contents/territory/production/evidence/recovery-${GITHUB_RUN_ID}.json" -f message='Retain actual recovery regression result [skip ci]' -f branch='territory-card-production' -f content="$(base64 -w0 "$RUNNER_TEMP/recovery-tests.json")" > "$RUNNER_TEMP/receipt-upload.json"
+          else
+            echo 'No complete test receipt exists; do not infer a pass.'
+            exit 1
+          fi
+      - name: No artifact, cache, paid model, or real-card release
+        if: always()
+        run: echo 'Software regression evidence only. Original card release gates remain unchanged.' >> "$GITHUB_STEP_SUMMARY"
