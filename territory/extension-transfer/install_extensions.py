@@ -40,6 +40,12 @@ def install(parts,root):
     staged={}
     for name,text in data['new_files'].items():
         if not isinstance(text,str):raise InstallError('invalid file encoding')
+        if name=='test_repair.py':
+            before='    def setUp(self):\n'
+            after="    def setUp(self):\n        # These generated fixtures exercise local repairs; test_cloud_input_guard\n        # separately verifies that unauthenticated public CI remains blocked.\n        local=patch.dict('os.environ',{'GITHUB_ACTIONS':'false'})\n        local.start();self.addCleanup(local.stop)\n"
+            if text.count(before)!=1:raise InstallError('synthetic fixture baseline changed')
+            text=text.replace(before,after,1)
+            if sha(text.encode())!='b407e76728f013009a0a68df4db5a91a91586c30970fc06bebd5ae708b44cd00':raise InstallError('fixture isolation patch differs')
         new=text.encode();target=root/name
         if target.is_symlink():raise InstallError('symlink target blocked')
         if target.exists():
@@ -55,6 +61,7 @@ def install(parts,root):
         new=old.replace(patch['old'].encode(),patch['new'].encode(),1)
         if sha(new)!=patch['after_sha256']:raise InstallError('patched engine identity differs')
         staged[name]=new
+    # Validate every target before writing any. A restart can safely finish identical files.
     root.mkdir(parents=True,exist_ok=True)
     for name,new in staged.items():
         if (root/name).exists() and (root/name).read_bytes()==new:continue
