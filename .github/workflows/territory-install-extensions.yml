@@ -61,7 +61,7 @@ jobs:
           prefix='territory/production/'
           allowed=[prefix+n for n in sorted(NAMES|{'engine.py','EXTENSION-INSTALLATION-RECEIPT.json','evidence/continuation-kit-audit.json','evidence/continuation-kit-audit.txt'})]
           def run(args,**kw):return subprocess.run(args,check=True,text=True,capture_output=True,**kw)
-          run(['git','add','--',*allowed])
+          run(['git','add','-f','--',*allowed])
           staged=list(filter(None,run(['git','diff','--cached','--name-only','-z']).stdout.split('\0')))
           if any(name not in allowed for name in staged):raise SystemExit('Unapproved path; no commit permitted.')
           if not staged:raise SystemExit(0)
