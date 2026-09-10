@@ -26,7 +26,7 @@ def api(endpoint,data=None,method=None):
     return json.loads(r.stdout)
 
 def safe_path(path):
-    if not re.fullmatch(r'territory/transport/(requests|sessions|inputs|outputs)/[0-9a-f]{32}(/[A-Za-z0-9.-]+)?',path):raise TransportError('unsafe transport path')
+    if not re.fullmatch(r'territory/transport/(requests|visual-requests|sessions|inputs|outputs)/[0-9a-f]{32}(/[A-Za-z0-9.-]+)?',path):raise TransportError('unsafe transport path')
     return path
 
 def read(path):
