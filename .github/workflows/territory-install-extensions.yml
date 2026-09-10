@@ -1,0 +1,77 @@
+name: Territory verified candidate extensions
+'on':
+  push:
+    branches: [territory-card-production]
+    paths: ['territory/extension-transfer/**', '.github/workflows/territory-install-extensions.yml']
+permissions:
+  contents: read
+concurrency:
+  group: territory-extension-installation
+  cancel-in-progress: false
+jobs:
+  install:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install pinned candidate extensions without replacing changed files
+        run: python3 territory/extension-transfer/install_extensions.py
+      - name: Install exact dependencies without caches or paid services
+        run: |
+          python3 -m venv "$RUNNER_TEMP/territory-extension-env"
+          "$RUNNER_TEMP/territory-extension-env/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -r territory/production/requirements.txt
+      - name: Run the complete software audit
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          "$RUNNER_TEMP/territory-extension-env/bin/python" territory/production/audit_kit.py
+      - name: Require 120 tests and intact original skills
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,os
+          root=Path('territory/production')
+          audit=json.loads((root/'evidence/continuation-kit-audit.json').read_text())
+          if (audit['tests_run']!=120 or audit['failures'] or audit['errors'] or audit['skipped'] or not audit['software_tests_passed']):
+              raise SystemExit('Required software tests did not pass.')
+          receipt={'kind':'verified_candidate_extension_installation','source_commit':os.environ['GITHUB_SHA'],
+                   'run_id':os.environ['GITHUB_RUN_ID'],'tests_run':120,'failures':0,'errors':0,'skipped':0,
+                   'original_files_verified':138,'software_tests_passed':True,
+                   'live_encrypted_job_verified':False,'independent_real_card_critic_qualified':False,
+                   'card_release_authorized':False}
+          (root/'EXTENSION-INSTALLATION-RECEIPT.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Candidate extensions verified\n120/120 software tests passed; 138/138 original skills intact.\n\nThis is not an independent visual review or real-card release.\n')
+          PY
+      - name: Commit only tested candidate tooling and its evidence
+        env:
+          GH_INSTALL_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64,os,subprocess,sys
+          sys.path.insert(0,str(Path('territory/extension-transfer').resolve()))
+          from install_extensions import NAMES
+          prefix='territory/production/'
+          allowed=[prefix+n for n in sorted(NAMES|{'engine.py','EXTENSION-INSTALLATION-RECEIPT.json','evidence/continuation-kit-audit.json','evidence/continuation-kit-audit.txt'})]
+          def run(args,**kw):return subprocess.run(args,check=True,text=True,capture_output=True,**kw)
+          run(['git','add','--',*allowed])
+          staged=list(filter(None,run(['git','diff','--cached','--name-only','-z']).stdout.split('\0')))
+          if any(name not in allowed for name in staged):raise SystemExit('Unapproved path; no commit permitted.')
+          if not staged:raise SystemExit(0)
+          run(['git','-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','commit','-m','Install and verify candidate tooling with 120 passing software tests [skip ci]'])
+          token=os.environ.pop('GH_INSTALL_TOKEN');env=os.environ.copy()
+          env.update({'GIT_TERMINAL_PROMPT':'0','GIT_CONFIG_COUNT':'1','GIT_CONFIG_KEY_0':'http.https://github.com/.extraheader',
+                      'GIT_CONFIG_VALUE_0':'AUTHORIZATION: basic '+base64.b64encode(('x-access-token:'+token).encode()).decode()})
+          run(['git','push','origin','HEAD:refs/heads/territory-card-production'],env=env)
+          local=run(['git','rev-parse','HEAD']).stdout.strip()
+          remote=run(['git','ls-remote','origin','refs/heads/territory-card-production'],env=env).stdout.split()[0]
+          if local!=remote:raise SystemExit('Concurrent branch change; readback verification required.')
+          print('Verified candidate-extension commit: '+local)
+          PY
