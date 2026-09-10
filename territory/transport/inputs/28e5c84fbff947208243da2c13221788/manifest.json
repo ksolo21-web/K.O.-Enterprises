@@ -1,0 +1,17 @@
+{
+  "envelope": {
+    "version": 1,
+    "session": "28e5c84fbff947208243da2c13221788",
+    "purpose": "job",
+    "suite": "X25519-HKDF-SHA256-AES256GCM",
+    "ephemeral_public": "WAgjc3RJPCuvLf511JeeIc6mTlMSfeUGYZk1JxxZt2Zc=",
+    "nonce": "TRE7Fmpcv/zHnwMJ"
+  },
+  "parts": [
+    {"name":"part-0000.json","sha256":"f27e3d5d643d1b68dd4dc017d82370e3f7c5b3e751c5217c66c39c4a774fa0e7"},
+    {"name":"part-0001.json","sha256":"13835079f11dbd1641cd0d5c156224b1f874c3811d2d462a15b9c2e04cd09ecca"},
+    {"name":"part-0002.json","sha256":"34f348a779171ab0755e74801d7a6a0bb7327d8d1f2d070bd8076bf45be4a4b5d"},
+    {"name":"part-0003.json","sha256":"bcc76e0a6d0930f14eb2f997d6513408b7a9cbe8f41d3ab7d92d44835c63d2d91"}
+  ],
+  "ciphertext_sha256":"f592931bcc638cf320b707c9c491c2b5b40af2c59432f53d1de530cd40ca2489b"
+}
