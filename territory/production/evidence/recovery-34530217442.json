@@ -1,0 +1,29 @@
+{
+  "kind": "internal_software_recovery_review",
+  "run_id": "34530217442",
+  "source_commit": "90f8718190edad2291beef869295f64baebd85e2",
+  "source_sha256": {
+    "client.py": "9fc9c14b5758070c141700622935c29a048523ebc4799275718b68cd9d71f3e3",
+    "transport.py": "58e6f49b81e5ee29e005bc179fee99dd142326b766fbeed6b07b6374693f3a10",
+    "worker.py": "6ce4e217f07f7eb90fbed81cae0b600fb2ea2850ec461231fdd38e419a9e02d5",
+    "visual_worker.py": "6573a1b7e689f598694e12176cd2d69a1b48b833873c583537fd2a8bb6dbb05b",
+    "test_client_recovery.py": "df5a454ae990516d26abd88d4b8b962173a144128fc1228ed9d51cd7727cc136"
+  },
+  "original_files_verified_before": 138,
+  "original_files_verified_after": 138,
+  "baseline_tests_run": 137,
+  "visual_and_recovery_tests_run": 70,
+  "tests_run": 207,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "software_tests_passed": true,
+  "actual_model_inference_in_this_run": false,
+  "real_card_critic_qualified": false,
+  "real_cards_released": 0,
+  "release_ready": false,
+  "limits": [
+    "Crypto and recovery tests use controlled synthetic inputs, not card approval.",
+    "Windows-specific runtime not exercised by this Ubuntu workflow."
+  ]
+}
