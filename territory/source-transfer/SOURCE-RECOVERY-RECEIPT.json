@@ -1,0 +1,131 @@
+{
+  "kind": "actual_github_source_recovery",
+  "source_branch_head": "0dcda8d0dd89cf55c9d61c98f6a194447c074db8",
+  "verified_segments": 26,
+  "required_segments": 39,
+  "original_source_file_count": 138,
+  "source_installation_complete": false,
+  "card_release_authorized": false,
+  "verified": [
+    {
+      "segment": "part-01.txt",
+      "git_sha": "373cb7d3ced4f098f0a5283647ff412e7bfb71b0"
+    },
+    {
+      "segment": "part-02.txt",
+      "git_sha": "5f2fad871b0861fe8dc3df1b26269a181d18aab8"
+    },
+    {
+      "segment": "part-03.txt",
+      "git_sha": "472f09e8500c7fbd856354d14c603779e066c29f"
+    },
+    {
+      "segment": "part-04.txt",
+      "git_sha": "945a45ab6d697c1aec1206d729b4cc8f9ac5e5e4"
+    },
+    {
+      "segment": "part-05.txt",
+      "git_sha": "b633e92077806c914625aee7d00a4a6fa92e0a1c"
+    },
+    {
+      "segment": "part-06.txt",
+      "git_sha": "7b9f6e081cd07c7835d5f64cc4d6d399ab96299e"
+    },
+    {
+      "segment": "part-07.txt",
+      "git_sha": "201b2185d3a8a982c4037cac5fd49602a5966c0d"
+    },
+    {
+      "segment": "part-08.txt",
+      "git_sha": "2058291b64ae8c0e7d961f4511085b9660bf2af1"
+    },
+    {
+      "segment": "part-09.txt",
+      "git_sha": "602dfaef79c76e47bc377d184834fb91875f2c52"
+    },
+    {
+      "segment": "part-10.txt",
+      "git_sha": "0c9fed727b9144dd3ad2d34d76a63fe1ce7b36c5"
+    },
+    {
+      "segment": "part-11.txt",
+      "git_sha": "52c7d3aeafd3d206fe9e597befbd3e16000bb3d0"
+    },
+    {
+      "segment": "part-12.txt",
+      "git_sha": "ea40a733e6bd39d496eafb9671f958de035911fb"
+    },
+    {
+      "segment": "part-13.txt",
+      "git_sha": "752d02aa849372e82cef7cb09db7e14452bbd133"
+    },
+    {
+      "segment": "part-14.txt",
+      "git_sha": "c08e5e4d5f8c88672465e79d2312cf26665ab32f"
+    },
+    {
+      "segment": "part-15.txt",
+      "git_sha": "8202f35285610014f782bcb010162f921b6f01a6"
+    },
+    {
+      "segment": "part-16.txt",
+      "git_sha": "58b997684f477e7fbfcba7e54bfc0a7eef83dcc3"
+    },
+    {
+      "segment": "part-17.txt",
+      "git_sha": "c713ce4667458e1258b46d3a72d97b21394ab20d"
+    },
+    {
+      "segment": "part-18.txt",
+      "git_sha": "1dc239e9549353bd39d8b1c98da0bcc14b0a94bf"
+    },
+    {
+      "segment": "part-19.txt",
+      "git_sha": "047026d00f486af322e2f6a87dcbfe73a637bc81"
+    },
+    {
+      "segment": "part-20.txt",
+      "git_sha": "fe4f73b90ed5a96f1d65a4eeeaf16e782f86a9b9"
+    },
+    {
+      "segment": "part-21.txt",
+      "git_sha": "36fa02e5535452e988eb7b4f4593db0d4612fd65"
+    },
+    {
+      "segment": "part-22.txt",
+      "git_sha": "fbb57f7bcff93facfc0b829b0f61651d1be70be3"
+    },
+    {
+      "segment": "part-23.txt",
+      "git_sha": "4f81d1b3ffc32118a0ad72f148e72313b71e258f"
+    },
+    {
+      "segment": "part-24.txt",
+      "git_sha": "7b6a0a2b74d64b2d1824ecff6a58b699754bce8c"
+    },
+    {
+      "segment": "part-25.txt",
+      "git_sha": "0381fa13011d23a9e985d6346f77d471530dffff"
+    },
+    {
+      "segment": "part-26.txt",
+      "git_sha": "c6ac33225e58df7fbd02661f18a6878223f6f1c6"
+    }
+  ],
+  "run_id": "34509826894",
+  "missing_segments": [
+    "part-27.txt",
+    "part-28.txt",
+    "part-29.txt",
+    "part-30.txt",
+    "part-31.txt",
+    "part-32.txt",
+    "part-33.txt",
+    "part-34.txt",
+    "part-35.txt",
+    "part-36.txt",
+    "part-37.txt",
+    "part-38.txt",
+    "part-39.txt"
+  ]
+}
