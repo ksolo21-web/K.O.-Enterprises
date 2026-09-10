@@ -18,7 +18,7 @@ def main():
     from verify_originals import verify_installed
     before=verify_installed(HERE)
     log=io.StringIO()
-    names=['test_engine','test_sealed','test_repair','test_privacy','test_readiness','test_transport']
+    names=['test_engine','test_sealed','test_repair','test_privacy','test_readiness','test_transport','test_delivery','test_runtime_integration']
     suite=unittest.defaultTestLoader.loadTestsFromNames(names)
     result=unittest.TextTestRunner(stream=log,verbosity=2).run(suite)
     after=verify_installed(HERE)
