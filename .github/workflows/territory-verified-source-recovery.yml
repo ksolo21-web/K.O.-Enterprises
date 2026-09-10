@@ -1,0 +1,37 @@
+name: Territory verified source recovery
+on:
+  push:
+    branches: [territory-card-production]
+    paths:
+      - '.github/workflows/territory-verified-source-recovery.yml'
+      - 'territory/source-transfer/recovery-index-20260910.json'
+      - 'territory/source-transfer/recover_verified.py'
+permissions:
+  contents: read
+concurrency:
+  group: territory-source-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - name: Check out only the authorized branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: territory-card-production
+          persist-credentials: false
+      - name: Syntax-check the source recovery program
+        run: python3 -m py_compile territory/source-transfer/recover_verified.py
+      - name: Verify remote bytes and preserve missing verified segments
+        env:
+          GH_RECOVERY_TOKEN: ${{ github.token }}
+        run: python3 territory/source-transfer/recover_verified.py
+      - name: Keep source recovery separate from production approval
+        if: always()
+        run: |
+          printf '%s\n' 'Source recovery is not territory-card approval.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' 'No paid model, Work, Codex, cache, artifact upload, or private job input is used.' >> "$GITHUB_STEP_SUMMARY"
