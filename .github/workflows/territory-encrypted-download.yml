@@ -1,0 +1,51 @@
+name: Territory encrypted return download
+'on':
+  push:
+    branches: [territory-card-production]
+    paths: ['territory/transport/downloads/*']
+permissions:
+  contents: read
+jobs:
+  encrypted-download:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Identify the owner's single encrypted-return request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json,os,re,subprocess
+          c=json.loads(subprocess.run(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/commits/'+os.environ['GITHUB_SHA']],check=True,capture_output=True,text=True).stdout)
+          if c.get('author',{}).get('login')!='ksolo21-web':raise SystemExit('Owner request required.')
+          names=[f['filename'] for f in c['files'] if f['status'] in ('added','modified') and re.fullmatch(r'territory/transport/downloads/[0-9a-f]{32}',f['filename'])]
+          if len(names)!=1:raise SystemExit('Exactly one encrypted return request required.')
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('TERRITORY_SESSION='+names[0].rsplit('/',1)[1]+'\n')
+          PY
+      - name: Install pinned dependencies without a cache
+        run: |
+          python3 -m venv "$RUNNER_TEMP/territory-download-env"
+          "$RUNNER_TEMP/territory-download-env/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -r territory/production/requirements.txt
+      - name: Require all 136 software tests and original source integrity
+        run: |
+          "$RUNNER_TEMP/territory-download-env/bin/python" territory/production/audit_kit.py
+          (cd territory/production && "$RUNNER_TEMP/territory-download-env/bin/python" -m unittest -q test_delivery)
+      - name: Mirror matching ciphertext only; do not rerun the worker
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          "$RUNNER_TEMP/territory-download-env/bin/python" territory/production/delivery.py "$TERRITORY_SESSION" "$RUNNER_TEMP/territory-encrypted-download/result.encrypted.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: territory-encrypted-${{ env.TERRITORY_SESSION }}
+          path: ${{ runner.temp }}/territory-encrypted-download/result.encrypted.json
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error

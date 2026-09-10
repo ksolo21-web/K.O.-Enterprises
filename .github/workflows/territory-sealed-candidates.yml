@@ -42,6 +42,7 @@ jobs:
       - name: Require original source integrity and software tests
         run: |
           "$RUNNER_TEMP/territory-env/bin/python" territory/production/audit_kit.py
+          (cd territory/production && "$RUNNER_TEMP/territory-env/bin/python" -m unittest -q test_delivery)
       - name: Process encrypted input and publish encrypted candidates only
         env:
           GH_TOKEN: ${{ github.token }}
@@ -51,21 +52,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          "$RUNNER_TEMP/territory-env/bin/python" - <<'PY'
-          import hashlib,json,os,sys
-          from pathlib import Path
-          sys.path.insert(0,str(Path('territory/production').resolve()))
-          import transport,sealed
-          sid=sealed.validate_session(os.environ['TERRITORY_SESSION'])
-          envelope=transport.receive_envelope('outputs',sid)
-          if envelope is None or envelope.get('purpose')!='result' or envelope.get('session')!=sid:
-              raise SystemExit('No matching encrypted return envelope.')
-          raw=json.dumps(envelope,sort_keys=True,separators=(',',':')).encode()
-          if len(raw)>2000000:raise SystemExit('Download mirror exceeds its bounded size; ciphertext remains in branch transport.')
-          p=Path(os.environ['RUNNER_TEMP'])/'territory-encrypted-download';p.mkdir()
-          (p/'result.encrypted.json').write_bytes(raw)
-          print(json.dumps({'encrypted_bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'card_release_authorized':False}))
-          PY
+          "$RUNNER_TEMP/territory-env/bin/python" territory/production/delivery.py "$TERRITORY_SESSION" "$RUNNER_TEMP/territory-encrypted-download/result.encrypted.json"
       - name: Retain encrypted return envelope for one day
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
