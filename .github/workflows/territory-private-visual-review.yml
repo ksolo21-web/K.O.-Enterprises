@@ -7,6 +7,7 @@ name: Territory private visual critic - local model only
       - 'territory/production/visual_review.py'
       - 'territory/production/visual_worker.py'
       - 'territory/production/test_visual_review.py'
+      - 'territory/production/test_visual_card_review.py'
       - 'territory/production/transport.py'
       - '.github/workflows/territory-private-visual-review.yml'
 permissions:
@@ -33,7 +34,7 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/testenv"
           "$RUNNER_TEMP/testenv/bin/python" -m pip install --disable-pip-version-check --no-cache-dir -r territory/production/requirements.txt
-      - name: Recheck original sources and existing plus new tests
+      - name: Recheck original sources and visual-controller tests
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
@@ -46,12 +47,13 @@ jobs:
           if audit_kit.main()!=0:raise SystemExit('Existing audit failed.')
           base=json.loads((root/'evidence/continuation-kit-audit.json').read_text())
           if base['tests_run']!=137 or not base['software_tests_passed']:raise SystemExit('Existing suite failed or changed.')
-          result=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromName('test_visual_review'))
-          if result.testsRun!=20 or result.skipped or not result.wasSuccessful():raise SystemExit('Visual controller tests failed or changed.')
+          suite=unittest.defaultTestLoader.loadTestsFromNames(['test_visual_review','test_visual_card_review'])
+          result=unittest.TextTestRunner(verbosity=2).run(suite)
+          if result.testsRun!=30 or result.skipped or not result.wasSuccessful():raise SystemExit('Visual controller tests failed or changed.')
           after=engine.verify_skills()
           receipt={'run_id':os.environ['GITHUB_RUN_ID'],'source_commit':os.environ['GITHUB_SHA'],
-                   'original_files_verified':138,'existing_tests_passed':137,'new_controller_tests_passed':20,
-                   'total_tests_passed':157,'failures':0,'errors':0,'skipped':0,
+                   'original_files_verified':138,'existing_tests_passed':137,'visual_controller_tests_passed':30,
+                   'total_tests_passed':167,'failures':0,'errors':0,'skipped':0,
                    'visual_model_qualified':False,'real_cards_released':0,'release_ready':False}
           Path(os.environ['RUNNER_TEMP'],'controller-tests.json').write_text(json.dumps(receipt,indent=2))
           PY
@@ -104,7 +106,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/ollama"
           tar --zstd -xf "$RUNNER_TEMP/ollama.tar.zst" -C "$RUNNER_TEMP/ollama"
           rm "$RUNNER_TEMP/ollama.tar.zst"
-      - name: Run encrypted real-image calibration with a separate local model
+      - name: Run encrypted real-image calibration or card review with a separate local model
         env:
           GH_TOKEN: ${{ github.token }}
           REVIEW_SESSION: ${{ needs.verify.outputs.session }}
