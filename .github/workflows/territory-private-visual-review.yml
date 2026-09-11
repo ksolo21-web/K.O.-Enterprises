@@ -14,7 +14,7 @@ permissions:
   contents: read
 concurrency:
   group: territory-private-visual-review
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   verify:
     if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web' && github.ref == 'refs/heads/territory-card-production'
