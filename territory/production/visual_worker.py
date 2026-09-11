@@ -17,7 +17,7 @@ def run(session):
         if set(request)!={'version','session','client_public'} or type(request['version']) is not int or request['version']!=1 or request['session']!=session:raise RuntimeError('Invalid session request')
         client_public=request['client_public'];sealed.derive(sealed.new_key(),client_public,{'probe':True})
         stage='verify_local_model';identity=visual_review.neural.model_identity()
-        key=sealed.new_key();expires=int(time.time())+1200
+        key=sealed.new_key();expires=int(time.time())+5400
         stage='publish_readiness'
         t.commit({'territory/transport/sessions/'+session+'/ready.json':{'version':1,'session':session,'server_public':sealed.public(key),'expires':expires,'kind':'visual-review','run_id':os.environ.get('GITHUB_RUN_ID'),'source_commit':os.environ.get('GITHUB_SHA')}},'Publish ephemeral encrypted-review readiness [skip ci]')
         envelope=None;stage='receive_input'
