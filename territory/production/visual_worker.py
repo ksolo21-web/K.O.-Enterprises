@@ -1,8 +1,8 @@
-"""Owner-started encrypted visual calibration; public failures contain no private data."""
+"""Owner-started encrypted visual review; public failures contain no private data."""
 from __future__ import annotations
 import json,os,shutil,sys,tempfile,time
 from pathlib import Path
-import engine,privacy,sealed,transport as t,visual_review
+import engine,privacy,sealed,transport as t,visual_review,real_card_review
 
 def run(session):
     sealed.metadata(session,'job')
@@ -19,7 +19,7 @@ def run(session):
         stage='verify_local_model';identity=visual_review.neural.model_identity()
         key=sealed.new_key();expires=int(time.time())+1200
         stage='publish_readiness'
-        t.commit({'territory/transport/sessions/'+session+'/ready.json':{'version':1,'session':session,'server_public':sealed.public(key),'expires':expires,'kind':'visual-calibration','run_id':os.environ.get('GITHUB_RUN_ID'),'source_commit':os.environ.get('GITHUB_SHA')}},'Publish ephemeral encrypted-review readiness [skip ci]')
+        t.commit({'territory/transport/sessions/'+session+'/ready.json':{'version':1,'session':session,'server_public':sealed.public(key),'expires':expires,'kind':'visual-review','run_id':os.environ.get('GITHUB_RUN_ID'),'source_commit':os.environ.get('GITHUB_SHA')}},'Publish ephemeral encrypted-review readiness [skip ci]')
         envelope=None;stage='receive_input'
         while time.time()<expires:
             try:envelope=t.receive_envelope(session,'inputs');break
@@ -29,12 +29,16 @@ def run(session):
         tmp=Path(tempfile.mkdtemp(prefix='territory-visual-',dir=os.environ['RUNNER_TEMP']))
         stage='unpack_input';job=tmp/'input';result=tmp/'output';sealed.unpack(raw,job)
         stage='visual_review'
+        operation=engine.json_read(job/'job.json').get('kind')
         with privacy.authenticated_session(job,raw):
-            visual_review.run(job/'job.json',result,identity=identity)
+            if operation=='territory_card_review':
+                real_card_review.run(job/'job.json',result,identity=identity)
+            else:
+                visual_review.run(job/'job.json',result,identity=identity)
         stage='publish_result'
         answer=sealed.seal(sealed.pack(result),client_public,session,'result');t.send_envelope(answer,'outputs')
-        t.commit({'territory/transport/sessions/'+session+'/status.json':{'version':1,'session':session,'status':'encrypted-review-returned','run_id':os.environ.get('GITHUB_RUN_ID'),'release_ready':False}},'Record encrypted-review completion without private findings [skip ci]')
-        return {'session':session,'encrypted_review_returned':True,'release_ready':False}
+        t.commit({'territory/transport/sessions/'+session+'/status.json':{'version':1,'session':session,'status':'encrypted-review-returned','run_id':os.environ.get('GITHUB_RUN_ID'),'operation':operation,'release_ready':False}},'Record encrypted-review completion without private findings [skip ci]')
+        return {'session':session,'encrypted_review_returned':True,'operation':operation,'release_ready':False}
     except Exception as error:
         code=('protocol_error' if isinstance(error,t.ProtocolError) else
               'input_window_expired' if isinstance(error,TimeoutError) else
