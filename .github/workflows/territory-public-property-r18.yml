@@ -1,0 +1,73 @@
+name: Public county property verification R18
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/territory-public-property-r18.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Read public property geometry and use codes only
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          out=pathlib.Path('public-property');out.mkdir()
+          bounds=[-83.17,42.638,-83.105,42.707]
+          base='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/'
+          sources={'site_addresses':base+'EnterpriseOpenParcelDataMapService/MapServer/0','tax_parcels':base+'EnterpriseOpenParcelDataMapService/MapServer/1','land_use':base+'EnterpriseOpenPlanningMapService/MapServer/4','municipal':base+'EnterpriseAdminDataMapService/MapServer/2'}
+          wanted={'OBJECTID','OBJECTID_12','TYPE','PIN','KEYPIN','SITEPREFIXONE','SITESTREETNUMBER','SITESTREETNAME','SITESTREETTYPE','SITESUFFIXONE','SITESTREETADDRESS','SITECITY','SITESTATE','SITEZIPCODE','REVISIONDATE','CVTTAXCODE','CVTTAXDESCRIPTION','CLASSCODE','SITEADDRESS','SITEZIP5','STRUCTURE_DESC','LANDUSECODE','LANDUSE','LOCALFIPS','NAME','STATEFIPS','COUNTYFIPS','SQUAREMILES'}
+          receipts=[]
+          def request(url,params):
+            full=url+'?'+urllib.parse.urlencode(params)
+            req=urllib.request.Request(full,headers={'User-Agent':'Public municipal map verification (read only)'})
+            with urllib.request.urlopen(req,timeout=90) as r:
+              raw=r.read(32000001)
+              if len(raw)>32000000:raise ValueError('Response exceeds capture limit')
+              data=json.loads(raw)
+            if 'error' in data:raise ValueError(json.dumps(data['error']))
+            time.sleep(.25);return data,raw,full
+          def save(p,raw):p.write_bytes(raw);return hashlib.sha256(raw).hexdigest()
+          for name,url in sources.items():
+            d=out/name;d.mkdir();rec={'id':name,'url':url,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'bounds':bounds,'crs':'EPSG:4326','complete':False,'requests':[]}
+            try:
+              meta,raw,full=request(url,{'f':'json'});save(d/'metadata.json',raw)
+              oid=meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+              fields=[f['name'] for f in meta['fields'] if f['name'] in wanted]
+              if oid not in fields:fields.insert(0,oid)
+              query={'f':'json','where':'1=1','geometry':','.join(map(str,bounds)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              counts,raw,full=request(url+'/query',{**query,'returnCountOnly':'true'});save(d/'count.json',raw)
+              ids,raw,full=request(url+'/query',{**query,'returnIdsOnly':'true'});save(d/'ids.json',raw)
+              expected=sorted(ids['objectIds'] or [])
+              if len(expected)!=len(set(expected)) or len(expected)!=counts['count']:raise ValueError('Count and ID queries disagree')
+              if len(expected)>30000:raise ValueError('More than 30000 objects in bounded query')
+              features=[]
+              for offset in range(0,len(expected),400):
+                selected=expected[offset:offset+400]
+                data,raw,full=request(url+'/query',{'f':'json','objectIds':','.join(map(str,selected)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                digest=save(d/f'page-{offset//400:03}.json',raw)
+                actual=[f['attributes'][oid] for f in data.get('features',[])]
+                if sorted(actual)!=selected or data.get('exceededTransferLimit',False):raise ValueError('Truncated page or ID mismatch')
+                features.extend(data['features']);rec['requests'].append({'url':full,'sha256':digest,'count':len(actual),'ids':actual,'exceededTransferLimit':False})
+              if sorted(f['attributes'][oid] for f in features)!=expected:raise ValueError('Full response reconciliation failed')
+              save(d/'features.json',json.dumps({'source':url,'objectIdField':oid,'spatialReference':{'wkid':4326},'features':features},separators=(',',':')).encode())
+              rec.update(complete=True,returned_count=len(expected),feature_ids=expected,fields=fields,source_recency=meta.get('editingInfo') or 'See layer description and feature revision dates; retrieval date is not dataset update date')
+              print(name,'complete',len(expected),flush=True)
+            except Exception as e:rec['error']=type(e).__name__+': '+str(e)[:500];print(name,'failed',rec['error'],flush=True)
+            receipts.append(rec)
+          save(out/'retrieval-receipts.json',json.dumps(receipts,indent=2).encode())
+          with zipfile.ZipFile('public-property.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+            for p in sorted(out.rglob('*')):
+              if p.is_file():z.write(p,p.as_posix())
+          p=pathlib.Path('public-property.zip');print('archive_bytes',p.stat().st_size,'sha256',hashlib.sha256(p.read_bytes()).hexdigest(),flush=True)
+          if p.stat().st_size>20000000:raise SystemExit('Evidence exceeds 20 MB cap')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-property-r18
+          path: public-property.zip
+          retention-days: 1
+          if-no-files-found: error
