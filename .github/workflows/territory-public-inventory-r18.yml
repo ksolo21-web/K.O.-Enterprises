@@ -1,0 +1,101 @@
+name: Public municipal inventory verification R18
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/territory-public-inventory-r18.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false && github.actor == 'ksolo21-web'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Retrieve public map features only, without credentials or private card files
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          out=pathlib.Path('public-inventory');out.mkdir()
+          bounds=[-83.17,42.638,-83.105,42.707]
+          sources={
+            'county_roads':'https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0',
+            'city_roads':'https://atlas.rochesterhills.org/arcgis/rest/services/Roads/Roads_PublicDataset/MapServer/8',
+            'city_parcels':'https://gis.rochesterhills.org/server/rest/services/ParcelPublishing/ParcelsGeoEnrich_PublicDataset/FeatureServer/0',
+            'city_jurisdiction':'https://atlas.rochesterhills.org/arcgis/rest/services/StreetJurisdiction/MapServer/0'
+          }
+          wanted={'OBJECTID','StreetName','StreetType','DirectionalPrefix','DirectionalSuffix','CartographicName','CVTTaxNameL','CVTTaxNameR','RevisionDate','NFC','Act51RoadType','JurisdictionName','LowAddressLeft','HighAddressLeft','LowAddressRight','HighAddressRight','TravelDirection','STREETNAME','ROUTE','created_date','last_edited_date','pnum','PIN','relatedpnum','REVISIONDATE','CVTTAXDESCRIPTION','propaddrnum','propstreetname','propcity_RH','propzip','classcode','STRUCTURE_DESC','dataexport','RDNAME','JURISDICTION'}
+          receipts=[]
+          def request(url,params):
+            full=url+'?'+urllib.parse.urlencode(params)
+            req=urllib.request.Request(full,headers={'User-Agent':'Public municipal map quality verification (read-only)'})
+            with urllib.request.urlopen(req,timeout=90) as r:
+              raw=r.read(32000001)
+              if len(raw)>32000000:raise ValueError('Response exceeds bounded capture limit')
+              data=json.loads(raw)
+            if 'error' in data:raise ValueError(json.dumps(data['error']))
+            time.sleep(0.3)
+            return data,raw,full
+          def save(path,raw):
+            path.write_bytes(raw)
+            return hashlib.sha256(raw).hexdigest()
+          for name,url in sources.items():
+            d=out/name;d.mkdir();rec={'id':name,'url':url,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'bounds':bounds,'crs':'EPSG:4326','complete':False,'requests':[]}
+            try:
+              meta,raw,full=request(url,{'f':'json'});save(d/'metadata.json',raw)
+              fields=[f['name'] for f in meta['fields'] if f['name'] in wanted]
+              oid=meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+              if oid not in fields:fields.insert(0,oid)
+              query={'f':'json','where':'1=1','geometry':','.join(map(str,bounds)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              counts,raw,full=request(url+'/query',{**query,'returnCountOnly':'true'});save(d/'count.json',raw)
+              ids,raw,full=request(url+'/query',{**query,'returnIdsOnly':'true'});save(d/'ids.json',raw)
+              expected=sorted(ids['objectIds'] or [])
+              if len(expected)!=len(set(expected)) or len(expected)!=counts['count']:raise ValueError('Count and ID query disagree')
+              if len(expected)>25000:raise ValueError('Inventory exceeds bounded retrieval limit')
+              features=[]
+              for offset in range(0,len(expected),400):
+                selected=expected[offset:offset+400]
+                data,raw,full=request(url+'/query',{'f':'json','objectIds':','.join(map(str,selected)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                digest=save(d/f'page-{offset//400:03}.json',raw)
+                actual=[f['attributes'][oid] for f in data.get('features',[])]
+                if sorted(actual)!=selected or data.get('exceededTransferLimit',False):raise ValueError('Page is truncated or IDs do not reconcile')
+                features.extend(data['features']);rec['requests'].append({'url':full,'sha256':digest,'count':len(actual),'ids':actual,'exceededTransferLimit':False})
+              actual=sorted(f['attributes'][oid] for f in features)
+              if actual!=expected:raise ValueError('Full response ID reconciliation failed')
+              merged={'source':url,'objectIdField':oid,'spatialReference':{'wkid':4326},'features':features}
+              save(d/'features.json',json.dumps(merged,separators=(',',':')).encode())
+              rec.update(complete=True,returned_count=len(actual),feature_ids=actual,fields=fields,source_recency=meta.get('editingInfo') or 'Dataset update not published in layer metadata; retain individual feature revision fields')
+              print(name,'complete',len(actual),flush=True)
+            except Exception as e:
+              rec['error']=type(e).__name__+': '+str(e)[:500];print(name,'failed',rec['error'],flush=True)
+            receipts.append(rec)
+          # Discover the county's public property layer metadata without guessing feature records.
+          try:
+            url='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise'
+            data,raw,full=request(url,{'f':'json'});save(out/'county-enterprise-services.json',raw)
+          except Exception as e:save(out/'county-directory-error.txt',str(e).encode())
+          try:
+            s,w,n,e=bounds[1],bounds[0],bounds[3],bounds[2]
+            bbox=f'{s},{w},{n},{e}'
+            q=f'[out:json][timeout:120];(nwr[highway]({bbox});nwr[building]({bbox});nwr["addr:street"]({bbox}););out count;out meta geom;'
+            url='https://overpass-api.de/api/interpreter'
+            data,raw,full=request(url,{'data':q});save(out/'osm-full.json',raw)
+            if data.get('remark'):raise ValueError(data['remark'])
+            counts=[x for x in data['elements'] if x['type']=='count'];elements=[x for x in data['elements'] if x['type']!='count']
+            if len(counts)!=1 or int(counts[0]['tags']['total'])!=len(elements):raise ValueError('OSM count does not reconcile')
+            receipts.append({'id':'osm','url':url,'query':q,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'bounds':bounds,'complete':True,'returned_count':len(elements),'source_recency':data.get('osm3s',{}),'sha256':hashlib.sha256(raw).hexdigest()})
+            print('osm complete',len(elements),flush=True)
+          except Exception as e:receipts.append({'id':'osm','complete':False,'error':type(e).__name__+': '+str(e)[:500]});print('osm failed',str(e)[:300],flush=True)
+          save(out/'retrieval-receipts.json',json.dumps(receipts,indent=2).encode())
+          with zipfile.ZipFile('public-inventory.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+            for p in sorted(out.rglob('*')):
+              if p.is_file():z.write(p,p.as_posix())
+          p=pathlib.Path('public-inventory.zip')
+          print('archive_bytes',p.stat().st_size,'sha256',hashlib.sha256(p.read_bytes()).hexdigest(),flush=True)
+          if p.stat().st_size>10000000:raise SystemExit('Archive exceeds bounded evidence size')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-inventory-r18
+          path: public-inventory.zip
+          retention-days: 1
+          if-no-files-found: error
