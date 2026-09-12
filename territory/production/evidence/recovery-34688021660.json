@@ -1,0 +1,32 @@
+{
+  "kind": "internal_software_recovery_review",
+  "run_id": "34688021660",
+  "source_commit": "7631e539d22b1765a168c0c74651cd25dab87937",
+  "source_sha256": {
+    "client.py": "5bd12c346d5abd4f3fa7f69ae51e1b08035b2e07cd03a1e0c725d0693f0ed5b3",
+    "transport.py": "393ac77cebe877f3e570ded7d376b73b454e45cb5a176b4460a79e44b3d35200",
+    "worker.py": "6ce4e217f07f7eb90fbed81cae0b600fb2ea2850ec461231fdd38e419a9e02d5",
+    "visual_worker.py": "3d4b03b3189ad5ae296c126fd30f3b3c46239989c6e0d4b4aaefaa48c6ae2317",
+    "test_client_recovery.py": "df5a454ae990516d26abd88d4b8b962173a144128fc1228ed9d51cd7727cc136",
+    "atomic_delivery.py": "54ceae2a3240085460b7b93b0da642b66a47addcf9ab80e69201513fa45248ab",
+    "test_atomic_delivery.py": "d62de2f8b4890364285883cf9c984e62b0d7cac96bcde43f129a223882f5035a"
+  },
+  "original_files_verified_before": 138,
+  "original_files_verified_after": 138,
+  "baseline_tests_run": 137,
+  "visual_and_recovery_tests_run": 70,
+  "atomic_delivery_tests_run": 34,
+  "tests_run": 241,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "software_tests_passed": true,
+  "actual_model_inference_in_this_run": false,
+  "real_card_critic_qualified": false,
+  "real_cards_released": 0,
+  "release_ready": false,
+  "limits": [
+    "Crypto and recovery tests use controlled synthetic inputs, not card approval.",
+    "Windows-specific runtime not exercised by this Ubuntu workflow."
+  ]
+}
