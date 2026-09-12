@@ -71,28 +71,26 @@ def commit(files,message):
     return commit['sha']
 
 def send_envelope(envelope,direction):
+    """Store ciphertext parts plus a compact hash-bound manifest in one commit.
+
+    The compact manifest avoids a manifest-size explosion when an owner-side connector
+    must use many small transport chunks. Integrity remains fail-closed: the receiver
+    verifies the exact part count, ordering/schema and SHA-256 of the complete ciphertext,
+    and AES-GCM authenticates the decrypted envelope before any private job is processed.
+    """
     validate_envelope(envelope,direction)
     session=envelope['session'];sealed.metadata(session,envelope['purpose'])
     if direction not in ('inputs','outputs'):raise TransportError('bad direction')
-    root=f'territory/transport/{direction}/{session}';cipher=envelope['ciphertext'];files={};parts=[]
+    root=f'territory/transport/{direction}/{session}';cipher=envelope['ciphertext'];files={};count=0
     for i in range(0,len(cipher),CHUNK):
         name=f'part-{i//CHUNK:04}.json';text=cipher[i:i+CHUNK]
-        files[root+'/'+name]={'data':text};parts.append({'name':name,'sha256':hashlib.sha256(text.encode()).hexdigest()})
+        files[root+'/'+name]={'data':text};count+=1
     header={k:v for k,v in envelope.items() if k!='ciphertext'}
-    files[root+'/manifest.json']={'envelope':header,'parts':parts,'ciphertext_sha256':hashlib.sha256(cipher.encode()).hexdigest()}
+    files[root+'/manifest.json']={'envelope':header,'part_count':count,'ciphertext_sha256':hashlib.sha256(cipher.encode()).hexdigest()}
     return commit(files,'Store opaque encrypted territory '+direction)
 
-def receive_envelope(session,direction):
-    if direction not in ('inputs','outputs'):raise ProtocolError('bad direction')
-    purpose='job' if direction=='inputs' else 'result'
-    sealed.metadata(session,purpose)
-    root=f'territory/transport/{direction}/{session}';manifest=read(root+'/manifest.json')
-    if not isinstance(manifest,dict) or set(manifest)!={'envelope','parts','ciphertext_sha256'}:raise ProtocolError('invalid manifest schema')
-    header=manifest['envelope']
-    fields={'version','session','purpose','sender','receiver','nonce'}
-    if not isinstance(header,dict) or set(header)!=fields:raise ProtocolError('envelope_schema_invalid')
-    if header.get('session')!=session or header.get('purpose')!=purpose:raise ProtocolError('envelope_context_invalid')
-    parts=manifest['parts']
+def _receive_legacy_manifest(root,manifest):
+    header=manifest['envelope'];parts=manifest['parts']
     if not isinstance(parts,list) or not 1<=len(parts)<=200:raise ProtocolError('invalid part count')
     chunks=[]
     for i,part in enumerate(parts):
@@ -103,6 +101,35 @@ def receive_envelope(session,direction):
         value=item['data']
         if not isinstance(value,str) or len(value)>CHUNK or hashlib.sha256(value.encode()).hexdigest()!=part['sha256']:raise ProtocolError('encrypted part identity mismatch')
         chunks.append(value)
-    cipher=''.join(chunks)
+    return header,''.join(chunks)
+
+def _receive_compact_manifest(root,manifest):
+    header=manifest['envelope'];count=manifest['part_count']
+    if type(count) is not int or not 1<=count<=200:raise ProtocolError('invalid part count')
+    chunks=[]
+    for i in range(count):
+        try:item=read(root+f'/part-{i:04}.json')
+        except MissingObject as error:raise ProtocolError('complete manifest references a missing part') from error
+        if not isinstance(item,dict) or set(item)!={'data'}:raise ProtocolError('invalid part schema')
+        value=item['data']
+        if not isinstance(value,str) or not value or len(value)>CHUNK:raise ProtocolError('invalid encrypted part')
+        chunks.append(value)
+    return header,''.join(chunks)
+
+def receive_envelope(session,direction):
+    if direction not in ('inputs','outputs'):raise ProtocolError('bad direction')
+    purpose='job' if direction=='inputs' else 'result'
+    sealed.metadata(session,purpose)
+    root=f'territory/transport/{direction}/{session}';manifest=read(root+'/manifest.json')
+    if not isinstance(manifest,dict):raise ProtocolError('invalid manifest schema')
+    if set(manifest)=={'envelope','parts','ciphertext_sha256'}:
+        header,cipher=_receive_legacy_manifest(root,manifest)
+    elif set(manifest)=={'envelope','part_count','ciphertext_sha256'}:
+        header,cipher=_receive_compact_manifest(root,manifest)
+    else:raise ProtocolError('invalid manifest schema')
+    fields={'version','session','purpose','sender','receiver','nonce'}
+    if not isinstance(header,dict) or set(header)!=fields:raise ProtocolError('envelope_schema_invalid')
+    if header.get('session')!=session or header.get('purpose')!=purpose:raise ProtocolError('envelope_context_invalid')
+    if not isinstance(manifest['ciphertext_sha256'],str) or not re.fullmatch(r'[0-9a-f]{64}',manifest['ciphertext_sha256']):raise ProtocolError('invalid encrypted bundle identity')
     if hashlib.sha256(cipher.encode()).hexdigest()!=manifest['ciphertext_sha256']:raise ProtocolError('encrypted bundle identity mismatch')
     return validate_envelope({**header,'ciphertext':cipher},direction)
