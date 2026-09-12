@@ -89,6 +89,7 @@ jobs:
       OLLAMA_NUM_PARALLEL: '1'
       PYTHONDONTWRITEBYTECODE: '1'
       PIP_NO_CACHE_DIR: '1'
+      TERRITORY_REVIEW_INPUT_WINDOW_SECONDS: '5400'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
