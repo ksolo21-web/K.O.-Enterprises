@@ -1,0 +1,92 @@
+name: Bounded public GIS source verification
+'on':
+  push:
+    branches: [public-gis-verification-20260913]
+    paths: ['.github/workflows/public-gis-verification.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - name: Prepare isolated encryption dependency without cache
+        run: |
+          python3 -m venv "$RUNNER_TEMP/source-env"
+          "$RUNNER_TEMP/source-env/bin/pip" install --disable-pip-version-check --no-cache-dir cryptography==45.0.7
+      - name: Retrieve only public municipal geographic features and preserve encrypted return
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          "$RUNNER_TEMP/source-env/bin/python" - <<'PY'
+          import base64,datetime,hashlib,json,os,time,urllib.parse,urllib.request,zlib
+          from cryptography.hazmat.primitives import hashes,serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+          PUBLIC_KEY=b'''-----BEGIN PUBLIC KEY-----
+          MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp11pIVAtTD4x0t5W88fv
+          J4ruArE0B0tsyzD/agBQmCtGzIKKsPFP5si/c7nvvZgCc+rD34HVVBPU1rAM0Ps0
+          Exc7G10hwH7ISBmz2Y+Ehtpl3pC+IRihpPgJtrI7dWca6YwdK6a5QeEMW7b/OoTU
+          +GQAasjiMZA8XzQMedcMilW2R+Wrw9lA8bqVTzCCGKHfjMZSGqyXan248OO2xSYh
+          k9nkxoU6Pt6scYgUeH66fUErw301H0YsYLRZD38aBqbY/4RlRkcvXLGdlVOatmMH
+          CYetjbk+u6KvemOa7eLKKiyWQRoimqTzc+BzVK8iq40weHZhTDSVeiaWZm3RWR1f
+          hwIDAQAB
+          -----END PUBLIC KEY-----'''
+          def get_json(url):
+              request=urllib.request.Request(url,headers={'User-Agent':'Public geographic verification/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(request,timeout=35) as response:
+                  raw=response.read(5000001)
+              if len(raw)>5000000: raise ValueError('Response exceeds bounded read')
+              value=json.loads(raw)
+              if 'error' in value: raise ValueError(json.dumps(value['error']))
+              return value,hashlib.sha256(raw).hexdigest()
+          root='https://atlas.rochesterhills.org/arcgis/rest/services/'
+          layers={
+            'buildings':(root+'FacilitiesStructures/Building/FeatureServer/0','-83.1565,42.6735,-83.1520,42.6770','OBJECTID,BuildingType,BuildingUse,STATUS,ParcelID,PELNUMBER,last_edited_date'),
+            'addresses':(root+'Addresses/MasterAddresses_PublicDataset/MapServer/1','-83.1565,42.6735,-83.1520,42.6770','OBJECTID,SITEADDRESS,BUILDING,AddressType,last_edited_date'),
+            'roads':(root+'Roads/Roads_PublicDataset/FeatureServer/8','-83.1600,42.6725,-83.1500,42.6840','*')}
+          result={'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'source_scope':'Public municipal geographic features only; no user assignment, card, private screenshot, names or contact records supplied','run_id':os.environ['GITHUB_RUN_ID'],'sources':{}}
+          for name,(base,bbox,fields) in layers.items():
+              entry={'layer_url':base,'bbox_wgs84':bbox,'pages':[],'features':[],'complete':False}
+              result['sources'][name]=entry
+              try:
+                  metadata,mhash=get_json(base+'?f=pjson')
+                  entry['metadata_sha256']=mhash
+                  entry['field_schema']=metadata.get('fields',[])
+                  entry['spatial_reference']=metadata.get('sourceSpatialReference',metadata.get('extent',{}).get('spatialReference'))
+                  oid=metadata.get('objectIdField','OBJECTID')
+                  for offset in (0,2000,4000):
+                      params={'f':'json','where':'1=1','geometry':bbox,'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects','outSR':4326,'outFields':fields,'returnGeometry':'true','orderByFields':oid,'resultOffset':offset,'resultRecordCount':2000}
+                      url=base+'/query?'+urllib.parse.urlencode(params)
+                      page,phash=get_json(url)
+                      features=page.get('features',[])
+                      entry['pages'].append({'url':url,'sha256':phash,'count':len(features),'exceededTransferLimit':page.get('exceededTransferLimit',False)})
+                      entry['features'].extend(features)
+                      if not page.get('exceededTransferLimit',False):
+                          entry['complete']=True
+                          break
+                  if not entry['complete']: raise ValueError('Pagination cap reached; evidence remains incomplete')
+                  print(name,'features',len(entry['features']),'complete',entry['complete'])
+              except Exception as e:
+                  entry['error']=str(e)
+                  print(name,'retrieval failed:',type(e).__name__)
+          raw=json.dumps(result,separators=(',',':')).encode()
+          compressed=zlib.compress(raw,9)
+          key=AESGCM.generate_key(bit_length=256); nonce=os.urandom(12)
+          public=serialization.load_pem_public_key(PUBLIC_KEY)
+          wrapped=public.encrypt(key,padding.OAEP(mgf=padding.MGF1(hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
+          cipher=AESGCM(key).encrypt(nonce,compressed,b'public-gis-source-v1')
+          envelope={'schema':'public-gis-source-v1','run_id':os.environ['GITHUB_RUN_ID'],'plaintext_sha256':hashlib.sha256(raw).hexdigest(),'wrapped_key':base64.b64encode(wrapped).decode(),'nonce':base64.b64encode(nonce).decode(),'ciphertext':base64.b64encode(cipher).decode()}
+          content=json.dumps(envelope,indent=2).encode()
+          path='source-verification/return-'+os.environ['GITHUB_RUN_ID']+'.json'
+          payload={'message':'Preserve encrypted public-source return [skip ci]','branch':'public-gis-verification-20260913','content':base64.b64encode(content).decode()}
+          url='https://api.github.com/repos/ksolo21-web/K.O.-Enterprises/contents/'+path
+          req=urllib.request.Request(url,data=json.dumps(payload).encode(),method='PUT',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=35) as response:
+              receipt=json.load(response)
+          print('Encrypted return:',path,'bytes',len(content),'commit',receipt['commit']['sha'])
+          print('No Actions artifacts, caches, paid services, private maps or user assignments uploaded.')
+          PY
