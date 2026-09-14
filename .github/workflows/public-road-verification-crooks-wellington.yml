@@ -1,0 +1,76 @@
+name: Public road verification Crooks Wellington
+'on':
+  push:
+    branches: [public-road-verification-crooks-wellington-20260913]
+    paths: ['.github/workflows/public-road-verification-crooks-wellington.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve public roads with complete ID pagination
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,urllib.parse,urllib.request
+          out=pathlib.Path('public-source-return'); out.mkdir()
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Public-road-verification/1.0'})
+              with urllib.request.urlopen(req,timeout=35) as r:
+                  raw=r.read(8000001)
+              if len(raw)>8000000: raise ValueError('bounded size exceeded')
+              return raw
+          def js(url):
+              raw=get(url); value=json.loads(raw)
+              if 'error' in value: raise ValueError(str(value['error']))
+              return value,hashlib.sha256(raw).hexdigest()
+          def url(base,params): return base+'/query?'+urllib.parse.urlencode(params)
+          sources={
+          'county_roads':('https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0','-83.200,42.635,-83.120,42.745'),
+          'city_roads':('https://atlas.rochesterhills.org/arcgis/rest/services/Roads/Roads_PublicDataset/FeatureServer/8','-83.200,42.635,-83.120,42.745')}
+          def collect(name,base,bbox):
+              result={'source':base,'bounds_wgs84':bbox,'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'features':[],'requests':[]}
+              try:
+                  meta,mhash=js(base+'?f=pjson'); result['metadata']=meta; result['metadata_sha256']=mhash
+                  params={'f':'json','where':'1=1','geometry':bbox,'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+                  ids,ihash=js(url(base,dict(params,returnIdsOnly='true')))
+                  count,chash=js(url(base,dict(params,returnCountOnly='true')))
+                  result['id_response']=ids; result['count_response']=count
+                  result['requests'].extend([{'url':url(base,dict(params,returnIdsOnly='true')),'sha256':ihash},{'url':url(base,dict(params,returnCountOnly='true')),'sha256':chash}])
+                  object_ids=sorted(set(ids.get('objectIds') or []))
+                  if not object_ids or len(object_ids)>12000: raise ValueError('empty IDs or bounded feature cap exceeded')
+                  oid=ids.get('objectIdFieldName') or meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+                  for n in range(0,len(object_ids),250):
+                      p={'f':'json','objectIds':','.join(map(str,object_ids[n:n+250])),'outFields':'*','outSR':4326,'returnGeometry':'true'}
+                      page,phash=js(url(base,p)); rows=page.get('features',[])
+                      result['requests'].append({'url':url(base,p),'sha256':phash,'count':len(rows),'exceededTransferLimit':page.get('exceededTransferLimit',False)})
+                      if page.get('exceededTransferLimit'): raise ValueError('unexpected transfer truncation')
+                      result['features'].extend(rows)
+                  got=[f['attributes'].get(oid) for f in result['features']]
+                  result['complete']=len(got)==len(set(got))==count.get('count')==len(object_ids) and set(got)==set(object_ids)
+                  if not result['complete']: raise ValueError('count/ID/content mismatch')
+              except Exception as e: result['error']=str(e)
+              (out/(name+'.json')).write_text(json.dumps(result,separators=(',',':')))
+              print(name,'features',len(result['features']),'complete',result['complete'],'error',result.get('error','none'))
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+              list(ex.map(lambda item:collect(item[0],*item[1]),sources.items()))
+          docs={'oakland-township-street-index.pdf':'https://oaklandtwpmi.gov/wp-content/uploads/2025/05/Street-Index-Map-7-22-21.pdf','rochester-map-index.html':'https://atlas.rochesterhills.org/IndexMapsofInterest/'}
+          receipts=[]
+          for name,link in docs.items():
+              r={'url':link,'file':name,'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+              try:
+                  raw=get(link); (out/name).write_bytes(raw); r.update(bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest())
+              except Exception as e: r['error']=str(e)
+              receipts.append(r)
+          (out/'documents.json').write_text(json.dumps(receipts,indent=2))
+          (out/'scope.json').write_text(json.dumps({'scope':'Public municipal/county road centerlines and official public street-map document only. No private screenshots, congregation assignments, card PDFs, credentials, personal contacts or financial data supplied.','run_id':__import__('os').environ['GITHUB_RUN_ID']},indent=2))
+          PY
+      - name: Return public evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-roads-return
+          path: public-source-return/
+          retention-days: 1
+          if-no-files-found: error
