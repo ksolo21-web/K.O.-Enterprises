@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
-      - name: Run pinned public-only retrieval with disambiguated road names
+      - name: Run pinned public-only retrieval with southern road context
         run: |
           python3 - <<'RUN'
           import urllib.request,textwrap,re
@@ -20,14 +20,16 @@ jobs:
           code=textwrap.dedent(source.split("python3 - <<'PY'\n",1)[1].split('\n          PY',1)[0])
           seed_line=next(line for line in code.splitlines() if line.startswith('seeds='))
           code=code.replace(seed_line,"seeds={'northumberland':\"CartographicName IN ('Northumberland Dr','Ludgate Ln','Kingsmere Cir','Bretton Dr N','Bretton Dr S')\"}")
+          assert 'min(ys)-.002' in code
+          code=code.replace('min(ys)-.002','min(ys)-.010')
           dl=next(line for line in code.splitlines() if line.startswith('downloads='))
-          code=code.replace(dl,"downloads={'rochester-street-map.pdf':'https://www.rochesterhills.org/Maps/StreetMap.pdf','rochester-street-map-book.pdf':'https://www.rochesterhills.org/Maps/StreetMapBook.pdf'}")
+          code=code.replace(dl,'downloads={}')
           assert "'wellington':" not in code
           exec(compile(code,'pinned-public-retrieval','exec'),{})
           RUN
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: northumberland-public-streets-20260914
+          name: northumberland-hamlin-public-streets-20260914
           path: public-streets.zip
           retention-days: 2
           if-no-files-found: error
