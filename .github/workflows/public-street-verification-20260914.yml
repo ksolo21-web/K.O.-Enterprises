@@ -1,0 +1,95 @@
+name: Bounded public street verification September 2026
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-street-verification-20260914.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Retrieve public geometry without owners or financial data
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          out=pathlib.Path('public-streets');out.mkdir()
+          base='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/'
+          sources={'roads':base+'EnterpriseTransportationDataMapService/MapServer/0','addresses':base+'EnterpriseOpenParcelDataMapService/MapServer/0','parcels':base+'EnterpriseOpenParcelDataMapService/MapServer/1','land_use':base+'EnterpriseOpenPlanningMapService/MapServer/4'}
+          wanted={'OBJECTID','OBJECTID_12','PIN','KEYPIN','TYPE','STREETNAME','StreetName','StreetType','DirectionalPrefix','DirectionalSuffix','CartographicName','Act51RoadType','JurisdictionName','NFC','RevisionDate','TravelDirection','SITEPREFIXONE','SITESTREETNUMBER','SITESTREETNAME','SITESTREETTYPE','SITESUFFIXONE','SITESTREETADDRESS','SITECITY','SITESTATE','SITEZIPCODE','CVTTAXDESCRIPTION','CLASSCODE','SITEADDRESS','STRUCTURE_DESC','LANDUSECODE','LANDUSE','LANDUSE_CODE','LANDUSE_TYPE','LU_CODE','LU_DESCRIPTION'}
+          receipts=[]
+          def get(url,params=None):
+            full=url+('?' + urllib.parse.urlencode(params) if params else '')
+            error=None
+            for attempt in range(3):
+              try:
+                req=urllib.request.Request(full,headers={'User-Agent':'Public street map verification; read-only'})
+                with urllib.request.urlopen(req,timeout=45) as response:raw=response.read(25000001)
+                if len(raw)>25000000:raise ValueError('Response larger than 25MB')
+                data=json.loads(raw)
+                if 'error' in data:raise ValueError(str(data['error']))
+                time.sleep(.15);return data,raw,full
+              except Exception as e:error=e;time.sleep(1+attempt)
+            raise error
+          def save(p,raw):p.write_bytes(raw);return hashlib.sha256(raw).hexdigest()
+          def retrieve(name,url,where='1=1',bounds=None):
+            folder=out/name;folder.mkdir(parents=True,exist_ok=True)
+            rec={'id':name,'source':url,'where':where,'bounds':bounds,'crs':'EPSG:4326','retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'pages':[]}
+            features=[]
+            try:
+              meta,raw,full=get(url,{'f':'json'});save(folder/'metadata.json',raw)
+              oid=meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+              fields=[f['name'] for f in meta['fields'] if f['name'] in wanted]
+              if oid not in fields:fields.insert(0,oid)
+              query={'f':'json','where':where}
+              if bounds:query.update(geometry=','.join(map(str,bounds)),geometryType='esriGeometryEnvelope',inSR=4326,spatialRel='esriSpatialRelIntersects')
+              cnt,raw,full=get(url+'/query',{**query,'returnCountOnly':'true'});save(folder/'count.json',raw)
+              ids,raw,full=get(url+'/query',{**query,'returnIdsOnly':'true'});save(folder/'ids.json',raw)
+              expected=sorted(ids.get('objectIds') or [])
+              if len(expected)!=len(set(expected)) or len(expected)!=cnt['count']:raise ValueError('Count/ID disagreement')
+              if len(expected)>12000:raise ValueError('Query exceeds 12000 object cap')
+              for offset in range(0,len(expected),200):
+                selected=expected[offset:offset+200]
+                d,raw,full=get(url+'/query',{'f':'json','objectIds':','.join(map(str,selected)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                digest=save(folder/f'page-{offset//200:03}.json',raw)
+                actual=sorted(f['attributes'][oid] for f in d.get('features',[]))
+                if actual!=selected or d.get('exceededTransferLimit',False):raise ValueError('Page truncation/ID mismatch')
+                features.extend(d['features']);rec['pages'].append({'url':full,'sha256':digest,'count':len(actual),'ids':actual,'exceededTransferLimit':False})
+              if sorted(f['attributes'][oid] for f in features)!=expected:raise ValueError('Full ID mismatch')
+              rec.update(complete=True,count=len(features),object_id_field=oid,fields=fields,dataset_editing_info=meta.get('editingInfo'),source_recency_note='Retrieval time is not dataset update time; use RevisionDate or metadata when present.')
+              save(folder/'features.json',json.dumps({'source':url,'spatialReference':{'wkid':4326},'features':features},separators=(',',':')).encode())
+              print(name,'COMPLETE',len(features),flush=True)
+            except Exception as e:rec['error']=type(e).__name__+': '+str(e)[:500];print(name,rec['error'],flush=True)
+            receipts.append(rec);save(out/'receipts.json',json.dumps(receipts,indent=2).encode())
+            return features if rec['complete'] else []
+          seeds={'northumberland':"UPPER(StreetName) IN ('NORTHUMBERLAND','LUDGATE','KINGSMERE','BRETTON')",'wellington':"UPPER(StreetName) = 'STONEHAVEN'"}
+          for area,where in seeds.items():
+            seed=retrieve(area+'/seed_roads',sources['roads'],where)
+            points=[p for f in seed for path in f.get('geometry',{}).get('paths',[]) for p in path]
+            if not points:continue
+            xs,ys=zip(*[(p[0],p[1]) for p in points]);bounds=[min(xs)-.003,min(ys)-.002,max(xs)+.003,max(ys)+.003]
+            if bounds[2]-bounds[0]>.06 or bounds[3]-bounds[1]>.06:
+              print(area,'Seed extent ambiguous; skipped',bounds,flush=True);continue
+            save(out/area/'bounds.json',json.dumps(bounds).encode())
+            for kind,url in sources.items():retrieve(area+'/'+kind,url,bounds=bounds)
+          downloads={'oakland-street-index.pdf':'https://oaklandtwpmi.gov/wp-content/uploads/2025/05/Street-Index-Map-7-22-21.pdf','rochester-map-index.html':'https://atlas.rochesterhills.org/IndexMapsofInterest/'}
+          for name,url in downloads.items():
+            try:
+              with urllib.request.urlopen(url,timeout=45) as r:raw=r.read(25000001)
+              if len(raw)>25000000:raise ValueError('Static response too large')
+              digest=save(out/name,raw);receipts.append({'id':name,'source':url,'sha256':digest,'complete':True,'bytes':len(raw)})
+            except Exception as e:receipts.append({'id':name,'source':url,'complete':False,'error':str(e)})
+          save(out/'receipts.json',json.dumps(receipts,indent=2).encode())
+          with zipfile.ZipFile('public-streets.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+            for p in sorted(out.rglob('*')):
+              if p.is_file():z.write(p,p.as_posix())
+          p=pathlib.Path('public-streets.zip');print('ZIP',p.stat().st_size,hashlib.sha256(p.read_bytes()).hexdigest(),flush=True)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bounded-public-streets-20260914
+          path: public-streets.zip
+          retention-days: 2
+          if-no-files-found: error
