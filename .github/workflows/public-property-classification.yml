@@ -1,0 +1,66 @@
+name: Public property classification
+'on':
+  push:
+    branches: [public-road-verification-crooks-wellington-20260913]
+    paths: ['.github/workflows/public-property-classification.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve bounded public property classification without owners or finances
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,urllib.parse,urllib.request,os
+          out=pathlib.Path('public-property-return');out.mkdir()
+          def js(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Public-property-verification/1.0'})
+              with urllib.request.urlopen(req,timeout=35) as r: raw=r.read(8000001)
+              if len(raw)>8000000: raise ValueError('bounded size exceeded')
+              value=json.loads(raw)
+              if 'error' in value: raise ValueError(str(value['error']))
+              return value,hashlib.sha256(raw).hexdigest()
+          def url(base,p): return base+'/query?'+urllib.parse.urlencode(p)
+          county='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/1'
+          city='https://atlas.rochesterhills.org/arcgis/rest/services/'
+          sources={
+          'crooks_parcels':(county,'-83.178,42.6505,-83.1665,42.6657','OBJECTID_12,KEYPIN,REVISIONDATE,CVTTAXDESCRIPTION,PIN,CLASSCODE,SITEADDRESS,SITECITY,STRUCTURE_DESC'),
+          'wellington_parcels':(county,'-83.1865,42.7096,-83.1738,42.7187','OBJECTID_12,KEYPIN,REVISIONDATE,CVTTAXDESCRIPTION,PIN,CLASSCODE,SITEADDRESS,SITECITY,STRUCTURE_DESC'),
+          'crooks_addresses':(city+'Addresses/MasterAddresses_PublicDataset/MapServer/1','-83.178,42.6505,-83.1665,42.6657','OBJECTID,PARCELID,BUILDING,SITEADDRESS,Subdivision,DateModified,AddressType,last_edited_date'),
+          'crooks_buildings':(city+'FacilitiesStructures/Building/FeatureServer/0','-83.178,42.6505,-83.1665,42.6657','OBJECTID,BuildingType,BuildingUse,STATUS,ParcelID,DATE_ENTER,SOURCE,ChangeDate,last_edited_date')}
+          def collect(item):
+              name,(base,bbox,fields)=item
+              result={'source':base,'bounds_wgs84':bbox,'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'features':[],'requests':[],'selected_fields':fields}
+              try:
+                  meta,mhash=js(base+'?f=pjson');result['metadata']=meta;result['metadata_sha256']=mhash
+                  p={'f':'json','where':'1=1','geometry':bbox,'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+                  ids,ihash=js(url(base,dict(p,returnIdsOnly='true')));count,chash=js(url(base,dict(p,returnCountOnly='true')))
+                  result['id_response']=ids;result['count_response']=count
+                  result['requests'] += [{'url':url(base,dict(p,returnIdsOnly='true')),'sha256':ihash},{'url':url(base,dict(p,returnCountOnly='true')),'sha256':chash}]
+                  object_ids=sorted(set(ids.get('objectIds') or []));oid=ids.get('objectIdFieldName') or meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+                  if not object_ids or len(object_ids)>3000: raise ValueError('empty or bounded feature cap exceeded')
+                  for n in range(0,len(object_ids),200):
+                      p={'f':'json','objectIds':','.join(map(str,object_ids[n:n+200])),'outFields':fields,'outSR':4326,'returnGeometry':'true'}
+                      page,phash=js(url(base,p));rows=page.get('features',[])
+                      result['requests'].append({'url':url(base,p),'sha256':phash,'count':len(rows),'exceededTransferLimit':page.get('exceededTransferLimit',False)})
+                      if page.get('exceededTransferLimit'): raise ValueError('transfer truncation')
+                      result['features'] += rows
+                  got=[f['attributes'][oid] for f in result['features']]
+                  result['complete']=len(got)==len(set(got))==count.get('count')==len(object_ids) and set(got)==set(object_ids)
+                  if not result['complete']: raise ValueError('count/ID mismatch')
+              except Exception as e: result['error']=str(e)
+              (out/(name+'.json')).write_text(json.dumps(result,separators=(',',':')))
+              print(name,len(result['features']),'complete',result['complete'],'error',result.get('error','none'))
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:list(ex.map(collect,sources.items()))
+          (out/'scope.json').write_text(json.dumps({'scope':'Public GIS building/road address and classification evidence only; no private maps, assignment outlines, owners, financial records, user contacts or credentials.','run_id':os.environ['GITHUB_RUN_ID']}))
+          PY
+      - name: Return public evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-property-return
+          path: public-property-return/
+          retention-days: 1
+          if-no-files-found: error
