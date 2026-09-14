@@ -1,0 +1,33 @@
+name: Rochester Hills bounded public inventory
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-northumberland-verification-20260914.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Run pinned public-only retrieval with disambiguated road names
+        run: |
+          python3 - <<'RUN'
+          import urllib.request,textwrap,re
+          url='https://raw.githubusercontent.com/ksolo21-web/K.O.-Enterprises/42b91081811a10151c2c1c544c9738003a90ee2d/.github/workflows/public-street-verification-20260914.yml'
+          with urllib.request.urlopen(url,timeout=40) as r:source=r.read().decode()
+          code=textwrap.dedent(source.split("python3 - <<'PY'\n",1)[1].split('\n          PY',1)[0])
+          seed_line=next(line for line in code.splitlines() if line.startswith('seeds='))
+          code=code.replace(seed_line,"seeds={'northumberland':\"CartographicName IN ('Northumberland Dr','Ludgate Ln','Kingsmere Cir','Bretton Dr N','Bretton Dr S')\"}")
+          dl=next(line for line in code.splitlines() if line.startswith('downloads='))
+          code=code.replace(dl,"downloads={'rochester-street-map.pdf':'https://www.rochesterhills.org/Maps/StreetMap.pdf','rochester-street-map-book.pdf':'https://www.rochesterhills.org/Maps/StreetMapBook.pdf'}")
+          assert "'wellington':" not in code
+          exec(compile(code,'pinned-public-retrieval','exec'),{})
+          RUN
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: northumberland-public-streets-20260914
+          path: public-streets.zip
+          retention-days: 2
+          if-no-files-found: error
