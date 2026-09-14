@@ -1,0 +1,82 @@
+name: Public Rochester geography fetch 20260914
+'on':
+  push:
+    branches: [territory-card-production]
+    paths: ['.github/workflows/public-geography-fetch-20260914.yml']
+permissions:
+  contents: read
+jobs:
+  fetch:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve public geographic records without user files or secrets
+        shell: bash
+        run: |
+          mkdir -p public-geography
+          python3 - <<'PY'
+          import concurrent.futures, datetime, hashlib, json, pathlib, time, urllib.parse, urllib.request
+          OUT=pathlib.Path('public-geography')
+          BBOX=[-83.17,42.64,-83.09,42.695]
+          stamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          def request(url, params=None, timeout=60, post=False):
+              encoded=urllib.parse.urlencode(params or {}).encode()
+              req=urllib.request.Request(url if post else url+'?'+encoded.decode(), data=encoded if post else None, headers={'User-Agent':'PublicGeographyReview/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=timeout) as r:
+                  data=json.load(r)
+              if isinstance(data,dict) and 'error' in data: raise RuntimeError(str(data['error']))
+              return data
+          def save(name,data):
+              p=OUT/name;p.write_text(json.dumps(data,separators=(',',':')))
+              return {'path':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+          def arcgis(name,url,requested_fields=None):
+              log={'source':url,'retrieved_utc':stamp,'bbox4326':BBOX,'complete':False,'pages':[]}
+              try:
+                  meta=request(url,{'f':'json'});save(name+'-metadata.json',meta)
+                  fieldnames=[f['name'] for f in meta.get('fields',[])]
+                  oid=next((f['name'] for f in meta.get('fields',[]) if f['type']=='esriFieldTypeOID'),'OBJECTID')
+                  fields='*' if requested_fields is None else ','.join(dict.fromkeys([oid]+[f for f in requested_fields if f in fieldnames]))
+                  base={'f':'json','where':'1=1','geometry':','.join(map(str,BBOX)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+                  ids=request(url+'/query',dict(base,returnIdsOnly='true'))
+                  objectids=sorted(ids.get('objectIds') or []);log['expected_ids']=objectids
+                  allfeatures=[]
+                  for index in range(0,len(objectids),400):
+                      subset=objectids[index:index+400]
+                      q={'f':'json','objectIds':','.join(map(str,subset)),'outFields':fields,'returnGeometry':'true','outSR':4326,'geometryPrecision':7,'returnZ':'false','returnM':'false'}
+                      page=request(url+'/query',q)
+                      features=page.get('features',[]);allfeatures.extend(features)
+                      log['pages'].append({'offset':index,'requested_count':len(subset),'returned_count':len(features),'exceededTransferLimit':page.get('exceededTransferLimit',False)})
+                  actual=sorted(f['attributes'][oid] for f in allfeatures)
+                  log['complete']=actual==objectids and not any(p['exceededTransferLimit'] for p in log['pages'])
+                  log['returned_count']=len(allfeatures)
+                  log['data']=save(name+'.json',{'spatialReference':{'wkid':4326},'features':allfeatures})
+              except Exception as e: log['error']=repr(e)
+              save(name+'-retrieval.json',log)
+              print(name,json.dumps({k:v for k,v in log.items() if k not in ('expected_ids','pages')}),flush=True)
+              return log
+          def osm():
+              log={'retrieved_utc':stamp,'bbox4326':BBOX,'complete':False,'attempts':[]}
+              b=','.join(map(str,[BBOX[1],BBOX[0],BBOX[3],BBOX[2]]))
+              query='[out:json][timeout:100];(way[highway]('+b+');way[building]('+b+');way[waterway]('+b+'););out body;>;out skel qt;'
+              for url in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']:
+                  try:
+                      data=request(url,{'data':query},timeout=130,post=True)
+                      log['source']=url;log['query']=query;log['remark']=data.get('remark')
+                      log['complete']='elements' in data and not data.get('remark')
+                      log['elements']=len(data.get('elements',[]));log['data']=save('osm.json',data)
+                      break
+                  except Exception as e:log['attempts'].append({'source':url,'error':repr(e)})
+              save('osm-retrieval.json',log);print('osm',json.dumps(log),flush=True)
+              return log
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              jobs=[pool.submit(arcgis,'county-roads','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0'),pool.submit(arcgis,'county-parcels','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/1',['OBJECTID','OBJECTID_12','PIN','KEYPIN','SITEADDRESS','SITECITY','SITESTATE','SITEZIP5','CLASSCODE','REVISIONDATE','STRUCTURE_DESC','NUM_BEDS','NUM_BATHS','LIVING_AREA_SQFT']),pool.submit(osm)]
+              results=[f.result() for f in jobs]
+          save('MANIFEST.json',{'retrieved_utc':stamp,'bbox4326':BBOX,'public_data_only':True,'no_user_assignment_uploaded':True,'sources':results})
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-rochester-geography-20260914
+          path: public-geography
+          retention-days: 2
+          if-no-files-found: error
