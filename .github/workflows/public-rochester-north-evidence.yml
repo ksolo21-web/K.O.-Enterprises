@@ -1,0 +1,85 @@
+name: Public Rochester north evidence
+'on':
+  push:
+    branches: [public-rochester-north-evidence-20260915]
+    paths: ['.github/workflows/public-rochester-north-evidence.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - name: Collect bounded public map records with count and ID reconciliation
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          O=pathlib.Path('rochester-north-evidence');O.mkdir()
+          B=[-83.175,42.691,-83.130,42.726]
+          S={
+            'county_roads':'https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0',
+            'city_roads':'https://atlas.rochesterhills.org/arcgis/rest/services/Roads/Roads_PublicDataset/MapServer/8',
+            'city_buildings':'https://atlas.rochesterhills.org/arcgis/rest/services/FacilitiesStructures/Building/FeatureServer/0',
+            'city_addresses':'https://atlas.rochesterhills.org/arcgis/rest/services/Addresses/MasterAddresses_PublicDataset/MapServer/1',
+            'parcels':'https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/1',
+            'landuse':'https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenPlanningMapService/MapServer/4',
+            'semcog_points':'https://gis.semcog.org/server/rest/services/Hosted/Building_Points/FeatureServer/34',
+            'semcog_2020':'https://gis.semcog.org/server/rest/services/Hosted/Building_Footprints__2020/FeatureServer/60'}
+          def save(p,d):
+            b=d if isinstance(d,bytes) else json.dumps(d,indent=2).encode();p.write_bytes(b);return hashlib.sha256(b).hexdigest()
+          def req(u,p=None):
+            url=u+('?' + urllib.parse.urlencode(p) if p else '')
+            for attempt in range(2):
+              try:
+                with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Read-only public municipal map evidence'}),timeout=65) as r:b=r.read(24000001)
+                if len(b)>24000000:raise ValueError('bounded response size exceeded')
+                j=json.loads(b)
+                if 'error' in j:raise ValueError(str(j['error']))
+                return j,b,url
+              except Exception:
+                if attempt:raise
+                time.sleep(2)
+          def capture(it):
+            n,u=it;d=O/n;d.mkdir();rec={'source':u,'bbox':B,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'requests':[]}
+            try:
+              m,b,_=req(u,{'f':'json'});rec['metadata_sha256']=save(d/'metadata.json',b)
+              oid=m.get('objectIdField') or next(x['name'] for x in m['fields'] if x['type']=='esriFieldTypeOID')
+              fields=[]
+              for x in m['fields']:
+                name=x['name'];v=name.lower()
+                if any(s in v for s in ['owner','taxpayer','name1','name2','assessed','taxable','postal','phone','email']):continue
+                if name==oid or any(w in v for w in ['address','street','route','cartographic','nfc','jurisdiction','date','revision','building','landuse','land_use','cvt','pin','parcel','type','class','use','status','shape','situs','site','source','lot','zoning','description','loadd','hiadd','housing','demolished','apn','city_id','year_built','unit','fullroadname']):fields.append(name)
+              q={'f':'json','where':'1=1','geometry':','.join(map(str,B)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              count,b,url=req(u+'/query',{**q,'returnCountOnly':'true'});rec['count_sha256']=save(d/'count.json',b)
+              idsj,b,url=req(u+'/query',{**q,'returnIdsOnly':'true'});rec['ids_sha256']=save(d/'ids.json',b);ids=sorted(idsj['objectIds'] or [])
+              if len(ids)!=count['count'] or len(ids)!=len(set(ids)) or len(ids)>14000:raise ValueError('Count/ID bound mismatch')
+              fs=[]
+              for k in range(0,len(ids),250):
+                chosen=ids[k:k+250];j,b,url=req(u+'/query',{'f':'json','objectIds':','.join(map(str,chosen)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                if sorted(f['attributes'][oid] for f in j.get('features',[]))!=chosen or j.get('exceededTransferLimit'):raise ValueError('Incomplete page')
+                rec['requests'].append({'url':url,'count':len(chosen),'sha256':save(d/f'page-{k//250:03}.json',b)});fs+=j['features']
+              save(d/'features.json',{'source':u,'bbox':B,'spatialReference':{'wkid':4326},'features':fs});rec.update(complete=True,expected_count=len(ids),returned_count=len(fs))
+            except Exception as e:rec['error']=str(e)
+            save(d/'receipt.json',rec);print(n,rec['complete'],rec.get('returned_count'),rec.get('error'),flush=True);return rec
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:receipts=list(pool.map(capture,S.items()))
+          q='[out:json][timeout:65];(way[highway](42.691,-83.175,42.726,-83.130);way[building](42.691,-83.175,42.726,-83.130););out count;out meta geom;'
+          rec={'source':'https://overpass-api.de/api/interpreter','query':q,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False}
+          try:
+            j,b,u=req(rec['source'],{'data':q});save(O/'osm.json',b);cs=[x for x in j['elements'] if x['type']=='count'];els=[x for x in j['elements'] if x['type']!='count']
+            if j.get('remark') or len(cs)!=1 or int(cs[0]['tags']['total'])!=len(els):raise ValueError('OSM inventory incomplete')
+            rec.update(complete=True,returned_count=len(els),sha256=hashlib.sha256(b).hexdigest())
+          except Exception as e:rec['error']=str(e)
+          receipts.append(rec);save(O/'receipts.json',receipts)
+          save(O/'PROVENANCE.json',{'scope':'Public municipal street topology and building address/geometry only. No private assignments, resident names, owner identities or financial values.','bbox':B,'source_age_note':'Metadata vintage is separate from retrieval date.'})
+          with zipfile.ZipFile('rochester-north-evidence.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in O.rglob('*'):
+              if p.is_file():z.write(p,str(p))
+          print(json.dumps([{'source':r['source'],'complete':r['complete'],'count':r.get('returned_count'),'error':r.get('error')} for r in receipts]),flush=True)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-rochester-north-evidence
+          path: rochester-north-evidence.zip
+          retention-days: 3
+          if-no-files-found: error
