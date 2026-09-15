@@ -1,0 +1,70 @@
+name: Public address resolution
+'on':
+  push:
+    branches: [public-rochester-north-evidence-20260915]
+    paths: ['.github/workflows/public-address-resolution.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Read bounded municipal and county geography
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          O=pathlib.Path('public-address-resolution');O.mkdir()
+          B=[-83.175,42.680,-83.120,42.726]
+          S={
+            'city_master':'https://atlas.rochesterhills.org/arcgis/rest/services/MasterAddressPoints/MapServer/0',
+            'city_master_features':'https://atlas.rochesterhills.org/arcgis/rest/services/MasterAddressPoints/FeatureServer/0',
+            'city_addresses_features':'https://atlas.rochesterhills.org/arcgis/rest/services/Addresses/MasterAddresses_PublicDataset/FeatureServer/1',
+            'city_buildings_map':'https://atlas.rochesterhills.org/arcgis/rest/services/FacilitiesStructures/Building/MapServer/0',
+            'county_buildings':'https://gisservices.oakgov.com/arcgisds/rest/services/Hosted/Building_Outline/FeatureServer/30'}
+          def save(p,d):
+            b=d if isinstance(d,bytes) else json.dumps(d,indent=2).encode();p.write_bytes(b);return hashlib.sha256(b).hexdigest()
+          def req(u,p=None):
+            url=u+('?' + urllib.parse.urlencode(p) if p else '')
+            with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Read-only public municipal map evidence'}),timeout=80) as r:b=r.read(28000001)
+            if len(b)>28000000:raise ValueError('size bound')
+            j=json.loads(b)
+            if 'error' in j:raise ValueError(str(j['error']))
+            return j,b,url
+          def capture(it):
+            n,u=it;d=O/n;d.mkdir();rec={'source':u,'bbox':B,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'requests':[]}
+            try:
+              m,b,_=req(u,{'f':'json'});save(d/'metadata.json',b)
+              oid=m.get('objectIdField') or next(x['name'] for x in m['fields'] if x['type']=='esriFieldTypeOID')
+              fields=[]
+              for x in m['fields']:
+                name=x['name'];v=name.lower()
+                if any(w in v for w in ['owner','taxpayer','assessed','taxable','phone','email']):continue
+                if name==oid or any(w in v for w in ['address','street','house','building','unit','apartment','pin','parcel','status','source','date','shape','latitude','longitude','type','city','use','id']):fields.append(name)
+              q={'f':'json','where':'1=1','geometry':','.join(map(str,B)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              count,b,_=req(u+'/query',{**q,'returnCountOnly':'true'});save(d/'count.json',b)
+              idsj,b,_=req(u+'/query',{**q,'returnIdsOnly':'true'});save(d/'ids.json',b);ids=sorted(idsj['objectIds'] or [])
+              if len(ids)!=count['count'] or len(ids)!=len(set(ids)) or len(ids)>20000:raise ValueError('count/ID bound mismatch')
+              fs=[]
+              for k in range(0,len(ids),400):
+                chosen=ids[k:k+400];j,b,url=req(u+'/query',{'f':'json','objectIds':','.join(map(str,chosen)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                if sorted(f['attributes'][oid] for f in j.get('features',[]))!=chosen or j.get('exceededTransferLimit'):raise ValueError('incomplete page')
+                rec['requests'].append({'url':url,'count':len(chosen),'sha256':save(d/f'page-{k//400:03}.json',b)});fs+=j['features']
+              save(d/'features.json',{'source':u,'bbox':B,'spatialReference':{'wkid':4326},'features':fs});rec.update(complete=True,expected_count=len(ids),returned_count=len(fs))
+            except Exception as e:rec['error']=str(e)
+            save(d/'receipt.json',rec);print(n,rec['complete'],rec.get('returned_count'),rec.get('error'),flush=True);return rec
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:rs=list(pool.map(capture,S.items()))
+          for n,u in [('atlas-catalog','https://atlas.rochesterhills.org/arcgis/rest/services'),('address-catalog','https://atlas.rochesterhills.org/arcgis/rest/services/Addresses'),('facilities-catalog','https://atlas.rochesterhills.org/arcgis/rest/services/FacilitiesStructures')]:
+            try:j,b,url=req(u,{'f':'json'});save(O/(n+'.json'),b)
+            except Exception as e:save(O/(n+'-error.json'),{'url':u,'error':str(e)})
+          save(O/'receipts.json',rs)
+          with zipfile.ZipFile('public-address-resolution.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in O.rglob('*'):
+              if p.is_file():z.write(p,str(p))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-address-resolution
+          path: public-address-resolution.zip
+          retention-days: 3
+          if-no-files-found: error
