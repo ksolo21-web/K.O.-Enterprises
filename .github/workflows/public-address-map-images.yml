@@ -1,0 +1,53 @@
+name: Public address map images
+'on':
+  push:
+    branches: [public-rochester-north-evidence-20260915]
+    paths: ['.github/workflows/public-address-map-images.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Export public address labels and retain exact map extents
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,urllib.parse,urllib.request,zipfile
+          O=pathlib.Path('municipal-address-images');O.mkdir()
+          def req(u):
+            with urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'Public municipal address map verification'}),timeout=70) as r:b=r.read(28000001)
+            if len(b)>28000000:raise ValueError('size bound')
+            return b
+          boxes={'bedford_east':[-83.1411,42.6970,-83.1397,42.6994],'bedford_middle':[-83.1421,42.6970,-83.1409,42.6994],'bedford_west':[-83.1444,42.6959,-83.1430,42.6994],'bedford_all':[-83.1445,42.6958,-83.1396,42.6994]}
+          def capture(item):
+            n,bbox=item;u='https://atlas.rochesterhills.org/arcgis/rest/services/RochesterHillsAddress/MapServer/export';q={'f':'json','bbox':','.join(map(str,bbox)),'bboxSR':4326,'imageSR':3857,'size':'1800,2200','dpi':144,'format':'png32','transparent':'true','layers':'show:0,1,2,3,4,5'};url=u+'?'+urllib.parse.urlencode(q);r={'source':url,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False}
+            try:
+              b=req(url);j=json.loads(b);(O/(n+'-export.json')).write_bytes(b)
+              if 'error' in j:raise ValueError(str(j['error']))
+              bb=req(j['href']);
+              if not bb.startswith(b'\x89PNG'):raise ValueError('not PNG')
+              (O/(n+'.png')).write_bytes(bb);r.update(complete=True,sha256=hashlib.sha256(bb).hexdigest(),extent=j.get('extent'),bytes=len(bb))
+            except Exception as e:r['error']=str(e)
+            return r
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:rs=list(ex.map(capture,boxes.items()))
+          for n,u in [('section3.pdf','https://atlas.rochesterhills.org/Sec3SidwellPages.pdf'),('section4.pdf','https://atlas.rochesterhills.org/Sec4SidwellPages.pdf')]:
+            r={'source':u,'complete':False}
+            try:
+              b=req(u)
+              if not b.startswith(b'%PDF'):raise ValueError('not PDF')
+              (O/n).write_bytes(b);r.update(complete=True,sha256=hashlib.sha256(b).hexdigest(),bytes=len(b))
+            except Exception as e:r['error']=str(e)
+            rs.append(r)
+          (O/'receipts.json').write_text(json.dumps(rs,indent=2))
+          with zipfile.ZipFile('municipal-address-images.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in O.rglob('*'):
+              if p.is_file():z.write(p,str(p))
+          print(json.dumps(rs))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-address-map-images
+          path: municipal-address-images.zip
+          retention-days: 3
+          if-no-files-found: error
