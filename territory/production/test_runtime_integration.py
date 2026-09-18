@@ -28,15 +28,22 @@ class IntegratedRuntimeTests(unittest.TestCase):
                    'source_class':'individually_approved_map','filename':'Territory - 999a.pdf',
                    'template':pin('template.pdf'),'map':pin('map.pdf'),'map_box':[130,40,460,285],
                    'approved_texts':[]}
-            repair={'mode':'approved_vector_label_revision','source':pin('map.pdf'),
-                    'approved_masks':[[80,40,270,148]],'labels':[{'old_box':box,'text':'Source Road',
-                    'font_resource':font,'font_size':10,'road_id':'synthetic-road',
+            enforcer={'kind':'territory_enforcer_critic','r52_revision':'segment-role-whole-label-2026-09-13-r52',
+                      'artifact_sha256':engine.sha(source/'map.pdf'),'review_sha256':'0'*64,
+                      'findings':['synthetic label defect'],'passed':False,'release_gate_eligible':False}
+            engine.json_write(source/'enforcer-fail.json',enforcer)
+            repair={'schema_version':1,'kind':'territory_fixer_request','candidate':pin('map.pdf'),
+                    'enforcer_verdict':pin('enforcer-fail.json'),
+                    'repair_scope':{'type':'label_only','approved_masks':[[80,40,270,148]],
+                    'labels':[{'label_id':'source-road-entrance','street':'Source Road','navigation_role':'entrance_run',
+                    'segment_id':'synthetic-road-west-entrance','source_evidence':'synthetic source fixture',
+                    'old_box':box,'text':'Source Road','font_resource':font,'font_size':10,'road_id':'synthetic-road',
                     'road_polyline':[[30,150],[370,150]],'road_width':4,
                     'placements':[{'kind':'direct','baseline':[100,80]},
-                                  {'kind':'direct','baseline':[100,144]}]}]}
-            engine.json_write(source/'build.json',build);engine.json_write(source/'repair.json',repair)
+                                  {'kind':'direct','baseline':[100,144]}]}]}}
+            engine.json_write(source/'build.json',build);engine.json_write(source/'repair-request.json',repair)
             plan={'schema_version':1,'cards':[{'id':'999a','action':'build','recipe':pin('build.json')},
-                                            {'id':'999b','action':'repair','recipe':pin('repair.json')}]}
+                                            {'id':'999b','action':'repair','recipe':pin('repair-request.json')}]}
             engine.json_write(source/'job.json',plan)
             original={p.name:engine.sha(p) for p in source.iterdir()}
             key=sealed.new_key();sid=sealed.new_session()
@@ -51,12 +58,15 @@ class IntegratedRuntimeTests(unittest.TestCase):
             self.assertFalse(privacy.active());self.assertEqual(report['processed'],2)
             self.assertEqual(report['released'],0);self.assertFalse(report['release_ready'])
             for record in report['cards']:
-                self.assertEqual(record['status'],'candidate_requires_independent_review',record.get('error'))
+                self.assertEqual(record['status'],'candidate_requires_enforcer_review',record.get('error'))
                 folder=root/'result'/record['id'];pdf=folder/f"Territory - {record['id']}.pdf"
                 self.assertEqual(record['capture']['artifact_sha256'],engine.sha(pdf))
                 self.assertEqual(len(record['capture']['screenshots']),8)
                 for image in record['capture']['screenshots']:
                     self.assertGreater((folder/'final-evidence'/image).stat().st_size,0)
+            self.assertTrue(report['cards'][1]['fixer_advice']['repair_authorized'])
+            self.assertFalse(report['cards'][1]['fixer_advice']['release_authorized'])
+            self.assertTrue(report['cards'][1]['fixer_advice']['enforcer_recheck_required'])
             self.assertEqual(report['cards'][1]['repair']['selected']['round'],2)
             for view in report['cards'][1]['repair']['selected']['invariants']['views']:
                 self.assertEqual(view['changed_outside_masks'],0);self.assertEqual(view['changed_colored_ink'],0)
