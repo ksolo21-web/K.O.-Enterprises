@@ -75,6 +75,7 @@ def verify(root: Path | None = None) -> dict:
     if not isinstance(expected, dict):
         raise R52PolicyError("R52 manifest is malformed")
     checked = {}
+    source_hash_mismatches = {}
     for rel in REQUIRED:
         path = root / rel
         key = _manifest_key(rel)
@@ -82,9 +83,25 @@ def verify(root: Path | None = None) -> dict:
             raise R52PolicyError("missing R52 core file: " + rel)
         want = expected.get(key)
         got = sha(path)
-        if not isinstance(want, str) or got != want:
-            raise R52PolicyError("R52 core hash mismatch: " + rel)
+        if not isinstance(want, str):
+            raise R52PolicyError("R52 source manifest missing core path: " + rel)
+        if got != want:
+            source_hash_mismatches[rel] = {"source_sha256": want, "deployed_sha256": got, "bytes": path.stat().st_size}
         checked[rel] = got
+    deployment_manifest = root / "R52-GITHUB-DEPLOYMENT-MANIFEST.json"
+    if not deployment_manifest.is_file():
+        raise R52PolicyError("R52 GitHub deployment manifest missing; deployed_hashes=" + json.dumps(source_hash_mismatches or {k:{"deployed_sha256":v} for k,v in checked.items()}, sort_keys=True))
+    deployed = json.loads(deployment_manifest.read_text(encoding="utf-8"))
+    if deployed.get("source_package_sha256") != "193e82ee45cf9e4cfd355f0d0efdc5163b0fbf722cf9b95dcc7fc2bf57e8597e":
+        raise R52PolicyError("deployment manifest is not bound to the saved R52 package")
+    if deployed.get("revision") != REVISION:
+        raise R52PolicyError("deployment manifest revision mismatch")
+    hashes = deployed.get("files")
+    if not isinstance(hashes, dict):
+        raise R52PolicyError("deployment manifest file hashes missing")
+    for rel, got in checked.items():
+        if hashes.get(rel) != got:
+            raise R52PolicyError("deployed R52 file drift: " + rel)
     script = root / "scripts" / "validate_territory_activation.py"
     result = subprocess.run(
         [sys.executable, str(script), str(root)],
@@ -102,6 +119,9 @@ def verify(root: Path | None = None) -> dict:
     return {
         "revision": REVISION,
         "verified_core_files": len(checked),
+        "source_package_sha256": deployed.get("source_package_sha256"),
+        "source_hash_normalization_count": len(source_hash_mismatches),
+        "deployment_manifest_verified": True,
         "activation_passed": True,
         "default_minimum": active.get("default_minimum"),
         "score_operator": active.get("score_operator"),
