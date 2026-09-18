@@ -324,13 +324,13 @@ def score_guard(review: dict) -> None:
     """
     scores = review.get('categories')
     overall = review.get('overall_score')
-    if isinstance(overall, bool) or not isinstance(overall, (int, float)) or overall <= 9.0 or not isinstance(scores, dict):
+    if isinstance(overall, bool) or not isinstance(overall, (int, float)) or not (9.0 < overall <= 10.0) or not isinstance(scores, dict):
         raise GateError('R52 requires overall_score strictly >9.0 and category evidence')
     values = []
     for key in CATEGORIES:
         item = scores.get(key)
         value = item.get('score') if isinstance(item, dict) else item
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 9.0:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not (9.0 < value <= 10.0):
             raise GateError(f'R52 category {key} must be strictly >9.0')
         values.append(float(value))
     if abs(float(overall) - min(values)) > 1e-9:
