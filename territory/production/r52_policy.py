@@ -8,6 +8,7 @@ rewriting the historical source capsule.
 from __future__ import annotations
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -91,7 +92,7 @@ def verify(root: Path | None = None) -> dict:
         capture_output=True,
         text=True,
         timeout=60,
-        env={"PYTHONDONTWRITEBYTECODE": "1"},
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
     )
     if result.returncode != 0:
         raise R52PolicyError("R52 activation failed: " + (result.stdout + result.stderr)[-2000:])
