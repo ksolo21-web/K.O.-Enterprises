@@ -85,6 +85,7 @@ def run(job: Path, output: Path, *, infer=None, identity=None) -> dict:
     data=engine.json_read(job); root=job.parent
     if data.get('schema_version')!=1 or data.get('kind')!='territory_card_review':
         raise ReviewError('Unsupported private real-card review operation')
+    candidate=engine.pinned(root,data.get('candidate'));engine.inspect_pdf(candidate);artifact_sha=engine.sha(candidate)
     infer=infer or neural.infer; identity=identity or neural.model_identity()
     if identity.get('digest')!=MODEL_DIGEST or identity.get('version')!='0.33.3' or identity.get('model')!=neural.MODEL:
         raise ReviewError('Exact qualified model/runtime identity is required')
@@ -147,9 +148,9 @@ def run(job: Path, output: Path, *, infer=None, identity=None) -> dict:
         report['checks'].append(item); engine.json_write(output/'review.json',report)
         if time.monotonic()-started>3300: raise ReviewError('Private review time budget exceeded')
     report['minimum_score']=min(scores) if scores else 0
-    all_noncoverage=all('result' in x and x['result'].get('uncertain') is False and not x['result'].get('blocking_defect',False) and float(x['result']['score'])>=9 for x in report['checks'] if x['check']!='coverage_scope')
-    coverage_ok=bool(coverage_result and coverage_result['uncertain'] is False and coverage_result['score']>=9 and not coverage_result['unresolved_items'] and all(coverage_result[k] for k in ('complete_active_scope_verified','canonical_identity_verified','measures_and_sides_verified','source_to_artifact_inventory_verified')))
-    report['release_candidate']=report['qualified'] and report['minimum_score']>=9 and all_noncoverage and coverage_ok
+    all_noncoverage=all('result' in x and x['result'].get('uncertain') is False and not x['result'].get('blocking_defect',False) and float(x['result']['score'])>9.0 for x in report['checks'] if x['check']!='coverage_scope')
+    coverage_ok=bool(coverage_result and coverage_result['uncertain'] is False and coverage_result['score']>9.0 and not coverage_result['unresolved_items'] and all(coverage_result[k] for k in ('complete_active_scope_verified','canonical_identity_verified','measures_and_sides_verified','source_to_artifact_inventory_verified')))
+    report['release_candidate']=report['qualified'] and report['minimum_score']>9.0 and all_noncoverage and coverage_ok
     report['original_sources_after']=engine.verify_skills()
     evidence_refs=data.get('duplicate_evidence_refs',[])
     if not isinstance(evidence_refs,list) or not evidence_refs: raise ReviewError('Hash-bound duplicate evidence refs required')
