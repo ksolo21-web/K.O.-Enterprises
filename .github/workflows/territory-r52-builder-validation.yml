@@ -75,6 +75,15 @@ jobs:
         run: |
           cd territory/production
           "$RUNNER_TEMP/r52env/bin/python" -m unittest -v test_r52_authority_chain
+      - name: Run inherited critic/controller regressions
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          cd territory/production
+          "$RUNNER_TEMP/r52env/bin/python" -m unittest -v \
+            test_engine \
+            test_visual_card_review \
+            test_real_card_review
       - name: Assert role docs exist
         run: |
           test -s territory/production/roles/ROLE-AUTHORITY-CONTRACT.md
