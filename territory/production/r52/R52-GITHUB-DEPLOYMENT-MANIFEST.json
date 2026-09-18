@@ -1,0 +1,43 @@
+{
+  "revision": "segment-role-whole-label-2026-09-13-r52",
+  "source_package": "Kaleb-Territory-Skills-Segment-Role-Whole-Label-2026-09-13-r52.zip",
+  "source_package_sha256": "193e82ee45cf9e4cfd355f0d0efdc5163b0fbf722cf9b95dcc7fc2bf57e8597e",
+  "source_package_bytes": 1314348,
+  "source_manifest_sha256": "2281abfa6c433b472f9db0dbe794d422fb16d97e556d031fdd429e84ffe3dabb",
+  "normalization": "strip_single_final_lf_from_library_text_transport",
+  "normalization_proof": "For each package-pinned text member whose deployed SHA differs, SHA256(deployed_bytes + LF) equals the exact source-package manifest SHA. R48 style tokens were byte-identical. Inherited Source Truth contract was separately read back from Library and proves the same single-final-LF transformation.",
+  "inherited_source_sha256": {
+    "Territory-Source-Truth-Preflight-Contract.md": "d5f6351cd2455c481b04da23f2fceec9dc00d43a4441758a076cca8cb2622f52"
+  },
+  "files": {
+    "ACTIVE-SKILLS.json": "4e4a2252fd3bbdd3d1711637cd40c9da14e2cd5bb32c04f7abb90d5c40778f59",
+    "Territory-Map-Card-Builder-SKILL.md": "3789c1e4cdd4320822e57f3018d22c7290dbb7a7e06961f4a632deeaa902979f",
+    "Territory-Card-Critic-SKILL.md": "c131e197a4ab14759f8d9df687f7493d6c917f7b7dc099ad9320a89b073c816e",
+    "Kaleb-Quality-Loop-SKILL.md": "b9019628420c5b7936fe3e94c9d597af8e2fb4f63f08a3664a7aa110df5e2005",
+    "Territory-Automatic-Execution-Contract.md": "b51ca89cfaaf3317de70c83d77dc70b10be5127c986d5834b5246a282d12cac4",
+    "New-Designed-Card-Family-Contract.md": "b723cfab6d224e1f32abc9c1e8083ff20db5af7aebcfe9b044d2a69b748ecf17",
+    "New-Designed-Visual-Regression-Standard.md": "3654852d1fd7d4a85876f9be67d91fcb998609899c2c3d7750eb5d9643d6577f",
+    "Territory-Label-Completeness-Preflight-Contract.md": "d855e557710a7a5cbe3bf698da0b42f24092181012927a65e63a1e734490df8f",
+    "Territory-PDF-Label-Metric-Contract.md": "a79975494a5f09ac6e0487e83c8bc34162da1288150ad9ffc89b1119882b6549",
+    "Territory-Segment-Role-Whole-Label-Contract.md": "9ed2af9213c5fa2da02b07fc9c1838d1d6e348ed8dcfb6a55fc551b8bc30e9b9",
+    "Territory-Source-Truth-Preflight-Contract.md": "794b49841102a68454459ec08ba4060206dc6effeeb12474344ca887cea12495",
+    "Territory-Identity-Naming-Contract.md": "cffc23ca1e1f45c4ce9bb99e6e30c28e789e17d9537594443db7005061deb4f3",
+    "Locked-Template-Style-Token-Contract.md": "767af669f1cf18c3c54ba8891ff0e5d30c0987b2baa3d1eb3c38f953a528f6ba",
+    "R52-FINAL-ACCEPTANCE.json": "81fd31d6d541ca7f8df08fab7a68ecf2e6925b8084b41293441f0f1c50573c66",
+    "R52-MANIFEST-SHA256.json": "96fc19fe31a67c4f9a5ee094c9dbe00bc9200fb1a0af311219fbe858ebc887f0",
+    "scripts/validate_territory_activation.py": "77e8e0c7432d1fd169825c2091139abba8050aaa03c190e25fe5fcef25b3348e",
+    "scripts/validate_internal_reviewer_parity.py": "56edca2b699f587b8b5da57a660679d50d22e2c749f656981d05d75bc1235eaf",
+    "scripts/validate_label_navigation_contract.py": "797c6ac86ba0cacc421aa6e4532b89d7a17d68a8912553288161e945f2dfbee4",
+    "scripts/validate_label_completeness_preflight.py": "df981b372555eb0acfe73121758659ea48d31d1658e70dd15c016329289beb03",
+    "scripts/validate_label_placement_contract.py": "35fa77b3655b7e5038d3b29251c841b839f058e57919173f778ed73725d0aabc",
+    "scripts/validate_pdf_label_metrics.py": "7fccaf1d5ea1c35fa9f6c477955b7f1364104ecca982359e2073d68f1173c138",
+    "scripts/validate_source_truth_preflight.py": "c69aa40f4b6753515fe587a0511b3140af447a68f947fd457d76ed2261f8f6aa",
+    "scripts/validate_new_designed_family.py": "e15ac39edf0504dd2961209071123f26f89b04ecb707aa5f5af03894d49ff9e7",
+    "scripts/validate_style_token_layer.py": "51ace397431b2d4887dc91733ac24bc36f6132dcccb7c3f4091e40ab08438993",
+    "scripts/validate_territory_identity.py": "54223501d31988940c441f9745437f090f7cf9b36eede0fac0ee49db09b4bbd8",
+    "scripts/validate_pdf_identity.py": "9b3e2fb078b95bda62fd48a67c8a282ca1ed8c2373aa950c1c1659c8ba1f0af9",
+    "scripts/render_locked_template.py": "bd6b68a5c1c55682f73c90b2d15cda975586d759bc12daa9898e72bde61a190f",
+    "scripts/territory_identity.py": "e460dd90f031c43f65a0f6dc7ccdb2574e92eb7a59a2b4407a67b3e648351c81",
+    "references/R48-Canonical-Style-Tokens.json": "61144d7bbe9d35f73c4cfd548e11573965f94e207ece3a6a4405c045122689dc"
+  }
+}
