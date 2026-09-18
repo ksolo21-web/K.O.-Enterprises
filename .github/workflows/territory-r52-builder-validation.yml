@@ -18,6 +18,8 @@ name: Territory R52 builder authority validation
       - 'territory/production/test_r52_authority_chain.py'
       - 'territory/production/test_visual_card_review.py'
       - 'territory/production/test_real_card_review.py'
+      - 'territory/production/test_repair.py'
+      - 'territory/production/test_runtime_integration.py'
       - '.github/workflows/territory-r52-builder-validation.yml'
 permissions:
   contents: read
