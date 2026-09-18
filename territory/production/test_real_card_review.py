@@ -3,6 +3,7 @@ import json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 from PIL import Image
+import fitz
 import engine,real_card_review as r
 
 class RealCardReviewTests(unittest.TestCase):
@@ -10,6 +11,9 @@ class RealCardReviewTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.root=Path(self.tmp.name);self.job=self.root/'job.json';self.out=self.root/'result';self.calln=0
         self.identity={'model':r.neural.MODEL,'digest':r.MODEL_DIGEST,'runtime':'ollama','version':'0.33.3'}
+        self.candidate=self.root/'candidate.pdf'
+        with fitz.open() as doc:
+            page=doc.new_page(width=400,height=240);page.insert_text((20,30),'SYNTHETIC TERRITORY REVIEW',fontsize=10);doc.save(self.candidate)
         self.images={}
         for i,name in enumerate(['wrong','leader','clutter','branch','balance','source','candidate','clean','full','close','family','nav','cov1','cov2']):
             p=self.root/(name+'.png');Image.new('RGB',(160,160),(220+i,225,230)).save(p);self.images[name]=p
@@ -21,7 +25,8 @@ class RealCardReviewTests(unittest.TestCase):
             q.append({'id':f'{i+1:016x}','check':typ,'expected_defect':typ!='clean_card','focus':typ,'images':imgs})
         ctypes=[('full_visual',['full']),('closeup_visual',['close']),('source_fidelity',['source','candidate']),('family_resemblance',['family','full']),('navigation_context',['full','nav']),('coverage_scope',['cov1','cov2'])]
         checks=[{'id':f'{j:016x}','check':typ,'images':[spec(n) for n in names]} for j,(typ,names) in enumerate(ctypes,20)]
-        self.data={'schema_version':1,'kind':'territory_card_review','qualification_cases':q,'review_checks':checks,
+        self.data={'schema_version':1,'kind':'territory_card_review','candidate':{'file':self.candidate.name,'sha256':r.sha(self.candidate)},
+                   'qualification_cases':q,'review_checks':checks,
                    'scope_sha256':'a'*64,'duplicate_evidence_refs':[{'file':'cov1.png','sha256':r.sha(self.images['cov1'])}]}
     def infer(self,images,prompt,schema,**kw):
         self.calln+=1
@@ -41,6 +46,13 @@ class RealCardReviewTests(unittest.TestCase):
     def test_full_mock_path_passes_controller_but_does_not_authorize_release(self):
         got=self.runjob();self.assertTrue(got['qualified']);self.assertTrue(got['release_candidate']);self.assertEqual(got['minimum_score'],9.5)
         dup=json.loads((self.out/'duplicate-independent-review.json').read_text());self.assertTrue(dup['complete_active_scope_verified'])
+    def test_exact_nine_does_not_pass_r52(self):
+        def nine(images,prompt,schema,**kw):
+            out=self.infer(images,prompt,schema,**kw)
+            if 'score' in out['result']:
+                out['result']['score']=9.0;out['raw_response']['message']['content']=json.dumps(out['result'])
+            return out
+        got=self.runjob(nine);self.assertFalse(got['release_candidate']);self.assertEqual(got['minimum_score'],9.0)
     def test_missing_qualification_class_fails_closed(self):
         self.data['qualification_cases']=self.data['qualification_cases'][:-1]
         with self.assertRaises(r.ReviewError):self.runjob()
