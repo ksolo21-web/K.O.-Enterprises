@@ -43,8 +43,8 @@ jobs:
           cd territory/production
           "$RUNNER_TEMP/r52env/bin/python" - <<'PY'
           import json
+          from pathlib import Path
           import verify_originals
-from pathlib import Path
           result=verify_originals.verify_installed(Path('.').resolve())
           print(json.dumps(result,indent=2))
           assert result['installed_originals_verified']==138
@@ -59,7 +59,16 @@ from pathlib import Path
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          "$RUNNER_TEMP/r52env/bin/python" -m py_compile             territory/production/r52_policy.py             territory/production/engine.py             territory/production/repair.py             territory/production/fixer_advisor.py             territory/production/enforcer_critic.py             territory/production/real_card_review.py             territory/production/visual_review.py             territory/production/batch.py             territory/production/test_r52_authority_chain.py
+          "$RUNNER_TEMP/r52env/bin/python" -m py_compile \
+            territory/production/r52_policy.py \
+            territory/production/engine.py \
+            territory/production/repair.py \
+            territory/production/fixer_advisor.py \
+            territory/production/enforcer_critic.py \
+            territory/production/real_card_review.py \
+            territory/production/visual_review.py \
+            territory/production/batch.py \
+            territory/production/test_r52_authority_chain.py
       - name: Run R52 authority-chain regression
         env:
           PYTHONDONTWRITEBYTECODE: '1'
