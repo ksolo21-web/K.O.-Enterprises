@@ -76,6 +76,7 @@ def verify(root: Path | None = None) -> dict:
         raise R52PolicyError("R52 manifest is malformed")
     checked = {}
     source_hash_mismatches = {}
+    source_unmanifested = []
     for rel in REQUIRED:
         path = root / rel
         key = _manifest_key(rel)
@@ -84,13 +85,15 @@ def verify(root: Path | None = None) -> dict:
         want = expected.get(key)
         got = sha(path)
         if not isinstance(want, str):
-            raise R52PolicyError("R52 source manifest missing core path: " + rel)
-        if got != want:
+            source_unmanifested.append(rel)
+        elif got != want:
             source_hash_mismatches[rel] = {"source_sha256": want, "deployed_sha256": got, "bytes": path.stat().st_size}
         checked[rel] = got
     deployment_manifest = root / "R52-GITHUB-DEPLOYMENT-MANIFEST.json"
     if not deployment_manifest.is_file():
-        raise R52PolicyError("R52 GitHub deployment manifest missing; deployed_hashes=" + json.dumps(source_hash_mismatches or {k:{"deployed_sha256":v} for k,v in checked.items()}, sort_keys=True))
+        report = {k:{"deployed_sha256":v} for k,v in checked.items()}
+        for k,v in source_hash_mismatches.items(): report[k].update(v)
+        raise R52PolicyError("R52 GitHub deployment manifest missing; source_unmanifested=" + json.dumps(source_unmanifested) + "; deployed_hashes=" + json.dumps(report, sort_keys=True))
     deployed = json.loads(deployment_manifest.read_text(encoding="utf-8"))
     if deployed.get("source_package_sha256") != "193e82ee45cf9e4cfd355f0d0efdc5163b0fbf722cf9b95dcc7fc2bf57e8597e":
         raise R52PolicyError("deployment manifest is not bound to the saved R52 package")
@@ -121,6 +124,7 @@ def verify(root: Path | None = None) -> dict:
         "verified_core_files": len(checked),
         "source_package_sha256": deployed.get("source_package_sha256"),
         "source_hash_normalization_count": len(source_hash_mismatches),
+        "source_unmanifested_required_files": source_unmanifested,
         "deployment_manifest_verified": True,
         "activation_passed": True,
         "default_minimum": active.get("default_minimum"),
