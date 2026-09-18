@@ -49,11 +49,11 @@ jobs:
           if base['tests_run']!=137 or not base['software_tests_passed']:raise SystemExit('Existing suite failed or changed.')
           suite=unittest.defaultTestLoader.loadTestsFromNames(['test_visual_review','test_visual_card_review'])
           result=unittest.TextTestRunner(verbosity=2).run(suite)
-          if result.testsRun!=30 or result.skipped or not result.wasSuccessful():raise SystemExit('Visual controller tests failed or changed.')
+          if result.testsRun!=31 or result.skipped or not result.wasSuccessful():raise SystemExit('Visual controller tests failed or changed.')
           after=engine.verify_skills()
           receipt={'run_id':os.environ['GITHUB_RUN_ID'],'source_commit':os.environ['GITHUB_SHA'],
-                   'original_files_verified':138,'existing_tests_passed':137,'visual_controller_tests_passed':30,
-                   'total_tests_passed':167,'failures':0,'errors':0,'skipped':0,
+                   'original_files_verified':138,'existing_tests_passed':137,'visual_controller_tests_passed':31,
+                   'total_tests_passed':168,'failures':0,'errors':0,'skipped':0,
                    'visual_model_qualified':False,'real_cards_released':0,'release_ready':False}
           Path(os.environ['RUNNER_TEMP'],'controller-tests.json').write_text(json.dumps(receipt,indent=2))
           PY
