@@ -111,12 +111,21 @@ def invariant_check(source:Path,candidate:Path,masks:list) -> dict:
     engine.inspect_pdf(candidate)
     return {'kind':'deterministic_invariant_check','views':evidence,'visual_approval':False}
 
-def repair(recipe_path:Path,outdir:Path) -> dict:
+def repair(recipe_path:Path,outdir:Path,workspace_root:Path|None=None) -> dict:
     engine.private_guard();engine.verify_skills()
     if outdir.exists():raise RepairError('fresh repair directory required')
-    recipe=engine.json_read(recipe_path);root=recipe_path.parent
+    recipe=engine.json_read(recipe_path);root=Path(workspace_root or recipe_path.parent).resolve()
+    if recipe.get('kind')!='territory_fixer_advice' or recipe.get('advisor_role')!='fixer_advisor':raise RepairError('Builder requires a Fixer Advisor plan')
+    if recipe.get('r52_revision')!='segment-role-whole-label-2026-09-13-r52':raise RepairError('Fixer Advisor plan is not R52')
+    if recipe.get('repair_authorized') is not True or recipe.get('release_authorized') is not False:raise RepairError('Fixer Advisor authority flags are invalid')
+    if recipe.get('builder_may_execute_only_this_scope') is not True or recipe.get('enforcer_recheck_required') is not True:raise RepairError('Fixer Advisor scope/recheck contract missing')
     if recipe.get('mode')!='approved_vector_label_revision':raise RepairError('unsupported repair mode')
     source=engine.pinned(root,recipe['source']);source_hash=engine.sha(source)
+    if recipe.get('source_sha256')!=source_hash:raise RepairError('Fixer Advisor source hash is stale')
+    verdict_path=engine.pinned(root,recipe['enforcer_verdict'])
+    if engine.sha(verdict_path)!=recipe.get('enforcer_verdict_sha256'):raise RepairError('Fixer Advisor enforcer receipt hash mismatch')
+    verdict=engine.json_read(verdict_path)
+    if verdict.get('kind')!='territory_enforcer_critic' or verdict.get('passed') is not False or verdict.get('artifact_sha256')!=source_hash:raise RepairError('Builder may repair only a candidate rejected by Enforcer Critic')
     masks=[tuple(engine.rect(r)) for r in recipe.get('approved_masks',[])]
     labels=recipe.get('labels')
     if not masks or not isinstance(labels,list) or not 1<=len(labels)<=12:raise RepairError('explicit masks and 1-12 label repairs required')
@@ -144,6 +153,8 @@ def repair(recipe_path:Path,outdir:Path) -> dict:
         fonts.append(font_from_source(doc,page,label['font_resource']));boxes.append(box)
         number(label['font_size'],7,24)
         if not isinstance(label.get('road_id'),str) or not label['road_id']:raise RepairError('assigned road identity required')
+        for key in ('label_id','street','navigation_role','segment_id','source_evidence'):
+            if not isinstance(label.get(key),str) or not label[key].strip():raise RepairError('R52 target lock field required: '+key)
         points(label['road_polyline'])
     for box in boxes:page.add_redact_annot(box,fill=False,cross_out=False)
     page.apply_redactions(images=0,graphics=0,text=0)
