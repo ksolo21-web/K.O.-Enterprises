@@ -86,6 +86,13 @@ jobs:
             test_engine \
             test_visual_card_review \
             test_real_card_review
+      - name: Run production baseline audit suite
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          cd territory/production
+          "$RUNNER_TEMP/r52env/bin/python" audit_kit.py
+          cat evidence/continuation-kit-audit.txt
       - name: Assert role docs exist
         run: |
           test -s territory/production/roles/ROLE-AUTHORITY-CONTRACT.md
