@@ -22,6 +22,7 @@ name: Territory R52 builder authority validation
       - 'territory/production/test_runtime_integration.py'
       - '.github/workflows/territory-r52-builder-validation.yml'
       - '.github/workflows/territory-recovery-tests.yml'
+      - '.github/workflows/territory-private-visual-review.yml'
 permissions:
   contents: read
 concurrency:
