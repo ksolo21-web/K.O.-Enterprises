@@ -110,7 +110,9 @@ def verify_skills() -> dict:
             continue
         if p.relative_to(root).as_posix() not in expected:
             raise GateError('unmanifested source file')
-    return {'verified_files': len(expected), 'source_integrity': True, 'visual_approval': False}
+    from r52_policy import verify as verify_r52
+    r52 = verify_r52()
+    return {'verified_files': len(expected), 'source_integrity': True, 'r52': r52, 'visual_approval': False}
 
 def install_skills(archive: Path) -> dict:
     """Import an exact source capsule, rejecting traversal, symlinks and extras."""
@@ -164,6 +166,7 @@ def build(recipe_path: Path, output: Path) -> dict:
     ownership, or turn a historical score into a new approval.
     """
     private_guard()
+    verify_skills()
     import fitz
     recipe = json_read(recipe_path)
     root = recipe_path.parent
@@ -314,14 +317,24 @@ def local_review(images: list[Path], prompt: str, output: Path, model=MODEL) -> 
     return receipt
 
 def score_guard(review: dict) -> None:
+    """R52: every mandatory category and overall score must be strictly >9.0.
+
+    Overall is the minimum applicable category score; weighted averages have no
+    release authority and exact 9.0 fails.
+    """
     scores = review.get('categories')
-    if review.get('overall_score') != 10 or isinstance(review.get('overall_score'), bool) or not isinstance(scores, dict):
-        raise GateError('current recovered territory policy requires exact 10, not a rounded or averaged score')
+    overall = review.get('overall_score')
+    if isinstance(overall, bool) or not isinstance(overall, (int, float)) or overall <= 9.0 or not isinstance(scores, dict):
+        raise GateError('R52 requires overall_score strictly >9.0 and category evidence')
+    values = []
     for key in CATEGORIES:
         item = scores.get(key)
         value = item.get('score') if isinstance(item, dict) else item
-        if isinstance(value, bool) or value != 10:
-            raise GateError(f'category {key} requires exact 10')
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 9.0:
+            raise GateError(f'R52 category {key} must be strictly >9.0')
+        values.append(float(value))
+    if abs(float(overall) - min(values)) > 1e-9:
+        raise GateError('R52 overall_score must equal the lowest applicable category score')
 
 def release(job: Path, output: Path) -> dict:
     private_guard()
@@ -336,6 +349,14 @@ def release(job: Path, output: Path) -> dict:
         raise GateError('noncanonical delivery filename')
     inspect_pdf(pdf)
     score_guard(json_read(report))
+    verdict = pinned(root, data['enforcer_verdict'])
+    enforced = json_read(verdict)
+    if enforced.get('kind') != 'territory_enforcer_critic' or enforced.get('passed') is not True or enforced.get('release_gate_eligible') is not True:
+        raise GateError('R52 Enforcer Critic has not approved this exact candidate')
+    if enforced.get('artifact_sha256') != sha(pdf) or enforced.get('review_sha256') != sha(report):
+        raise GateError('Enforcer Critic verdict is stale or bound to different evidence')
+    if enforced.get('r52_revision') != 'segment-role-whole-label-2026-09-13-r52':
+        raise GateError('Enforcer Critic did not enforce active R52')
     # Do not manufacture the independently generated report or any review fields.
     builder = source_root() / 'skills/territory-map-card-builder/scripts/validate_release.py'
     critic = source_root() / 'skills/territory-card-critic/scripts/critic_evidence.py'
@@ -372,7 +393,7 @@ def release(job: Path, output: Path) -> dict:
     verified = run_checked(['openssl', 'dgst', '-sha256', '-verify', str(key), '-signature', str(signature), str(approval)])
     if verified['returncode']:
         raise GateError('independent reviewer signature failed')
-    for record in (data['candidate'], data['project'], data['review'], proof['signed_review'], proof['signature'], data['trusted_reviewer_public_key']):
+    for record in (data['candidate'], data['project'], data['review'], data['enforcer_verdict'], proof['signed_review'], proof['signature'], data['trusted_reviewer_public_key']):
         pinned(root, record)
     if output.exists():
         raise GateError('release destination already exists; never silently overwrite')
