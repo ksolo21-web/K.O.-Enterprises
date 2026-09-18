@@ -64,7 +64,14 @@ class CardReviewTests(unittest.TestCase):
             if len(self.calls)==3:
                 r['result']['score']=7.5;r['raw_response']['message']['content']=json.dumps(r['result'])
             return r
-        r=self.runjob(call);self.assertEqual(len(r['categories_below_8']),1)
+        r=self.runjob(call);self.assertEqual(len(r['categories_not_strictly_above_9']),1)
+    def test_exact_nine_is_not_a_passing_category(self):
+        def call(images,prompt,schema,**kw):
+            r=self.infer(images,prompt,schema,**kw)
+            if len(self.calls)==1:
+                r['result']['score']=9.0;r['raw_response']['message']['content']=json.dumps(r['result'])
+            return r
+        r=self.runjob(call);self.assertIn(list(v.REVIEW_WEIGHTS)[0],r['categories_not_strictly_above_9']);self.assertFalse(r['visual_pass'])
     def test_builder_score_never_reaches_model_prompt(self):
         self.data['builder_score']='SECRET BUILDER 10';self.runjob();self.assertTrue(all('SECRET' not in p for _,p,_,_ in self.calls))
 
