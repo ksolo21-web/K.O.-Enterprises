@@ -10,6 +10,18 @@ name: Territory interruption recovery regression
       - 'territory/production/worker.py'
       - 'territory/production/visual_worker.py'
       - 'territory/production/test_client_recovery.py'
+      - 'territory/production/r52/**'
+      - 'territory/production/r52_policy.py'
+      - 'territory/production/engine.py'
+      - 'territory/production/repair.py'
+      - 'territory/production/fixer_advisor.py'
+      - 'territory/production/enforcer_critic.py'
+      - 'territory/production/real_card_review.py'
+      - 'territory/production/visual_review.py'
+      - 'territory/production/batch.py'
+      - 'territory/production/test_r52_authority_chain.py'
+      - 'territory/production/test_real_card_review.py'
+      - 'territory/production/test_visual_card_review.py'
       - '.github/workflows/territory-recovery-tests.yml'
 permissions:
   contents: read
