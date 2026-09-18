@@ -2,7 +2,7 @@
 from __future__ import annotations
 import hashlib,json,re,shutil,time
 from pathlib import Path
-import engine,repair
+import engine,fixer_advisor,repair
 
 class QueueError(engine.GateError):pass
 
@@ -26,15 +26,17 @@ def run(job:Path,output:Path,budget_seconds=1800) -> dict:
             recipe_path=engine.pinned(job,card['recipe']);action=card.get('action');candidate=folder/f"Territory - {card['id']}.pdf"
             if action=='build':record['build']=engine.build(recipe_path,candidate)
             elif action=='repair':
-                result=repair.repair(recipe_path,folder/'rounds');record['repair']=result
+                advice_path=folder/'fixer-advice.json'
+                record['fixer_advice']=fixer_advisor.advise(recipe_path,advice_path)
+                result=repair.repair(advice_path,folder/'rounds',workspace_root=recipe_path.parent);record['repair']=result
                 if result['selected'] is None:raise QueueError('authorized alternatives exhausted without a qualifying candidate')
                 source=folder/'rounds'/result['selected']['file'];shutil.copyfile(source,candidate)
                 if engine.sha(source)!=engine.sha(candidate):raise QueueError('candidate identity changed during final naming')
             else:raise QueueError('unsupported action; never execute code supplied inside a job')
             record['export']=engine.inspect_pdf(candidate)
             record['capture']=engine.capture(candidate,folder/'final-evidence')
-            record['status']='candidate_requires_independent_review'
-            record['mandatory_review']='exact original release gates plus qualified independent source/candidate review still required'
+            record['status']='candidate_requires_enforcer_review'
+            record['mandatory_review']='R52 internal critic + qualified independent critic + Enforcer Critic review still required'
             # Model calibration does not qualify real cards. Do not forge the
             # original review report, skip geographic checks, or create releases.
         except Exception as error:
