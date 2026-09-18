@@ -1,0 +1,51 @@
+{
+  "revision": "R52",
+  "scope": "Active skill-content, executable-rule regression and preserved approved label-component fixtures; not full-card geography certification",
+  "reviewer_type": "authorized_internal",
+  "critic_independent": false,
+  "local_tests_passed": 44,
+  "local_tests_total": 44,
+  "actual_saved_pdf_preservation_checks_passed": 21,
+  "actual_saved_pdf_preservation_checks_total": 21,
+  "original_document_content_preserved": {
+    "Territory-Map-Card-Builder-SKILL.md": true,
+    "Territory-Card-Critic-SKILL.md": true,
+    "Kaleb-Quality-Loop-SKILL.md": true,
+    "Territory-Automatic-Execution-Contract.md": true,
+    "New-Designed-Card-Family-Contract.md": true,
+    "New-Designed-Visual-Regression-Standard.md": true,
+    "Territory-Label-Completeness-Preflight-Contract.md": true,
+    "Territory-PDF-Label-Metric-Contract.md": true
+  },
+  "unmodified_existing_validator_bytes_preserved": {
+    "validate_territory_identity.py": true,
+    "validate_pdf_label_metrics.py": true,
+    "validate_style_token_layer.py": true,
+    "render_locked_template.py": true,
+    "validate_label_placement_contract.py": true,
+    "validate_pdf_identity.py": true,
+    "validate_source_truth_preflight.py": true,
+    "validate_new_designed_family.py": true,
+    "validate_label_completeness_preflight.py": true,
+    "territory_identity.py": true
+  },
+  "python_files_compile_passed": 16,
+  "approved_pdf_sha256": "ddd76a4c1ac44854c988ae8c10f1e238574a83245813dc60ba4a839cd92443cd",
+  "approved_pdf_bytes": 60648,
+  "actual_rejected_cases_verified": [
+    "Wrong same-named Foxboro loop target and straight Steamboat suffix",
+    "Cramped-font first curve despite zero glyph overlap"
+  ],
+  "review_repair_history": [
+    {
+      "finding": "First fixture selector included nearby Foxboro characters in the Steamboat window",
+      "status": "Fixed by selecting the measured Steamboat-only y extent; exact expected text asserted; all three PDFs retested. Approved card never altered."
+    }
+  ],
+  "content_and_tests_passed": true,
+  "full_card_geography_certification": false,
+  "score_scope": "skill rules, actual known-failure regressions and preservation only",
+  "internal_review_score": 9.8,
+  "remaining_content_blockers": [],
+  "persistence_evidence": "R52-PERSISTENCE-RECEIPT.json is written separately after Library upload and byte readback; do not infer activation from this local report."
+}
