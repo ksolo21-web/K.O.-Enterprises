@@ -14,7 +14,31 @@ class RepairTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);self.source=self.root/'source.pdf'
         d=fitz.open();p=d.new_page(width=400,height=240);p.draw_line((30,150),(370,150),color=(0.1,0.7,0.2),width=4);p.insert_text((100,65),'Source Road',fontsize=10)
         box=list(p.search_for('Source Road')[0]);font=p.get_fonts()[0][4];d.save(self.source);d.close()
-        self.recipe={'mode':'approved_vector_label_revision','source':{'file':'source.pdf','sha256':engine.sha(self.source)},'approved_masks':[[80,40,270,148]],'labels':[{'old_box':box,'text':'Source Road','font_resource':font,'font_size':10,'road_id':'fixture-road-1','road_polyline':[[30,150],[370,150]],'road_width':4,'placements':[{'kind':'direct','baseline':[100,80]},{'kind':'direct','baseline':[100,144]}]}]}
+        self.enforcer=self.root/'enforcer.json'
+        self._write_failed_enforcer(self.source)
+        self.recipe={'kind':'territory_fixer_advice','advisor_role':'fixer_advisor',
+                     'r52_revision':'segment-role-whole-label-2026-09-13-r52',
+                     'repair_authorized':True,'release_authorized':False,
+                     'builder_may_execute_only_this_scope':True,'enforcer_recheck_required':True,
+                     'mode':'approved_vector_label_revision',
+                     'source':{'file':'source.pdf','sha256':engine.sha(self.source)},'source_sha256':engine.sha(self.source),
+                     'enforcer_verdict':{'file':'enforcer.json','sha256':engine.sha(self.enforcer)},'enforcer_verdict_sha256':engine.sha(self.enforcer),
+                     'approved_masks':[[80,40,270,148]],
+                     'labels':[{'label_id':'source-road-entrance','street':'Source Road','navigation_role':'entrance_run',
+                                'segment_id':'source-road-west-entrance','source_evidence':'synthetic source fixture',
+                                'old_box':box,'text':'Source Road','font_resource':font,'font_size':10,'road_id':'fixture-road-1',
+                                'road_polyline':[[30,150],[370,150]],'road_width':4,
+                                'placements':[{'kind':'direct','baseline':[100,80]},{'kind':'direct','baseline':[100,144]}]}]}
+    def _write_failed_enforcer(self,source):
+        engine.json_write(self.enforcer,{'kind':'territory_enforcer_critic','r52_revision':'segment-role-whole-label-2026-09-13-r52',
+            'artifact_sha256':engine.sha(source),'review_sha256':'0'*64,'findings':['synthetic defect'],
+            'passed':False,'release_gate_eligible':False})
+    def sync_source_authority(self,source,name):
+        self._write_failed_enforcer(source)
+        self.recipe['source']={'file':name,'sha256':engine.sha(source)}
+        self.recipe['source_sha256']=engine.sha(source)
+        self.recipe['enforcer_verdict']={'file':'enforcer.json','sha256':engine.sha(self.enforcer)}
+        self.recipe['enforcer_verdict_sha256']=engine.sha(self.enforcer)
     def tearDown(self):self.temp.cleanup()
     def run_recipe(self,recipe=None):
         p=self.root/'recipe.json';engine.json_write(p,recipe or self.recipe)
@@ -90,7 +114,7 @@ class RepairTests(unittest.TestCase):
     def test_existing_ink_collision(self):
         other=self.root/'other.pdf'
         with fitz.open(self.source) as d:d[0].insert_text((100,144),'Other Label',fontsize=10);d.save(other)
-        self.recipe['source']={'file':'other.pdf','sha256':engine.sha(other)}
+        self.sync_source_authority(other,'other.pdf')
         self.assertEqual(self.run_recipe()['candidates'],0)
     def test_overlay_unsupported(self):
         with self.assertRaises(repair.RepairError):repair.label_overlay((400,240),'a',{'kind':'invented'},(fitz.Font('helv'),None,'helv'),10)
