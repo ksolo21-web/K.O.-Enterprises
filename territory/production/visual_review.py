@@ -185,12 +185,15 @@ def _card_review(job: Path, output: Path, data: dict, root: Path, before, *, inf
     if any(engine.sha(engine.within(root,n))!=h for n,h in source_hashes.items()): raise VisualError('A card-review source changed during review')
     raw=sum(REVIEW_WEIGHTS[c]*float(report['categories'][c]['score']) for c in REVIEW_WEIGHTS)
     blockers=[c for c,v in report['categories'].items() if v.get('blocking') or v.get('uncertain') or not v.get('completed')]
-    low=[c for c,v in report['categories'].items() if float(v.get('score',0))<8.0]
-    overall=round(raw,2)
+    values=[float(report['categories'][c].get('score',0)) for c in REVIEW_WEIGHTS]
+    low=[c for c,v in report['categories'].items() if float(v.get('score',0))<=9.0]
+    overall=min(values) if values else 0.0
     if blockers: overall=min(overall,8.0)
-    report['raw_weighted_score']=round(raw,2);report['independent_visual_score']=overall
-    report['blocking_categories']=blockers;report['categories_below_8']=low
-    report['visual_pass']=bool(real_call and not blockers and not low and overall>=9.0)
+    report['raw_weighted_score']=round(raw,2)
+    report['score_aggregation']='minimum_applicable_category'
+    report['independent_visual_score']=round(overall,2)
+    report['blocking_categories']=blockers;report['categories_not_strictly_above_9']=low
+    report['visual_pass']=bool(real_call and not blockers and not low and overall>9.0)
     report['original_sources_after']=engine.verify_skills()
     report['limitations']=['This is an independent visual-model score, not geographic or release certification.',
                            'Original deterministic quality, coverage, current-inventory and exact-file gates remain mandatory.']
