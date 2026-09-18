@@ -9,8 +9,10 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -32,6 +34,7 @@ REQUIRED = (
     "Territory-Identity-Naming-Contract.md",
     "Locked-Template-Style-Token-Contract.md",
     "R52-FINAL-ACCEPTANCE.json",
+    "R52-MANIFEST-SHA256.json",
     "scripts/validate_territory_activation.py",
     "scripts/validate_internal_reviewer_parity.py",
     "scripts/validate_label_navigation_contract.py",
@@ -99,21 +102,56 @@ def verify(root: Path | None = None) -> dict:
         raise R52PolicyError("deployment manifest is not bound to the saved R52 package")
     if deployed.get("revision") != REVISION:
         raise R52PolicyError("deployment manifest revision mismatch")
+    if deployed.get("normalization") != "strip_single_final_lf_from_library_text_transport":
+        raise R52PolicyError("unexpected R52 deployment normalization")
     hashes = deployed.get("files")
     if not isinstance(hashes, dict):
         raise R52PolicyError("deployment manifest file hashes missing")
     for rel, got in checked.items():
         if hashes.get(rel) != got:
             raise R52PolicyError("deployed R52 file drift: " + rel)
-    script = root / "scripts" / "validate_territory_activation.py"
-    result = subprocess.run(
-        [sys.executable, str(script), str(root)],
-        cwd=root,
-        capture_output=True,
-        text=True,
-        timeout=60,
-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
-    )
+
+    inherited = deployed.get("inherited_source_sha256") or {}
+    source_manifest_sha = deployed.get("source_manifest_sha256")
+    if source_manifest_sha != "2281abfa6c433b472f9db0dbe794d422fb16d97e556d031fdd429e84ffe3dabb":
+        raise R52PolicyError("unexpected exact R52 source-manifest identity")
+
+    # Prove the GitHub text mirror round-trips to the exact saved source:
+    # package text arrived with only one terminal LF stripped by the Library
+    # text transport. No other byte change is accepted.
+    restored = {}
+    for rel, got in checked.items():
+        raw = (root / rel).read_bytes()
+        source_sha = expected.get(rel)
+        if rel == "R52-MANIFEST-SHA256.json":
+            source_sha = source_manifest_sha
+        elif source_sha is None:
+            source_sha = inherited.get(rel)
+        if not isinstance(source_sha, str):
+            raise R52PolicyError("no source identity for deployed R52 dependency: " + rel)
+        if sha(root / rel) == source_sha:
+            restored[rel] = raw
+        elif hashlib.sha256(raw + b"\n").hexdigest() == source_sha:
+            restored[rel] = raw + b"\n"
+        else:
+            raise R52PolicyError("deployed file is not exact source or exact source minus one final LF: " + rel)
+
+    # Run the original R52 activation validator against the byte-restored mirror.
+    with tempfile.TemporaryDirectory() as temp:
+        restored_root = Path(temp) / "r52"
+        for rel, raw in restored.items():
+            target = restored_root / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+        script = restored_root / "scripts" / "validate_territory_activation.py"
+        result = subprocess.run(
+            [sys.executable, str(script), str(restored_root)],
+            cwd=restored_root,
+            capture_output=True,
+            text=True,
+            timeout=60,
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        )
     if result.returncode != 0:
         raise R52PolicyError("R52 activation failed: " + (result.stdout + result.stderr)[-2000:])
     payload = json.loads(result.stdout)
