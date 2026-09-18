@@ -44,7 +44,8 @@ jobs:
           "$RUNNER_TEMP/r52env/bin/python" - <<'PY'
           import json
           import verify_originals
-          result=verify_originals.verify_installed()
+from pathlib import Path
+          result=verify_originals.verify_installed(Path('.').resolve())
           print(json.dumps(result,indent=2))
           assert result['installed_originals_verified']==138
           PY
