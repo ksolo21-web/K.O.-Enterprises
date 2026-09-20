@@ -1,0 +1,48 @@
+name: Bounded public Pondview 2025 imagery
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-pondview-ortho-20260920.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Fetch public county imagery only
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,json,math,pathlib,hashlib,datetime,zipfile
+          out=pathlib.Path('public-pondview-ortho');out.mkdir()
+          base='https://gisservices.oakgov.com/arcgis/rest/services/BaseMap/EnterpriseOrthoTC2025BasemapMap/MapServer'
+          def get(u):
+            with urllib.request.urlopen(u,timeout=25) as r:b=r.read(12000001)
+            assert len(b)<12000000
+            return b
+          meta=json.loads(get(base+'?f=json'));(out/'metadata.json').write_text(json.dumps(meta))
+          info=json.loads(get(base+'/info/iteminfo?f=json'));(out/'iteminfo.json').write_text(json.dumps(info))
+          ti=meta['tileInfo'];ox=ti['origin']['x'];oy=ti['origin']['y'];tw=ti['cols'];th=ti['rows']
+          def xy(lon,lat):return 6378137*math.radians(lon),6378137*math.log(math.tan(math.pi/4+math.radians(lat)/2))
+          ledger=[]
+          for name,bounds,level in [('south',[-83.1725,42.6511,-83.1692,42.6528],9),('parent',[-83.174,42.6509,-83.1617,42.6580],7)]:
+            res=next(q['resolution'] for q in ti['lods'] if q['level']==level)
+            x0,y0=xy(bounds[0],bounds[1]);x1,y1=xy(bounds[2],bounds[3]);c0=int((x0-ox)//(tw*res));c1=int((x1-ox)//(tw*res));r0=int((oy-y1)//(th*res));r1=int((oy-y0)//(th*res))
+            assert (c1-c0+1)*(r1-r0+1)<=24
+            for rr in range(r0,r1+1):
+              for cc in range(c0,c1+1):
+                u=base+f'/tile/{level}/{rr}/{cc}';p=out/f'{name}-{level}-{rr}-{cc}.jpg';rec={'group':name,'level':level,'row':rr,'col':cc,'resolution':res,'bounds3857':[ox+cc*tw*res,oy-(rr+1)*th*res,ox+(cc+1)*tw*res,oy-rr*th*res],'url':u,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False}
+                try:
+                  b=get(u);assert b[:2]==b'\xff\xd8' or b[:4]==b'\x89PNG';p.write_bytes(b);rec.update(complete=True,file=p.name,bytes=len(b),sha256=hashlib.sha256(b).hexdigest());print(p.name,len(b),flush=True)
+                except Exception as e:rec['error']=str(e);print('FAIL',u,str(e),flush=True)
+                ledger.append(rec)
+          (out/'receipts.json').write_text(json.dumps(ledger,indent=2))
+          with zipfile.ZipFile('public-pondview-ortho.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in sorted(out.iterdir()):z.write(p,p.as_posix())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-pondview-ortho-20260920
+          path: public-pondview-ortho.zip
+          retention-days: 2
+          if-no-files-found: error
