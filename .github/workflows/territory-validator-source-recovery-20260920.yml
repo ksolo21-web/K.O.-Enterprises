@@ -1,0 +1,29 @@
+name: Recover public territory validator capsule
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/territory-validator-source-recovery-20260920.yml']
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Fetch unchanged public source capsule
+        run: |
+          python3 - <<'PY'
+          import urllib.request,pathlib,hashlib,zipfile
+          u='https://raw.githubusercontent.com/ksolo21-web/K.O.-Enterprises/territory-255-260-geography-20260911/territory/production/Territory-Skills-Source-Capsule.zip'
+          with urllib.request.urlopen(u,timeout=30) as r: b=r.read(2000001)
+          assert len(b)<2000000 and b[:2]==b'PK'
+          p=pathlib.Path('Territory-Skills-Source-Capsule.zip');p.write_bytes(b)
+          with zipfile.ZipFile(p) as z: assert z.testzip() is None
+          print('bytes',len(b),'sha256',hashlib.sha256(b).hexdigest())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: original-validator-source-20260920
+          path: Territory-Skills-Source-Capsule.zip
+          retention-days: 2
+          if-no-files-found: error
