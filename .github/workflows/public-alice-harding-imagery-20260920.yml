@@ -1,0 +1,57 @@
+name: Alice Harding public 2025 imagery crosscheck
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-alice-harding-imagery-20260920.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve government imagery and public source metadata
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,json,pathlib,datetime,hashlib,zipfile,concurrent.futures
+          out=pathlib.Path('public-alice-imagery');out.mkdir()
+          base='https://gisservices.oakgov.com/arcgis/rest/services/ImageServices/EnterpriseOrthoTC2025ImageService/ImageServer'
+          recs=[]
+          def get(url,p):
+            u=url+'?'+urllib.parse.urlencode(p)
+            with urllib.request.urlopen(u,timeout=55) as r:b=r.read(25000001)
+            assert len(b)<25000000
+            j=json.loads(b)
+            if 'error'in j:raise RuntimeError(str(j['error']))
+            return j,b,u
+          for name,url in [('imagery_metadata',base),('current_metadata',base.replace('OrthoTC2025','OrthoCurrent'))]:
+            try:
+              j,b,u=get(url,{'f':'json'});(out/(name+'.json')).write_bytes(b)
+            except Exception as e:recs.append({'id':name,'complete':False,'error':str(e)})
+          tiles=[('north',[-9255980,5262730,-9255640,5263580],[1190,2975]),('southwest',[-9256620,5262090,-9255980,5262810],[2560,2880]),('southeast',[-9256010,5262200,-9255420,5262840],[2360,2560])]
+          def tile(t):
+            name,bbox,size=t;rec={'id':name,'year':2025,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'requested_bounds_3857':bbox,'size':size,'complete':False}
+            try:
+              j,b,u=get(base+'/exportImage',{'f':'json','bbox':','.join(map(str,bbox)),'bboxSR':3857,'imageSR':3857,'size':','.join(map(str,size)),'format':'jpg','bandIds':'0,1,2','interpolation':'RSP_BilinearInterpolation','compressionQuality':95})
+              (out/(name+'-export.json')).write_bytes(b)
+              with urllib.request.urlopen(j['href'],timeout=55) as r:im=r.read(25000001)
+              assert len(im)<25000000 and im[:2]==b'\xff\xd8';(out/(name+'.jpg')).write_bytes(im)
+              rec.update(complete=True,url=u,extent=j['extent'],sha256=hashlib.sha256(im).hexdigest(),bytes=len(im));print(name,len(im),flush=True)
+            except Exception as e:rec['error']=str(e);print(name,str(e),flush=True)
+            return rec
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:recs+=list(ex.map(tile,tiles))
+          try:
+            j,b,u=get(base+'/query',{'f':'json','where':'1=1','geometry':'-83.1544,42.6713,-83.1408,42.6823','geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects','outFields':'OBJECTID,Name,GroupName,ProductName,Tag','returnGeometry':'false'})
+            (out/'image-source-tiles.json').write_bytes(b)
+          except Exception as e:recs.append({'id':'image_source_tiles','complete':False,'error':str(e)})
+          (out/'receipts.json').write_text(json.dumps(recs,indent=2))
+          with zipfile.ZipFile('public-alice-imagery.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in out.iterdir():
+              if p.is_file():z.write(p,p.as_posix())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-alice-imagery-20260920
+          path: public-alice-imagery.zip
+          retention-days: 2
+          if-no-files-found: error
