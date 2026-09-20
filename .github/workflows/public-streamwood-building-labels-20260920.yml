@@ -1,0 +1,67 @@
+name: Streamwood public building address verification
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-streamwood-building-labels-20260920.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Retrieve bounded SEMCOG building and condominium points
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,json,pathlib,datetime,hashlib,zipfile,time
+          out=pathlib.Path('public-building-labels');out.mkdir()
+          bbox='-83.1751,42.6505,-83.1582,42.6581'
+          allowed={'objectid','building_id','parcel_id','build_type','city_id','apn','year_built','demolished','housing_units','stories','loadd1','hiadd1','street1','loadd2','hiadd2','street2','zipcode','aka','condo_id'}
+          recs=[]
+          def get(url,p=None):
+            full=url+('?' + urllib.parse.urlencode(p) if p else '')
+            with urllib.request.urlopen(full,timeout=40) as r:b=r.read(15000001)
+            assert len(b)<15000000
+            j=json.loads(b)
+            if 'error' in j:raise RuntimeError(str(j['error']))
+            return j,b,full
+          sources={'building_points':'https://gis.semcog.org/server/rest/services/Hosted/Building_Points/FeatureServer/34'}
+          try:
+            j,b,u=get('https://gis.semcog.org/server/rest/services/Hosted',{'f':'json'})
+            for s in j.get('services',[]):
+              if 'condo' in s['name'].lower() and s['type']=='FeatureServer':
+                url='https://gis.semcog.org/server/rest/services/'+s['name']+'/FeatureServer'
+                meta,_,_=get(url,{'f':'json'})
+                for layer in meta.get('layers',[]):
+                  if 'condo' in layer['name'].lower():sources['condo_points']=url+'/'+str(layer['id'])
+          except Exception as e:recs.append({'id':'condo_discovery','complete':False,'error':str(e)})
+          for name,url in sources.items():
+            f=out/name;f.mkdir();rec={'id':name,'url':url,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'bounds':bbox,'pages':[]}
+            try:
+              m,b,u=get(url,{'f':'json'});(f/'metadata.json').write_bytes(b)
+              oid=m.get('objectIdField') or next(x['name'] for x in m['fields'] if x['type']=='esriFieldTypeOID')
+              fields=[x['name'] for x in m['fields'] if x['name'].lower() in allowed]
+              if oid not in fields:fields.insert(0,oid)
+              q={'f':'json','where':'1=1','geometry':bbox,'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              j,b,u=get(url+'/query',{**q,'returnIdsOnly':'true'});(f/'ids.json').write_bytes(b);ids=sorted(j.get('objectIds') or [])
+              j,b,u=get(url+'/query',{**q,'returnCountOnly':'true'});(f/'count.json').write_bytes(b);assert j['count']==len(ids)==len(set(ids)) and len(ids)<5000
+              features=[]
+              for offset in range(0,len(ids),150):
+                batch=ids[offset:offset+150];j,b,u=get(url+'/query',{'f':'json','objectIds':','.join(map(str,batch)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                assert sorted(x['attributes'][oid] for x in j['features'])==batch and not j.get('exceededTransferLimit',False)
+                (f/f'page-{offset//150}.json').write_bytes(b);features.extend(j['features']);rec['pages'].append({'url':u,'ids':batch,'count':len(batch),'sha256':hashlib.sha256(b).hexdigest(),'exceededTransferLimit':False});time.sleep(.15)
+              (f/'features.json').write_text(json.dumps({'source':url,'spatialReference':{'wkid':4326},'features':features},separators=(',',':')))
+              rec.update(complete=True,count=len(features),fields=fields,editing_info=m.get('editingInfo'));print(name,'COMPLETE',len(features),flush=True)
+            except Exception as e:rec['error']=str(e);print(name,'ERROR',str(e),flush=True)
+            recs.append(rec)
+          (out/'receipts.json').write_text(json.dumps(recs,indent=2))
+          with zipfile.ZipFile('public-building-labels.zip','w',zipfile.ZIP_DEFLATED) as z:
+            for p in sorted(out.rglob('*')):
+              if p.is_file():z.write(p,p.as_posix())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: streamwood-building-labels-20260920
+          path: public-building-labels.zip
+          retention-days: 2
+          if-no-files-found: error
