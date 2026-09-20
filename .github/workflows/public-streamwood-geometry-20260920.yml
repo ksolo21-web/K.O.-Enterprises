@@ -1,0 +1,94 @@
+name: Streamwood bounded public geometry verification
+'on':
+  push:
+    branches: [territory-255-260-geography-20260911]
+    paths: ['.github/workflows/public-streamwood-geometry-20260920.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Retrieve public map geometry and published association plans
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request,zipfile
+          out=pathlib.Path('public-streamwood');out.mkdir()
+          bounds=[-83.1751,42.6505,-83.1582,42.6581]
+          base='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/'
+          sources={
+            'roads':base+'EnterpriseTransportationDataMapService/MapServer/0',
+            'addresses':base+'EnterpriseOpenParcelDataMapService/MapServer/0',
+            'parcels':base+'EnterpriseOpenParcelDataMapService/MapServer/1',
+            'landuse':base+'EnterpriseOpenPlanningMapService/MapServer/4',
+            'county_buildings':'https://gisservices.oakgov.com/arcgisds/rest/services/Hosted/Building_Outline/FeatureServer/30',
+            'semcog_buildings':'https://gis.semcog.org/server/rest/services/Hosted/Building_Footprints/FeatureServer/14'
+          }
+          allowed={'objectid','objectid_12','pin','keypin','type','streetname','streettype','directionalprefix','directionalsuffix','cartographicname','act51roadtype','jurisdictionname','nfc','revisiondate','traveldirection','siteprefixone','sitestreetnumber','sitestreetname','sitestreettype','sitesuffixone','sitestreetaddress','sitecity','sitestate','sitezipcode','cvttaxdescription','classcode','siteaddress','structure_desc','landusecode','landuse','landuse_code','landuse_type','lu_code','lu_description','bldg_id','building_id','address','year','source','date','height','use'}
+          receipts=[]
+          def get(url,params=None):
+            full=url+('?' + urllib.parse.urlencode(params) if params else '')
+            for attempt in range(2):
+              try:
+                req=urllib.request.Request(full,headers={'User-Agent':'Read-only bounded public map geometry verification'})
+                with urllib.request.urlopen(req,timeout=35) as r: raw=r.read(25000001)
+                if len(raw)>25000000:raise ValueError('Response size exceeds bounded retrieval limit')
+                data=json.loads(raw)
+                if 'error' in data:raise ValueError(str(data['error']))
+                time.sleep(.12);return data,raw,full
+              except Exception:
+                if attempt:raise
+                time.sleep(1)
+          def save(p,b):p.write_bytes(b);return hashlib.sha256(b).hexdigest()
+          for name,url in sources.items():
+            folder=out/name;folder.mkdir()
+            rec={'id':name,'source':url,'bounds':bounds,'crs':'EPSG:4326','retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'pages':[]}
+            try:
+              meta,raw,full=get(url,{'f':'json'});save(folder/'metadata.json',raw)
+              oid=meta.get('objectIdField') or next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+              fields=[f['name'] for f in meta['fields'] if f['name'].lower() in allowed]
+              if oid not in fields:fields.insert(0,oid)
+              q={'f':'json','where':'1=1','geometry':','.join(map(str,bounds)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+              cnt,raw,full=get(url+'/query',{**q,'returnCountOnly':'true'});save(folder/'count.json',raw)
+              ids,raw,full=get(url+'/query',{**q,'returnIdsOnly':'true'});save(folder/'ids.json',raw)
+              expected=sorted(ids.get('objectIds') or [])
+              assert len(expected)==len(set(expected))==cnt['count'],'Count/ID mismatch'
+              assert len(expected)<=8000,'Bounded feature cap exceeded'
+              features=[]
+              for offset in range(0,len(expected),150):
+                batch=expected[offset:offset+150]
+                d,raw,full=get(url+'/query',{'f':'json','objectIds':','.join(map(str,batch)),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326})
+                digest=save(folder/f'page-{offset//150:03}.json',raw)
+                actual=sorted(f['attributes'][oid] for f in d.get('features',[]))
+                assert actual==batch and not d.get('exceededTransferLimit',False),'Truncation or ID mismatch'
+                features.extend(d['features']);rec['pages'].append({'url':full,'sha256':digest,'count':len(actual),'ids':actual,'exceededTransferLimit':False})
+              assert sorted(f['attributes'][oid] for f in features)==expected
+              save(folder/'features.json',json.dumps({'source':url,'spatialReference':{'wkid':4326},'features':features},separators=(',',':')).encode())
+              rec.update(complete=True,count=len(features),object_id_field=oid,fields=fields,dataset_editing_info=meta.get('editingInfo'),source_recency_note='Retrieval time is not dataset update time.')
+              print(name,'COMPLETE',len(features),flush=True)
+            except Exception as e:
+              rec['error']=type(e).__name__+': '+str(e)[:500];print(name,rec['error'],flush=True)
+            receipts.append(rec);save(out/'receipts.json',json.dumps(receipts,indent=2).encode())
+          docs={f'streamwood-{n}.pdf':f'https://highlandergroup.net/wp-content/uploads/2020/10/29-{n}-Amendment.pdf' for n in ['7th','8th','9th']}
+          for name,url in docs.items():
+            rec={'id':name,'source':url,'retrieved_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False}
+            try:
+              with urllib.request.urlopen(url,timeout=35) as r:raw=r.read(25000001)
+              assert len(raw)<25000000 and raw.startswith(b'%PDF'),'Invalid or oversized PDF'
+              rec.update(complete=True,sha256=save(out/name,raw),bytes=len(raw))
+              print(name,'COMPLETE',len(raw),flush=True)
+            except Exception as e:rec['error']=str(e)[:400];print(name,rec['error'],flush=True)
+            receipts.append(rec)
+          save(out/'receipts.json',json.dumps(receipts,indent=2).encode())
+          with zipfile.ZipFile('public-streamwood.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+            for p in sorted(out.rglob('*')):
+              if p.is_file():z.write(p,p.as_posix())
+          p=pathlib.Path('public-streamwood.zip');print('ZIP',p.stat().st_size,hashlib.sha256(p.read_bytes()).hexdigest(),flush=True)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: streamwood-public-geometry-20260920
+          path: public-streamwood.zip
+          retention-days: 2
+          if-no-files-found: error
