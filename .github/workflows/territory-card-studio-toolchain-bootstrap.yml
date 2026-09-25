@@ -63,9 +63,26 @@ jobs:
           export ANDROID_SDK_ROOT="$ANDROID_HOME"
           mkdir -p "$ANDROID_HOME"
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
-          "$SDKMANAGER" --sdk_root="$ANDROID_HOME"             "platform-tools" "platforms;android-37" "build-tools;36.0.0"
 
-          test -f "$ANDROID_HOME/platforms/android-37/android.jar"
+          SDK_LIST="$RUNNER_TEMP/sdkmanager-list.txt"
+          "$SDKMANAGER" --list --include_obsolete --channel=3 > "$SDK_LIST"
+          if grep -Fq "platforms;android-37.0" "$SDK_LIST"; then
+            PLATFORM_PACKAGE="platforms;android-37.0"
+            PLATFORM_DIR="android-37.0"
+          elif grep -Fq "platforms;android-37" "$SDK_LIST"; then
+            PLATFORM_PACKAGE="platforms;android-37"
+            PLATFORM_DIR="android-37"
+          else
+            echo "Exact API 37 platform is not published in sdkmanager channels 0-3" >&2
+            grep -E "platforms;android-3[67]|Cinnamon|build-tools;3[67]" "$SDK_LIST" | tail -80 >&2 || true
+            exit 3
+          fi
+          echo "Selected API 37 package: $PLATFORM_PACKAGE"
+
+          "$SDKMANAGER" --channel=3 --sdk_root="$ANDROID_HOME" \
+            "platform-tools" "$PLATFORM_PACKAGE" "build-tools;36.0.0"
+
+          test -f "$ANDROID_HOME/platforms/$PLATFORM_DIR/android.jar"
           test -x "$ANDROID_HOME/build-tools/36.0.0/aapt2"
 
           cat > "$DEPS/settings.gradle.kts" <<'EOF'
