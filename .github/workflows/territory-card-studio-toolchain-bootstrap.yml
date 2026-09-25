@@ -192,6 +192,9 @@ jobs:
           cp -aL "$JAVA_HOME" "$TOOLCHAIN/jdk-17"
           test -x "$TOOLCHAIN/jdk-17/bin/java"
           "$TOOLCHAIN/jdk-17/bin/java" -version
+          tar -C "$TOOLCHAIN" -I 'zstd -10 -T0' -cf "$RUNNER_TEMP/tcs-jdk17.tar.zst" jdk-17
+          (cd "$RUNNER_TEMP" && sha256sum tcs-jdk17.tar.zst > tcs-jdk17.tar.zst.sha256)
+          rm -rf "$TOOLCHAIN/jdk-17"
 
           cat > "$TOOLCHAIN/TOOLCHAIN-MANIFEST.txt" <<EOF
           gradle=9.6.0
@@ -216,6 +219,17 @@ jobs:
           path: |
             ${{ runner.temp }}/tcs-android-offline-toolchain.tar.zst
             ${{ runner.temp }}/tcs-android-offline-toolchain.tar.zst.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Upload offline JDK 17
+        uses: actions/upload-artifact@v4
+        with:
+          name: tcs-jdk17
+          path: |
+            ${{ runner.temp }}/tcs-jdk17.tar.zst
+            ${{ runner.temp }}/tcs-jdk17.tar.zst.sha256
           if-no-files-found: error
           retention-days: 1
           compression-level: 0
