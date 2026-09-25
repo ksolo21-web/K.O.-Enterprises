@@ -182,6 +182,12 @@ jobs:
           fi
 
           rm -rf "$TOOLCHAIN/gradle-user-home"
+          # Persist the exact JDK 17 used by the successful hosted warmup so
+          # offline/local builds satisfy the project's Java 17 toolchain pin.
+          cp -a "$JAVA_HOME" "$TOOLCHAIN/jdk-17"
+          test -x "$TOOLCHAIN/jdk-17/bin/java"
+          "$TOOLCHAIN/jdk-17/bin/java" -version
+
           cat > "$TOOLCHAIN/TOOLCHAIN-MANIFEST.txt" <<EOF
           gradle=9.6.0
           gradle_sha256=bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01
@@ -196,7 +202,7 @@ jobs:
 
           du -sh "$TOOLCHAIN"/* || true
           tar -C "$RUNNER_TEMP" -I 'zstd -10 -T0' -cf "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst" tcs-toolchain
-          sha256sum "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst" | tee "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst.sha256"
+          (cd "$RUNNER_TEMP" && sha256sum tcs-android-offline-toolchain.tar.zst > tcs-android-offline-toolchain.tar.zst.sha256)
 
       - name: Upload offline toolchain
         uses: actions/upload-artifact@v4
