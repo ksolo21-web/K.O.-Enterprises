@@ -169,6 +169,21 @@ jobs:
           </resources>
           EOF
 
+          mkdir -p "$DEPS/app/src/main/java/warmup/tcs"
+          cat > "$DEPS/app/src/main/java/warmup/tcs/MainActivity.kt" <<'EOF'
+          package warmup.tcs
+          import android.os.Bundle
+          import androidx.activity.ComponentActivity
+          import androidx.activity.compose.setContent
+          import androidx.compose.material3.Text
+          class MainActivity : ComponentActivity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContent { Text("TCS warmup") }
+              }
+          }
+          EOF
+
           export GRADLE_USER_HOME="$TOOLCHAIN/gradle-user-home"
           cat > "$DEPS/gradle.properties" <<'EOF'
           org.gradle.jvmargs=-Xmx5g -Dfile.encoding=UTF-8
