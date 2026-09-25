@@ -1,0 +1,174 @@
+name: Territory Card Studio Toolchain Bootstrap
+
+on:
+  push:
+    branches:
+      - territory-card-studio-toolchain-bootstrap
+    paths:
+      - .github/workflows/territory-card-studio-toolchain-bootstrap.yml
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build pinned offline Android toolchain bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TOOLCHAIN="$RUNNER_TEMP/tcs-toolchain"
+          DEPS="$RUNNER_TEMP/tcs-deps"
+          mkdir -p "$TOOLCHAIN" "$DEPS"
+
+          curl -fL --retry 3 -o "$RUNNER_TEMP/gradle-9.6.0-bin.zip"             https://services.gradle.org/distributions/gradle-9.6.0-bin.zip
+          echo "bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01  $RUNNER_TEMP/gradle-9.6.0-bin.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/gradle-9.6.0-bin.zip" -d "$TOOLCHAIN"
+          "$TOOLCHAIN/gradle-9.6.0/bin/gradle" --version
+
+          export ANDROID_HOME="$TOOLCHAIN/android-sdk"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          mkdir -p "$ANDROID_HOME"
+
+          SDKMANAGER="$(command -v sdkmanager)"
+          if [[ -z "$SDKMANAGER" ]]; then
+            echo "sdkmanager missing on GitHub runner" >&2
+            exit 2
+          fi
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses >/dev/null || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_HOME"             "platform-tools" "platforms;android-37" "build-tools;36.0.0"
+
+          test -f "$ANDROID_HOME/platforms/android-37/android.jar"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/aapt2"
+
+          cat > "$DEPS/settings.gradle.kts" <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "TcsDependencyWarmup"
+          include(":app", ":core")
+          EOF
+
+          cat > "$DEPS/build.gradle.kts" <<'EOF'
+          plugins {
+              id("com.android.application") version "9.4.0" apply false
+              id("org.jetbrains.kotlin.jvm") version "2.4.10" apply false
+              id("org.jetbrains.kotlin.plugin.compose") version "2.4.10" apply false
+          }
+          EOF
+
+          mkdir -p "$DEPS/core/src/main/kotlin/warmup"
+          cat > "$DEPS/core/build.gradle.kts" <<'EOF'
+          plugins {
+              id("org.jetbrains.kotlin.jvm")
+          }
+          kotlin {
+              jvmToolchain(17)
+          }
+          EOF
+          echo 'package warmup; object CoreWarmup' > "$DEPS/core/src/main/kotlin/warmup/CoreWarmup.kt"
+
+          mkdir -p "$DEPS/app/src/main"
+          cat > "$DEPS/app/build.gradle.kts" <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.plugin.compose")
+          }
+          android {
+              namespace = "warmup.tcs"
+              compileSdk = 37
+              defaultConfig {
+                  applicationId = "warmup.tcs"
+                  minSdk = 29
+                  targetSdk = 37
+                  versionCode = 1
+                  versionName = "1"
+              }
+              buildFeatures { compose = true }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+          }
+          dependencies {
+              implementation(project(":core"))
+              val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
+              implementation(composeBom)
+              implementation("androidx.activity:activity-compose:1.13.0")
+              implementation("androidx.compose.ui:ui")
+              implementation("androidx.compose.ui:ui-tooling-preview")
+              implementation("androidx.compose.material3:material3")
+              debugImplementation("androidx.compose.ui:ui-tooling")
+          }
+          EOF
+
+          cat > "$DEPS/app/src/main/AndroidManifest.xml" <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <application android:theme="@style/AppTheme"/>
+          </manifest>
+          EOF
+          mkdir -p "$DEPS/app/src/main/res/values"
+          cat > "$DEPS/app/src/main/res/values/styles.xml" <<'EOF'
+          <resources>
+            <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar"/>
+          </resources>
+          EOF
+
+          export GRADLE_USER_HOME="$TOOLCHAIN/gradle-user-home"
+          "$TOOLCHAIN/gradle-9.6.0/bin/gradle" -p "$DEPS"             --no-daemon --stacktrace :app:assembleDebug
+
+          mkdir -p "$TOOLCHAIN/gradle-offline"
+          cp -a "$GRADLE_USER_HOME/caches/modules-2" "$TOOLCHAIN/gradle-offline/"
+          if [[ -d "$GRADLE_USER_HOME/caches/9.6" ]]; then
+            cp -a "$GRADLE_USER_HOME/caches/9.6" "$TOOLCHAIN/gradle-offline/"
+          fi
+          if [[ -d "$GRADLE_USER_HOME/caches/jars-9" ]]; then
+            cp -a "$GRADLE_USER_HOME/caches/jars-9" "$TOOLCHAIN/gradle-offline/"
+          fi
+
+          rm -rf "$TOOLCHAIN/gradle-user-home"
+          cat > "$TOOLCHAIN/TOOLCHAIN-MANIFEST.txt" <<EOF
+          gradle=9.6.0
+          gradle_sha256=bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01
+          android_platform=android-37
+          build_tools=36.0.0
+          jdk=17
+          agp=9.4.0
+          kotlin=2.4.10
+          compose_bom=2026.09.00
+          activity_compose=1.13.0
+          EOF
+
+          du -sh "$TOOLCHAIN"/* || true
+          tar -C "$RUNNER_TEMP" -I 'zstd -10 -T0' -cf "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst" tcs-toolchain
+          sha256sum "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst" | tee "$RUNNER_TEMP/tcs-android-offline-toolchain.tar.zst.sha256"
+
+      - name: Upload offline toolchain
+        uses: actions/upload-artifact@v4
+        with:
+          name: tcs-android-offline-toolchain
+          path: |
+            ${{ runner.temp }}/tcs-android-offline-toolchain.tar.zst
+            ${{ runner.temp }}/tcs-android-offline-toolchain.tar.zst.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
