@@ -189,7 +189,7 @@ jobs:
           rm -rf "$TOOLCHAIN/gradle-user-home"
           # Persist the exact JDK 17 used by the successful hosted warmup so
           # offline/local builds satisfy the project's Java 17 toolchain pin.
-          cp -a "$JAVA_HOME" "$TOOLCHAIN/jdk-17"
+          cp -aL "$JAVA_HOME" "$TOOLCHAIN/jdk-17"
           test -x "$TOOLCHAIN/jdk-17/bin/java"
           "$TOOLCHAIN/jdk-17/bin/java" -version
 
