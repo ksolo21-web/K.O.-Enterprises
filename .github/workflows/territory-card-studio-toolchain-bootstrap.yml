@@ -170,6 +170,11 @@ jobs:
           EOF
 
           export GRADLE_USER_HOME="$TOOLCHAIN/gradle-user-home"
+          cat > "$DEPS/gradle.properties" <<'EOF'
+          org.gradle.jvmargs=-Xmx5g -Dfile.encoding=UTF-8
+          org.gradle.workers.max=2
+          android.useAndroidX=true
+          EOF
           "$TOOLCHAIN/gradle-9.6.0/bin/gradle" -p "$DEPS"             --no-daemon --stacktrace :app:assembleDebug
 
           mkdir -p "$TOOLCHAIN/gradle-offline"
