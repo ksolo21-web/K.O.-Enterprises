@@ -1,0 +1,43 @@
+name: Territory Android compile
+
+on:
+  push:
+    branches:
+      - territory-card-studio-android-build
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK 37
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+      - name: Compile Android app
+        working-directory: territory-card-studio-android
+        run: gradle --no-daemon :core:compileKotlin :app:assembleDebug --stacktrace
+      - name: Verify APK
+        working-directory: territory-card-studio-android
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk | tee app-debug.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TerritoryCardStudio-first-compile
+          path: |
+            territory-card-studio-android/app/build/outputs/apk/debug/app-debug.apk
+            territory-card-studio-android/app-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
