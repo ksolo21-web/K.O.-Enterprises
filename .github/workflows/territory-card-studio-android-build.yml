@@ -22,17 +22,25 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.6.0'
-      - uses: android-actions/setup-android@v3
       - name: Install Android SDK 37
-        run: sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+        run: |
+          set -euo pipefail
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+          test -d "$ANDROID_HOME/platforms/android-37"
+          test -d "$ANDROID_HOME/build-tools/36.0.0"
       - name: Compile Android app
         working-directory: territory-card-studio-android
         run: gradle --no-daemon :core:compileKotlin :app:assembleDebug --stacktrace
       - name: Verify APK
         working-directory: territory-card-studio-android
         run: |
+          set -euo pipefail
           test -s app/build/outputs/apk/debug/app-debug.apk
           sha256sum app/build/outputs/apk/debug/app-debug.apk | tee app-debug.apk.sha256
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | sed -n '1,80p'
       - uses: actions/upload-artifact@v4
         with:
           name: TerritoryCardStudio-first-compile
