@@ -1,0 +1,79 @@
+{
+  "project": "Territory Card Studio Android",
+  "version": "0.1.18-site-building-assignment-recovered-build-candidate",
+  "saved_at_utc": "2026-09-26T17:08:23.432517Z",
+  "milestone": "phase-1b3-site-building-assignment-recovered-build-candidate",
+  "status": "PHASE_1B3_OPEN_RECOVERED_BUILD_CANDIDATE_NEEDS_SOURCE_VISUAL_FREEZE",
+  "phase_milestone_before": "Phase 1B-3 OPEN",
+  "phase_milestone_after": "Phase 1B-3 OPEN_RECOVERED_BUILD_CANDIDATE_NEEDS_SOURCE_VISUAL_FREEZE",
+  "preserved_passed_milestones": [
+    "1A_dedicated_detail",
+    "1B_1_split_detail",
+    "1B_2_full_plus_detail"
+  ],
+  "last_completed_package": "0.1.17-full-plus-detail-renderer",
+  "validation": {
+    "phase1b3_recovered_candidate_build": "PASS_BUILD_ONLY_NOT_MILESTONE_FREEZE",
+    "core_test": "PASS",
+    "app_compile": "PASS",
+    "assemble_debug": "PASS",
+    "bundle_debug": "PASS",
+    "apk_v2_signature": "PASS",
+    "aab_jar_verify": "PASS",
+    "apk_zip_integrity": "PASS",
+    "aab_zip_integrity": "PASS",
+    "version_name": "0.1.18",
+    "version_code": 18,
+    "target_sdk": 37,
+    "reserved_candidate_pdfs_generated": 0,
+    "adapter_fail_closed_mutations": 28,
+    "binary_contract_assertions": "17/17 PASS",
+    "shared_authority_hashes": "19/19 PASS",
+    "assignments": 225,
+    "needs_new_card": 6,
+    "roads": 6930,
+    "buildings": 364,
+    "topology_segments": 3802,
+    "missing_mandatory_evidence": [
+      "exact 0.1.18 source package/overlay bytes",
+      "durable synthetic Phase 1B-3 NOT-FOR-FIELD-USE PDF bytes",
+      "R48/R51/R52/identity/hard-override validator outputs",
+      "1x and 4x visual inspection evidence",
+      "second-renderer parity evidence"
+    ]
+  },
+  "in_progress_evidence_hashes": {
+    "0.1.18_recovered_build_freeze_zip": "029d24f7a7e54192400ce637004c8b7799f140e6a9ea76d32aaedd2ec0c8ed2d",
+    "0.1.18_recovered_apk": "d948bf76152d38fcc2c38f942d9835dd0f9454391dff633ee176b49930a689a3",
+    "0.1.18_recovered_aab": "311208db1e2c248bb65db06f383c94c195cacf60e55f9fc1b8c2b32a99c1c36a",
+    "0.1.18_recovered_status_log": "0052a9e6013d312b7d20292f00c74bc35a513f2e2f69d80375ed89d951008ba6",
+    "0.1.18_recovered_core_test_log": "49e7d09d64c091361012b65ac22f40260fc855cead69a4d0259979f37d2a2e8f",
+    "0.1.18_recovered_source_manifest_file": "903f58cab7984d18dfc51d37e9553b4aa2ab581a042139e5e82d50d6ef36cf57",
+    "0.1.18_recovered_binary_contract_assertions": "29ada612554e5c70b85441d9aa028be765a60971a79909e6559dab0076c6c7a2",
+    "0.1.18_prior_overlay_recorded": "85bf31b214098df041b43f1aad65f947c59876fbace92e256bb1e26d73946946",
+    "0.1.18_adapter_input": "9e8b43359ab6c2117caab6130d91815015b2d63e1f63d3f5500ba17c76a9fcc1",
+    "0.1.18_adapter_output_spec": "52830a0869a78788efb3dc78f3466fe1b3494190271cbeeb8bf7fc241586e596",
+    "0.1.18_non_field_pdf_recorded_not_durable": "5e88a940f81495bf5a42ea99a8ba58c67cc7b867fa581ad99fede5e2953c5ecf"
+  },
+  "reserved_commissioning_territories": ["250T","257A","297","298A","299","347TA"],
+  "reserved_commissioning_status": "UNTOUCHED_UNAPPROVED",
+  "reopened_defects": [],
+  "blocker_fingerprint": null,
+  "blocker_route_attempts": 0,
+  "internal_review": {
+    "type": "internal",
+    "score": 8.9,
+    "milestone_approval": false,
+    "overall_app_approval": false,
+    "independent_critic_runtime_available": false,
+    "reason": "Recovered build is strongly evidenced but mandatory source and visual freeze gates are absent."
+  },
+  "next_open_gate": "Phase 1B-3 - site_building_assignment source/visual freeze completion",
+  "next_bounded_task": "Phase 1B-3 only: reconstruct or recover the exact site-building source delta from frozen 0.1.17 plus recovered 0.1.18 binary/source-manifest evidence; generate a synthetic NOT-FOR-FIELD-USE site-building fixture; run R48/R51/R52/identity/hard-override plus 1x/4x and second-renderer validation; create a durable 0.1.18 source package and freeze 1B-3 only if every mandatory gate passes.",
+  "durable_persistence": {
+    "primary_this_run": "github_fallback",
+    "branch": "territory-card-studio-android-state",
+    "library_upload_error_code": "container_session_unavailable",
+    "status": "PERSISTED_ON_DURABLE_STATE_BRANCH"
+  }
+}
