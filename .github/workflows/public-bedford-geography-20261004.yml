@@ -1,0 +1,79 @@
+name: Public Bedford geography 20261004
+'on':
+  push:
+    branches: [public-geography-bedford-20261004]
+    paths: ['.github/workflows/public-bedford-geography-20261004.yml']
+permissions:
+  contents: read
+jobs:
+  fetch:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Read public geography only; no checkout, secrets, or user assignments
+        shell: bash
+        run: |
+          mkdir -p public-bedford
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,time,urllib.parse,urllib.request
+          OUT=pathlib.Path('public-bedford')
+          BBOX=[-83.148,42.6945,-83.1335,42.7010]
+          stamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          def request(url,params=None,timeout=55,post=False):
+              enc=urllib.parse.urlencode(params or {}).encode()
+              req=urllib.request.Request(url if post else url+'?'+enc.decode(),data=enc if post else None,headers={'User-Agent':'PublicGeographyVerification/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=timeout) as r: data=json.load(r)
+              if isinstance(data,dict) and 'error' in data: raise RuntimeError(str(data['error']))
+              return data
+          def save(name,data):
+              p=OUT/name;p.write_text(json.dumps(data,separators=(',',':')))
+              return {'file':name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+          def arcgis(name,url,fields):
+              log={'source':url,'retrieved_utc':stamp,'bbox4326':BBOX,'complete':False,'pages':[]}
+              try:
+                  meta=request(url,{'f':'json'});save(name+'-metadata.json',meta)
+                  names=[f['name'] for f in meta.get('fields',[])]
+                  oid=next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+                  outfields=','.join(dict.fromkeys([oid]+[f for f in fields if f in names]))
+                  base={'f':'json','where':'1=1','geometry':','.join(map(str,BBOX)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects'}
+                  data=request(url+'/query',dict(base,returnIdsOnly='true'))
+                  ids=sorted(data.get('objectIds') or []);log['expected_ids']=ids
+                  features=[]
+                  for start in range(0,len(ids),300):
+                      wanted=ids[start:start+300]
+                      q={'f':'json','objectIds':','.join(map(str,wanted)),'outFields':outfields,'returnGeometry':'true','outSR':4326,'geometryPrecision':8,'returnZ':'false','returnM':'false'}
+                      page=request(url+'/query',q);batch=page.get('features',[]);features+=batch
+                      log['pages'].append({'requested':len(wanted),'returned':len(batch),'exceededTransferLimit':page.get('exceededTransferLimit',False)})
+                  log['complete']=sorted(f['attributes'][oid] for f in features)==ids and not any(p['exceededTransferLimit'] for p in log['pages'])
+                  log['data']=save(name+'.json',{'spatialReference':{'wkid':4326},'features':features})
+                  print(name,'features',len(features),'complete',log['complete'],flush=True)
+              except Exception as e:
+                  log['error']=repr(e);print(name,'ERROR',repr(e),flush=True)
+              save(name+'-retrieval.json',log);return log
+          def osm():
+              log={'retrieved_utc':stamp,'complete':False,'attempts':[]}
+              b=','.join(map(str,[BBOX[1],BBOX[0],BBOX[3],BBOX[2]]))
+              q='[out:json][timeout:80];(way[highway]('+b+');way[building]('+b+');node["addr:housenumber"]('+b+'););out tags geom;'
+              for url in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']:
+                  try:
+                      d=request(url,{'data':q},timeout=105,post=True)
+                      log.update(source=url,query=q,complete='elements' in d and not d.get('remark'),remark=d.get('remark'),data=save('osm.json',d))
+                      print('osm elements',len(d.get('elements',[])),'complete',log['complete'],flush=True);break
+                  except Exception as e: log['attempts'].append({'source':url,'error':repr(e)})
+              save('osm-retrieval.json',log);return log
+          endpoints=[
+            ('county-buildings','https://gisservices.oakgov.com/arcgisds/rest/services/Hosted/Building_Outline/FeatureServer/30',['objectid','buildingtype','datasource','datecreated','dateupdate']),
+            ('county-roads','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0',['OBJECTID','RoadID','StreetName','StreetType','StreetPreDirection','StreetPostDirection','CartographicName','RoadClass','Owner','Jurisdiction']),
+            ('county-site-addresses','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/0',['OBJECTID','SITEUNIT','SITESTREETNUMBER','SITESTREETNAME','SITESTREETTYPE','SITEDIRECTION','POSTOFFICE','ZIPCODE','LATITUDE','LONGITUDE','SITESTATUS','SITETYPE'])]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+              futures=[pool.submit(arcgis,*e) for e in endpoints]+[pool.submit(osm)]
+              results=[f.result() for f in futures]
+          save('MANIFEST.json',{'retrieved_utc':stamp,'public_data_only':True,'no_user_maps_or_assignments':True,'bbox4326':BBOX,'sources':results})
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-bedford-geography-20261004
+          path: public-bedford
+          retention-days: 1
+          if-no-files-found: error
