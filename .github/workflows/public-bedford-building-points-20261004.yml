@@ -1,0 +1,50 @@
+name: Public Bedford building points 20261004
+'on':
+  push:
+    branches: [public-geography-bedford-20261004]
+    paths: ['.github/workflows/public-bedford-building-points-20261004.yml']
+permissions:
+  contents: read
+jobs:
+  fetch:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Retrieve public SEMCOG building identifiers and addresses only
+        shell: bash
+        run: |
+          mkdir -p public-building-points
+          python3 - <<'PY'
+          import json,pathlib,urllib.request,urllib.parse,datetime,hashlib,concurrent.futures
+          O=pathlib.Path('public-building-points');B=[-83.148,42.6945,-83.1335,42.7010]
+          def req(u,p):
+            with urllib.request.urlopen(u+'?'+urllib.parse.urlencode(p),timeout=60) as r:d=json.load(r)
+            if 'error' in d:raise ValueError(d['error'])
+            return d
+          def save(n,d):
+            p=O/n;p.write_text(json.dumps(d,separators=(',',':')));return {'file':n,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+          def get(name,root):
+            log={'source':root,'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'complete':False,'bbox':B}
+            try:
+              rootmeta=req(root,{'f':'json'});save(name+'-service.json',rootmeta)
+              layer=root+'/'+str(rootmeta['layers'][0]['id']);meta=req(layer,{'f':'json'});save(name+'-metadata.json',meta)
+              wanted={'building_id','build_type','housing_units','loadd1','hiadd1','street1','loadd2','hiadd2','street2','zipcode','aka','source','demolished','year_built'}
+              oid=next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+              fields=[f['name'] for f in meta['fields'] if f['name'].lower() in wanted or f['name']==oid]
+              ids=sorted(req(layer+'/query',{'f':'json','where':'1=1','geometry':','.join(map(str,B)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects','returnIdsOnly':'true'}).get('objectIds') or [])
+              features=[];overflow=False
+              for k in range(0,len(ids),300):
+                d=req(layer+'/query',{'f':'json','objectIds':','.join(map(str,ids[k:k+300])),'outFields':','.join(fields),'returnGeometry':'true','outSR':4326,'returnZ':'false','returnM':'false','geometryPrecision':8});features+=d.get('features',[]);overflow|=d.get('exceededTransferLimit',False)
+              log.update(layer=layer,expected_ids=ids,returned_count=len(features),complete=sorted(f['attributes'][oid] for f in features)==ids and not overflow,data=save(name+'.json',{'spatialReference':{'wkid':4326},'features':features}))
+            except Exception as e:log['error']=repr(e)
+            save(name+'-retrieval.json',log);print(json.dumps(log),flush=True)
+          with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            list(pool.map(lambda x:get(*x),[('semcog-points','https://gis.semcog.org/server/rest/services/Hosted/Building_Points/FeatureServer'),('semcog-footprints','https://gis.semcog.org/server/rest/services/Hosted/Building_Footprints/FeatureServer')]))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-bedford-building-points-20261004
+          path: public-building-points
+          retention-days: 1
+          if-no-files-found: error
