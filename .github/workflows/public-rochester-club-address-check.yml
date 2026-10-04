@@ -1,0 +1,47 @@
+name: Public Rochester Club address cross-check
+on:
+  push:
+    branches: [geodata-rochester-club-20261004]
+    paths: ['.github/workflows/public-rochester-club-address-check.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Retrieve bounded public address and geometry records
+        shell: bash
+        run: |
+          mkdir -p public-geodata-check
+          python3 - <<'PY'
+          import concurrent.futures,datetime,hashlib,json,pathlib,urllib.parse,urllib.request
+          P=pathlib.Path('public-geodata-check');B=[-83.1465,42.6945,-83.1320,42.7005];T=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          def request(url,params):
+              data=urllib.parse.urlencode(params).encode();r=urllib.request.Request(url,data=data,headers={'User-Agent':'PublicSiteGeography/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(r,timeout=65) as f:d=json.load(f)
+              if 'error' in d:raise RuntimeError(str(d['error']))
+              return d
+          def save(name,d):
+              p=P/name;p.write_text(json.dumps(d,separators=(',',':')));return {'path':name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+          def arc(name,url):
+              l={'name':name,'source':url,'retrieved_utc':T,'bbox4326':B,'complete':False,'pages':[]}
+              try:
+                  m=request(url,{'f':'json'});save(name+'-metadata.json',m);oid=next(f['name'] for f in m['fields'] if f['type']=='esriFieldTypeOID')
+                  q={'f':'json','where':'1=1','geometry':','.join(map(str,B)),'geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects','returnIdsOnly':'true'}
+                  d=request(url+'/query',q);ids=sorted(d.get('objectIds') or []);l['expected_ids']=ids;fs=[]
+                  for n in range(0,len(ids),250):
+                      part=ids[n:n+250];d=request(url+'/query',{'f':'json','objectIds':','.join(map(str,part)),'outFields':'*','returnGeometry':'true','outSR':4326,'geometryPrecision':8,'returnZ':'false','returnM':'false'});f=d.get('features',[]);fs.extend(f);l['pages'].append({'requested':len(part),'returned':len(f),'exceededTransferLimit':d.get('exceededTransferLimit',False)})
+                  l['returned_count']=len(fs);l['complete']=sorted(f['attributes'][oid] for f in fs)==ids and not any(x['exceededTransferLimit'] for x in l['pages']);l['data']=save(name+'.json',{'spatialReference':{'wkid':4326},'features':fs})
+              except Exception as e:l['error']=repr(e)
+              save(name+'-retrieval.json',l);print(name,l.get('returned_count'),l['complete'],l.get('error'),flush=True);return l
+          sources=[('city-addresses','https://atlas.rochesterhills.org/arcgis/rest/services/Addresses/MasterAddresses_PublicDataset/MapServer/1'),('semcog-points','https://gis.semcog.org/server/rest/services/Hosted/Building_Points/FeatureServer/34'),('semcog-footprints','https://gis.semcog.org/server/rest/services/Hosted/Building_Footprints/FeatureServer/14'),('county-roads-wide','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0')]
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as e:logs=list(e.map(lambda s:arc(*s),sources))
+          save('MANIFEST.json',{'retrieved_utc':T,'bbox4326':B,'public_data_only':True,'sources':logs})
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-rochester-club-address-check-20261004
+          path: public-geodata-check
+          retention-days: 7
+          if-no-files-found: error
