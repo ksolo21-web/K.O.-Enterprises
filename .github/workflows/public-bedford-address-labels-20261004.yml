@@ -1,0 +1,32 @@
+name: Public Bedford address labels 20261004
+'on':
+  push:
+    branches: [public-geography-bedford-20261004]
+    paths: ['.github/workflows/public-bedford-address-labels-20261004.yml']
+permissions:
+  contents: read
+jobs:
+  fetch:
+    if: github.repository == 'ksolo21-web/K.O.-Enterprises' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Read address labels without owner or resident fields
+        shell: bash
+        run: |
+          mkdir -p public-addresses
+          python3 - <<'PY'
+          import urllib.request,urllib.parse,json,pathlib,hashlib,datetime
+          U='https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/0/query'
+          Q={'f':'json','where':"UPPER(SITESTREETNAME) LIKE '%BEDFORD%'",'geometry':'-83.148,42.6945,-83.1335,42.7010','geometryType':'esriGeometryEnvelope','inSR':4326,'spatialRel':'esriSpatialRelIntersects','outFields':'OBJECTID,TYPE,SITESTREETNUMBER,SITESTREETNAME,SITESTREETTYPE,SITESTREETADDRESS,SITECITY,SITEZIPCODE','returnGeometry':'true','outSR':4326,'resultRecordCount':2000}
+          with urllib.request.urlopen(U+'?'+urllib.parse.urlencode(Q),timeout=80) as r:d=json.load(r)
+          if 'error' in d or d.get('exceededTransferLimit'):raise RuntimeError(str(d)[:1000])
+          p=pathlib.Path('public-addresses/bedford-address-labels.json');p.write_text(json.dumps(d,separators=(',',':')))
+          pathlib.Path('public-addresses/retrieval.json').write_text(json.dumps({'retrieved_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'url':U,'query':Q,'returned_count':len(d.get('features',[])),'exceededTransferLimit':d.get('exceededTransferLimit',False),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-bedford-address-labels-20261004
+          path: public-addresses
+          retention-days: 1
+          if-no-files-found: error
