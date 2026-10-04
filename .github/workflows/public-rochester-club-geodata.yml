@@ -1,0 +1,89 @@
+name: Public Rochester Club geographic records
+on:
+  push:
+    branches: [geodata-rochester-club-20261004]
+    paths: ['.github/workflows/public-rochester-club-geodata.yml']
+permissions:
+  contents: read
+jobs:
+  retrieve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Download public GIS only (no user files or secrets)
+        shell: bash
+        run: |
+          mkdir -p public-geodata
+          python3 - <<'PY'
+          import concurrent.futures, datetime, hashlib, json, pathlib, urllib.parse, urllib.request
+          OUT=pathlib.Path('public-geodata')
+          BBOX=[-83.1465,42.6945,-83.1360,42.7005]
+          STAMP=datetime.datetime.now(datetime.timezone.utc).isoformat()
+          def req(url,params=None,post=False,timeout=55):
+              enc=urllib.parse.urlencode(params or {}).encode()
+              u=url if post or not params else url+'?'+enc.decode()
+              r=urllib.request.Request(u,data=enc if post else None,headers={'User-Agent':'PublicSiteGeography/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(r,timeout=timeout) as f: data=json.load(f)
+              if isinstance(data,dict) and data.get('error'): raise RuntimeError(str(data['error']))
+              return data
+          def save(name,data):
+              p=OUT/name;p.write_text(json.dumps(data,separators=(',',':')))
+              return {'path':name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+          def arc(name,url,fields=None):
+              log={'name':name,'source':url,'retrieved_utc':STAMP,'bbox4326':BBOX,'complete':False,'pages':[]}
+              try:
+                  meta=req(url,{'f':'json'});save(name+'-metadata.json',meta)
+                  oid=next(f['name'] for f in meta['fields'] if f['type']=='esriFieldTypeOID')
+                  names=[f['name'] for f in meta['fields']]
+                  selected='*' if fields is None else ','.join(dict.fromkeys([oid]+[f for f in fields if f in names]))
+                  base={'f':'json','where':'1=1','geometry':','.join(map(str,BBOX)),'geometryType':'esriGeometryEnvelope','inSR':'4326','spatialRel':'esriSpatialRelIntersects','returnIdsOnly':'true'}
+                  ids=req(url+'/query',base,post=True)
+                  ids=sorted(ids.get('objectIds') or []);log['expected_ids']=ids
+                  features=[]
+                  for i in range(0,len(ids),250):
+                      part=ids[i:i+250]
+                      data=req(url+'/query',{'f':'json','objectIds':','.join(map(str,part)),'outFields':selected,'returnGeometry':'true','outSR':'4326','geometryPrecision':'8','returnZ':'false','returnM':'false'},post=True)
+                      fs=data.get('features',[]);features.extend(fs)
+                      log['pages'].append({'requested':len(part),'returned':len(fs),'exceededTransferLimit':data.get('exceededTransferLimit',False)})
+                  actual=sorted(f['attributes'][oid] for f in features)
+                  log['returned_count']=len(features)
+                  log['complete']=actual==ids and not any(p['exceededTransferLimit'] for p in log['pages'])
+                  log['data']=save(name+'.json',{'spatialReference':{'wkid':4326},'features':features})
+              except Exception as e:log['error']=repr(e)
+              save(name+'-retrieval.json',log);print(name,log.get('returned_count'),log.get('complete'),log.get('error'),flush=True)
+              return log
+          def osm():
+              log={'name':'osm','retrieved_utc':STAMP,'bbox4326':BBOX,'complete':False,'attempts':[]}
+              b=','.join(map(str,[BBOX[1],BBOX[0],BBOX[3],BBOX[2]]))
+              q='[out:json][timeout:100];(way[highway]('+b+');way[building]('+b+');nwr["addr:housenumber"]('+b+');nwr[amenity]('+b+'););out body;>;out skel qt;'
+              for u in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']:
+                  try:
+                      d=req(u,{'data':q},post=True,timeout=120);log['source']=u;log['query']=q;log['complete']='elements' in d and not d.get('remark');log['remark']=d.get('remark');log['data']=save('osm.json',d);break
+                  except Exception as e:log['attempts'].append({'source':u,'error':repr(e)})
+              save('osm-retrieval.json',log);print('osm',log['complete'],flush=True);return log
+          def imagery():
+              log={'name':'county-imagery','retrieved_utc':STAMP,'complete':False}
+              try:
+                  root='https://gisservices.oakgov.com/arcgis/rest/services/ImageServices'
+                  d=req(root,{'f':'json'});save('imagery-directory.json',d)
+                  candidates=[s for s in d.get('services',[]) if s.get('type')=='ImageServer' and any(y in s.get('name','') for y in ['2025','2023'])]
+                  candidates.sort(key=lambda s:s['name'],reverse=True)
+                  if candidates:
+                      s=candidates[0];u='https://gisservices.oakgov.com/arcgis/rest/services/'+s['name']+'/ImageServer';meta=req(u,{'f':'json'});save('imagery-metadata.json',meta)
+                      params={'f':'json','bbox':','.join(map(str,BBOX)),'bboxSR':4326,'imageSR':3857,'size':'2400,1850','format':'jpg','interpolation':'RSP_BilinearInterpolation'}
+                      ex=req(u+'/exportImage',params);save('imagery-export.json',ex)
+                      with urllib.request.urlopen(ex['href'],timeout=60) as f: raw=f.read()
+                      (OUT/'county-aerial.jpg').write_bytes(raw);log.update({'source':u,'complete':True,'export':ex,'sha256':hashlib.sha256(raw).hexdigest()})
+              except Exception as e:log['error']=repr(e)
+              save('imagery-retrieval.json',log);print('imagery',log['complete'],log.get('error'),flush=True);return log
+          with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+              jobs=[ex.submit(arc,'county-buildings','https://gisservices.oakgov.com/arcgisds/rest/services/Hosted/Building_Outline/FeatureServer/30'),ex.submit(arc,'county-addresses','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseOpenParcelDataMapService/MapServer/0'),ex.submit(arc,'county-roads','https://gisservices.oakgov.com/arcgis/rest/services/Enterprise/EnterpriseTransportationDataMapService/MapServer/0'),ex.submit(osm),ex.submit(imagery)]
+              logs=[f.result() for f in jobs]
+          save('MANIFEST.json',{'retrieved_utc':STAMP,'bbox4326':BBOX,'public_data_only':True,'no_user_assignment_uploaded':True,'sources':logs})
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: public-rochester-club-geodata-20261004
+          path: public-geodata
+          retention-days: 7
+          if-no-files-found: error
