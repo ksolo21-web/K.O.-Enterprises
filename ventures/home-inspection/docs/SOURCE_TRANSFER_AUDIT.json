@@ -1,0 +1,95 @@
+{
+  "audit_version": 1,
+  "audit_date": "2026-10-30",
+  "scope": "repository source-transfer preflight; no source recovery or runtime test pass claimed",
+  "repository": "ksolo21-web/K.O.-Enterprises",
+  "branch": "home-inspection-development",
+  "observed_commit": "45c9e92e3a927b5c0d2fa415b081b152b58538db",
+  "recursive_tree_complete": true,
+  "observed_product_files": [
+    {
+      "path": "ventures/home-inspection/README.md",
+      "git_blob_sha": "7124a7924d01c3bbf08ae78c18d886da423d605f",
+      "size": 2895
+    },
+    {
+      "path": "ventures/home-inspection/docs/ACCEPTANCE_M2_v0.7.md",
+      "git_blob_sha": "c7cf4670df471ba0a9e30295b5aaebcc04d559b9",
+      "size": 2733
+    },
+    {
+      "path": "ventures/home-inspection/docs/CHECKPOINT_M2_v0.7.md",
+      "git_blob_sha": "48912185d35cde7d082df1f21fa1d6d2935b81d1",
+      "size": 2645
+    },
+    {
+      "path": "ventures/home-inspection/docs/MILESTONE_2_AGENT_ORGANIZATION.md",
+      "git_blob_sha": "ef20c91a01f844efeb37b4e5fba2713333dbed91",
+      "size": 5065
+    },
+    {
+      "path": "ventures/home-inspection/docs/OPTION2_DESIGN_STANDARD.md",
+      "git_blob_sha": "849221d98e24710b768430c19346058c67f488a5",
+      "size": 2975
+    },
+    {
+      "path": "ventures/home-inspection/docs/REVIEW_PROTOCOL_M2_v0.7.md",
+      "git_blob_sha": "f3cf04f32287208d6f8f6e4b6e42865eeabddd64",
+      "size": 3475
+    },
+    {
+      "path": "ventures/home-inspection/inspection_engine/benchmark.py",
+      "git_blob_sha": "31f15e8d90bb25e776ef193c2cb9ed5638f1d61b",
+      "size": 7209
+    },
+    {
+      "path": "ventures/home-inspection/tests/test_benchmark.py",
+      "git_blob_sha": "0a5ad29c54bd3702b18a53ddb2fa6d47c3bd08d3",
+      "size": 3224
+    }
+  ],
+  "known_required_paths_absent": [
+    "ventures/home-inspection/inspection_engine/core.py",
+    "ventures/home-inspection/inspection_engine/capture.py",
+    "ventures/home-inspection/inspection_engine/critic.py",
+    "ventures/home-inspection/inspection_engine/report.py",
+    "ventures/home-inspection/inspection_engine/__main__.py",
+    "ventures/home-inspection/examples/demo_project.json",
+    "ventures/home-inspection/requirements.txt"
+  ],
+  "original_archive": {
+    "filename": "Home_Inspection_M2_Technical_Critic_v0.7_Source.zip",
+    "previously_recorded_sha256": "ba9dedcf000e4f77a746e614e0a55cc279e23343a3a436483e8ede75435cd025",
+    "bytes_available_here": false,
+    "sha256_revalidated_here": false,
+    "complete_manifest_available_here": false
+  },
+  "recovery_searches": {
+    "exact_library_title": "no matching artifact",
+    "alternate_library_title": "no matching source package; unrelated fuzzy result excluded",
+    "prior_exact_local_artifact_path": "not present"
+  },
+  "git_python_blobs": [
+    {
+      "path": "ventures/home-inspection/inspection_engine/benchmark.py",
+      "git_blob_sha": "31f15e8d90bb25e776ef193c2cb9ed5638f1d61b",
+      "original_byte_match": true,
+      "syntax_parse_passed": true,
+      "runtime_tests_executed": false
+    },
+    {
+      "path": "ventures/home-inspection/tests/test_benchmark.py",
+      "git_blob_sha": "0a5ad29c54bd3702b18a53ddb2fa6d47c3bd08d3",
+      "original_byte_match": true,
+      "syntax_parse_passed": true,
+      "runtime_tests_executed": false
+    }
+  ],
+  "original_suite_historical_test_count": 104,
+  "original_suite_executed_here": false,
+  "benchmark_cases_executed_here": false,
+  "live_model_executed_here": false,
+  "source_transfer_status": "BLOCKED_ORIGINAL_SOURCE_ARTIFACT_REQUIRED",
+  "customer_release_allowed": false,
+  "new_code_implemented_by_this_audit": false
+}
