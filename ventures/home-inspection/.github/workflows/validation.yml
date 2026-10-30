@@ -1,29 +1,31 @@
-name: Inspection engine validation
+# REFERENCE ONLY: stored under ventures/home-inspection/.github, not an active root workflow.
+name: Inspection engine manual validation reference
 on:
-  push:
-    branches: ['**']
-  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  local-contract-and-evidence-tests:
+  offline-validation:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install FFmpeg and Python dependencies
+      - name: Install FFmpeg and dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
-          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-      - name: Run bounded offline tests
+      - name: Generate only synthetic example fixtures
+        run: python -m scripts.generate_public_fixtures
+      - name: Run offline tests
         run: python -m unittest discover -s tests -v
-      - name: Validate synthetic work orders and review protocol
+      - name: Exercise synthetic specialist and review examples
         run: |
           python -m scripts.build_m2_specialist_demo
           python -m scripts.build_m2_critic_demo
-          python -m inspection_engine audit output/m2_specialist_demo/03_project_unapproved.json

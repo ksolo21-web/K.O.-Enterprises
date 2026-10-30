@@ -34,4 +34,9 @@ This repository is currently **public**; all branches, including this one, are p
 The repository's `PAUSE_AUTONOMY` governance marker remains in effect for external/scheduled operations; this branch does not remove or change it.
 
 ## Status (2026-10-30)
-**Branch created; status README committed; full source transfer and live-model validation remain pending.**
+**Source and safe synthetic test fixtures transferred; 118 local tests pass including long-report pagination. No remote CI run, no live vision-model validation, and no qualified-inspector field approval.**
+
+
+## Current source and report status
+
+The working engine is in [`inspection_engine/`](inspection_engine/). Run and test it using [`docs/GITHUB_DEVELOPMENT.md`](docs/GITHUB_DEVELOPMENT.md). See [`docs/PAGINATION_ACCEPTANCE.md`](docs/PAGINATION_ACCEPTANCE.md) and [`docs/SOURCE_TRANSFER_COMPLETION.md`](docs/SOURCE_TRANSFER_COMPLETION.md) for fresh verified status. The earlier `SOURCE_TRANSFER_HANDOFF.md` reflects the pre-recovery point, not the current state.

@@ -90,6 +90,140 @@ def datum(c,x,y,heading,value,w):
     label(c,heading,x,y)
     return para(c,value,x,y-20,w,11,16,DARK,'LatoB',maxlines=2)
 
+def _ledger_lines(value, max_width, font='Lato', size=9):
+    """Wrap every word, including unbroken model output; never ellipse ledger text."""
+    out=[]
+    for paragraph in str(value).split('\n'):
+        if not paragraph.strip():
+            out.append('')
+            continue
+        line=''
+        for word in paragraph.split():
+            while pdfmetrics.stringWidth(word,FONT_MAP[font],size)>max_width:
+                # Split a single overlong token at the last fitting character.
+                i=1
+                while i<len(word) and pdfmetrics.stringWidth(word[:i+1],FONT_MAP[font],size)<=max_width:
+                    i+=1
+                if line:out.append(line);line=''
+                out.append(word[:i]);word=word[i:]
+            trial=(line+' '+word).strip()
+            if line and pdfmetrics.stringWidth(trial,FONT_MAP[font],size)>max_width:
+                out.append(line);line=word
+            else:line=trial
+        if line:out.append(line)
+    return out
+
+
+def _needs_complete_appendix(doc):
+    """Enable full records for field cases and synthetic examples exceeding synopsis."""
+    if not doc.get('property',{}).get('synthetic',False):
+        return True
+    findings=doc.get('findings',[])
+    if len(findings)>1:return True
+    if findings and (len(wraps(findings[0].get('condition',''),'Lato',10,CW-50))>4 or
+                     len(wraps(findings[0].get('recommendation',''),'Lato',9.5,CW-50))>2):return True
+    equip=doc.get('equipment',[])
+    if len(equip)>4:return True
+    observations=doc.get('observations',[])
+    visible=('foundation','subfloor','framing','roof','exterior','interior')
+    for system in visible:
+        entries=[o for o in observations if o.get('system')==system]
+        if len(entries)>1:return True
+        if entries and len(wraps(entries[0].get('description',''),'Lato',9.6,218))>4:return True
+    if any(o.get('system') not in visible for o in observations):return True
+    limits=doc.get('limitations',[])
+    if len(limits)>4:return True
+    if any(len(wraps(x.get('description',''),'Lato',9.5,CW-35))>2 for x in limits):return True
+    model_items=[x for key in ('findings','observations') for x in doc.get(key,[]) if x.get('model_proposal')]
+    if any(len(wraps(x.get('description',x.get('condition','')),'Lato',9.1,CW-232))>9 for x in model_items):return True
+    return False
+
+def _full_record_appendix(c, doc, synthetic, next_page):
+    """Lossless plain-language record ledger; pages expand with input rather than truncating.
+
+    The photo-led five-page design is retained as a visual synopsis. Every source
+    record appears in this separately paginated technical disclosure appendix.
+    Neither editorial cards nor image previews are authoritative complete text.
+    """
+    groups=[]
+    for entry in doc.get('findings',[]):
+        groups.append(('FINDING',str(entry.get('id','unassigned')),[
+            ('SYSTEM',entry.get('system','unknown')),
+            ('LOCATION',entry.get('location','unknown')),
+            ('SEVERITY',entry.get('severity','not assigned')),
+            ('CONDITION',entry.get('condition','')),
+            ('RECOMMENDATION',entry.get('recommendation','')),
+            ('EVIDENCE IDS',', '.join(map(str,entry.get('evidence_ids',[]))) or 'None'),
+            ('REVIEW',entry.get('review','pending'))]))
+    for entry in doc.get('observations',[]):
+        groups.append(('PROPERTY FEATURE',str(entry.get('id','unassigned')),[
+            ('SYSTEM',entry.get('system','unknown')),
+            ('FEATURE',entry.get('feature','')),
+            ('STATUS',entry.get('status','unknown')),
+            ('DESCRIPTION',entry.get('description','')),
+            ('EVIDENCE IDS',', '.join(map(str,entry.get('evidence_ids',[]))) or 'None'),
+            ('REVIEW',entry.get('review','pending'))]))
+    for entry in doc.get('equipment',[]):
+        groups.append(('EQUIPMENT',str(entry.get('id','unassigned')),[
+            ('SYSTEM',entry.get('system','unknown')),
+            ('MANUFACTURER',entry.get('brand','Not recorded')),
+            ('MODEL',entry.get('model','Not recorded')),
+            ('SERIAL',entry.get('serial','Not recorded')),
+            ('EVIDENCE IDS',', '.join(map(str,entry.get('evidence_ids',[]))) or 'None')]))
+    for entry in doc.get('limitations',[]):
+        groups.append(('LIMITATION',str(entry.get('id','unassigned')),[
+            ('SYSTEM',entry.get('system','unknown')),
+            ('DESCRIPTION',entry.get('description','')),
+            ('EVIDENCE IDS',', '.join(map(str,entry.get('evidence_ids',[]))) or 'None')]))
+    for status in coverage(doc):
+        groups.append(('SYSTEM COVERAGE',str(status.get('system','unknown')),[
+            ('SYSTEM',status.get('title',status.get('system','unknown'))),
+            ('COVERAGE STATUS',status.get('status','not verified')),
+            ('MISSING FEATURES',', '.join(map(str,status.get('missing_features',[]))) or 'None recorded')]))
+    if not groups:return next_page
+
+    page_no=next_page
+    y=548
+    def new_page():
+        nonlocal page_no,y
+        page(c,page_no,'complete record',synthetic)
+        header(c,'APPENDIX / COMPLETE RECORD','Full inspection record',
+             'Complete unabridged findings, property descriptions, equipment records, limitations and coverage status.')
+        y=546
+        page_no+=1
+
+    new_page()
+    for typ,item_id,fields in groups:
+        # Keep each record visibly distinct; do not artificially clip long prose.
+        if y<132:
+            c.showPage();new_page()
+        box(c,M,y-2,CW,1,BRONZE)
+        y-=23
+        heading=f'{typ}  /  {item_id}'
+        for title_line in _ledger_lines(heading,CW-12,'LatoB',10):
+            if y<109:
+                c.showPage();new_page()
+            txt(c,title_line,M+10,y,'LatoB',10,NAVY)
+            y-=16
+        for field,value in fields:
+            if y<109:
+                c.showPage();new_page()
+                txt(c,f'{typ}  /  {item_id}  (CONTINUED)',M+10,y,'LatoB',9,NAVY)
+                y-=19
+            txt(c,str(field),M+12,y,'LatoB',8,MUTED)
+            y-=15
+            for body_line in _ledger_lines(value,CW-26,'Lato',9):
+                if y<96:
+                    c.showPage();new_page()
+                    txt(c,f'{typ}  /  {item_id}  (CONTINUED)',M+10,y,'LatoB',9,NAVY)
+                    y-=19
+                txt(c,body_line,M+16,y,'Lato',9,DARK)
+                y-=13
+            y-=7
+        y-=16
+    c.showPage()
+    return page_no
+
 def build_pdf(document:dict,project_dir:Path,target:Path):
     target=Path(target);target.parent.mkdir(parents=True,exist_ok=True)
     prop=document['property'];synthetic=bool(prop.get('synthetic'))
@@ -325,5 +459,9 @@ def build_pdf(document:dict,project_dir:Path,target:Path):
             txt(c,f"{dims[0]} x {dims[1]} native px / no AI enlargement",M+13,top-194,'Lato',8.5,MUTED)
             txt(c,'UNREVIEWED SOURCE EVIDENCE',x,top-194,'LatoB',8.1,BRONZE)
         c.showPage()
+    # Mandatory complete ledger. The fixed editorial synopsis may use preview
+    # ellipses; the exhaustive ledger below never truncates supplied records.
+    if _needs_complete_appendix(document):
+        _full_record_appendix(c,document,synthetic,preceding+1+(len(selected)+1)//2)
     c.save()
     return target
