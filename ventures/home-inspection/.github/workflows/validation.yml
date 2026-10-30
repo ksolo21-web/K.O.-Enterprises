@@ -1,0 +1,29 @@
+name: Inspection engine validation
+on:
+  push:
+    branches: ['**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  local-contract-and-evidence-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install FFmpeg and Python dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run bounded offline tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate synthetic work orders and review protocol
+        run: |
+          python -m scripts.build_m2_specialist_demo
+          python -m scripts.build_m2_critic_demo
+          python -m inspection_engine audit output/m2_specialist_demo/03_project_unapproved.json

@@ -1,0 +1,18 @@
+# Live customer evidence, local state, and generated runtime data must NEVER be committed.
+private_case/
+private_cases/
+customer_data/
+client_data/
+state/
+*.db
+*.sqlite*
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+output/
+**/output/
+.DS_Store
