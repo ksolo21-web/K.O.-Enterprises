@@ -1,0 +1,7 @@
+{
+  "observations": [
+    {"system":"foundation","feature":"Foundation type","status":"observed","description":"Illustrative slab-on-grade construction; hypothetical example only."},
+    {"system":"subfloor","feature":"Floor platform","status":"observed","description":"Illustrative slab platform is visible but concealed assemblies remain undetermined."},
+    {"system":"electrical","feature":"Service entrance","status":"unknown","description":"No image supplied showing the electric service."}
+  ]
+}

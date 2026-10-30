@@ -16,3 +16,11 @@ __pycache__/
 output/
 **/output/
 .DS_Store
+# Generated synthetic fixtures stay local; committed JSON only.
+examples/**/*.png
+examples/**/*.jpg
+examples/**/*.jpeg
+examples/**/*.mp4
+examples/*.png
+examples/*.jpg
+examples/*.mp4

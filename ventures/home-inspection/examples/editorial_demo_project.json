@@ -1,0 +1,140 @@
+{
+  "project_id": "DEMO-0001",
+  "property": {
+    "label": "Illustrative Residential Property - Sample Only",
+    "inspection_date": "2026-10-30",
+    "inspector": "Example inspection author (not a real inspector)",
+    "synthetic": true,
+    "qualified_reviewer": null
+  },
+  "media": [
+    {
+      "id": "P00",
+      "kind": "photo",
+      "path": "demo_exterior.png",
+      "area": "exterior",
+      "caption": "Original AI-generated illustrative home exterior for demonstrating the editorial report design; NOT field evidence."
+    },
+    {
+      "id": "P01",
+      "kind": "photo",
+      "path": "demo_evidence.png",
+      "area": "foundation",
+      "caption": "Computer-created schematic; not a property photograph."
+    }
+  ],
+  "observations": [
+    {
+      "id": "O01",
+      "system": "foundation",
+      "feature": "Foundation type",
+      "status": "observed",
+      "description": "Illustrative slab-on-grade construction; hypothetical example only.",
+      "evidence_ids": [
+        "P01"
+      ],
+      "review": "review_pending",
+      "feature_code": "foundation_type"
+    },
+    {
+      "id": "O02",
+      "system": "subfloor",
+      "feature": "Floor platform",
+      "status": "unknown",
+      "description": "Subfloor assembly not established from the example media.",
+      "evidence_ids": [],
+      "review": "review_pending",
+      "feature_code": "floor_platform_type"
+    },
+    {
+      "id": "O03",
+      "system": "framing",
+      "feature": "Wall structure",
+      "status": "unknown",
+      "description": "Concealed framing material cannot be identified from this view.",
+      "evidence_ids": [],
+      "review": "review_pending",
+      "feature_code": "exterior_wall_structure"
+    },
+    {
+      "id": "O04",
+      "system": "roof",
+      "feature": "Roof structure and covering",
+      "status": "not_observed",
+      "description": "The illustration shows a roof form, but this does not establish actual materials or condition; a qualified field review is required.",
+      "evidence_ids": [],
+      "review": "review_pending",
+      "feature_code": "roof_geometry_and_structure"
+    },
+    {
+      "id": "O05",
+      "system": "hvac",
+      "feature": "Heating unit",
+      "status": "unknown",
+      "description": "Manufacturer and age need a legible rating plate and manufacturer confirmation.",
+      "evidence_ids": [],
+      "review": "review_pending",
+      "feature_code": "heating_type"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F01",
+      "system": "foundation",
+      "location": "Illustrative wall/floor transition",
+      "severity": "further_evaluation",
+      "condition": "The schematic provides insufficient information to establish whether moisture intrusion is present.",
+      "recommendation": "Have a qualified building professional evaluate actual site conditions and any relevant moisture history.",
+      "evidence_ids": [
+        "P01"
+      ],
+      "review": "review_pending"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "E01",
+      "system": "water_heating",
+      "brand": "Bradford White",
+      "model": "EXAMPLE ONLY",
+      "serial": "CA1234567",
+      "evidence_ids": []
+    },
+    {
+      "id": "E02",
+      "system": "hvac",
+      "brand": "Carrier",
+      "model": "NOT RECORDED",
+      "serial": "NOT RECORDED",
+      "evidence_ids": []
+    },
+    {
+      "id": "E03",
+      "system": "water_heating",
+      "brand": "Rheem",
+      "model": "ILLUSTRATION ONLY",
+      "serial": "1209D01234",
+      "evidence_ids": []
+    }
+  ],
+  "limitations": [
+    {
+      "id": "L01",
+      "system": "roof",
+      "description": "No roof-view evidence supplied.",
+      "evidence_ids": []
+    },
+    {
+      "id": "L02",
+      "system": "foundation",
+      "description": "An illustrative drawing cannot substitute for visual inspection of a real foundation.",
+      "evidence_ids": []
+    },
+    {
+      "id": "L03",
+      "system": "water_heating",
+      "description": "Serial code not corroborated by a real rating-plate image or manufacturer lookup.",
+      "evidence_ids": []
+    }
+  ]
+}
