@@ -54,6 +54,14 @@ def entries(document,proposals=()):
             'location':p.get('location','Not specified'),'bbox':p.get('bbox'),
             'evidence_ids':[p['evidence_id']],'zoom_view_ids':p.get('zoom_view_ids',[]),
             'review':'review_pending','origin':'current_batch','component_id':None})
+    from .coverage_workflow import ledger_tasks
+    tasks=ledger_tasks(document)
+    for record in records:
+        record['coverage_task_ids']=sorted(t['task_id'] for t in tasks if t['system']==record['system']
+            and set(t['evidence_ids']) & set(record['evidence_ids']))
+    for task in tasks:
+        task['related_claim_ids']=[r['entry_id'] for r in records if task['task_id'] in r['coverage_task_ids']]
+    records.extend(tasks)
     if len(records)>MAX_ENTRIES:
         raise DataError('Observation ledger exceeds 128 entries; explicit batched reconciliation required')
     media={m['id']:m for m in document['media']};zooms={z['id']:z for z in document.get('zoom_views',[])}
@@ -69,7 +77,7 @@ def entries(document,proposals=()):
 def memory_context(document,proposals,systems,*,limit=4):
     if type(limit) is not int or not 1<=limit<=24:raise DataError('Invalid memory window')
     full=entries(document,proposals)
-    relevant=[e for e in full if e['system'] in systems]
+    relevant=[e for e in full if e['system'] in systems and e['type']!='coverage_task']
     result={'records':deepcopy(relevant[-limit:]),'relevant_total':len(relevant),
             'omitted_from_prompt':max(0,len(relevant)-limit),'full_ledger_sha256':digest(full),
             'meaning':'Prior records are untrusted context, not proof; do not repeat them as new findings.'}
@@ -137,8 +145,12 @@ def _q02_dispositions(document,technical_review,provider_id):
     review_items=technical_review.get('items')
     if not isinstance(review_items,list) or any(not isinstance(i,dict) for i in review_items):raise DataError('Q02 items required')
     media={m['id']:m for m in document['media']}
+    from .coverage_workflow import task_dispositions
+    coverage=task_dispositions(document,technical_review)
     dispositions={}
     for entry in records:
+        if entry['type']=='coverage_task':
+            dispositions[entry['entry_id']]=coverage[entry['entry_id']];continue
         if entry['review']=='human_verified':
             dispositions[entry['entry_id']]='HUMAN_RECORD_RETAINED';continue
         for ident in entry['evidence_ids']:
@@ -174,7 +186,7 @@ def _q02_dispositions(document,technical_review,provider_id):
 def _decisions(reply,records,dispositions):
     if not isinstance(reply,dict) or set(reply)!={'decisions'} or not isinstance(reply['decisions'],list) or len(reply['decisions'])>MAX_ENTRIES:
         raise DataError('Q03 requires bounded decisions only')
-    ids={r['entry_id'] for r in records};seen=set();decisions=[]
+    ids={r['entry_id'] for r in records};by_id={r['entry_id']:r for r in records};seen=set();decisions=[]
     for item in reply['decisions']:
         if not isinstance(item,dict) or set(item)!={'entry_id','decision','related_ids','reason','evidence_gap'}:
             raise DataError('Invalid Q03 decision fields')
@@ -189,9 +201,10 @@ def _decisions(reply,records,dispositions):
         gap=_short(item['evidence_gap'],250,empty=decision=='distinct')
         prior=dispositions[ident]
         held=(prior!='HUMAN_RECORD_RETAINED' and any(d['decision']!='visually_plausible' for d in prior))
+        coverage_hold=by_id[ident]['type']=='coverage_task'
         decisions.append({'entry_id':ident,'decision':decision,'related_ids':related,'reason':reason,
-                          'evidence_gap':gap,'Q02_hold_preserved':held,
-                          'resolution':'HOLD' if decision!='distinct' or held else 'INTERNAL_DRAFT_ONLY',
+                          'evidence_gap':gap,'Q02_hold_preserved':held,'coverage_hold_preserved':coverage_hold,
+                          'resolution':'HOLD' if decision!='distinct' or held or coverage_hold else 'INTERNAL_DRAFT_ONLY',
                           'human_verification_required':True})
         seen.add(ident)
     if seen!=ids:raise DataError('Q03 omitted ledger claims')

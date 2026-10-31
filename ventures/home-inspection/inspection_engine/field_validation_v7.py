@@ -9,7 +9,7 @@ import hashlib
 import json
 import re
 
-from .serious_defect_benchmark import score_serious_defects, BenchmarkBlock
+from .serious_defect_benchmark import score_serious_defects, BenchmarkBlock, METRIC_REVIEW_PENDING
 
 HEX = re.compile(r'[0-9a-f]{64}\Z')
 REQUIRED_SCOPE = ('residential','commercial')
@@ -66,7 +66,8 @@ def evaluation_summary(cases:list[dict],detections:list[dict],protocol:dict|None
     except (CohortBlocked,BenchmarkBlock,KeyError,TypeError,ValueError) as e:
         return {'status':'BLOCKED','blockers':[str(e)],'field_detection_accuracy_verified':False,
                 'customer_release_allowed':False}
-    return {'status':'ADJUDICATION_EVIDENCE_AUDIT_REQUIRED' if score['status'].startswith('PILOT_') else 'BLOCKED',
+    return {'status':'ADJUDICATION_EVIDENCE_AUDIT_REQUIRED'
+            if score['status']==METRIC_REVIEW_PENDING and score['metric_thresholds_met'] is True else 'BLOCKED',
             'scoring':score,'identity_and_qualification_independently_authenticated':False,
             'field_detection_accuracy_verified':False,'customer_release_allowed':False,
             'next_required_evidence':['Secure underlying consent and inspection-case provenance',

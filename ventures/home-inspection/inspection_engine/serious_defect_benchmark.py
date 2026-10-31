@@ -13,6 +13,7 @@ HEX = re.compile(r'[0-9a-f]{64}\Z')
 SEVERITY = {'critical','major','moderate','minor'}
 SYSTEMS = {'site','foundation','subfloor','framing','exterior','roof','attic','interior',
            'electrical','plumbing','water_heating','hvac','crawlspace'}
+METRIC_REVIEW_PENDING='METRIC_THRESHOLDS_MET_EXTERNAL_REVIEW_PENDING'
 
 class BenchmarkBlock(ValueError): pass
 
@@ -44,6 +45,7 @@ def validate_real_holdout(cases: list[dict], detections:list[dict]) -> None:
             if not isinstance(lid,str) or (c['case_id'],lid) in labels:
                 raise BenchmarkBlock('Duplicate or invalid label ID')
             labels.add((c['case_id'],lid))
+    label_systems={(c['case_id'],l['label_id']):l['system'] for c in cases for l in c['labels']}
     seen=set()
     for d in detections:
         if not isinstance(d,dict) or d.get('case_id') not in known:
@@ -56,12 +58,13 @@ def validate_real_holdout(cases: list[dict], detections:list[dict]) -> None:
             raise BenchmarkBlock('Invalid predicted system')
         if d.get('matched_label_id') is not None and (d['case_id'],d['matched_label_id']) not in labels:
             raise BenchmarkBlock('Prediction matched nonexistent label')
-        if d.get('human_match_verified') not in (True,False):
+        if type(d.get('human_match_verified')) is not bool:
             raise BenchmarkBlock('Human matching decision required')
     # Every accepted one-to-one match must be independently reviewed.
     matched=[]
     for d in detections:
-        if d.get('matched_label_id') is not None and d.get('human_match_verified') is True:
+        if (d.get('matched_label_id') is not None and d.get('human_match_verified') is True
+            and d['system']==label_systems[(d['case_id'],d['matched_label_id'])]):
             matched.append((d['case_id'],d['matched_label_id']))
     if len(matched)!=len(set(matched)):
         raise BenchmarkBlock('A true defect can be counted once only')
@@ -72,9 +75,11 @@ def score_serious_defects(cases:list[dict], detections:list[dict]) ->dict:
     validate_real_holdout(cases,detections)
     case_by_id={c['case_id']:c for c in cases}
     label_by_key={(c['case_id'],l['label_id']):l for c in cases for l in c['labels']}
-    accepted={(d['case_id'],d['matched_label_id']) for d in detections
+    accepted_predictions={(d['case_id'],d['prediction_id']) for d in detections
               if d.get('matched_label_id') is not None and d['human_match_verified'] is True
               and d['system']==label_by_key[(d['case_id'],d['matched_label_id'])]['system']}
+    accepted={(d['case_id'],d['matched_label_id']) for d in detections
+              if (d['case_id'],d['prediction_id']) in accepted_predictions}
     misses=[]; per_system=defaultdict(lambda:{'total':0,'detected':0,'critical':0,'critical_missed':0})
     for key,l in label_by_key.items():
         row=per_system[l['system']];row['total']+=1
@@ -85,8 +90,8 @@ def score_serious_defects(cases:list[dict], detections:list[dict]) ->dict:
             if l['severity']=='critical':row['critical_missed']+=1
     false_positives=[]
     for d in detections:
-        key=(d['case_id'],d.get('matched_label_id'))
-        if key not in accepted:false_positives.append({'case_id':d['case_id'],'prediction_id':d['prediction_id'],'system':d['system']})
+        if (d['case_id'],d['prediction_id']) not in accepted_predictions:
+            false_positives.append({'case_id':d['case_id'],'prediction_id':d['prediction_id'],'system':d['system']})
     critical_total=sum(l['severity']=='critical' for l in label_by_key.values())
     critical_missed=[m for m in misses if m['severity']=='critical']
     major_missed=[m for m in misses if m['severity']=='major']
@@ -98,7 +103,8 @@ def score_serious_defects(cases:list[dict], detections:list[dict]) ->dict:
     match_precision=len(accepted)/(len(accepted)+len(false_positives)) if accepted or false_positives else None
     pass_gate=(cohort_adequate and critical_total>0 and not critical_missed
                and not major_missed and match_precision is not None and match_precision>=0.95)
-    return {'status':'METRIC_THRESHOLDS_MET_EXTERNAL_REVIEW_PENDING' if pass_gate else 'BLOCKED',
+    return {'status':METRIC_REVIEW_PENDING if pass_gate else 'BLOCKED',
+            'true_positive_predictions':len(accepted_predictions),'evaluated_predictions':len(detections),
             'cases':len(cases),'human_adjudicated_defects':len(label_by_key),
             'critical_defects':critical_total,'critical_recall':critical_recall,
             'critical_misses':critical_missed,'major_misses':major_missed,

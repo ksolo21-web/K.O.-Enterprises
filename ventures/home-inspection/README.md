@@ -60,3 +60,7 @@ Commands `python -m inspection_engine model-smoke` and `python -m scripts.run_lo
 ## Current local activation integration — v1.2
 
 The technical source is transferred and can be tested without any customer evidence. The v1.2 local activation wrapper is documented in [docs/LOCAL_ACTIVATION_v1.2.md](docs/LOCAL_ACTIVATION_v1.2.md). It includes operator-initiated Ollama start, explicit model downloads, synthetic live-gate execution and durable diagnostics. The local 159-test suite passed on 2026-10-31. **No live Ollama inference or qualified inspector validation has passed in this environment.** Earlier status lines above are historical checkpoints and do not override this one. `main` is unchanged by this branch's development.
+
+### Assigned hazard and specialty work (v1.5.1)
+
+Explicitly scoped residential/commercial cases now carry assigned hazard/specialty tasks from specialist prompts through source-bound Q02 assessments and the shared Q03 ledger. Missing views and physical checks stay visible as report holds; task assignments are not findings or proof of inspection completion. Benchmark scoring counts every unverified/wrong-system prediction, and numeric success advances only to external evidence audit. See [the repair checkpoint](docs/CHECKPOINT_v1.5.1_KNOWLEDGE_WORKFLOW_REPAIRS.md) for scope fields, photo labels, validation and remaining limits.

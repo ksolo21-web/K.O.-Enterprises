@@ -190,7 +190,7 @@ def coverage(document: dict) -> list[dict]:
 
 def blockers(document: dict) -> list[str]:
     b=[]
-    if document.get('adjudication_queue') is not None or any(
+    if document.get('adjudication_queue') is not None or document.get('agent_workflow') or 'coverage_work_orders' in document or any(
         item.get('model_proposal') for section in ('observations','findings') for item in document[section]):
         from .adjudication import build_queue,validate_record
         current=build_queue(document)
@@ -202,6 +202,8 @@ def blockers(document: dict) -> list[str]:
             else:
                 if held:
                     b.append('Q03 duplicate, conflict or evidence holds require resolution')
+    from .coverage_workflow import report_holds
+    b.extend(report_holds(document))
     for item in coverage(document):
         if item['open']:
             b.append(f"{item['title']}: visual coverage or system description not verified")

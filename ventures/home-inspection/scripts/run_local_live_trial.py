@@ -92,7 +92,7 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
                        'sampled_video_frames':sum(x.get('derived_from_id')=='V0001' for x in project['media']),
                        'video_sampling_is_exhaustive':False})
         reviewed={'items':[]}
-        if dossier['proposals']:
+        if dossier['proposals'] or staged.get('coverage_work_orders'):
             reviewed=review_specialist_dossier(staged,root,dossier,reviewer,
                         reviewer_id='Q02',provider_id='local-ollama:'+reviewer_model if live else 'controlled-test:'+reviewer_model)
             (root/'technical_review.json').write_text(json.dumps(reviewed,indent=2)+'\n')

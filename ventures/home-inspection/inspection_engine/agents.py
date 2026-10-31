@@ -28,6 +28,7 @@ from .failure_modes import build_failure_mode_brief
 from .inspection_policy import build_inspection_knowledge_brief, active_sop_context, policy_digest
 from .descriptors import REQUIRED_FEATURES
 from .adjudication import entries as ledger_entries, memory_context, require_new_candidate, build_queue
+from .coverage_workflow import AREA_ALIASES,inspection_scope,build_work_orders,attach_plan,task_ids_for
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,7 @@ AREA_SYSTEMS = {
     'furnace': ('hvac',), 'cooling': ('hvac',),
 }
 
+AREA_SYSTEMS.update(AREA_ALIASES)
 
 # Legacy generic format retained for importing clients. Live specialist entry
 # points use specialist_schema() for the narrower trusted work-order contract.
@@ -163,16 +165,18 @@ def plan_specialists(document: dict, media_ids: list[str] | None = None, *, max_
                          'systems':owned,'status':'READY','max_iterations':3,
                          'release_authority':False})
     if len(jobs)>max_jobs:raise DataError('Specialist work-order limit exceeded; use another batch')
+    coverage_plan=build_work_orders(document) if inspection_scope(document) else None
+    for job in jobs:
+        job['coverage_task_ids']=sorted({tid for system in job['systems']
+            for tid in task_ids_for(document,system,job['media_id'])})
     # M00 records embedded policy identity and unresolved scope; no approval.
     prop=document.get('property',{}) if isinstance(document.get('property'),dict) else {}
-    kind=prop.get('building_type')
-    kind=('residential' if kind=='residential_one_two_family' else
-          'commercial' if kind=='commercial_general' else 'unverified')
+    kind=inspection_scope(document) or 'unverified'
     sop_context=active_sop_context(kind,prop.get('inspection_date','2026-10-31'))
     return {'schema_version':1,'manager':'M00',
             'embedded_knowledge_policy_sha256':policy_digest(),
             'national_inspection_scope':sop_context,
-            'unmapped_residential_topic':'Fireplace/hearth requires separate inspector triage; not counted as covered',
+            'coverage_work_orders':coverage_plan,'coverage_scope_confirmed':coverage_plan is not None,
             'supervisors':['EVIDENCE-LEAD','TECH-LEAD','REPORT-LEAD'],
             'quality_reviewers':['Q01','Q02','Q03'],'release_gate':'QUALIFIED-HUMAN',
             'jobs':jobs,'unassigned_media':triage,'unreviewed_videos':pending_video,
@@ -273,6 +277,7 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
         if not selected.get('sha256'):
             raise DataError('Specialist evidence requires a recorded SHA-256 before model access')
     work=deepcopy(document)
+    if inspection_scope(work):work=attach_plan(work)
     dossier={'schema_version':1,'project_id':document['project_id'],'provider':provider_id,
             'created_utc':datetime.now(timezone.utc).isoformat(),
             'plan':plan,'proposals':[],'events':[],'tool_requests':[],
@@ -315,6 +320,8 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
             schema=specialist_schema(job['systems'],video_duration=context.get('video_duration_seconds'))
             memory=memory_context(work,dossier['proposals'],job['systems'])
             prior_records=ledger_entries(work,dossier['proposals'])
+            assigned_tasks=[t for t in build_work_orders(work)['tasks']
+                if t['system'] in job['systems'] and target['id'] in t['evidence_ids']] if inspection_scope(work) else []
             gaps=[{'feature_code':code,'task':('Describe exterior WALL finish only; roof material is not cladding. Material stays unknown without visible support.' if code=='cladding_type' else 'Describe this named feature only if visibly supported; otherwise leave it unknown.')}
                   for system,codes in allowed_feature_codes.items() for code in codes
                   if not any(e['system']==system and e.get('feature_code')==code for e in prior_records)]
@@ -344,15 +351,14 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 f'OUTPUT_JSON_SCHEMA: {json.dumps(schema,sort_keys=True)}\n'
                 f'OBSERVATION_MEMORY_JSON: {json.dumps(memory,sort_keys=True)}\n'
                 f'UNRECORDED_FEATURE_TASKS_JSON: {json.dumps(gaps,sort_keys=True)}\n'
+                f'ASSIGNED_COVERAGE_TASKS_JSON: {json.dumps(assigned_tasks,sort_keys=True)}\n'
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
             prompt += '\n' + build_knowledge_brief(job['systems']) + '\n'
             prompt += '\n' + build_failure_mode_brief(job['systems']) + '\n'
             # Original national/MI policy remains embedded; select only relevant cards per work order.
             policy_property=work.get('property',{})
             if not isinstance(policy_property,dict):policy_property={}
-            policy_type=policy_property.get('building_type')
-            policy_type=('residential' if policy_type=='residential_one_two_family' else
-                         'commercial' if policy_type=='commercial_general' else 'unverified')
+            policy_type=inspection_scope(work) or 'unverified'
             prompt += '\n' + build_inspection_knowledge_brief(
                 job['systems'],property_kind=policy_type,
                 inspection_date=policy_property.get('inspection_date','2026-10-31')) + '\n'
@@ -389,6 +395,7 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                          'description':proposed['description'],'review':'review_pending',
                          'evidence_id':target['id'],'evidence_sha256':sha256(safe_path(root,target['path'])),
                          'zoom_view_ids':proposed.get('zoom_view_ids',[]),
+                         'coverage_task_ids':task_ids_for(work,proposed['system'],target['id']),
                          'iteration':iteration+1,'invocation_id':invocation_id})
             result={'media_id':target['id'],'sha256':sha256(safe_path(root,target['path'])),
                     'source_video':target.get('derived_from_id'),
@@ -469,6 +476,7 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
     predictions={'schema_version':1,'provider':provider_id,'results':pred_results}
     # This validator is also the gate used by the original vision adapter.
     staged=apply_predictions(work,root,predictions)
+    if inspection_scope(staged):staged=attach_plan(staged)
     staged['adjudication_queue']=build_queue(staged)
     dossier['adjudication']={'role':'Q03','status':staged['adjudication_queue']['status'],
                             'ledger_snapshot_sha256':staged['adjudication_queue']['entry_snapshot_sha256'],
