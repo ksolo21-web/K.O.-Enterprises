@@ -22,6 +22,7 @@ from .vision import normalized_image, validate_proposal, apply_predictions, UNSU
 from .zoom import create_zoom_views, validate_bbox, verify_zoom_record
 from .video_photos import capture_video_photos
 from .source_of_truth import build_knowledge_brief
+from .knowledge_registry import safe_agent_reference_brief
 from .michigan_authority import build_michigan_brief
 from .failure_modes import build_failure_mode_brief
 from .inspection_policy import build_inspection_knowledge_brief, active_sop_context, policy_digest
@@ -362,6 +363,10 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 prompt += '\n' + build_michigan_brief(
                     job['systems'], property_context.get('inspection_date', ''),
                     property_context.get('building_type', 'unverified')) + '\n'
+            # v5: local, copyright-safe, jurisdiction-aware reference metadata;
+            # legal adoption and property-specific code findings are never inferred.
+            if isinstance(property_context,dict) and property_context.get('state') in ('MI','Michigan'):
+                prompt += '\n' + safe_agent_reference_brief(property_context,job['systems']) + '\n'
             if len(prompt.encode())>20000:raise DataError('Specialist prompt exceeds bounded context budget')
             response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
             candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])

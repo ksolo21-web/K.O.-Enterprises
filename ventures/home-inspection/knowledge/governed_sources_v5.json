@@ -1,0 +1,277 @@
+{
+  "schema_version": 5,
+  "jurisdiction": "Michigan",
+  "reviewed_on": "2026-10-31",
+  "copyright_policy": "Metadata and original short summaries only; proprietary full text not bundled. Access and machine-use permission must be independently verified.",
+  "sources": [
+    {
+      "id": "MI_LARA_RULES",
+      "publisher": "Michigan LARA",
+      "kind": "official_rules_index",
+      "rights": "government_reference",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "review_before_use"
+    },
+    {
+      "id": "MI_LARA_RES_STAY",
+      "publisher": "Michigan LARA",
+      "kind": "rule_status",
+      "rights": "government_reference",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts/rules/currently-open",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "injunction_check_required"
+    },
+    {
+      "id": "MI_LARA_JURISDICTION",
+      "publisher": "Michigan LARA",
+      "kind": "enforcement_directory",
+      "rights": "government_reference",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "live_jurisdiction_check_required"
+    },
+    {
+      "id": "MI_STATEWIDE_AHJ_20261006",
+      "publisher": "Michigan LARA",
+      "kind": "enforcement_directory",
+      "rights": "government_reference",
+      "url": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/bcc-media/ASD/StatewideJurisdictionList.pdf?hash=337442F1456C02A63BAAC230297C59FC&rev=fb9cb0fecd4342e4a084b1230a5ae28d",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "updated_periodically_verify_live"
+    },
+    {
+      "id": "MI_RES_CODE_2015",
+      "publisher": "Michigan LARA",
+      "kind": "code_adoption_index",
+      "rights": "official_index_only",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "requires_project_era_check"
+    },
+    {
+      "id": "MI_COMM_CODE_2021",
+      "publisher": "Michigan LARA",
+      "kind": "code_adoption_index",
+      "rights": "official_index_only",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "commercial"
+      ],
+      "status": "requires_project_era_check"
+    },
+    {
+      "id": "ICC_COPYRIGHT",
+      "publisher": "ICC",
+      "kind": "copyright_terms",
+      "rights": "metadata_only",
+      "url": "https://www.iccsafe.org/about/terms-of-use/",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "license_permission_required"
+    },
+    {
+      "id": "NFPA_COPYRIGHT",
+      "publisher": "NFPA",
+      "kind": "copyright_terms",
+      "rights": "metadata_only",
+      "url": "https://www.nfpa.org/en/Customer-Support/Terms-of-Use",
+      "systems": [
+        "electrical",
+        "hvac",
+        "interior"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "license_permission_required"
+    },
+    {
+      "id": "ASTM_COPYRIGHT",
+      "publisher": "ASTM",
+      "kind": "copyright_terms",
+      "rights": "metadata_only",
+      "url": "https://store.astm.org/restricted_copyright-and-permissions",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "commercial"
+      ],
+      "status": "license_permission_required"
+    },
+    {
+      "id": "ASTM_E2018_24",
+      "publisher": "ASTM",
+      "kind": "professional_standard",
+      "rights": "metadata_only",
+      "url": "https://store.astm.org/e2018-24.html",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "commercial"
+      ],
+      "status": "full_text_license_required"
+    },
+    {
+      "id": "INTERNACHI_SOP",
+      "publisher": "InterNACHI",
+      "kind": "professional_standard",
+      "rights": "official_online_reference",
+      "url": "https://www.nachi.org/sop.htm",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "contract_and_version_check_required"
+    },
+    {
+      "id": "ASHI_SOP",
+      "publisher": "ASHI",
+      "kind": "professional_standard",
+      "rights": "official_online_reference",
+      "url": "https://www.homeinspector.org/resources/standard-of-practice/",
+      "systems": [
+        "all"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "implementation_status_check_required"
+    },
+    {
+      "id": "CPSC_RECALL_API",
+      "publisher": "CPSC",
+      "kind": "recall_database",
+      "rights": "government_reference",
+      "url": "https://www.cpsc.gov/Recalls/CPSC-Recalls-Application-Program-Interface-API-Information",
+      "systems": [
+        "electrical",
+        "water_heating",
+        "hvac",
+        "plumbing",
+        "interior"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "exact_model_and_current_recall_check_required"
+    },
+    {
+      "id": "BW_AGE",
+      "publisher": "Bradford White",
+      "kind": "manufacturer_reference",
+      "rights": "official_index_only",
+      "url": "https://forthepro.bradfordwhite.com/determining-the-age-of-a-water-heater/",
+      "systems": [
+        "water_heating"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "model_serial_manual_review_required"
+    },
+    {
+      "id": "RHEEM_SERIAL",
+      "publisher": "Rheem",
+      "kind": "manufacturer_reference",
+      "rights": "official_index_only",
+      "url": "https://www.rheem.com/how-to-locate-and-read-your-rheem-water-heating-serial-numbers/",
+      "systems": [
+        "water_heating"
+      ],
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "status": "model_serial_manual_review_required"
+    },
+    {
+      "id": "CARRIER_LOOKUP",
+      "publisher": "Carrier",
+      "kind": "manufacturer_reference",
+      "rights": "official_index_only",
+      "url": "https://www.carrier.com/us/en/residential/homeowner-resources/warranty-lookup/",
+      "systems": [
+        "hvac"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "model_serial_manual_review_required"
+    },
+    {
+      "id": "GOODMAN_WARRANTY",
+      "publisher": "Goodman",
+      "kind": "manufacturer_reference",
+      "rights": "official_index_only",
+      "url": "https://www.goodmanmfg.com/resources/hvac-learning-center/warranty",
+      "systems": [
+        "hvac"
+      ],
+      "scope": [
+        "residential"
+      ],
+      "status": "model_serial_manual_review_required"
+    }
+  ],
+  "local_coverage": {
+    "municipal_amendments_verified": 0,
+    "manufacturer_manuals_licensed_and_indexed": 0,
+    "actual_expert_labeled_real_defect_cases": 0,
+    "full_icc_nfpa_astm_titles_licensed_for_machine_processing": 0
+  },
+  "manual_coverage": {
+    "status": "MODEL_EXACT_VERIFICATION_REQUIRED",
+    "public_official_portals_indexed": [
+      "Bradford White",
+      "Rheem",
+      "Carrier",
+      "Goodman"
+    ],
+    "local_complete_manuals": 0,
+    "full_model_family_coverage_verified": false
+  }
+}

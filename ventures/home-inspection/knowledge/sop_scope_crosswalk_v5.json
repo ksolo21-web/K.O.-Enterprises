@@ -1,0 +1,146 @@
+{
+  "schema_version": 5,
+  "purpose": "Reviewer-maintained gap inventory. Not a copy of any copyrighted SOP or a legal claim of exact inspection obligations.",
+  "reviewed_on": "2026-10-31",
+  "topics": [
+    {
+      "topic": "site grading drainage retaining and paving",
+      "systems": [
+        "site"
+      ],
+      "mapping": "present",
+      "verification": "site_scope_and_access_limitations"
+    },
+    {
+      "topic": "roof coverings and drainage",
+      "systems": [
+        "roof"
+      ],
+      "mapping": "present",
+      "verification": "contract_scope_and_current_sop_check"
+    },
+    {
+      "topic": "exterior cladding and flashing",
+      "systems": [
+        "exterior"
+      ],
+      "mapping": "present",
+      "verification": "contract_scope_and_current_sop_check"
+    },
+    {
+      "topic": "foundation and structural supports",
+      "systems": [
+        "foundation",
+        "framing",
+        "subfloor"
+      ],
+      "mapping": "present",
+      "verification": "access_and_limitations_documentation"
+    },
+    {
+      "topic": "crawlspace and basement",
+      "systems": [
+        "crawlspace"
+      ],
+      "mapping": "present",
+      "verification": "access_and_limitations_documentation"
+    },
+    {
+      "topic": "attic insulation and ventilation",
+      "systems": [
+        "attic"
+      ],
+      "mapping": "present",
+      "verification": "access_and_limitations_documentation"
+    },
+    {
+      "topic": "interior walls doors windows stairs",
+      "systems": [
+        "interior"
+      ],
+      "mapping": "present",
+      "verification": "contract_scope_and_current_sop_check"
+    },
+    {
+      "topic": "electrical distribution and visible hazards",
+      "systems": [
+        "electrical"
+      ],
+      "mapping": "present",
+      "verification": "no_code_compliance_claim"
+    },
+    {
+      "topic": "plumbing supply drains and fixtures",
+      "systems": [
+        "plumbing"
+      ],
+      "mapping": "present",
+      "verification": "contract_scope_and_current_sop_check"
+    },
+    {
+      "topic": "water heating and venting",
+      "systems": [
+        "water_heating"
+      ],
+      "mapping": "present",
+      "verification": "model_specific_manual_and_access_review"
+    },
+    {
+      "topic": "heating systems",
+      "systems": [
+        "hvac"
+      ],
+      "mapping": "present",
+      "verification": "actual_operations_require_inspector"
+    },
+    {
+      "topic": "cooling systems",
+      "systems": [
+        "hvac"
+      ],
+      "mapping": "present",
+      "verification": "actual_operations_require_inspector"
+    },
+    {
+      "topic": "fireplaces hearths chimneys",
+      "systems": [],
+      "mapping": "GAP",
+      "verification": "DEDICATED_COVERAGE_AND_REFERRAL_REQUIRED"
+    },
+    {
+      "topic": "attached garage garage doors and safety reverse",
+      "systems": [],
+      "mapping": "GAP",
+      "verification": "DEDICATED_COVERAGE_AND_OPERATIONAL_TEST_REQUIRED"
+    },
+    {
+      "topic": "smoke and CO alarms life-safety",
+      "systems": [
+        "interior"
+      ],
+      "mapping": "partial",
+      "verification": "TESTING_AND_LOCAL_REQUIREMENTS_NEED_HUMAN_CHECK"
+    },
+    {
+      "topic": "combustion appliance flues and gas",
+      "systems": [
+        "hvac",
+        "water_heating"
+      ],
+      "mapping": "partial",
+      "verification": "GAS_AND_CO_SAFETY_ESCALATION"
+    },
+    {
+      "topic": "pool spa and ancillary structures",
+      "systems": [],
+      "mapping": "scope_dependent_gap",
+      "verification": "EXPLICIT_CONTRACT_EXCLUSION_OR_SUPPLEMENTAL_SERVICE"
+    },
+    {
+      "topic": "commercial fire protection accessibility and elevators",
+      "systems": [],
+      "mapping": "commercial_specialty_gap",
+      "verification": "SEPARATE_PCA_SCOPE_AND_QUALIFIED_CONSULTANT"
+    }
+  ]
+}
