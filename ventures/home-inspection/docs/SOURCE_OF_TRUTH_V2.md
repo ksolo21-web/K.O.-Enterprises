@@ -9,7 +9,7 @@ The earlier manufacturer register was a loose list of five brand links, while th
 ## v2 data model and design
 
 - `knowledge/source_registry_v2.json`: 13 reviewed official entry points across professional SOPs, federal safety guidance, manufacturer data, recalls, and model-code context. Each entry has stable ID, title, publisher, authority class, applicability, covered systems, purpose, canonical HTTPS link, review date, current/pending status, original-content snapshot status, and *never-a-case-fact* flags. Index covers all 13 inspection systems. No copyrighted full manuals or proprietary standards text is copied into the repository.
-- `inspection_engine/source_of_truth.py`: deterministic catalog validation, safe bounded retrieval, prompts that disclose the source's limits, and `assess_claim()` decisions that never silently certify a property, a jurisdictional code rule or a technical finding.
+- `inspection_engine/source_of_truth.py`: deterministic catalog validation, protected cached references, safe bounded retrieval, prompts that disclose the source's limits, on-disk case-evidence hashing, and `assess_claim()` decisions that never silently certify a property, a jurisdictional code rule or a technical finding.
 - `scripts/knowledge_audit.py`: offline reproducible report of registry integrity, coverage, pending standards, references needing re-review, and the SHA-256 of the current catalog.
 - `tests/test_source_of_truth.py`: positive and adversarial provenance tests. All source documents remain independent of case photographs and videos.
 
@@ -66,3 +66,7 @@ Source links are contained in `knowledge/source_registry_v2.json`, independently
 ## Observable system knowledge (new)
 
 `knowledge/system_guidance_v2.json` adds a curated 13-system, 46-feature-code vocabulary tied exactly to `inspection_engine.descriptors.REQUIRED_FEATURES`, with (a) visible observation examples, (b) what still photographs cannot establish, (c) safe noninvasive evidence-capture/review guidance and (d) current SOP reference IDs. `build_knowledge_brief(systems)` supplies a bounded, non-diagnostic reference context on each specialist work order; tests compare all 46 codes to the live engine and require that the prompt remains review-pending. This prevents feature taxonomy drift, but **does not** prove the model obeyed its prompt or correctly identified a defect. Human adjudication is required.
+
+### Critical v2 internal-review correction
+
+`assess_claim()` now refuses a model-written `source_verified: true` flag without a path inside the trusted case root and a matching SHA-256 of an actual bounded media file. This is a prerequisite, not proof that the image interpretation is true. The source catalog and guidance loaders return isolated copies, preventing callers from changing subsequent reference retrievals through an in-memory mutation. This behavior is covered by adversarial tests.

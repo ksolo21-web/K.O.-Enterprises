@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import sys
 import unittest
+import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('inspection_source_of_truth_under_test',ROOT/'inspection_engine/source_of_truth.py')
@@ -98,58 +99,82 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(kb.catalog_digest(),hashlib.sha256(kb.CATALOG.read_bytes()).hexdigest())
 
 class ClaimTests(unittest.TestCase):
+    def setUp(self):
+        tmp=tempfile.TemporaryDirectory(prefix='kb_v2_case_')
+        self.addCleanup(tmp.cleanup)
+        self.root=Path(tmp.name)
+        (self.root/'case_photo.png').write_bytes(b'synthetic photo-bytes for custody gate')
+        self.case={'media_id':'P0002','media_sha256':hashlib.sha256((self.root/'case_photo.png').read_bytes()).hexdigest(),
+                   'source_verified':True,'path':'case_photo.png'}
     def test_valid_observed_feature_stays_provisional(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'PROVISIONAL_HUMAN_REVIEW')
         self.assertFalse(r['customer_release_allowed']);self.assertFalse(r['verified_defect'])
     def test_missing_source_media_blocks(self):
         r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']})
         self.assertEqual(r['status'],'BLOCKED')
-    def test_hash_missing_or_unverified_blocks(self):
-        c=dict(CASE,media_sha256='not a digest');r=kb.assess_claim({'kind':'potential_concern','system':'foundation','source_ids':['INTERNACHI_RESIDENTIAL_SOP']},case_evidence=c)
+    def test_forged_source_verified_flag_without_case_file_blocks(self):
+        c=dict(self.case)
+        c['path']='missing.png'
+        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=c,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
-        c=dict(CASE,source_verified=False);r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=c)
+    def test_tampered_case_bytes_block(self):
+        (self.root/'case_photo.png').write_bytes(b'changed')
+        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=self.case,case_root=self.root)
+        self.assertEqual(r['status'],'BLOCKED')
+    def test_path_escape_blocks(self):
+        c=dict(self.case,path='../fake.png')
+        r=kb.assess_claim({'kind':'potential_concern','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=c,case_root=self.root)
+        self.assertEqual(r['status'],'BLOCKED')
+    def test_reference_results_cannot_poison_catalog_cache(self):
+        original=kb.reference_sources(['foundation'])[0]
+        original['publisher']='EVIL_OVERRIDE'
+        self.assertNotEqual(kb.reference_sources(['foundation'])[0]['publisher'],'EVIL_OVERRIDE')
+    def test_hash_missing_or_unverified_blocks(self):
+        c=dict(self.case,media_sha256='not a digest');r=kb.assess_claim({'kind':'potential_concern','system':'foundation','source_ids':['INTERNACHI_RESIDENTIAL_SOP']},case_evidence=c)
+        self.assertEqual(r['status'],'BLOCKED')
+        c=dict(self.case,source_verified=False);r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_CURRENT_SOP']},case_evidence=c)
         self.assertEqual(r['status'],'BLOCKED')
     def test_generic_guidance_not_sufficient_for_a_condition(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['EPA_MOISTURE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['EPA_MOISTURE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_manufacturer_code_stays_unverified(self):
-        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','brand':'Bradford White','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','brand':'Bradford White','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'CODE_ONLY_UNVERIFIED')
         self.assertFalse(r['customer_release_allowed'])
     def test_generic_warranty_page_cannot_verify_age(self):
-        r=kb.assess_claim({'kind':'manufacture_date_code','system':'hvac','source_ids':['CARRIER_WARRANTY']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'manufacture_date_code','system':'hvac','source_ids':['CARRIER_WARRANTY']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_installation_date_never_inferred(self):
-        r=kb.assess_claim({'kind':'installation_date','system':'water_heating','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'installation_date','system':'water_heating','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_remaining_life_not_guessed(self):
-        r=kb.assess_claim({'kind':'remaining_service_life','system':'hvac','source_ids':['ASHI_CURRENT_SOP']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'remaining_service_life','system':'hvac','source_ids':['ASHI_CURRENT_SOP']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_code_compliance_cannot_be_inferred_from_doe(self):
-        r=kb.assess_claim({'kind':'code_compliance','system':'roof','source_ids':['DOE_CODE_ADOPTION']},case_evidence=CASE,
+        r=kb.assess_claim({'kind':'code_compliance','system':'roof','source_ids':['DOE_CODE_ADOPTION']},case_evidence=self.case,case_root=self.root,
                           jurisdiction_receipt={'jurisdiction':'Michigan'})
         self.assertEqual(r['status'],'BLOCKED');self.assertFalse(r['code_compliance_verified'])
     def test_recall_index_not_proof_specific_serial(self):
-        r=kb.assess_claim({'kind':'recall_confirmed','system':'water_heating','source_ids':['CPSC_RECALL_API']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'recall_confirmed','system':'water_heating','source_ids':['CPSC_RECALL_API']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_unseen_risk_cannot_be_diagnosed_by_image(self):
-        r=kb.assess_claim({'kind':'hazard_presence','system':'foundation','source_ids':['EPA_RADON']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'hazard_presence','system':'foundation','source_ids':['EPA_RADON']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_pending_standard_cannot_substitute_current(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_PENDING_2026']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'foundation','source_ids':['ASHI_PENDING_2026']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_cross_system_source_blocks(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_unknown_source_id_blocks(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':['NONEXISTENT']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':['NONEXISTENT']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_wrong_brand_cannot_borrow_date_decoder(self):
-        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','brand':'Rheem','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','brand':'Rheem','source_ids':['BRADFORD_WHITE_DATE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_date_code_requires_brand(self):
-        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','source_ids':['RHEEM_WATER_DATE']},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'manufacture_date_code','system':'water_heating','source_ids':['RHEEM_WATER_DATE']},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
     def test_scope_limitation_cannot_use_mold_guide(self):
         r=kb.assess_claim({'kind':'scope_limitation','system':'crawlspace','source_ids':['EPA_MOISTURE']})
@@ -159,7 +184,7 @@ class ClaimTests(unittest.TestCase):
         self.assertEqual(r['status'],'PROVISIONAL_HUMAN_REVIEW')
         self.assertFalse(r['customer_release_allowed'])
     def test_sources_cannot_be_omitted(self):
-        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':[]},case_evidence=CASE)
+        r=kb.assess_claim({'kind':'observed_feature','system':'roof','source_ids':[]},case_evidence=self.case,case_root=self.root)
         self.assertEqual(r['status'],'BLOCKED')
 
 if __name__=='__main__':unittest.main()

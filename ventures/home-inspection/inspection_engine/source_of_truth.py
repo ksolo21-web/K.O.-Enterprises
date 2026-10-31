@@ -119,8 +119,13 @@ def validate_catalog(catalog: dict) -> dict:
 
 
 @lru_cache(maxsize=1)
-def load_catalog() -> dict:
+def _catalog_cached() -> dict:
     return validate_catalog(json.loads(CATALOG.read_text(encoding='utf-8')))
+
+
+def load_catalog() -> dict:
+    # Return an isolated copy: one caller cannot silently mutate trusted memory.
+    return copy.deepcopy(_catalog_cached())
 
 
 def reference_sources(systems, purpose: str | None=None, *, include_pending=False) -> list[dict]:
@@ -162,12 +167,14 @@ def build_reference_brief(systems, limit: int=4) -> str:
 
 
 def assess_claim(claim: dict, *, case_evidence: dict | None=None,
+                 case_root: Path | None=None,
                  jurisdiction_receipt: dict | None=None) -> dict:
     """Conservative auditable claim gate: never upgrades a claim to verified or release-ready.
 
     claim: {kind,system,source_ids,description}.
-    case_evidence: {media_id,media_sha256,source_verified:True}, already
-    checked by the calling evidence-custody subsystem.
+    case_evidence: {media_id,media_sha256,source_verified:True,path}.
+    The claimed SHA must match an existing file under case_root. A provided
+    source_verified boolean alone is never enough to pass the gate.
     """
     base={'status':'BLOCKED','reason':'','human_review_required':True,
           'customer_release_allowed':False,'verified_defect':False,
@@ -206,7 +213,30 @@ def assess_claim(claim: dict, *, case_evidence: dict | None=None,
         if (not isinstance(case_evidence,dict) or not isinstance(case_evidence.get('media_id'),str)
             or not SHA_RE.fullmatch(str(case_evidence.get('media_sha256','')))
             or case_evidence.get('source_verified') is not True):
-            return dict(base,reason='Authenticated original case evidence required')
+            return dict(base,reason='Recorded original case evidence required')
+        # Never trust a model-written "source_verified" flag by itself. Verify
+        # an actual on-disk file is inside the case root and matches its digest.
+        rel=case_evidence.get('path')
+        if not isinstance(rel,str) or not rel or case_root is None:
+            return dict(base,reason='Evidence file path and trusted case root are required')
+        try:
+            root=Path(case_root).resolve(strict=True)
+            path=(root/rel).resolve(strict=True)
+            if (not path.is_relative_to(root) or not path.is_file()
+                or not rel.lower().endswith(('.png','.jpg','.jpeg','.webp','.mp4','.mov'))):
+                return dict(base,reason='Evidence must be an approved media file inside the case root')
+            limit=500*1024*1024 if path.suffix.lower() in ('.mp4','.mov') else 35*1024*1024
+            if path.stat().st_size>limit:
+                return dict(base,reason='Evidence file exceeds bounded inspection media size')
+            h=hashlib.sha256()
+            with path.open('rb') as stream:
+                for chunk in iter(lambda:stream.read(1024*1024),b''):
+                    h.update(chunk)
+            digest=h.hexdigest()
+            if digest!=case_evidence['media_sha256']:
+                return dict(base,reason='Evidence content SHA-256 mismatch')
+        except (OSError,ValueError):
+            return dict(base,reason='Cannot verify the original case evidence file')
     if kind=='manufacture_date_code':
         manufacturer_sources=[r for r in selected if r['purpose']=='manufacture_date_code']
         if len(manufacturer_sources)!=1:
@@ -237,7 +267,7 @@ GUIDANCE = Path(__file__).resolve().parents[1] / 'knowledge' / 'system_guidance_
 
 
 @lru_cache(maxsize=1)
-def load_guidance() -> dict:
+def _guidance_cached() -> dict:
     """Validate curated, non-diagnostic system guidance against the source registry."""
     data=json.loads(GUIDANCE.read_text(encoding='utf-8'))
     if not isinstance(data,dict) or data.get('schema_version')!=2:
@@ -263,6 +293,10 @@ def load_guidance() -> dict:
         if not isinstance(refs,list) or len(refs)!=len(set(refs)) or not refs or any(s not in known_sources for s in refs):
             raise KnowledgeError('System guidance references unknown sources')
     return copy.deepcopy(data)
+
+
+def load_guidance() -> dict:
+    return copy.deepcopy(_guidance_cached())
 
 
 def build_knowledge_brief(systems, *, limit: int=4) -> str:
