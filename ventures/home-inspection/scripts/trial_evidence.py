@@ -141,6 +141,9 @@ def tool_review_evidence(document: dict, dossier: dict, review: dict,
                    and any(i.get('source_media_id')==ident
                            and i.get('source_sha256')==media.get(ident,{}).get('sha256')
                            and i.get('proposal_description')==p.get('description')
+                           and i.get('proposal_feature_code')==p.get('feature_code')
+                           and i.get('proposal_location')==p.get('location')
+                           and i.get('proposal_bbox')==p.get('bbox')
                            and i.get('work_order')==p.get('work_order')
                            and (zoom_id is None or i.get('zoom_id')==zoom_id) for i in items)
                    for p in proposals)

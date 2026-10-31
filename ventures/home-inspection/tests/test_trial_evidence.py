@@ -152,3 +152,8 @@ class ToolReviewLineageTests(unittest.TestCase):
     def test_different_source_video_is_not_temporal_progress(self):
         self.doc['media'][1]['derived_from_id']='V2'
         self.assertEqual(self.evidence()['temporally_distinct_reviewed_video_still_ids'],[])
+
+    def test_mismatched_feature_code_in_review_does_not_verify_zoom(self):
+        self.dossier['proposals'][0]['feature_code']='cladding_type'
+        self.review['items'][0]['proposal_feature_code']='flashing_openings'
+        self.assertEqual(self.evidence()['reviewed_zoom_ids'],[])

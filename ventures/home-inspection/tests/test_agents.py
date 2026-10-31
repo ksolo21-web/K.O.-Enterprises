@@ -96,6 +96,24 @@ class SpecialistTests(unittest.TestCase):
             execute_specialists(self.doc,self.root,lambda i,p:answer,media_ids=['P0001'])
         self.assertEqual(self.doc['observations'],[])
 
+    def test_exact_a08_repeated_candidates_block_before_any_tool_execution(self):
+        path=Path(__file__).resolve().parents[1]/'docs/evidence/A08_REJECTED_WRITER_EVIDENCE.json'
+        evidence=json.loads(path.read_text())
+        raw=evidence['files']['request/response.json']['transport_response_untrusted']['response']
+        answer=json.loads(raw)
+        self.assertEqual(len(answer['candidates']),12)
+        with self.assertRaisesRegex(DataError,'Duplicate indistinguishable'):
+            execute_specialists(self.doc,self.root,lambda i,p:copy.deepcopy(answer),media_ids=['P0001'])
+        self.assertFalse((self.root/'zoom_views').exists())
+        self.assertEqual(self.doc['observations'],[])
+
+    def test_separate_locations_and_crop_regions_are_not_silently_merged(self):
+        first=self._feature(bbox=[.1,.1,.3,.3]);second=dict(first,location='Rear wall',bbox=[.6,.6,.9,.9])
+        updated,dossier=execute_specialists(self.doc,self.root,lambda i,p:{
+            'candidates':[first,second],'requests':[]},media_ids=['P0001'])
+        self.assertEqual(len(updated['observations']),2)
+        self.assertEqual([p['feature_code'] for p in dossier['proposals']],['cladding_type']*2)
+
     def test_schema_opt_in_reaches_actual_ollama_request(self):
         from unittest.mock import patch
         from inspection_engine.vision import ollama_local

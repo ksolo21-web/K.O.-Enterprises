@@ -208,6 +208,8 @@ def _review_dossier(dossier:dict,doc:dict,root:Path)->dict:
             failures_q01.append('Proposal source SHA mismatch: '+str(ident))
         if item.get('system') not in ROLE_BY_ID[item['assigned_to']].systems:
             failures_q02.append('Out-of-authority proposal')
+        if item.get('type')=='feature' and item.get('feature_code') not in REQUIRED_FEATURES.get(item.get('system'),()):
+            failures_q02.append('Missing or invalid dossier feature code')
         if item.get('review')!='review_pending':
             failures_q02.append('Specialist tried to approve own work')
         if UNSUPPORTED_ASSURANCES.search(item.get('description','')):
@@ -300,6 +302,8 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 'Strictly observe only visible pixels. No concealed structure, operation, safety, code or defect-free conclusions. '
                 'Return JSON with candidates and requests only. For type=feature, choose feature_code exactly from the listed system map; '
                 'feature_code is a REQUIRED separate field; description must describe visible evidence in plain language, not repeat the feature code. '
+                'Describe each distinct observation once; do not fill the array with repeated claims. '
+                'The description must address the named feature itself; a permitted code does not make an unrelated description valid. '
                 'for type=potential_concern, omit feature_code. Never create new feature codes or claim a concealed detail. '
                 'If no permitted feature is visibly supported, return no feature candidate. '
                 'Candidate bboxes are normalized to the CURRENT view. '
@@ -327,6 +331,8 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 mapped.append(proposed)
                 dossier['proposals'].append({'assigned_to':role.id,'work_order':job['id'],
                          'system':proposed['system'],'type':proposed['type'],
+                         'feature_code':proposed.get('feature_code'),
+                         'location':proposed.get('location'),'bbox':proposed.get('bbox'),
                          'description':proposed['description'],'review':'review_pending',
                          'evidence_id':target['id'],'evidence_sha256':sha256(safe_path(root,target['path'])),
                          'zoom_view_ids':proposed.get('zoom_view_ids',[]),

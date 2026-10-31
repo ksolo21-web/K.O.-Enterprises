@@ -61,6 +61,61 @@ class CriticStageTest(unittest.TestCase):
             review_specialist_dossier(self.staged,self.root,self.dossier,lambda i,p:{},
                               reviewer_id='Q02',provider_id='writer-v1')
 
+    def _feature_dossier(self):
+        return execute_specialists(self.project,self.root,lambda i,p:{'candidates':[
+            {'type':'feature','system':'exterior','feature_code':'cladding_type',
+             'description':'Visible illustrative facade, material unknown','status':'partially_observed'}],
+            'requests':[]},media_ids=['P0001'],provider_id='writer-v1')
+
+    def test_feature_code_reaches_Q02_claim_and_review_record(self):
+        staged,dossier=self._feature_dossier();seen=[]
+        def reviewer(image,prompt):
+            seen.append(json.loads(prompt.split('CLAIM DATA: ')[1]))
+            self.assertIn('description addresses its assigned system and feature_code',prompt)
+            return {'decision':'insufficient_evidence','reason':'Material not established',
+                    'missing_evidence':'Inspector close-up and material verification'}
+        review=review_specialist_dossier(staged,self.root,dossier,reviewer,reviewer_id='Q02',provider_id='critic-v2')
+        self.assertEqual(seen[0]['feature_code'],'cladding_type')
+        self.assertEqual(review['items'][0]['proposal_feature_code'],'cladding_type')
+        self.assertFalse(review['customer_release_allowed'])
+
+    def test_changed_allowed_feature_code_cannot_change_Q02_claim(self):
+        staged,dossier=self._feature_dossier();dossier['proposals'][0]['feature_code']='flashing_openings';calls=[]
+        with self.assertRaisesRegex(DataError,'not present'):
+            review_specialist_dossier(staged,self.root,dossier,lambda i,p:calls.append(1),
+                                      reviewer_id='Q02',provider_id='critic-v2')
+        self.assertEqual(calls,[])
+
+    def test_missing_feature_code_in_legacy_feature_dossier_fails_before_review(self):
+        staged,dossier=self._feature_dossier();dossier['proposals'][0].pop('feature_code');calls=[]
+        with self.assertRaisesRegex(DataError,'gate'):
+            review_specialist_dossier(staged,self.root,dossier,lambda i,p:calls.append(1),
+                                      reviewer_id='Q02',provider_id='critic-v2')
+        self.assertEqual(calls,[])
+
+    def test_distinct_locations_reach_Q02_and_remain_bound_to_staged_evidence(self):
+        candidate={'type':'feature','system':'exterior','feature_code':'cladding_type',
+                   'description':'Visible illustrative facade, material unknown','status':'partially_observed',
+                   'location':'Front wall','bbox':[.1,.1,.3,.3]}
+        second=dict(candidate,location='Rear wall',bbox=[.6,.6,.9,.9])
+        staged,dossier=execute_specialists(self.project,self.root,lambda i,p:{
+            'candidates':[candidate,second],'requests':[]},media_ids=['P0001'],provider_id='writer-v1')
+        seen=[]
+        def review(image,prompt):
+            seen.append(json.loads(prompt.split('CLAIM DATA: ')[1]))
+            return {'decision':'insufficient_evidence','reason':'Material unverified',
+                    'missing_evidence':'Qualified inspection and new angle'}
+        result=review_specialist_dossier(staged,self.root,dossier,review,reviewer_id='Q02',provider_id='critic-v2')
+        self.assertEqual([c['location'] for c in seen],['Front wall','Rear wall'])
+        self.assertEqual([c['candidate_source_bbox'] for c in seen],[candidate['bbox'],second['bbox']])
+        self.assertEqual(len(result['items']),2)
+        for key,wrong in [('location','Different location'),('bbox',[0,0,1,1])]:
+            bad=copy.deepcopy(dossier);bad['proposals'][0][key]=wrong;calls=[]
+            with self.assertRaisesRegex(DataError,'not present'):
+                review_specialist_dossier(staged,self.root,bad,lambda i,p:calls.append(1),
+                                          reviewer_id='Q02',provider_id='critic-v2')
+            self.assertEqual(calls,[])
+
     def test_specialist_cannot_review_itself(self):
         with self.assertRaisesRegex(DataError,'Specialist'):
             review_specialist_dossier(self.staged,self.root,self.dossier,lambda i,p:{},

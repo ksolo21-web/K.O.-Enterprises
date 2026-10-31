@@ -104,7 +104,7 @@ def validate_proposal(answer:dict,media:dict)->list[dict]:
     if not isinstance(answer,dict) or not isinstance(answer.get('candidates'),list):
         raise DataError('Vision response requires candidates array')
     if len(answer['candidates'])>12:raise DataError('Too many proposed observations')
-    accepted=[]
+    accepted=[];seen=set()
     for cand in answer['candidates']:
         if not isinstance(cand,dict):raise DataError('Candidate must be object')
         kind=cand.get('type');system=cand.get('system'); status=cand.get('status')
@@ -130,11 +130,15 @@ def validate_proposal(answer:dict,media:dict)->list[dict]:
             # Can't raise a possible defect with no visible supporting indication.
             continue
         # Human must independently verify ANY descriptive detail before release.
-        accepted.append({'type':kind,'system':system,'status':('unknown' if status=='unknown' else 'partially_observed'),
+        proposal={'type':kind,'system':system,'status':('unknown' if status=='unknown' else 'partially_observed'),
                          'description':description,'feature_code':feature_code or None,
                          'location':location,'bbox':bb,'evidence_ids':[media['id']],
                          'review':'review_pending','interpretation':'model_proposal_not_verified',
-                         'specialist_route':('T07' if system in {'plumbing','water_heating'} else 'T08' if system=='hvac' else system)})
+                         'specialist_route':('T07' if system in {'plumbing','water_heating'} else 'T08' if system=='hvac' else system)}
+        fingerprint=json.dumps(proposal,sort_keys=True,allow_nan=False)
+        if fingerprint in seen:
+            raise DataError('Duplicate indistinguishable model candidates rejected')
+        seen.add(fingerprint);accepted.append(proposal)
     return accepted
 
 
