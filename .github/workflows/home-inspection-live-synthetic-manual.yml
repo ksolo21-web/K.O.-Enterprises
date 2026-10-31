@@ -1,0 +1,113 @@
+# PROPOSED MANUAL-ONLY workflow, development branch. NOT authorized to run while
+# PAUSE_AUTONOMY exists. Never processes customer media or production credentials.
+name: Home Inspection - Synthetic Local Vision Trial (Manual Only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      authorize_synthetic_only:
+        description: 'Type SYNTHETIC_ONLY to confirm no customer media or release activity'
+        required: true
+        type: string
+      ollama_installer_sha256:
+        description: 'Expected SHA-256 of reviewed official Ollama install script (required for execution)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  local-vision-proof:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/home-inspection-development' &&
+      github.repository == 'ksolo21-web/K.O.-Enterprises' &&
+      inputs.authorize_synthetic_only == 'SYNTHETIC_ONLY'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
+    env:
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_KEEP_ALIVE: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+      OLLAMA_NUM_PARALLEL: '1'
+      OLLAMA_MAX_LOADED_MODELS: '1'
+    steps:
+      - name: Check out source (no persisted GitHub credentials)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fail closed on company autonomy pause and unapproved content
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -e ../../PAUSE_AUTONOMY ]]; then
+            echo 'BLOCKED: PAUSE_AUTONOMY is active; owner governance required before external compute.' >&2
+            exit 1
+          fi
+          if [[ "${GITHUB_REF}" != 'refs/heads/home-inspection-development' ]]; then
+            echo 'BLOCKED: unexpected branch' >&2
+            exit 1
+          fi
+          if [[ -e examples/customer_data || -e private_case || -e customer_data ]]; then
+            echo 'BLOCKED: unexpected customer-media path' >&2
+            exit 1
+          fi
+          echo 'Governance gate passed; synthetic inputs only.'
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install Python requirements and verify FFmpeg
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -r requirements.txt
+          command -v ffmpeg || { echo 'FFmpeg missing from runner image' >&2; exit 1; }
+          python -m scripts.generate_public_fixtures
+          python -m unittest discover -s tests -q
+      - name: Download and verify Ollama installer, then start CPU loopback service
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Operator-supplied, independently reviewed SHA-256 is mandatory.
+          expected="${{ inputs.ollama_installer_sha256 }}"
+          if [[ ! "$expected" =~ ^[0-9a-fA-F]{64}$ ]]; then
+            echo 'BLOCKED: Ollama installer SHA-256 not supplied in valid format' >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --location https://ollama.com/install.sh -o "$RUNNER_TEMP/install-ollama.sh"
+          printf '%s  %s\n' "$expected" "$RUNNER_TEMP/install-ollama.sh" | sha256sum --check --status || {
+            echo 'BLOCKED: downloaded Ollama installer fails authorized SHA-256 check' >&2
+            exit 1
+          }
+          sh "$RUNNER_TEMP/install-ollama.sh"
+          nohup ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for i in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:11434/api/tags > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl --fail --silent http://127.0.0.1:11434/api/tags > /dev/null
+          ollama pull qwen2.5vl:3b
+          ollama pull granite3.2-vision:2b
+      - name: Run actual image-conditioned specialist and Q02 gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.run_vision_acceptance \
+            --writer-model qwen2.5vl:3b \
+            --review-model granite3.2-vision:2b \
+            --out-dir local-results/github-actions-synthetic-live
+      - name: Publish non-customer acceptance artifacts even on blocked model outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: home-inspection-synthetic-vision-evidence
+          path: ventures/home-inspection/local-results/github-actions-synthetic-live/
+          if-no-files-found: ignore
+          retention-days: 3
