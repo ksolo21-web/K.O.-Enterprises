@@ -28,6 +28,20 @@ class BenchmarkTests(unittest.TestCase):
     def evaluate(self):return evaluate(self.doc,self.root,self.truth,self.pred,minimum_cases=1)
     def test_exact_matching(self):
         r=self.evaluate();self.assertEqual((r['tp'],r['fp'],r['fn']), (1,0,0));self.assertFalse(r['customer_release_allowed'])
+    def test_overlapping_boxes_maximize_valid_detections(self):
+        # The best individual IoU consumes the only match for the second
+        # defect. Maximum-cardinality matching finds both valid detections.
+        self.truth['labels'][0]['bbox']=[.388,.132,.616,.407]
+        other=dict(self.truth['labels'][0])
+        other['bbox']=[.495,.168,.692,.298]
+        self.truth['labels'].append(other)
+        self.pred['proposals'][0]['bbox']=[.344,.142,.671,.384]
+        other_proposal=dict(self.pred['proposals'][0])
+        other_proposal['bbox']=[.252,.262,.649,.417]
+        self.pred['proposals'].append(other_proposal)
+        result=self.evaluate()
+        self.assertEqual((result['tp'],result['fp'],result['fn']),(2,0,0))
+
     def test_mislocated(self):
         self.pred['proposals'][0]['bbox']=[.5,.5,.7,.7]
         r=self.evaluate();self.assertEqual((r['tp'],r['fp'],r['fn'],r['critical_misses']),(0,1,1,1))

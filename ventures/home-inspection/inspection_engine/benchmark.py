@@ -4,7 +4,7 @@ This measures exact issue-code and spatial agreement, not professional competenc
 Only a qualified inspector can approve findings; these scores never release reports.
 """
 from __future__ import annotations
-from collections import Counter
+from collections import Counter, deque
 from pathlib import Path
 from typing import Any
 import math
@@ -94,17 +94,48 @@ def evaluate(document: dict, root: Path, ground_truth: dict, predictions: dict,
         raise DataError('Duplicate ground truth label')
     if len({(x['media_id'],x['system'],x['issue_code'],x['bbox']) for x in proposed})!=len(proposed):
         raise DataError('Duplicate identical proposal')
-    # One-to-one matching by best spatial agreement within exact issue category.
-    pairs=[]
+    # Maximum-cardinality one-to-one matching. A greedy choice of the highest
+    # IoU can incorrectly count two genuine detections as one when regions
+    # overlap. Prefer high-IoU edges, but use augmenting paths to maximize TP.
+    edges = {i: [] for i in range(len(truth))}
     for i,g in enumerate(truth):
         for j,p in enumerate(proposed):
             if all(g[k]==p[k] for k in ('media_id','system','issue_code')):
-                score=_iou(g['bbox'],p['bbox'])
-                if score >= iou_threshold: pairs.append((score,i,j))
-    matched_g=set();matched_p=set()
-    for _,i,j in sorted(pairs,key=lambda t:(-t[0],t[1],t[2])):
-        if i not in matched_g and j not in matched_p:
-            matched_g.add(i);matched_p.add(j)
+                score = _iou(g['bbox'], p['bbox'])
+                if score >= iou_threshold:
+                    edges[i].append((score,j))
+        edges[i].sort(key=lambda item: (-item[0],item[1]))
+    adjacency={i:[j for _,j in pairs] for i,pairs in edges.items()}
+    matched_prediction={}  # proposed index -> ground-truth index
+    matched_ground={}      # ground-truth index -> proposed index
+    for first in range(len(truth)):
+        queue=deque([first]); visited_ground={first}; predecessor={}
+        free_prediction=None
+        while queue and free_prediction is None:
+            i=queue.popleft()
+            for j in adjacency[i]:
+                if j in predecessor:
+                    continue
+                predecessor[j]=i
+                if j not in matched_prediction:
+                    free_prediction=j
+                    break
+                next_i=matched_prediction[j]
+                if next_i not in visited_ground:
+                    visited_ground.add(next_i)
+                    queue.append(next_i)
+        if free_prediction is not None:
+            j=free_prediction
+            while True:
+                i=predecessor[j]
+                previous_j=matched_ground.get(i)
+                matched_prediction[j]=i
+                matched_ground[i]=j
+                if previous_j is None:
+                    break
+                j=previous_j
+    matched_g=set(matched_ground)
+    matched_p=set(matched_prediction)
     tp=len(matched_g);fp=len(proposed)-len(matched_p);fn=len(truth)-tp
     missed=Counter(x['severity'] for i,x in enumerate(truth) if i not in matched_g)
     precision=tp/(tp+fp) if tp+fp else 0.0
