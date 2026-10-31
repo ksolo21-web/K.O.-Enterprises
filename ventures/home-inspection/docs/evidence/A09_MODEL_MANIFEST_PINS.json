@@ -1,0 +1,29 @@
+[
+  {
+    "model": "qwen2.5vl:3b",
+    "manifest_sha256": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+    "source": "https://registry.ollama.ai/v2/library/qwen2.5vl/manifests/3b",
+    "retrieved_on": "2026-10-31",
+    "manifest_bytes": 1002,
+    "layer_bytes": 3200626601
+  },
+  {
+    "model": "granite3.2-vision:2b",
+    "manifest_sha256": "3be41a661804ad72cd08269816c5a145f1df6479ad07e2b3a7e29dba575d2669",
+    "source": "https://registry.ollama.ai/v2/library/granite3.2-vision/manifests/2b",
+    "retrieved_on": "2026-10-31",
+    "manifest_bytes": 1405,
+    "layer_bytes": 2437851819
+  },
+  {
+    "model": "qwen2.5:7b",
+    "manifest_sha256": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "source": "https://registry.ollama.ai/v2/library/qwen2.5/manifests/7b",
+    "retrieved_on": "2026-10-31",
+    "manifest_bytes": 858,
+    "layer_bytes": 4683086845,
+    "license_observed": "Apache-2.0",
+    "license_source": "https://ollama.com/library/qwen2.5:7b",
+    "role": "Q03_EVALUATION_CANDIDATE_NOT_PROMOTED"
+  }
+]
