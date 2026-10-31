@@ -35,6 +35,14 @@ class GithubManualVisionWorkflowTests(unittest.TestCase):
         self.assertNotIn('secrets.',self.data)
         self.assertNotIn('customer_data/',self.data.split('Publish non-customer acceptance')[1])
 
+    def test_ffmpeg_and_zstd_installed_before_fixture_generation(self):
+        s = self.data
+        gate = s.index('Provision FFmpeg and zstd before media tests or model installation')
+        self.assertLess(gate, s.index('python -m scripts.generate_public_fixtures'))
+        self.assertLess(gate, s.index('python -m scripts.verify_pinned_ollama'))
+        self.assertIn('for binary in ffmpeg zstd;', s)
+        self.assertIn('apt-get install -y --no-install-recommends "${missing[@]}"', s)
+
     def test_low_model_concurrency_and_nonrelease(self):
         self.assertIn("OLLAMA_MAX_LOADED_MODELS: '1'",self.data)
         self.assertIn('scripts.run_vision_acceptance',self.data)

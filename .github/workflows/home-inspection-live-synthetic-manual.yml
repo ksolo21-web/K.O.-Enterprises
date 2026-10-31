@@ -58,12 +58,28 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
-      - name: Install Python requirements and verify FFmpeg
+      - name: Provision FFmpeg and zstd before media tests or model installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          for binary in ffmpeg zstd; do
+            if ! command -v "$binary" >/dev/null 2>&1; then missing+=("$binary"); fi
+          done
+          if ((${#missing[@]})); then
+            sudo apt-get update -qq
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${missing[@]}"
+          fi
+          for binary in ffmpeg zstd; do
+            command -v "$binary" || { echo "BLOCKED: missing required tool $binary" >&2; exit 1; }
+          done
+          ffmpeg -version
+          zstd --version
+      - name: Install Python requirements and run synthetic regression tests
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install -r requirements.txt
-          command -v ffmpeg || { echo 'FFmpeg missing from runner image' >&2; exit 1; }
           python -m scripts.generate_public_fixtures
           python -m unittest discover -s tests -q
       - name: Verify disk budget and install pinned Ollama binary from verified archive
@@ -72,10 +88,6 @@ jobs:
           set -euo pipefail
           # Official Linux binary archive, fixed tag and published GitHub asset checksum.
           # No mutable installer script or arbitrary shell code from the network.
-          # Ubuntu hosted runners do not guarantee a zstd executable.
-          sudo apt-get update -qq
-          sudo apt-get install -y zstd
-          command -v zstd >/dev/null || { echo 'BLOCKED: could not install zstd' >&2; exit 1; }
           free_kib=$(df --output=avail -k "$RUNNER_TEMP" | tail -n 1)
           if (( free_kib < 9 * 1024 * 1024 )); then
             echo 'BLOCKED: less than 9 GiB disk available for binary and models' >&2
