@@ -45,6 +45,8 @@ class CriticStageTest(unittest.TestCase):
                 self.assertEqual(im.size,(1800,960))
             self.assertIn('CLAIM DATA:',prompt)
             self.assertIn('UNTRUSTED HYPOTHESIS',prompt)
+            self.assertIn('NATIONAL_INSPECTION_POLICY_V4',prompt)
+            self.assertIn('POLICY_DIGEST_SHA256',prompt)
             calls.append(1)
             return {'decision':'visually_plausible','reason':'Image may depict a dark mark',
                     'missing_evidence':''}

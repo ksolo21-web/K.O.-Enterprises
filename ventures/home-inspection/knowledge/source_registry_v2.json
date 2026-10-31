@@ -97,14 +97,14 @@
       "last_reviewed": "2026-10-31",
       "review_method": "public_official_webpage_read_no_immutable_snapshot",
       "content_snapshot_sha256": null,
-      "verified_claim_note": "Approved January 8, 2026; implementation date was to be determined when reviewed. Reference only; never substitute as effective automatically.",
+      "verified_claim_note": "Approved January 8, 2026; ASHI now publishes an implementation date of January 1, 2027. Not effective on 2026-10-31. Recheck original publisher for subsequent status changes.",
       "may_prove_field_condition": false,
       "may_prove_local_code_compliance": false,
       "may_automatically_approve_report": false
     },
     {
       "id": "DOE_CODE_ADOPTION",
-      "title": "DOE: Building Energy Codes \u2014 development, adoption, implementation",
+      "title": "DOE: Building Energy Codes — development, adoption, implementation",
       "publisher": "U.S. Department of Energy",
       "authority_class": "government_explainer",
       "purpose": "jurisdiction_context",

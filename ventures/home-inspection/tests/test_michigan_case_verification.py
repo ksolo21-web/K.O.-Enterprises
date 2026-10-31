@@ -149,6 +149,9 @@ class MichiganCaseTests(unittest.TestCase):
             return {'candidates':[],'requests':[]}
         _,dossier=execute_specialists(doc,self.root,provider,media_ids=['P0001'])
         self.assertIn('MICHIGAN_SOURCE_POLICY',prompts[0]);self.assertIn('MI_RES_2015',prompts[0]);self.assertFalse(dossier['customer_release_allowed'])
+        self.assertIn('NATIONAL_INSPECTION_POLICY_V4',prompts[0])
+        self.assertIn('POLICY_DIGEST_SHA256',prompts[0])
+        self.assertIn('embedded_knowledge_policy_sha256',dossier['plan'])
     def test_other_state_not_falsely_given_michigan_law(self):
         doc={'project_id':'SYNTH-KNOW','property':{'label':'Synthetic house','inspection_date':'2026-10-31',
              'state':'OH','building_type':'residential_one_two_family','synthetic':True},

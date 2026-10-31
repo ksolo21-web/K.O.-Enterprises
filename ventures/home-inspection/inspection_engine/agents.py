@@ -24,6 +24,7 @@ from .video_photos import capture_video_photos
 from .source_of_truth import build_knowledge_brief
 from .michigan_authority import build_michigan_brief
 from .failure_modes import build_failure_mode_brief
+from .inspection_policy import build_inspection_knowledge_brief, active_sop_context, policy_digest
 from .descriptors import REQUIRED_FEATURES
 from .adjudication import entries as ledger_entries, memory_context, require_new_candidate, build_queue
 
@@ -161,7 +162,17 @@ def plan_specialists(document: dict, media_ids: list[str] | None = None, *, max_
                          'systems':owned,'status':'READY','max_iterations':3,
                          'release_authority':False})
     if len(jobs)>max_jobs:raise DataError('Specialist work-order limit exceeded; use another batch')
-    return {'schema_version':1,'manager':'M00','supervisors':['EVIDENCE-LEAD','TECH-LEAD','REPORT-LEAD'],
+    # M00 records embedded policy identity and unresolved scope; no approval.
+    prop=document.get('property',{}) if isinstance(document.get('property'),dict) else {}
+    kind=prop.get('building_type')
+    kind=('residential' if kind=='residential_one_two_family' else
+          'commercial' if kind=='commercial_general' else 'unverified')
+    sop_context=active_sop_context(kind,prop.get('inspection_date','2026-10-31'))
+    return {'schema_version':1,'manager':'M00',
+            'embedded_knowledge_policy_sha256':policy_digest(),
+            'national_inspection_scope':sop_context,
+            'unmapped_residential_topic':'Fireplace/hearth requires separate inspector triage; not counted as covered',
+            'supervisors':['EVIDENCE-LEAD','TECH-LEAD','REPORT-LEAD'],
             'quality_reviewers':['Q01','Q02','Q03'],'release_gate':'QUALIFIED-HUMAN',
             'jobs':jobs,'unassigned_media':triage,'unreviewed_videos':pending_video,
             'status':'PLAN_NOT_INSPECTION'}
@@ -335,6 +346,15 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
             prompt += '\n' + build_knowledge_brief(job['systems']) + '\n'
             prompt += '\n' + build_failure_mode_brief(job['systems']) + '\n'
+            # Original national/MI policy remains embedded; select only relevant cards per work order.
+            policy_property=work.get('property',{})
+            if not isinstance(policy_property,dict):policy_property={}
+            policy_type=policy_property.get('building_type')
+            policy_type=('residential' if policy_type=='residential_one_two_family' else
+                         'commercial' if policy_type=='commercial_general' else 'unverified')
+            prompt += '\n' + build_inspection_knowledge_brief(
+                job['systems'],property_kind=policy_type,
+                inspection_date=policy_property.get('inspection_date','2026-10-31')) + '\n'
             # Michigan-specific law is injected only when the case explicitly identifies MI.
             # These are candidate state indexes, never automatic legal conclusions.
             property_context = work.get('property', {})

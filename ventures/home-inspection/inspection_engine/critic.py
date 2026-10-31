@@ -17,6 +17,7 @@ import hashlib
 from PIL import Image, ImageOps, ImageDraw
 
 from .agents import ROLE_BY_ID, _review_dossier
+from .inspection_policy import build_inspection_knowledge_brief
 from .capture import verify_custody
 from .core import DataError, sha256, safe_path, validate_project
 from .vision import UNSUPPORTED_ASSURANCES
@@ -164,6 +165,15 @@ def review_specialist_dossier(document:dict, root:Path, dossier:dict,
             'Do not propose tools, edits, approvals or release. Return JSON only. '
             f'CLAIM DATA: {json.dumps({"system":p["system"],"feature_code":p.get("feature_code"),"description":p["description"],"evidence_id":media["id"],"location":p.get("location"),"candidate_source_bbox":p.get("bbox"),"zoom_source_bbox":zoom.get("normalized_bbox") if zoom else None},ensure_ascii=True)}'
         )
+        # Q02 independently challenges the pixels using the audited internal SOP context.
+        policy_property=document.get('property',{})
+        if not isinstance(policy_property,dict):policy_property={}
+        policy_type=policy_property.get('building_type')
+        policy_type=('residential' if policy_type=='residential_one_two_family' else
+                     'commercial' if policy_type=='commercial_general' else 'unverified')
+        prompt += '\n' + build_inspection_knowledge_brief(
+            [p['system']],property_kind=policy_type,
+            inspection_date=policy_property.get('inspection_date','2026-10-31'))
         response=_review_response(provider(_two_view_image(root,media,zoom),prompt))
         responses.append({'proposal_index':index,'work_order':p['work_order'],
             'source_media_id':media['id'],'source_sha256':p['evidence_sha256'],

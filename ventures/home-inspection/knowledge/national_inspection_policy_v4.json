@@ -1,0 +1,534 @@
+{
+  "schema_version": 4,
+  "edition": "2026-10-31",
+  "territory": "Michigan, United States",
+  "license_notice": "Original derived paraphrases and metadata only. Full proprietary ASTM, ICC, NFPA and manufacturer standards must be licensed/authorized; links are not local copies.",
+  "knowledge_is_not_property_evidence": true,
+  "all_conditions_detected_guarantee": false,
+  "general_rules": [
+    "Inspect under documented agreement and applicable SOP; never replace a qualified inspector or perform unsafe testing.",
+    "Document material observed defects and serious potential hazards; communicate promptly per company safety protocol.",
+    "Separate symptom from mechanism, cause hypothesis, hidden conditions and legally adopted requirements.",
+    "Unobserved and inaccessible are not defect-free; coverage gaps belong in internal ledger and material limitations in report.",
+    "Do not state code violation, code compliance, or recall confirmation without exact authenticated applicability receipts.",
+    "Do not promise zero defects, safety warranty, future service life, insurance, purchase advice, or legal immunity.",
+    "Recommend licensed or qualified specialists when evidence cannot resolve safety, structural, electrical, combustion, water or other material risk.",
+    "Customer report should be readable: location + observed condition + significance + recommended evaluation/action + material limitation. Internal hypotheses stay internal unless verified and materially useful.",
+    "Urgent warnings are not suppressed merely because a root cause is unknown; report the observed hazard with calibrated language and human escalation.",
+    "Commercial PCA must use separate agreed scope and qualified assessor; E2018 is an optional framework and is not home SOP."
+  ],
+  "scope": {
+    "residential": {
+      "primary": "INT_NACHI_SOP",
+      "alternative": "ASHI_SOP_CURRENT",
+      "effective_change": "ASHI_SOP_2027",
+      "status": "selected_sop_requires_written_agreement",
+      "must_disclose_limitations": true,
+      "unmapped_sop_topics": [
+        "3.8 Fireplace: no dedicated specialized system in current 13-system engine; required explicit scope triage",
+        "Additional smoke/CO-alarm observations and related limitations must be individually reviewed"
+      ]
+    },
+    "commercial": {
+      "primary": "ASTM_E2018_24",
+      "status": "requires_signed_commercial_pca_scope",
+      "must_disclose_limitations": true,
+      "separate_obligations": [
+        "Occupancy and use, accessibility, life-safety systems, fire suppression, roof, building envelope, structural, MEP and relevant site systems require agreed PCA scope",
+        "Do not substitute ASTM E2018 for an AHJ compliance inspection, Phase I environmental assessment, or engineering report"
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "INT_NACHI_SOP",
+      "type": "national_residential_standard",
+      "publisher": "InterNACHI",
+      "url": "https://www.nachi.org/sop.htm",
+      "status": "active_reference",
+      "building_scope": "residential",
+      "use_limit": "Scope of visual residential inspection, material defects and reporting of observed concerns; contract and credentials must determine actual governing SOP.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "ASHI_SOP_CURRENT",
+      "type": "national_residential_standard",
+      "publisher": "ASHI",
+      "url": "https://www.homeinspector.org/",
+      "status": "current_until_2026_12_31",
+      "building_scope": "residential",
+      "use_limit": "ASHI current SOP; use direct official current text and inspector agreement to confirm exact edition.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "ASHI_SOP_2027",
+      "type": "national_residential_standard",
+      "publisher": "ASHI",
+      "url": "https://www.homeinspector.org/proposed-ashi-standards-of-practice-public-changes/",
+      "status": "future_2027_01_01",
+      "building_scope": "residential",
+      "use_limit": "New ASHI SOP approved January 2026; implementation listed January 1, 2027. Not active on this snapshot date.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "ASTM_E2018_24",
+      "type": "commercial_pca_framework",
+      "publisher": "ASTM International",
+      "url": "https://store.astm.org/standards/e2018",
+      "status": "optional_contract_framework",
+      "building_scope": "commercial",
+      "use_limit": "Baseline property condition assessment of commercial property; purchased/contract-adopted standard not reproduced and not synonymous with a residential SOP.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "MI_CODE_BOOKS",
+      "type": "state_code_index",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts/codes/code-books",
+      "status": "index_only",
+      "building_scope": "both",
+      "use_limit": "Michigan lists state codes by discipline and edition; verify permit era, AHJ, local amendments and applicability before asserting any violation.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "MI_RES_STAY",
+      "type": "state_legal_status",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts/rules/currently-open",
+      "status": "court_order_check_required",
+      "building_scope": "residential",
+      "use_limit": "July 2025 injunction affects proposed residential and energy updates; verify current status for each inspection date.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "MI_RULES",
+      "type": "state_legal_status",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts",
+      "status": "reference_index_only",
+      "building_scope": "both",
+      "use_limit": "Acts, rules, licensing and construction-code amendments; this list is not legal applicability proof.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "CPSC_RECALL",
+      "type": "product_safety_database",
+      "publisher": "U.S. Consumer Product Safety Commission",
+      "url": "https://www.cpsc.gov/th/node/5808",
+      "status": "live_lookup_required",
+      "building_scope": "both",
+      "use_limit": "Public recall API; confirm exact model, production/serial range and recall remedy directly; brand resemblance cannot prove recall.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "EPA_RADON",
+      "type": "environmental_testing_guidance",
+      "publisher": "U.S. Environmental Protection Agency",
+      "url": "https://www.epa.gov/radon/what-epas-action-level-radon-and-what-does-it-mean",
+      "status": "testing_required",
+      "building_scope": "both",
+      "use_limit": "Radon cannot be inferred visually; qualified testing and lab/device receipts required before stating measured levels.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "CDC_CO",
+      "type": "urgent_safety_guidance",
+      "publisher": "Centers for Disease Control and Prevention",
+      "url": "https://www.cdc.gov/carbon-monoxide/about/",
+      "status": "active_reference",
+      "building_scope": "both",
+      "use_limit": "Carbon monoxide has no detectable color or odor; visible vent concern is a reason to refer, not proof of CO level.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "DOE_CODES",
+      "type": "energy_code_adoption_index",
+      "publisher": "U.S. Department of Energy",
+      "url": "https://www.energycodes.gov/",
+      "status": "adoption_check_required",
+      "building_scope": "both",
+      "use_limit": "Model-code history and adoption context; local adopted text and amendments govern, not generic model editions.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "BRADFORD_AGE",
+      "type": "manufacturer_date_reference",
+      "publisher": "Bradford White",
+      "url": "https://forthepro.bradfordwhite.com/determining-the-age-of-a-water-heater/",
+      "status": "model_serial_check_required",
+      "building_scope": "both",
+      "use_limit": "Manufacture date code has repeating cycle; serial alone does not establish installation age.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "RHEEM_AGE",
+      "type": "manufacturer_date_reference",
+      "publisher": "Rheem",
+      "url": "https://www.rheem.com/how-to-locate-and-read-your-rheem-water-heating-serial-numbers/",
+      "status": "model_serial_check_required",
+      "building_scope": "both",
+      "use_limit": "Use only product-series-appropriate date format and original plate; serial does not establish installation date.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    },
+    {
+      "id": "CARRIER_WARRANTY",
+      "type": "manufacturer_reference",
+      "publisher": "Carrier",
+      "url": "https://www.carrier.com/us/en/residential/homeowner-resources/warranty-lookup/",
+      "status": "model_serial_check_required",
+      "building_scope": "both",
+      "use_limit": "Warranty/model support cannot alone verify installation date or remaining life.",
+      "retrieved_on": "2026-10-31",
+      "embedded_full_text": false
+    }
+  ],
+  "systems": [
+    {
+      "system": "site",
+      "feature_codes": [
+        "grading_drainage",
+        "surface_water_management",
+        "walks_drives_retaining"
+      ],
+      "inspection_focus": "Check grading, discharge patterns and retaining features without diagnosing subsurface drainage.",
+      "example_sign": "Surface ponding adjacent to structure",
+      "possible_mechanism": "Negative surface grading or blocked runoff path",
+      "alternative_explanation": "Overflow from roof drainage or seasonal high groundwater",
+      "what_would_distinguish": "Observe drainage during precipitation; measure surface slope; trace roof discharge",
+      "serious_warning_cue": "Concentrated water reaching foundation or pedestrian ice hazard",
+      "qualified_referral": "Drainage / grading contractor or licensed civil engineer if significant movement.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.2"
+      ]
+    },
+    {
+      "system": "foundation",
+      "feature_codes": [
+        "foundation_type",
+        "foundation_material",
+        "support_configuration",
+        "visible_foundation_condition"
+      ],
+      "inspection_focus": "Seek displacement, cracking patterns, dampness and support distress; distinguish shrinkage from possible movement.",
+      "example_sign": "Crack or displacement on accessible foundation face",
+      "possible_mechanism": "Material shrinkage or thermal movement",
+      "alternative_explanation": "Differential settlement or hydrostatic pressure",
+      "what_would_distinguish": "Measure crack width and displacement; inspect drainage, history and structural load path; refer if movement suspected",
+      "serious_warning_cue": "Significant displacement, instability or active water entry",
+      "qualified_referral": "Licensed structural engineer for displacement or suspected structural failure.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.3"
+      ]
+    },
+    {
+      "system": "subfloor",
+      "feature_codes": [
+        "floor_platform_type",
+        "subfloor_material",
+        "visible_floor_supports"
+      ],
+      "inspection_focus": "Inspect safely visible joists, supports, moisture effects, penetrations and changes in floor plane.",
+      "example_sign": "Uneven, sagging or moisture-marked floor surface",
+      "possible_mechanism": "Moisture deterioration of supporting material",
+      "alternative_explanation": "Span, load, foundation settlement or earlier repairs",
+      "what_would_distinguish": "Inspect accessible underside, member condition, moisture readings and load paths",
+      "serious_warning_cue": "Unsupported or visibly failing floor platform",
+      "qualified_referral": "Licensed structural engineer or qualified framing contractor.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.3"
+      ]
+    },
+    {
+      "system": "framing",
+      "feature_codes": [
+        "exterior_wall_structure",
+        "floor_structure",
+        "roof_structure"
+      ],
+      "inspection_focus": "Inspect exposed framing and connection conditions, not covered members or structural capacity.",
+      "example_sign": "Visible bowed or altered member at accessible framing",
+      "possible_mechanism": "Material deformation under load",
+      "alternative_explanation": "Nonstructural irregularity, prior modification or moisture damage",
+      "what_would_distinguish": "Confirm member size, span, connections, loading and alteration record with qualified professional",
+      "serious_warning_cue": "Cracked load-bearing member or visibly compromised connection",
+      "qualified_referral": "Licensed structural engineer where load path or deformation is uncertain.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.3",
+        "3.1"
+      ]
+    },
+    {
+      "system": "exterior",
+      "feature_codes": [
+        "cladding_type",
+        "flashing_openings",
+        "trim_decks_and_attached_features"
+      ],
+      "inspection_focus": "Check cladding clearances, penetration flashings, exterior openings and moisture pathways.",
+      "example_sign": "Staining, cracking or separation near cladding and openings",
+      "possible_mechanism": "Water entry at absent/damaged flashing",
+      "alternative_explanation": "Surface condensation or non-active legacy staining",
+      "what_would_distinguish": "Trace flashing and drainage-plane details where safely visible; moisture meter and targeted noninvasive evaluation",
+      "serious_warning_cue": "Loose facade components or ongoing water entry",
+      "qualified_referral": "Qualified building-envelope specialist or appropriate contractor.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.2"
+      ]
+    },
+    {
+      "system": "roof",
+      "feature_codes": [
+        "roof_covering",
+        "roof_geometry_and_structure",
+        "roof_drainage",
+        "roof_access_method"
+      ],
+      "inspection_focus": "Assess accessible roof-covering indications, flashings, drainage and leak evidence; do not claim remaining life.",
+      "example_sign": "Staining, damaged covering or ponding on visible roof area",
+      "possible_mechanism": "Age-related material distress or poor water shedding",
+      "alternative_explanation": "Storm damage, condensation or debris blockage",
+      "what_would_distinguish": "Document drainage/flashings from safe vantage; review leak history and attic underside where accessible",
+      "serious_warning_cue": "Active leakage or apparent collapse risk; avoid unsafe roof access",
+      "qualified_referral": "Qualified roofing contractor; structural engineer if roof structure appears compromised.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.1"
+      ]
+    },
+    {
+      "system": "attic",
+      "feature_codes": [
+        "attic_access",
+        "visible_roof_framing",
+        "insulation_type",
+        "ventilation_design"
+      ],
+      "inspection_focus": "Note insulation, ventilation, staining, roof framing visibility and access limitations.",
+      "example_sign": "Discoloration, dampness or condensation on accessible attic material",
+      "possible_mechanism": "Air leakage with moisture condensation",
+      "alternative_explanation": "Roof covering leak, plumbing vent leakage or past inactive damage",
+      "what_would_distinguish": "Measure moisture and humidity, observe vent terminations, compare weather history",
+      "serious_warning_cue": "Electrical hazard near wet materials or visibly unstable roof framing",
+      "qualified_referral": "Qualified roofer, insulation/ventilation contractor, or engineer as applicable.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.9"
+      ]
+    },
+    {
+      "system": "interior",
+      "feature_codes": [
+        "walls_ceilings_floors",
+        "windows_doors_stairs",
+        "life_safety_observations"
+      ],
+      "inspection_focus": "Look for moisture staining, egress limitations, step/guard issues, windows and doors.",
+      "example_sign": "Localized wall, ceiling or flooring stain/crack",
+      "possible_mechanism": "Moisture from building envelope",
+      "alternative_explanation": "Plumbing source, condensation or historic repaired event",
+      "what_would_distinguish": "Review adjacent rooms/above/below, moisture readings and leak history",
+      "serious_warning_cue": "Active water near electrical, failing stairs or unsafe guarding",
+      "qualified_referral": "Qualified carpenter/contractor; licensed structural engineer for suspected support issue.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.10"
+      ]
+    },
+    {
+      "system": "electrical",
+      "feature_codes": [
+        "service_entry_type",
+        "panel_and_overcurrent",
+        "branch_wiring_visible",
+        "tested_devices_and_limitations"
+      ],
+      "inspection_focus": "Look for readily observable panel/receptacle hazards; never open energized parts or imply tested operation.",
+      "example_sign": "Exposed conductor, heat marks or panel corrosion where visible",
+      "possible_mechanism": "Damaged wiring, loose termination or water exposure",
+      "alternative_explanation": "Surface dirt, labeling issue or pre-existing non-active staining",
+      "what_would_distinguish": "Qualified electrician to inspect de-energized condition and test as appropriate; do not open energized components",
+      "serious_warning_cue": "Arcing, hot equipment, damaged insulation or exposed live parts",
+      "qualified_referral": "Licensed electrician; advise prompt safety evaluation of exposed conductors or heat damage.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.7"
+      ]
+    },
+    {
+      "system": "plumbing",
+      "feature_codes": [
+        "visible_supply_materials",
+        "visible_drain_waste_vent",
+        "fixtures_and_water_controls"
+      ],
+      "inspection_focus": "Look for leaks, corrosion, visible drain and supply characteristics, fixture behavior when tested.",
+      "example_sign": "Moisture and corrosion near accessible joint",
+      "possible_mechanism": "Active joint leakage",
+      "alternative_explanation": "Condensation or historic water event",
+      "what_would_distinguish": "Observe under operating conditions when safe, meter moisture, trace water source",
+      "serious_warning_cue": "Active uncontrolled leak or contaminated wastewater",
+      "qualified_referral": "Licensed plumber for leaking, unsafe or unverified systems.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.6"
+      ]
+    },
+    {
+      "system": "water_heating",
+      "feature_codes": [
+        "heater_type_and_energy",
+        "rating_plate_make_model_serial",
+        "venting_and_safety",
+        "visible_condition"
+      ],
+      "inspection_focus": "Check accessible venting, leakage, corrosion, relief arrangement and rating plate; no date from appearance.",
+      "example_sign": "Rust, water trace or soot around water heater",
+      "possible_mechanism": "Leaking fitting or combustion/venting fault",
+      "alternative_explanation": "Ambient condensation or old staining",
+      "what_would_distinguish": "Verify exact product/venting instructions and operating checks by qualified technician",
+      "serious_warning_cue": "Potential combustion-gas hazard, apparent unsafe venting or active leak",
+      "qualified_referral": "Licensed plumber or qualified HVAC technician for vent/combustion hazards.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.6"
+      ]
+    },
+    {
+      "system": "hvac",
+      "feature_codes": [
+        "heating_type",
+        "cooling_type",
+        "distribution_type",
+        "rating_plate_make_model_serial",
+        "operation_and_access_limitations"
+      ],
+      "inspection_focus": "Record system identification, visible flue, condensate, distribution and observed operation only when actually tested.",
+      "example_sign": "Corrosion, water pooling or irregular vent termination",
+      "possible_mechanism": "Condensate handling or venting defect",
+      "alternative_explanation": "Normal defrost drainage, inactive history or adjacent plumbing",
+      "what_would_distinguish": "Review model-specific manufacturer instructions; qualified HVAC operational testing",
+      "serious_warning_cue": "Suspected combustion exhaust exposure or damaged gas piping",
+      "qualified_referral": "Licensed HVAC professional; CO concern is not visually diagnosable.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.4",
+        "3.5"
+      ]
+    },
+    {
+      "system": "crawlspace",
+      "feature_codes": [
+        "space_type_and_access",
+        "soil_moisture_and_vapor_control",
+        "supports_and_observed_structure"
+      ],
+      "inspection_focus": "Assess safely accessible moisture, vapor control, supports and concealed-area limits.",
+      "example_sign": "Wet soil, stained members or displaced supports",
+      "possible_mechanism": "Ground moisture intrusion or poor vapor control",
+      "alternative_explanation": "Plumbing leak, surface runoff or seasonal flood history",
+      "what_would_distinguish": "Moisture mapping, observe source routes, assess support geometry and access limitations",
+      "serious_warning_cue": "Visible structural instability, active flooding or suspected biological hazard",
+      "qualified_referral": "Crawlspace/moisture specialist and structural engineer where warranted.",
+      "not_tested_by_photo": [
+        "concealed conditions",
+        "operational performance",
+        "code compliance",
+        "absence of defects"
+      ],
+      "status": "illustrative_nonexhaustive_training_context",
+      "internachi_section_index": [
+        "3.3"
+      ]
+    }
+  ]
+}
