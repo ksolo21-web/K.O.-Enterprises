@@ -20,6 +20,8 @@ Adversarial repairs include missingSHA=None comparisons, stale crops under the s
 
 No live model call, new installation, replacement-model promotion, paid service, customer upload or temporary workflow was added. Remote inference was not rerun. This test/critic score is **not** a score for actual observation intelligence or full Milestone2.
 
+Final exported-plan metadata now lists Q03 alongside Q01/Q02. A final full local rerun after that declarative update passed **309/309**,36.073seconds; no execution or approval claim is implied by a role appearing in the plan.
+
 ## Limits and critical next step
 
 The current3B vision configuration has not earned the lead role. A stronger reasoning or multimodal model must be evaluated, not assumed competent. Q03 currently has a callable text-provider interface and controlled tests, not proven live semantic adjudication or authenticated separate runtime.

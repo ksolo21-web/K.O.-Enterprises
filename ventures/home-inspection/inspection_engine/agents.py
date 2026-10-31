@@ -160,7 +160,7 @@ def plan_specialists(document: dict, media_ids: list[str] | None = None, *, max_
                          'release_authority':False})
     if len(jobs)>max_jobs:raise DataError('Specialist work-order limit exceeded; use another batch')
     return {'schema_version':1,'manager':'M00','supervisors':['EVIDENCE-LEAD','TECH-LEAD','REPORT-LEAD'],
-            'quality_reviewers':['Q01','Q02'],'release_gate':'QUALIFIED-HUMAN',
+            'quality_reviewers':['Q01','Q02','Q03'],'release_gate':'QUALIFIED-HUMAN',
             'jobs':jobs,'unassigned_media':triage,'unreviewed_videos':pending_video,
             'status':'PLAN_NOT_INSPECTION'}
 
