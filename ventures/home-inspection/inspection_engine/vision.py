@@ -7,14 +7,13 @@ from __future__ import annotations
 import base64
 import json
 import re
-import urllib.error
-import urllib.request
 from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageOps
 from .core import DataError, SYSTEM_NAME, safe_path, sha256
 from .descriptors import REQUIRED_FEATURES
 from .capture import verify_custody
+from .local_runtime import local_json, validate_model_name
 
 ALLOWED_STATUS={'observed','partially_observed','unknown'}
 PROPOSAL_TYPES={'feature','potential_concern'}
@@ -54,29 +53,22 @@ CANDIDATE_SCHEMA={
 def ollama_local(image_bytes:bytes, prompt:str, model:str,timeout:int=100,
                  schema:dict|None=None, system_prompt:str|None=None)->dict:
     """Uses local Ollama /api/generate only. No external URLs or cloud fallbacks."""
-    if not re.fullmatch(r'[A-Za-z0-9][\w.:-]{0,90}',model):
-        raise DataError('Invalid local model identifier')
+    validate_model_name(model)
     if system_prompt is not None and (not isinstance(system_prompt,str) or not 1<=len(system_prompt)<=5000):
         raise DataError('Invalid system prompt contract')
     request_data={'model':model,'prompt':prompt,'system':system_prompt or SYSTEM_PROMPT,
                   'images':[base64.b64encode(image_bytes).decode('ascii')],
                   'format':schema if schema is not None else CANDIDATE_SCHEMA,'stream':False,
                   'options':{'temperature':0}}
-    req=urllib.request.Request('http://127.0.0.1:11434/api/generate',
-              json.dumps(request_data).encode('utf8'),headers={'Content-Type':'application/json'},method='POST')
+    parsed=local_json('POST','/api/generate',request_data,timeout=timeout,max_bytes=MAX_MODEL_REPLY)
     try:
-        with urllib.request.urlopen(req,timeout=timeout) as response:
-            payload=response.read(MAX_MODEL_REPLY+1)
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise DataError('Local Ollama unavailable; start Ollama with a vision-capable model') from exc
-    if len(payload)>MAX_MODEL_REPLY:raise DataError('Vision model response exceeds limit')
-    try:
-        parsed=json.loads(payload)
         if not isinstance(parsed.get('response'),str):raise ValueError('response missing')
         obj=json.loads(parsed['response'])
+        if not isinstance(obj,dict):raise ValueError('non-object model reply')
     except (ValueError,TypeError,KeyError) as exc:
         raise DataError('Vision model returned invalid JSON') from exc
     return obj
+
 
 
 def normalized_image(path:Path)->bytes:

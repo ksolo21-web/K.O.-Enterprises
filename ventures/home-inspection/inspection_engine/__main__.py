@@ -12,6 +12,7 @@ from .zoom import create_zoom_views, grid_regions, zoom_from_predictions
 from .video_photos import capture_video_photos, verify_selected_photo_pixels
 from .agents import plan_specialists, execute_specialists, SPECIALIST_SCHEMA
 from .critic import review_specialist_dossier, CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
+from .local_runtime import preflight_models
 
 
 def main():
@@ -72,7 +73,20 @@ def main():
             cmd.add_argument('--out-project',type=Path,required=True)
             cmd.add_argument('--dossier',type=Path,required=True)
 
+    preflight=sub.add_parser('model-preflight', help='Read-only check for two installed local vision models')
+    preflight.add_argument('--writer-model',required=True)
+    preflight.add_argument('--review-model',required=True)
     args=ap.parse_args()
+    if args.command == 'model-preflight':
+        try:
+            result=preflight_models(args.writer_model,args.review_model)
+        except DataError as exc:
+            print(json.dumps({'preflight':'BLOCKED','reason':str(exc),
+                              'real_inference_completed':False,
+                              'customer_release_allowed':False},indent=2))
+            raise SystemExit(2) from None
+        print(json.dumps(result,indent=2))
+        return
     source=args.project.resolve();doc=load_project(source)
     root=source.parent
     if args.command=='report':
