@@ -20,7 +20,9 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
         if self.path == '/api/tags':
-            obj={'models':[{'name':'writer:1'},{'name':'reviewer:2'}]}
+            review_digest='b'*64 if Handler.reply_kind!='same-digest' else 'a'*64
+            obj={'models':[{'name':'writer:1','digest':'a'*64},
+                           {'name':'reviewer:2','digest':review_digest}]}
         elif self.path == '/api/show':
             n=json.loads(self.rfile.read(int(self.headers.get('Content-Length','0'))))['model']
             obj={'capabilities':['completion','vision'] if n!='reviewer:2' or Handler.reply_kind!='text-only' else ['completion']}
@@ -52,6 +54,8 @@ class LocalRuntimeTests(unittest.TestCase):
         res=local_runtime.preflight_models('writer:1','reviewer:2')
         self.assertEqual(res['preflight'],'LOCAL_MODELS_ADVERTISED_VISION')
         self.assertEqual([m['role'] for m in res['models']],['writer','reviewer'])
+        self.assertEqual(res['models'][0]['model_digest_sha256'],'a'*64)
+        self.assertEqual(res['models'][1]['model_digest_sha256'],'b'*64)
         self.assertFalse(res['real_inference_completed'])
         self.assertFalse(res['separate_runtime_identity_verified'])
         self.assertFalse(res['customer_release_allowed'])
@@ -69,6 +73,11 @@ class LocalRuntimeTests(unittest.TestCase):
         Handler.reply_kind='text-only'
         with self.assertRaisesRegex(DataError,'does not advertise vision'):
             local_runtime.preflight_models('writer:1','reviewer:2')
+    def test_same_digest_different_names_denied(self):
+        Handler.reply_kind='same-digest'
+        with self.assertRaisesRegex(DataError,'identical model digests'):
+            local_runtime.preflight_models('writer:1','reviewer:2')
+
     def test_same_model_denied(self):
         with self.assertRaisesRegex(DataError,'distinct model'):
             local_runtime.preflight_models('writer:1','writer:1')

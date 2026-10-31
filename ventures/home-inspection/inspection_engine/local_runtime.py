@@ -81,7 +81,7 @@ def preflight_models(writer_model: str, reviewer_model: str) -> dict:
     tags = available.get('models')
     if not isinstance(tags, list):
         raise DataError('Ollama model inventory unavailable')
-    installed = {m.get('name') for m in tags if isinstance(m,dict) and isinstance(m.get('name'),str)}
+    installed = {m['name']:m for m in tags if isinstance(m,dict) and isinstance(m.get('name'),str)}
     checks=[]
     for role, model in [('writer', writer), ('reviewer', reviewer)]:
         if model not in installed:
@@ -90,7 +90,14 @@ def preflight_models(writer_model: str, reviewer_model: str) -> dict:
         capabilities = info.get('capabilities')
         if not isinstance(capabilities, list) or 'vision' not in capabilities:
             raise DataError('%s model does not advertise vision capability: %s' % (role.capitalize(), model))
-        checks.append({'role':role,'model':model,'installed':True,'vision_capability_advertised':True})
+        metadata = installed[model]
+        digest = metadata.get('digest')
+        if digest is not None and (not isinstance(digest,str) or not re.fullmatch('[0-9a-fA-F]{64}',digest)):
+            raise DataError('Invalid model digest from local inventory')
+        checks.append({'role':role,'model':model,'installed':True,
+                       'model_digest_sha256':digest,'vision_capability_advertised':True})
+    if all(x['model_digest_sha256'] for x in checks) and checks[0]['model_digest_sha256']==checks[1]['model_digest_sha256']:
+        raise DataError('Writer and reviewer resolve to identical model digests')
     return {'preflight':'LOCAL_MODELS_ADVERTISED_VISION', 'endpoint':'127.0.0.1:11434',
             'models':checks,'real_inference_completed':False,
             'separate_runtime_identity_verified':False,'field_accuracy_verified':False,

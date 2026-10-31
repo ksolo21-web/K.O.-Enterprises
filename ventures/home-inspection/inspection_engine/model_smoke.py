@@ -66,8 +66,11 @@ def smoke_probe(writer_model: str, reviewer_model: str, *, transport=local_json)
         preflight_models(writer_model, reviewer_model)
     elif writer_model == reviewer_model:
         raise DataError('Writer and reviewer require distinct models')
-    probes = [('writer', writer_model, 'red', 'square'),
-              ('reviewer', reviewer_model, 'blue', 'circle')]
+    # Each independent model receives both incompatible images under identical
+    # prompts. One hard-coded answer can no longer pass one model's probe.
+    probes = [(role, model, color, shape)
+              for role, model in [('writer', writer_model), ('reviewer', reviewer_model)]
+              for color, shape in [('red', 'square'), ('blue', 'circle')]]
     items = []
     for role, model, color, shape in probes:
         image = synthetic_probe_image(color=color, shape=shape)
@@ -95,7 +98,7 @@ def smoke_probe(writer_model: str, reviewer_model: str, *, transport=local_json)
                       'passed': found == (color, shape), 'elapsed_seconds': elapsed,
                       'model_done': True})
     passed = all(x['passed'] for x in items)
-    return {'test': 'SYNTHETIC_LIVE_VISION',
+    return {'test': 'SYNTHETIC_LIVE_VISION', 'protocol_version': 2, 'probes_per_model': 2,
             'status': (('SYNTHETIC_VISION_PROBE_PASSED' if passed else 'SYNTHETIC_VISION_PROBE_FAILED')
                        if is_live_transport else ('MOCK_CONTRACT_PASSED' if passed else 'MOCK_CONTRACT_FAILED')),
             'actual_image_inference_executed': is_live_transport, 'test_inputs': 'SYNTHETIC_ONLY',

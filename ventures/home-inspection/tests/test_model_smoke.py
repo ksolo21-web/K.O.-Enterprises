@@ -26,12 +26,16 @@ class ModelSmokeContractTests(unittest.TestCase):
             raw=base64.b64decode(payload['images'][0])
             with Image.open(BytesIO(raw)) as im:
                 self.assertEqual(im.size,(512,384))
-            return {'response':json.dumps({'color':'red','shape':'square'} if len(calls)==1 else
-                                            {'color':'blue','shape':'circle'}), 'done':True}
+            # Contract double looks at the actual rendered pixels, not call index.
+            with Image.open(BytesIO(raw)) as im:
+                pixel=im.convert('RGB').getpixel((256,192))
+            answer={'color':'red','shape':'square'} if pixel[0]>pixel[2] else {'color':'blue','shape':'circle'}
+            return {'response':json.dumps(answer), 'done':True}
         result=smoke_probe('writer:3b','reviewer:2b',transport=mock_transport)
         self.assertEqual(result['status'],'MOCK_CONTRACT_PASSED')
         self.assertFalse(result['actual_image_inference_executed'])
-        self.assertEqual([x['model'] for x in calls],['writer:3b','reviewer:2b'])
+        self.assertEqual([x['model'] for x in calls],['writer:3b','writer:3b','reviewer:2b','reviewer:2b'])
+        self.assertEqual(result['probes_per_model'], 2)
         self.assertFalse(result['customer_release_allowed'])
         self.assertFalse(result['real_property_accuracy_verified'])
 
@@ -40,7 +44,18 @@ class ModelSmokeContractTests(unittest.TestCase):
             return {'response':'{"color":"red","shape":"square"}', 'done':True}
         result=smoke_probe('w','r',transport=wrong)
         self.assertFalse(result['models'][1]['passed'])
+        self.assertFalse(result['models'][3]['passed'])
         self.assertEqual(result['status'],'MOCK_CONTRACT_FAILED')
+
+    def test_fixed_reply_for_each_model_cannot_pass(self):
+        seen={}
+        def canned(method,endpoint,payload,**kw):
+            model=payload['model']
+            seen.setdefault(model, {'color':'red','shape':'square'})
+            return {'response':json.dumps(seen[model]), 'done':True}
+        result=smoke_probe('a','b',transport=canned)
+        self.assertEqual(result['status'],'MOCK_CONTRACT_FAILED')
+        self.assertEqual(sum(x['passed'] for x in result['models']),2)
 
     def test_noncompleted_model_response_rejected(self):
         with self.assertRaisesRegex(DataError,'did not complete'):

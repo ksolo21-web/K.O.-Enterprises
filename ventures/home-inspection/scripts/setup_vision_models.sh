@@ -22,5 +22,7 @@ if ! python3 -m inspection_engine model-preflight --writer-model "$WRITER" --rev
 fi
 python3 -m inspection_engine model-preflight --writer-model "$WRITER" --review-model "$REVIEWER"
 mkdir -p local-results
-python3 -m inspection_engine model-smoke --writer-model "$WRITER" --review-model "$REVIEWER" --out "local-results/vision-smoke-$(date +%Y%m%d-%H%M%S).json"
-echo 'Synthetic image-conditioned model check completed; real inspection accuracy still unverified.'
+# Unique output directory: prior evidence is never overwritten.
+PROOF_DIR="local-results/acceptance-$(date +%Y%m%d-%H%M%S)-$$"
+python3 -m scripts.run_vision_acceptance --writer-model "$WRITER" --review-model "$REVIEWER" --out-dir "$PROOF_DIR"
+echo "Acceptance evidence saved under $PROOF_DIR (synthetic only; field accuracy still unverified)."

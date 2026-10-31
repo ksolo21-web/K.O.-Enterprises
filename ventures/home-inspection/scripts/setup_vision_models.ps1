@@ -16,7 +16,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Reviewer model download failed.' }
 python -m inspection_engine model-preflight --writer-model $Writer --review-model $Reviewer
 if ($LASTEXITCODE -ne 0) { throw 'Vision model preflight failed.' }
 New-Item -Path local-results -ItemType Directory -Force | Out-Null
-$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-python -m inspection_engine model-smoke --writer-model $Writer --review-model $Reviewer --out "local-results/vision-smoke-$stamp.json"
-if ($LASTEXITCODE -ne 0) { throw 'Live synthetic image inference did not pass.' }
-Write-Host 'Synthetic model check completed; real property accuracy not verified.'
+$stamp = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + ([guid]::NewGuid().ToString('N').Substring(0,8))
+$proof = "local-results/acceptance-$stamp"
+python -m scripts.run_vision_acceptance --writer-model $Writer --review-model $Reviewer --out-dir $proof
+if ($LASTEXITCODE -ne 0) { throw "Local acceptance gate is blocked; see $proof/acceptance_status.json." }
+Write-Host "Synthetic acceptance evidence: $proof. Real property accuracy remains unverified."
