@@ -63,6 +63,19 @@ class FailedTrialEvidenceTests(unittest.TestCase):
             self.assertEqual(reply['status'],'PROVIDER_ERROR')
             self.assertNotIn('structured_response_untrusted',reply)
 
+    def test_transport_timeout_cause_is_recorded_without_counting_completion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'trial'
+            def fail(*args):
+                try:raise TimeoutError('sensitive untrusted detail excluded')
+                except TimeoutError as cause:raise DataError('Local Ollama request timed out') from cause
+            result=run_trial(root,'writer','reviewer',writer=fail,reviewer=lambda *a:{},with_video=False)
+            reply=json.loads((root/'invocations/0001-writer.response.json').read_text())
+            self.assertEqual(reply['cause_types'],['TimeoutError'])
+            self.assertNotIn('sensitive',json.dumps(reply))
+            self.assertEqual(result['status'],'BLOCKED')
+            self.assertEqual(result['invocation_audit']['completed_live_calls'],{'writer':0,'reviewer':0})
+
 
 class ToolReviewLineageTests(unittest.TestCase):
     def setUp(self):

@@ -104,6 +104,23 @@ class LocalRuntimeTests(unittest.TestCase):
         self.assertEqual(json.loads(reply['response']),{'candidates':[]})
         self.assertEqual(Handler.calls,[('POST','/api/generate')])
 
+    def test_transport_failure_categories_keep_cause_and_never_retry(self):
+        from unittest.mock import MagicMock
+        import http.client
+        for original,message in [(TimeoutError('read timed out'),'request timed out'),
+                                 (ConnectionRefusedError('no listener'),'connection refused'),
+                                 (ConnectionResetError('lost connection'),'transport failed'),
+                                 (http.client.RemoteDisconnected('closed'),'transport failed')]:
+            with self.subTest(kind=type(original).__name__):
+                connection=MagicMock()
+                connection.getresponse.side_effect=original
+                with patch('inspection_engine.local_runtime.http.client.HTTPConnection',return_value=connection):
+                    with self.assertRaisesRegex(DataError,message) as raised:
+                        local_runtime.local_json('POST','/api/generate',{'prompt':'synthetic'},timeout=180)
+                self.assertIs(raised.exception.__cause__,original)
+                connection.request.assert_called_once()
+                connection.close.assert_called_once()
+
 if __name__=='__main__':unittest.main()
 
 class LocalPreflightCliTests(unittest.TestCase):

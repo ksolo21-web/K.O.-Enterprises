@@ -92,6 +92,13 @@ class TrialRecorder:
                 return answer
             except (DataError, OSError, RuntimeError, ValueError, TypeError, TimeoutError) as exc:
                 response.update(status='PROVIDER_ERROR', error_type=type(exc).__name__, error=str(exc))
+                # Preserve bounded exception categories without host paths,
+                # arbitrary server strings or pretending all failures are outages.
+                causes=[];cause=exc.__cause__
+                while cause is not None and len(causes)<4:
+                    causes.append(type(cause).__name__)
+                    cause=cause.__cause__
+                response['cause_types']=causes
                 raise
             finally:
                 response['elapsed_seconds'] = round(time.monotonic()-started, 3)

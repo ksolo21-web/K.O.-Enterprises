@@ -58,8 +58,12 @@ def local_json(method: str, endpoint: str, body: dict[str, Any] | None = None,
         raw = response.read(max_bytes + 1)
         if len(raw) > max_bytes:
             raise DataError('Local model response exceeds limit')
-    except (OSError, socket.timeout, http.client.HTTPException) as exc:
-        raise DataError('Local Ollama unavailable; start Ollama with installed vision-capable models') from exc
+    except (TimeoutError, socket.timeout) as exc:
+        raise DataError('Local Ollama request timed out before a completed response; generation may still be running') from exc
+    except ConnectionRefusedError as exc:
+        raise DataError('Local Ollama connection refused; verify the local runtime is listening') from exc
+    except (OSError, http.client.HTTPException) as exc:
+        raise DataError('Local Ollama transport failed before a completed response') from exc
     finally:
         conn.close()
     try:
