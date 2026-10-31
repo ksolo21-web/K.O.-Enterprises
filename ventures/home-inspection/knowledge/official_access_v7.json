@@ -4,25 +4,264 @@
   "state": "MI",
   "policy": "Official read access does not confer copying, redistribution, model-training, machine-ingestion, or automated scraping rights.",
   "sources": [
-    {"id":"ICC_DIGITAL_BASIC","publisher":"ICC","url":"https://codes.iccsafe.org/","category":"standards_viewer","access":"read_only_online","embedding":"metadata_only","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Individual title access varies; basic view does not grant machine ingestion."},
-    {"id":"NFPA_FREE_VIEW","publisher":"NFPA","url":"https://www.nfpa.org/for-professionals/codes-and-standards","category":"standards_viewer","access":"read_only_online","embedding":"metadata_only","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Some access flows require account sign-in; no license for copying assumed."},
-    {"id":"ASTM_IBR_READING","publisher":"ASTM","url":"https://www.astm.org/standards-and-solutions/standards-and-publications/reading-room","category":"standards_viewer","access":"federal_ibr_reading_room","embedding":"metadata_only","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Not all ASTM titles are available; federally incorporated edition may not be latest. Requires free account."},
-    {"id":"ASTM_E2018_24_INDEX","publisher":"ASTM","url":"https://store.astm.org/standards/e2018","category":"standard_index","access":"public_metadata","embedding":"metadata_only","edition_must_be_verified":true,"scope":["commercial"],"note":"Commercial baseline PCA standard title and edition; no full text licensed or imported."},
-    {"id":"ANSI_IBR","publisher":"ANSI","url":"https://ibr.ansi.org/","category":"standards_viewer","access":"federal_ibr_reading_room","embedding":"metadata_only","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Read only federally incorporated standards, not a complete Michigan code library."},
-    {"id":"MI_BCC_CODES","publisher":"Michigan LARA","url":"https://www.michigan.gov/lara/bureau-list/bcc/rules-acts","category":"government_index","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Check operative state code editions, litigation/stays and rule effective dates."},
-    {"id":"MI_BCC_OPEN_RULES","publisher":"Michigan LARA","url":"https://www.michigan.gov/lara/bureau-list/bcc/rules-acts/rules/currently-open","category":"government_status","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Includes residential and energy code litigation status; pending is not effective."},
-    {"id":"MI_BCC_JURISDICTIONS","publisher":"Michigan LARA","url":"https://www.michigan.gov/lara/bureau-list/bcc","category":"enforcement_directory","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Consult latest Statewide Jurisdiction List separately for building/electrical/mechanical/plumbing; temporal assistance may change."},
-    {"id":"MI_ADMIN_RULES","publisher":"Michigan LARA","url":"https://ars.apps.lara.state.mi.us/AdminCode/DeptBureauAdminCode?Bureau=Bureau+of+Construction+Codes&Department=Licensing+and+Regulatory+Affairs","category":"government_rules","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Official administrative rules and amendments; legal interpretation requires qualified verification."},
-    {"id":"CPSC_RECALL_API","publisher":"CPSC","url":"https://www.cpsc.gov/Recalls/CPSC-Recalls-Application-Program-Interface-API-Information","category":"recall_index","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":false,"scope":["residential","commercial"],"note":"A recall result requires exact model and affected serial/lot verification."},
-    {"id":"WESTLAND_BUILDING","publisher":"Westland","url":"https://www.cityofwestland.com/194/Building-Division","category":"municipal_building","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Official building division; AHJ role per trade and parcel must be independently confirmed."},
-    {"id":"WESTLAND_ORDINANCES","publisher":"Westland Municode","url":"https://library.municode.com/mi/westland","category":"municipal_ordinances","access":"official_link_reference","embedding":"metadata_only","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Code site notes the online publication may lag enacted ordinances. Not verified as complete for current parcel."},
-    {"id":"LIVONIA_INSPECTIONS","publisher":"Livonia","url":"https://www.ci.livonia.mi.us/","category":"municipal_building","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"City inspection code document last observed dated April 1 2025; reconfirm on inspection date."},
-    {"id":"DETROIT_CODES","publisher":"Detroit","url":"https://detroitmi.gov/departments/buildings-safety-engineering-and-environmental-department-bseed/bseed-divisions/construction-inspection/building-codes-ordinances-and-acts","category":"municipal_building","access":"official_public","embedding":"public_factual_metadata","edition_must_be_verified":true,"scope":["residential","commercial"],"note":"Prefer current code page to old construction page showing 2012 editions; conflicts require human resolution."}
+    {
+      "id": "ICC_DIGITAL_BASIC",
+      "publisher": "ICC",
+      "url": "https://codes.iccsafe.org/",
+      "category": "standards_viewer",
+      "access": "read_only_online",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Individual title access varies; basic view does not grant machine ingestion."
+    },
+    {
+      "id": "NFPA_FREE_VIEW",
+      "publisher": "NFPA",
+      "url": "https://www.nfpa.org/for-professionals/codes-and-standards",
+      "category": "standards_viewer",
+      "access": "read_only_online",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Some access flows require account sign-in; no license for copying assumed."
+    },
+    {
+      "id": "ASTM_IBR_READING",
+      "publisher": "ASTM",
+      "url": "https://www.astm.org/standards-and-solutions/standards-and-publications/reading-room",
+      "category": "standards_viewer",
+      "access": "federal_ibr_reading_room",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Not all ASTM titles are available; federally incorporated edition may not be latest. Requires free account."
+    },
+    {
+      "id": "ASTM_E2018_24_INDEX",
+      "publisher": "ASTM",
+      "url": "https://store.astm.org/standards/e2018",
+      "category": "standard_index",
+      "access": "public_metadata",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "commercial"
+      ],
+      "note": "Commercial baseline PCA standard title and edition; no full text licensed or imported."
+    },
+    {
+      "id": "ANSI_IBR",
+      "publisher": "ANSI",
+      "url": "https://ibr.ansi.org/",
+      "category": "standards_viewer",
+      "access": "federal_ibr_reading_room",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Read only federally incorporated standards, not a complete Michigan code library."
+    },
+    {
+      "id": "MI_BCC_CODES",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts",
+      "category": "government_index",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Check operative state code editions, litigation/stays and rule effective dates."
+    },
+    {
+      "id": "MI_BCC_OPEN_RULES",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/rules-acts/rules/currently-open",
+      "category": "government_status",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Includes residential and energy code litigation status; pending is not effective."
+    },
+    {
+      "id": "MI_BCC_JURISDICTIONS",
+      "publisher": "Michigan LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc",
+      "category": "enforcement_directory",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Consult latest Statewide Jurisdiction List separately for building/electrical/mechanical/plumbing; temporal assistance may change."
+    },
+    {
+      "id": "MI_ADMIN_RULES",
+      "publisher": "Michigan LARA",
+      "url": "https://ars.apps.lara.state.mi.us/AdminCode/DeptBureauAdminCode?Bureau=Bureau+of+Construction+Codes&Department=Licensing+and+Regulatory+Affairs",
+      "category": "government_rules",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Official administrative rules and amendments; legal interpretation requires qualified verification."
+    },
+    {
+      "id": "CPSC_RECALL_API",
+      "publisher": "CPSC",
+      "url": "https://www.cpsc.gov/Recalls/CPSC-Recalls-Application-Program-Interface-API-Information",
+      "category": "recall_index",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": false,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "A recall result requires exact model and affected serial/lot verification."
+    },
+    {
+      "id": "WESTLAND_BUILDING",
+      "publisher": "Westland",
+      "url": "https://www.cityofwestland.com/194/Building-Division",
+      "category": "municipal_building",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Official building division; AHJ role per trade and parcel must be independently confirmed."
+    },
+    {
+      "id": "WESTLAND_ORDINANCES",
+      "publisher": "Westland Municode",
+      "url": "https://library.municode.com/mi/westland",
+      "category": "municipal_ordinances",
+      "access": "official_link_reference",
+      "embedding": "metadata_only",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Code site notes the online publication may lag enacted ordinances. Not verified as complete for current parcel."
+    },
+    {
+      "id": "LIVONIA_INSPECTIONS",
+      "publisher": "Livonia",
+      "url": "https://www.ci.livonia.mi.us/",
+      "category": "municipal_building",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "City inspection code document last observed dated April 1 2025; reconfirm on inspection date."
+    },
+    {
+      "id": "DETROIT_CODES",
+      "publisher": "Detroit",
+      "url": "https://detroitmi.gov/departments/buildings-safety-engineering-and-environmental-department-bseed/bseed-divisions/construction-inspection/building-codes-ordinances-and-acts",
+      "category": "municipal_building",
+      "access": "official_public",
+      "embedding": "public_factual_metadata",
+      "edition_must_be_verified": true,
+      "scope": [
+        "residential",
+        "commercial"
+      ],
+      "note": "Prefer current code page to old construction page showing 2012 editions; conflicts require human resolution."
+    }
   ],
   "pilot_municipalities": [
-    {"county":"Wayne","municipality":"Westland","municipality_type":"city","source_ids":["WESTLAND_BUILDING","WESTLAND_ORDINANCES"],"four_trade_ahj_verified":false,"all_amendments_verified":false},
-    {"county":"Wayne","municipality":"Livonia","municipality_type":"city","source_ids":["LIVONIA_INSPECTIONS"],"four_trade_ahj_verified":false,"all_amendments_verified":false},
-    {"county":"Wayne","municipality":"Detroit","municipality_type":"city","source_ids":["DETROIT_CODES"],"four_trade_ahj_verified":false,"all_amendments_verified":false}
+    {
+      "county": "Wayne",
+      "municipality": "Westland",
+      "municipality_type": "city",
+      "source_ids": [
+        "WESTLAND_BUILDING",
+        "WESTLAND_ORDINANCES"
+      ],
+      "four_trade_ahj_verified": false,
+      "all_amendments_verified": false,
+      "directory_lead_levels": {
+        "building": "LOCAL",
+        "electrical": "LOCAL",
+        "mechanical": "LOCAL",
+        "plumbing": "LOCAL"
+      },
+      "directory_lead_revision": "2026-09-28",
+      "directory_lead_status": "PUBLISHED_DIRECTORY_LEAD_RECONFIRM_WITH_AHJ",
+      "directory_snapshot_sha256": null,
+      "directory_snapshot_verified": false
+    },
+    {
+      "county": "Wayne",
+      "municipality": "Livonia",
+      "municipality_type": "city",
+      "source_ids": [
+        "LIVONIA_INSPECTIONS"
+      ],
+      "four_trade_ahj_verified": false,
+      "all_amendments_verified": false,
+      "directory_lead_levels": {
+        "building": "LOCAL",
+        "electrical": "LOCAL",
+        "mechanical": "LOCAL",
+        "plumbing": "LOCAL"
+      },
+      "directory_lead_revision": "2026-09-28",
+      "directory_lead_status": "PUBLISHED_DIRECTORY_LEAD_RECONFIRM_WITH_AHJ",
+      "directory_snapshot_sha256": null,
+      "directory_snapshot_verified": false
+    },
+    {
+      "county": "Wayne",
+      "municipality": "Detroit",
+      "municipality_type": "city",
+      "source_ids": [
+        "DETROIT_CODES"
+      ],
+      "four_trade_ahj_verified": false,
+      "all_amendments_verified": false,
+      "directory_lead_levels": {
+        "building": "LOCAL",
+        "electrical": "LOCAL",
+        "mechanical": "LOCAL",
+        "plumbing": "LOCAL"
+      },
+      "directory_lead_revision": "2026-09-28",
+      "directory_lead_status": "PUBLISHED_DIRECTORY_LEAD_RECONFIRM_WITH_AHJ",
+      "directory_snapshot_sha256": null,
+      "directory_snapshot_verified": false
+    }
   ],
   "complete_michigan_municipalities_verified": 0,
   "licensed_full_text_embedded": 0,

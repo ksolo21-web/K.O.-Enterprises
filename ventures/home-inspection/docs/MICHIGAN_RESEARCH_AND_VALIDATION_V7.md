@@ -21,6 +21,8 @@ These links are source *locations*, not proof that full code texts or manuals ar
 
 ## Michigan rules and locality resolution
 
+The September 28, 2026 Statewide Jurisdiction List shows Westland, Livonia and Detroit as LOCAL in all four code disciplines, but these are publication-based research leads only, not confirmation for an individual property. No SHA-256 of the live PDF was obtained from the externally viewed link.
+
 The official Statewide Jurisdiction List distinguishes state, county and local enforcement *for each of building, electrical, mechanical, and plumbing*. There can be different authorities, effective dates and temporary assistance. The published directory must be rechecked for the specific case and date; a municipal page or a jurisdiction-list import cannot establish compliance for an existing property.
 
 The 2025 residential and residential-energy code litigation/stay requires tracking what is operative rather than treating a filed draft as effective. Historical requirements need a construction/permit/alteration date and occupancy context. A building code is generally not a retrospective unconditional condition rating.

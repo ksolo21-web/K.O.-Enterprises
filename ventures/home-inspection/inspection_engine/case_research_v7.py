@@ -102,6 +102,16 @@ def registry_validate(data):
         if not m.get('source_ids') or not set(m['source_ids'])<=keys:raise KnowledgeBlocked('Missing local references')
         if m.get('four_trade_ahj_verified') is not False or m.get('all_amendments_verified') is not False:
             raise KnowledgeBlocked('Pilot sources cannot self-certify full jurisdiction')
+        levels=m.get('directory_lead_levels')
+        if not isinstance(levels,dict) or set(levels)!=set(DISCIPLINES) or any(v not in ('LOCAL','STATE','COUNTY') for v in levels.values()):
+            raise KnowledgeBlocked('Local pilot must have four published directory leads')
+        if not all(v=='LOCAL' for v in levels.values()):
+            raise KnowledgeBlocked('Reviewed Wayne County pilot directory levels altered')
+        day(m.get('directory_lead_revision'))
+        if m.get('directory_lead_status')!='PUBLISHED_DIRECTORY_LEAD_RECONFIRM_WITH_AHJ':
+            raise KnowledgeBlocked('Published levels must not self-certify AHJ')
+        if m.get('directory_snapshot_verified') is not False or m.get('directory_snapshot_sha256') is not None:
+            raise KnowledgeBlocked('Do not invent a digest for the externally viewed PDF')
     for k in ('licensed_full_text_embedded','complete_michigan_municipalities_verified','professionally_adjudicated_field_cases'):
         if data.get(k)!=0:raise KnowledgeBlocked('Catalog cannot claim unproven complete coverage')
     return data
@@ -134,7 +144,10 @@ def case_research(case,*,registry=None):
            'authority_source_sha256':None,'amendments':'NOT_COMPLETE','adopted_edition':'UNVERIFIED'} for k in DISCIPLINES]
     return {'status':'RESEARCH_TASKS_OPEN','scope':case['building_type'],
             'locality':{'county':case['county'],'municipality':case['municipality'],'municipality_type':case['municipality_type'],
-                        'indexed_official_city_sources':bool(exact)},
+                        'indexed_official_city_sources':bool(exact),
+                        'state_published_directory_lead':dict(exact['directory_lead_levels']) if exact else None,
+                        'directory_revision':exact['directory_lead_revision'] if exact else None,
+                        'live_enforcement_and_temporary_assistance_reconfirmation_required':True},
             'enforcement':reqs,'official_sources':sources,
             'tasks':['Confirm local/county/state AHJ separately for each discipline, including effective date and temporary assistance',
                      'Check enacted ordinances, amendments and pending changes against current government record and municipal clerk',

@@ -132,3 +132,17 @@ class SourceAuthenticityV7Tests(unittest.TestCase):
   receipt=dict(source_id='MI_BCC_OPEN_RULES',discipline='building',edition='2015',section='R408.1',
    ahj_name='placeholder',jurisdiction_document_sha256='a'*64,evidence_sha256='b'*64,reviewer_id='human_1')
   with self.assertRaises(KnowledgeBlocked):verify_case_provision(receipt,c)
+
+class PublishedAHJLeadTests(unittest.TestCase):
+ def test_three_wayne_city_pilots_share_published_local_levels(self):
+  for municipality in ('Westland','Livonia','Detroit'):
+   d=case_research(dict(CASE,municipality=municipality))['locality']
+   self.assertEqual(d['state_published_directory_lead'],{k:'LOCAL' for k in ('building','electrical','mechanical','plumbing')})
+   self.assertEqual(d['directory_revision'],'2026-09-28')
+   self.assertTrue(d['live_enforcement_and_temporary_assistance_reconfirmation_required'])
+ def test_directory_lead_cannot_be_relabelled_verified(self):
+  a=deepcopy(registry_load());a['pilot_municipalities'][0]['directory_snapshot_verified']=True
+  with self.assertRaises(KnowledgeBlocked):registry_validate(a)
+ def test_unknown_location_has_no_guessed_directory_level(self):
+  d=case_research(dict(CASE,municipality='Not A City'))['locality']
+  self.assertIsNone(d['state_published_directory_lead'])
