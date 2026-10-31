@@ -1,0 +1,34 @@
+{
+  "scope": "SOURCE_FOUNDATION_AND_CONTROLLED_SYNTHETIC_INTEGRATION_ONLY",
+  "base_commit": "cb1a65084efe507c6cbe891996b58fd65059d8c0",
+  "local_tests": {
+    "passed": 617,
+    "seconds": 42.109
+  },
+  "independent_tests": {
+    "passed": 617,
+    "seconds": 41.968
+  },
+  "independent_critic": {
+    "score": 9.7,
+    "mandatory_blockers": []
+  },
+  "live_model_calls": 0,
+  "controlled_replay": {
+    "status": "SYNTHETIC_RECONCILIATION_COMPLETE_UNVERIFIED",
+    "execution_kind": "controlled_test",
+    "q03_decisions": 17,
+    "q03_live_call_completed": false,
+    "q03_status": "ADJUDICATION_HOLD",
+    "tool_lineage_verified": true,
+    "report_status": "INTERNAL DEMONSTRATION - NOT FOR CLIENT RELEASE",
+    "report_sha256": "b4a9feb13fe9d9edff078859dc1be2bda749222a907511b7b2b52c020464adec",
+    "full_milestone_2_approved": false,
+    "customer_release_allowed": false
+  },
+  "controlled_manifest_files": 56,
+  "report_pages_rendered_and_inspected": 13,
+  "full_m3_completed": false,
+  "field_accuracy_verified": false,
+  "customer_release_allowed": false
+}

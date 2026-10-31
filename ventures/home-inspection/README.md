@@ -64,3 +64,7 @@ The technical source is transferred and can be tested without any customer evide
 ### Assigned hazard and specialty work (v1.5.1)
 
 Explicitly scoped residential/commercial cases now carry assigned hazard/specialty tasks from specialist prompts through source-bound Q02 assessments and the shared Q03 ledger. Missing views and physical checks stay visible as report holds; task assignments are not findings or proof of inspection completion. Benchmark scoring counts every unverified/wrong-system prediction, and numeric success advances only to external evidence audit. See [the repair checkpoint](docs/CHECKPOINT_v1.5.1_KNOWLEDGE_WORKFLOW_REPAIRS.md) for scope fields, photo labels, validation and remaining limits.
+
+### Report-study foundation and three-role replay (v1.6)
+
+[Local reference import, comparison and correction capture](docs/M3_REPORT_STUDY_FOUNDATION.md) now preserve exact source quotes, ambiguous records, evidence-bound human declarations and holdout partitions. Lessons stay quarantined; no automatic training or release occurs. The [prepared M2 reconciliation replay](docs/M2_A09_RECONCILIATION_PREPARATION.md) adds Q03, an unreleased Option 2 PDF and saved evidence to the synthetic trial. See [the checkpoint](docs/CHECKPOINT_v1.6_REPORT_STUDY_AND_REPLAY.md) for verified tests and live-runtime blockers. M2 and full M3 remain unapproved.

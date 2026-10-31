@@ -36,8 +36,9 @@ def _distinct_video_sample_frames(first: Path, second: Path) -> bool:
     return different >= 20
 
 
-def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,reviewer=None,with_video=True)->dict:
+def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,reviewer=None,with_video=True,scope=None)->dict:
     """Writes only synthetic evidence and explicitly unapproved trial JSON under root."""
+    if scope not in (None,'residential','commercial'):raise DataError('Explicit trial scope must be residential/commercial')
     root=root.resolve()
     if root.exists():
         raise DataError('Refusing to overwrite an existing live-trial directory')
@@ -72,6 +73,7 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
                  'property':{'label':'Synthetic house drawing - not real evidence',
                              'inspection_date':'2026-10-30','synthetic':True},
                  'media':media,'observations':[],'findings':[],'equipment':[],'limitations':[]}
+        if scope:project['property']['building_type']=scope
         selected=['P0001']
         if with_video:
             frames=video_frames(project,root,'V0001',max_frames=2)
@@ -98,6 +100,9 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
             (root/'technical_review.json').write_text(json.dumps(reviewed,indent=2)+'\n')
             record['technical_review_items']=len(reviewed['items'])
             record['review_decisions']=reviewed['decision_summary']
+            record['coverage_review_items']=len(reviewed.get('coverage_items',[]))
+            record['coverage_missing_evidence_task_ids']=reviewed.get('coverage_missing_evidence_task_ids',[])
+            record['actual_q02_image_assessments']=reviewed.get('actual_image_assessments',len(reviewed['items']))
         else:
             record['technical_review_items']=0
             record['review_note']='No model-generated candidate: separate claim-specific review cannot execute'
