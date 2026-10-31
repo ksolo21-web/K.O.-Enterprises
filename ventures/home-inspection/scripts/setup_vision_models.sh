@@ -1,28 +1,23 @@
 #!/usr/bin/env bash
-# No additional accounts, no paid service. This downloads public model weights
-# ONLY when a user explicitly runs it on a computer with network access.
+# Operator-initiated, local-only installation and acceptance. Does not open the network.
+# Only the explicit `ollama pull` phase downloads public model weights.
 set -euo pipefail
 WRITER="${1:-qwen2.5vl:3b}"
 REVIEWER="${2:-granite3.2-vision:2b}"
-if [[ "${OLLAMA_HOST:-127.0.0.1:11434}" != "127.0.0.1:11434" && "${OLLAMA_HOST:-}" != "http://127.0.0.1:11434" ]]; then
-  echo 'STOP: Configure OLLAMA_HOST=127.0.0.1:11434 (loopback only).' >&2; exit 2
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "Python 3.12+ must be installed first." >&2; exit 2
 fi
 if ! command -v ollama >/dev/null 2>&1; then
-  echo 'Install official Ollama from https://ollama.com/download or https://ollama.com/download/linux then rerun.' >&2
-  exit 2
+  echo "Install official Ollama from https://ollama.com/download and rerun. No new account required." >&2; exit 2
 fi
-if ! python3 -c 'import PIL' >/dev/null 2>&1; then
-  echo 'Install Python dependencies from the project requirements.txt before running this script.' >&2; exit 2
-fi
-if ! python3 -m inspection_engine model-preflight --writer-model "$WRITER" --review-model "$REVIEWER" >/dev/null 2>&1; then
-  echo "Pulling writer model $WRITER (network download, no account required)"
-  ollama pull "$WRITER"
-  echo "Pulling reviewer model $REVIEWER (network download, no account required)"
-  ollama pull "$REVIEWER"
-fi
-python3 -m inspection_engine model-preflight --writer-model "$WRITER" --review-model "$REVIEWER"
 mkdir -p local-results
-# Unique output directory: prior evidence is never overwritten.
-PROOF_DIR="local-results/acceptance-$(date +%Y%m%d-%H%M%S)-$$"
-python3 -m scripts.run_vision_acceptance --writer-model "$WRITER" --review-model "$REVIEWER" --out-dir "$PROOF_DIR"
-echo "Acceptance evidence saved under $PROOF_DIR (synthetic only; field accuracy still unverified)."
+PROOF_DIR="local-results/activation-$(date +%Y%m%d-%H%M%S)-$$"
+if python3 -m scripts.activate_vision --out-dir "$PROOF_DIR" \
+  --writer-model "$WRITER" --review-model "$REVIEWER" \
+  --start-server --download-models --run-live-gate; then
+  echo "Activation record: $PROOF_DIR/activation_status.json"
+else
+  status=$?
+  echo "Activation blocked: $PROOF_DIR/activation_status.json" >&2
+  exit "$status"
+fi

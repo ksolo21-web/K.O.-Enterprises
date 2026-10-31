@@ -1,23 +1,13 @@
-# Requires separately installed official Ollama and Python dependencies; opt-in downloads.
-param([string]$Writer = 'qwen2.5vl:3b', [string]$Reviewer = 'granite3.2-vision:2b')
-$ErrorActionPreference = 'Stop'
-if ($env:OLLAMA_HOST -and $env:OLLAMA_HOST -notin @('127.0.0.1:11434', 'http://127.0.0.1:11434')) {
-  throw 'STOP: Configure OLLAMA_HOST=127.0.0.1:11434 (loopback only).'
-}
+# Operator-initiated, local-only install and acceptance. Public model weights download only by explicit invocation.
+param([string]$Writer='qwen2.5vl:3b',[string]$Reviewer='granite3.2-vision:2b')
+$ErrorActionPreference='Stop'
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
-  throw 'Install official Ollama from https://ollama.com/download/windows then rerun this script.'
+  throw 'Install Ollama from https://ollama.com/download/windows first. No new account required.'
 }
-python -c 'from PIL import Image'
-if ($LASTEXITCODE -ne 0) { throw 'Install Python dependencies from requirements.txt first.' }
-ollama pull $Writer
-if ($LASTEXITCODE -ne 0) { throw 'Writer model download failed.' }
-ollama pull $Reviewer
-if ($LASTEXITCODE -ne 0) { throw 'Reviewer model download failed.' }
-python -m inspection_engine model-preflight --writer-model $Writer --review-model $Reviewer
-if ($LASTEXITCODE -ne 0) { throw 'Vision model preflight failed.' }
 New-Item -Path local-results -ItemType Directory -Force | Out-Null
-$stamp = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + ([guid]::NewGuid().ToString('N').Substring(0,8))
-$proof = "local-results/acceptance-$stamp"
-python -m scripts.run_vision_acceptance --writer-model $Writer --review-model $Reviewer --out-dir $proof
-if ($LASTEXITCODE -ne 0) { throw "Local acceptance gate is blocked; see $proof/acceptance_status.json." }
-Write-Host "Synthetic acceptance evidence: $proof. Real property accuracy remains unverified."
+$stamp=(Get-Date -Format 'yyyyMMdd-HHmmss')+'-'+([guid]::NewGuid().ToString('N').Substring(0,8))
+$proof="local-results/activation-$stamp"
+python -m scripts.activate_vision --out-dir $proof --writer-model $Writer --review-model $Reviewer --start-server --download-models --run-live-gate
+$code=$LASTEXITCODE
+Write-Host "Full activation record: $proof/activation_status.json"
+if ($code -ne 0) { throw "Live acceptance remains blocked; see the activation record. Exit: $code" }
