@@ -98,12 +98,14 @@ def score_serious_defects(cases:list[dict], detections:list[dict]) ->dict:
     match_precision=len(accepted)/(len(accepted)+len(false_positives)) if accepted or false_positives else None
     pass_gate=(cohort_adequate and critical_total>0 and not critical_missed
                and not major_missed and match_precision is not None and match_precision>=0.95)
-    return {'status':'PILOT_HOLDOUT_GATE_PASSED_FIELD_VALIDATION_OPEN' if pass_gate else 'BLOCKED',
+    return {'status':'METRIC_THRESHOLDS_MET_EXTERNAL_REVIEW_PENDING' if pass_gate else 'BLOCKED',
             'cases':len(cases),'human_adjudicated_defects':len(label_by_key),
             'critical_defects':critical_total,'critical_recall':critical_recall,
             'critical_misses':critical_missed,'major_misses':major_missed,
             'all_misses':misses,'unmatched_or_unverified_predictions':false_positives,
             'human_verified_precision':match_precision,'per_system':dict(sorted(per_system.items())),
-            'minimum_cohort_met':cohort_adequate,'unrepresented_systems':sorted(SYSTEMS-distinct_systems),
-            'label_source':'QUALIFIED_INDEPENDENT_HUMAN',
+            'minimum_cohort_met':cohort_adequate,'metric_thresholds_met':bool(pass_gate),
+            'unrepresented_systems':sorted(SYSTEMS-distinct_systems),
+            'label_source':'DECLARED_PROFESSIONAL_ADJUDICATION_CREDENTIALS_NOT_AUTHENTICATED',
+            'professional_credentials_externally_verified':False,
             'guarantee_all_real_defects_found':False,'production_release_allowed':False}

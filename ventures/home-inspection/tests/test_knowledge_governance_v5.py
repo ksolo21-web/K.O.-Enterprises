@@ -228,3 +228,10 @@ class RiskHardeningTests(unittest.TestCase):
                 'permission_receipt_sha256':H,'expires_on':'2099-01-01',
                 'machine_indexing_authorized':True,'private_local_only':True}
             with self.assertRaises(LicenseBlock):prepare_licensed_reference(file,private_root=root,permission=perm)
+
+class PilotCredentialBoundaryTests(unittest.TestCase):
+    def test_small_positive_benchmark_does_not_authenticate_professional(self):
+        x=score_serious_defects([real_case()],[detected()])
+        self.assertFalse(x['professional_credentials_externally_verified'])
+        self.assertIn('CREDENTIALS_NOT_AUTHENTICATED',x['label_source'])
+        self.assertFalse(x['metric_thresholds_met'])
