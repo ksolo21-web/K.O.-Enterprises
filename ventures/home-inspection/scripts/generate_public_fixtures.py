@@ -7,6 +7,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import subprocess
+import tempfile
 from PIL import Image, ImageDraw
 
 
@@ -52,12 +53,30 @@ def generate(root: Path, video: bool) -> None:
     make_exterior(section/'demo_exterior.png')
     make_evidence(section/'demo_evidence.png')
     if video:
+        # Use distinctly changing pixels, not a static image repeated over time.
+        # Synthetic motion is essential: a still loop cannot test whether a model
+        # selects a video moment on the basis of temporally varying evidence.
         destination=section/'synthetic_moving_house_view.mp4'
-        cmd=['ffmpeg','-hide_banner','-loglevel','error','-y',
-             '-loop','1','-framerate','4','-i',str(image),
-             '-t','4','-vf','format=yuv420p','-c:v','libx264','-preset','ultrafast',
-             '-pix_fmt','yuv420p','-movflags','+faststart',str(destination)]
-        subprocess.run(cmd,check=True,capture_output=True,timeout=90)
+        with tempfile.TemporaryDirectory(prefix='.synthetic_frames_', dir=section) as folder:
+            frames=Path(folder)
+            with Image.open(image) as exterior:
+                base=exterior.convert('RGB')
+            for index in range(4):
+                frame=base.copy()
+                pen=ImageDraw.Draw(frame)
+                # First half: orange square. Second half: blue circle.
+                # Shape/color difference survives standard H.264 compression.
+                if index < 2:
+                    pen.rectangle((1340, 125, 1580, 365), fill=(245, 130, 24))
+                else:
+                    pen.ellipse((1340, 125, 1580, 365), fill=(24, 83, 228))
+                frame.save(frames/f'frame_{index:02d}.png', optimize=True)
+            cmd=['ffmpeg','-hide_banner','-loglevel','error','-nostdin','-y',
+                 '-framerate','1','-i',str(frames/'frame_%02d.png'),
+                 '-t','4','-vf','fps=4,format=yuv420p',
+                 '-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p',
+                 '-movflags','+faststart',str(destination)]
+            subprocess.run(cmd,check=True,capture_output=True,timeout=90)
     print('Generated synthetic fixtures in',e)
 
 if __name__=='__main__':

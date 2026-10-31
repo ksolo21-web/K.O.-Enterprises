@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+from PIL import Image
 import subprocess
 from pathlib import Path
 import sys
@@ -19,6 +20,20 @@ from inspection_engine.critic import review_specialist_dossier, CRITIC_SCHEMA, C
 from inspection_engine.vision import ollama_local
 from inspection_engine.local_runtime import preflight_models
 from scripts.generate_public_fixtures import generate
+
+
+def _distinct_video_sample_frames(first: Path, second: Path) -> bool:
+    """Confirm video actually varies; a repeated still is not temporal evidence.
+
+    This only tests the synthetic trial challenge, not property defects or model
+    interpretation. Downsampling avoids false differences from JPEG compression.
+    """
+    with Image.open(first) as a, Image.open(second) as b:
+        pixels_a = a.convert('RGB').resize((80, 48), Image.Resampling.BOX).tobytes()
+        pixels_b = b.convert('RGB').resize((80, 48), Image.Resampling.BOX).tobytes()
+    different = sum(sum(abs(pixels_a[i+j]-pixels_b[i+j]) for j in range(3)) > 90
+                    for i in range(0, len(pixels_a), 3))
+    return different >= 20
 
 
 def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,reviewer=None,with_video=True)->dict:
@@ -60,6 +75,10 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
         selected=['P0001']
         if with_video:
             frames=video_frames(project,root,'V0001',max_frames=2)
+            distinct=_distinct_video_sample_frames(root/frames[0]['path'],root/frames[1]['path'])
+            record['video_content_variation_verified']=distinct
+            if not distinct:
+                raise DataError('Synthetic video has no material change between sampled moments')
             selected.append(frames[0]['id'])
         staged,dossier=execute_specialists(project,root,writer,media_ids=selected,
                             provider_id='local-ollama:'+writer_model if live else 'controlled-test:'+writer_model)

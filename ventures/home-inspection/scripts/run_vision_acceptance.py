@@ -82,6 +82,7 @@ def run_acceptance(root: Path, writer_model: str, review_model: str,
         record['autonomous_zoom_request_count']=report.get('autonomous_zoom_request_count',0)
         record['autonomous_video_still_count']=report.get('autonomous_video_still_count',0)
         record['technical_review_items']=report.get('technical_review_items',0)
+        record['synthetic_video_temporal_change_verified']=bool(report.get('video_content_variation_verified',False))
         record['reviewer_visual_assessment_verified']=bool(real and report.get('reviewer_model_calls_completed'))
         record['live_specialist_tool_use_verified']=bool(real and report.get('autonomous_zoom_request_count',0)>0 and
                                                        (not with_video or report.get('autonomous_video_still_count',0)>0))
@@ -93,6 +94,8 @@ def run_acceptance(root: Path, writer_model: str, review_model: str,
             raise DataError('Real specialist did not choose a native-pixel zoom')
         if with_video and not record['autonomous_video_still_count']:
             raise DataError('Real specialist did not select a saved video photograph')
+        if with_video and not record['synthetic_video_temporal_change_verified']:
+            raise DataError('Synthetic video did not establish visibly changing source frames')
         if not real:
             raise DataError('Scripted providers cannot satisfy the live-model acceptance gate')
         if not report.get('real_model_invocations_completed') or not report.get('reviewer_model_calls_completed'):

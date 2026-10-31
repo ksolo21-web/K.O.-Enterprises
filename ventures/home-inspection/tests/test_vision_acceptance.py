@@ -75,6 +75,15 @@ class VisionAcceptanceTests(unittest.TestCase):
             with self.assertRaisesRegex(DataError,'different model'):
                 run_acceptance(Path(tmp)/'trial','same','same',preflight=fake_ready,smoke=fake_smoke,trial=fake_trial)
 
+    def test_nonchanging_video_cannot_pass_full_trial(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result=run_acceptance(Path(tmp)/'proof','a','b',
+                                  preflight=fake_ready,smoke=fake_smoke,trial=fake_trial)
+            self.assertEqual(result['status'],'BLOCKED')
+            self.assertFalse(result['synthetic_video_temporal_change_verified'])
+            self.assertIn('visibly changing',result['blocker'])
+            self.assertFalse(result['customer_release_allowed'])
+
     def test_no_video_never_passes_full_acceptance(self):
         with tempfile.TemporaryDirectory() as tmp:
             result=run_acceptance(Path(tmp)/'proof','a','b',preflight=fake_ready,smoke=fake_smoke,trial=fake_trial,with_video=False)
