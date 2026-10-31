@@ -1,0 +1,222 @@
+{
+  "schema_version": 2,
+  "guidance_version": "2026-10-31.v1",
+  "notice": "Observational prompts and limitations, not a defect detector or safety certification.",
+  "systems": {
+    "site": {
+      "feature_codes": [
+        "grading_drainage",
+        "surface_water_management",
+        "walks_drives_retaining"
+      ],
+      "visible_observation_examples": "Ground slopes, visible ponding/staining, paths and retaining walls",
+      "not_established_from_photographs": "Grading performance during storms, underground drainage, soil stability",
+      "safe_capture_and_review_guidance": "Document slopes and water patterns visually; recommend drainage review where warranted",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "foundation": {
+      "feature_codes": [
+        "foundation_type",
+        "foundation_material",
+        "support_configuration",
+        "visible_foundation_condition"
+      ],
+      "visible_observation_examples": "Visible foundation faces, cracks, penetrations and moisture marks",
+      "not_established_from_photographs": "Footings below grade, load-bearing adequacy, concealed foundation conditions",
+      "safe_capture_and_review_guidance": "Identify visible type/material only when exposed; structural interpretation needs specialist",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "subfloor": {
+      "feature_codes": [
+        "floor_platform_type",
+        "subfloor_material",
+        "visible_floor_supports"
+      ],
+      "visible_observation_examples": "Exposed floor platform and underside, visible moisture or damaged surfaces",
+      "not_established_from_photographs": "Concealed subfloor layers, fastening and load capacity",
+      "safe_capture_and_review_guidance": "Record material only from an unobstructed view; floor finish is not proof of subfloor composition",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "framing": {
+      "feature_codes": [
+        "exterior_wall_structure",
+        "floor_structure",
+        "roof_structure"
+      ],
+      "visible_observation_examples": "Exposed studs, joists, beams, roof members and obvious modifications",
+      "not_established_from_photographs": "Concealed framing, load paths and structural adequacy",
+      "safe_capture_and_review_guidance": "Describe visible framing only; unknown members remain unknown",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "exterior": {
+      "feature_codes": [
+        "cladding_type",
+        "flashing_openings",
+        "trim_decks_and_attached_features"
+      ],
+      "visible_observation_examples": "Visible cladding, trim, door/window flashings and attached assemblies",
+      "not_established_from_photographs": "Concealed WRB, attachment and cavity moisture",
+      "safe_capture_and_review_guidance": "Photograph seams/openings with wide context and close detail",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "roof": {
+      "feature_codes": [
+        "roof_covering",
+        "roof_geometry_and_structure",
+        "roof_drainage",
+        "roof_access_method"
+      ],
+      "visible_observation_examples": "Roof covering, penetrations, flashing, drainage and visible surface irregularities",
+      "not_established_from_photographs": "Remaining roof life, inaccessible roof deck and hidden leaks",
+      "safe_capture_and_review_guidance": "Record access method and visibility; a photo cannot certify leak-free performance",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "attic": {
+      "feature_codes": [
+        "attic_access",
+        "visible_roof_framing",
+        "insulation_type",
+        "ventilation_design"
+      ],
+      "visible_observation_examples": "Roof framing, visible insulation, stains, vent openings and obstructions",
+      "not_established_from_photographs": "R-values absent measurement, hidden condensation, structural adequacy",
+      "safe_capture_and_review_guidance": "Do not infer whole-attic condition from one access view",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "interior": {
+      "feature_codes": [
+        "walls_ceilings_floors",
+        "windows_doors_stairs",
+        "life_safety_observations"
+      ],
+      "visible_observation_examples": "Visible walls, floors, stairs, windows, doors and installed alarm devices",
+      "not_established_from_photographs": "Concealed wiring/plumbing, structural condition and alarm function unless tested",
+      "safe_capture_and_review_guidance": "Separate observed condition from operation or diagnostic claims",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "electrical": {
+      "feature_codes": [
+        "service_entry_type",
+        "panel_and_overcurrent",
+        "branch_wiring_visible",
+        "tested_devices_and_limitations"
+      ],
+      "visible_observation_examples": "Accessible labeled panel exterior, service entry and observed devices",
+      "not_established_from_photographs": "Live voltage, current safety, grounding continuity and concealed conductor types",
+      "safe_capture_and_review_guidance": "No invasive or energized testing instruction from the model; qualified electrical specialist referral",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "plumbing": {
+      "feature_codes": [
+        "visible_supply_materials",
+        "visible_drain_waste_vent",
+        "fixtures_and_water_controls"
+      ],
+      "visible_observation_examples": "Visible exposed piping, traps, fixtures and moisture evidence",
+      "not_established_from_photographs": "Concealed supply/drain runs, water quality and hidden leakage",
+      "safe_capture_and_review_guidance": "Material identification needs exposed segment; use evidence of actual tests for operation",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "water_heating": {
+      "feature_codes": [
+        "heater_type_and_energy",
+        "rating_plate_make_model_serial",
+        "venting_and_safety",
+        "visible_condition"
+      ],
+      "visible_observation_examples": "Heater type, visible piping/venting, rating plate make/model/serial",
+      "not_established_from_photographs": "Manufacture date absent clear plate, installation date, burner/combustion safety",
+      "safe_capture_and_review_guidance": "Use exact brand-specific date source and disclose cycle ambiguity; no warranty assumptions",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "hvac": {
+      "feature_codes": [
+        "heating_type",
+        "cooling_type",
+        "distribution_type",
+        "rating_plate_make_model_serial",
+        "operation_and_access_limitations"
+      ],
+      "visible_observation_examples": "Equipment identifiers, visible ducts, flues, condensate piping and exterior units",
+      "not_established_from_photographs": "Heating/cooling performance absent field testing, heat exchanger integrity and refrigerant data",
+      "safe_capture_and_review_guidance": "Separate manufacture age, installation date, service history and measured operation",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    },
+    "crawlspace": {
+      "feature_codes": [
+        "space_type_and_access",
+        "soil_moisture_and_vapor_control",
+        "supports_and_observed_structure"
+      ],
+      "visible_observation_examples": "Access conditions, exposed supports, moisture and vapor-barrier presence",
+      "not_established_from_photographs": "Hidden soil conditions, concealed framing, radon concentration and foundation performance",
+      "safe_capture_and_review_guidance": "Access limitation mandatory; radon and environmental risks require dedicated tests",
+      "no_automatic_diagnosis": true,
+      "requires_human_verification": true,
+      "reference_ids": [
+        "ASHI_CURRENT_SOP",
+        "INTERNACHI_RESIDENTIAL_SOP"
+      ]
+    }
+  }
+}

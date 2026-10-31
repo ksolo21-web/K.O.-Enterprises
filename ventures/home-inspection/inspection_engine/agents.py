@@ -21,6 +21,7 @@ from .capture import verify_custody, probe_video
 from .vision import normalized_image, validate_proposal, apply_predictions, UNSUPPORTED_ASSURANCES, CANDIDATE_SCHEMA
 from .zoom import create_zoom_views, validate_bbox, verify_zoom_record
 from .video_photos import capture_video_photos
+from .source_of_truth import build_knowledge_brief
 from .descriptors import REQUIRED_FEATURES
 
 
@@ -316,6 +317,7 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 'No customer release or self-approval is permitted.\n'
                 f'OUTPUT_JSON_SCHEMA: {json.dumps(schema,sort_keys=True)}\n'
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
+            prompt += '\n' + build_knowledge_brief(job['systems']) + '\n'
             response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
             candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])
             mapped=[]
