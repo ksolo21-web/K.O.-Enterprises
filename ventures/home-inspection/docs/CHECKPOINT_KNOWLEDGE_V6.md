@@ -8,14 +8,14 @@ Continue building the most competent, risk-aware Michigan-first residential and 
 ## Validated changes
 - New exact-source-host municipal catalog for Westland, Livonia, Detroit; four-discipline statewide-AHJ confirmation plan plus fire/zoning/maintenance follow-up, preserving Detroit publication conflicts.
 - Human-reviewed, private SHA-256 source snapshots and explicit same-URL change detection; never automatically update applicable codes, editions or municipal amendments based solely on altered website HTML.
-- Four official manufacturer literature portals and exact photographed model/manual provenance receipts. Never presume downloaded instructions grant full-text model-indexing rights.
+- Four official manufacturer literature portals, two actual A. O. Smith document-number index entries covering 18 model variants, and exact photographed model/manual provenance receipts. Never presume downloaded instructions grant full-text model-indexing rights.
 - Interior fireplace/hearth and garage-door tasks, separate commercial fire/life safety work orders; these do not silently certify full SOP inspections.
 - 13-system risk-triage sweep with differential hypotheses, appropriate referrals and pending human evidence checks; no `no defects` assertions from lack of imagery.
 - Existing Michigan agent reference packet now appends case-specific v6 municipal/specialty/triage context when the inspector provides municipality type, preserving all original specialist routing and authority. Missing municipality type fails closed without guessing city vs township.
 - Standalone read-only CLI for source-hashed coverage report; its nonzero exit is deliberate while legal and field gates remain open.
 
 ## Evidence and exclusions
-- **45/45** new v6 unit tests pass and **52/52** original v5 source-governance tests pass in the local reconstructed tree (97 focused checks total).
+- **50/50** new v6 unit tests pass and **52/52** original v5 source-governance tests pass in the local reconstructed tree (102 focused checks total).
 - A reconstructed earlier-source *whole-repository* local test attempt reports failures due to older agent implementation and absent baseline example files. Do not represent it as an integrated latest GitHub branch pass. A fresh complete GitHub branch checkout/CI validation is outstanding.
 - No customer evidence supplied, no actual authenticated AHJ municipality amendments, no full copyright-protected ICC/NFPA/ASTM machine-use rights, no verified exact-model manufacturer manual file for a real installed product, and no independently labeled field cohort. No real serious-defect accuracy metric can be claimed.
 - The date and source-index publisher metadata are not legal advice. Confirm effective edition, permits, occupancy, AHJ by trade and amendments for each real case.

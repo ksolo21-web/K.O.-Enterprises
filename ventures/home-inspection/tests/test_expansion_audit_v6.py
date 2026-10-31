@@ -5,6 +5,7 @@ class OfflineExpansionAudit(unittest.TestCase):
  def test_audit_has_counts_and_blocked_status(self):
   a=audit();self.assertEqual(a['indexed_pilot_municipalities'],3);self.assertEqual(a['manufacturer_official_portals'],4)
   self.assertEqual(a['hazard_systems_indexed'],13);self.assertEqual(a['supplemental_specialties_indexed'],3)
+  self.assertEqual(a['manufacturer_manual_titles_indexed'],2);self.assertEqual(a['manufacturer_model_listings_indexed'],18)
   self.assertFalse(a['customer_release_allowed'])
  def test_audit_declares_zero_licensed_full_text(self):
   a=audit();self.assertEqual(a['licensed_full_copyrighted_text_ingested'],0);self.assertEqual(a['exact_model_manuals_verified'],0)

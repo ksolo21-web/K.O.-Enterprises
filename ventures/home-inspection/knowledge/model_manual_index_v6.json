@@ -1,0 +1,31 @@
+{
+ "schema_version": 6,
+ "reviewed_on": "2026-10-31",
+ "purpose": "Exact-model-to-official-manual listing metadata only; no copyrighted full text or installation approval",
+ "documents": [
+  {
+   "id": "AOS_MANUAL_2000628591",
+   "publisher": "A. O. Smith",
+   "document_number": "2000628591",
+   "title": "Adapt+ Premium Condensing Tankless Water Heater Manual",
+   "official_index_url": "https://www.hotwater.com/find-documents-and-videos?cgid=literature-residential&prefn1=literatureType&prefv1=Manual",
+   "models": ["ATHR-160M 100","ATHR-160X3 100","ATHR-180M 100","ATHR-180X3 100","ATHR-199M 100","ATHR-199X3 100"],
+   "manual_content_retrieved": false,
+   "full_text_machine_rights_verified": false,
+   "installed_product_match_verified": false,
+   "source_type": "manufacturer_public_manual_listing"
+  },
+  {
+   "id": "AOS_MANUAL_100385425",
+   "publisher": "A. O. Smith",
+   "document_number": "100385425",
+   "title": "Adapt NC Non-Condensing Tankless Manual",
+   "official_index_url": "https://www.hotwater.com/find-documents-and-videos?cgid=literature-residential&prefn1=literatureType&prefv1=Manual",
+   "models": ["ATI-140B-N 100","ATI-140X3-N 100","ATI-180B-N 100","ATI-180X3-N 100","ATI-199B-N 100","ATI-199X3-N 100","ATO-140B-N 100","ATO-140X3-N 100","ATO-180B-N 100","ATO-180X3-N 100","ATO-199B-N 100","ATO-199X3-N 100"],
+   "manual_content_retrieved": false,
+   "full_text_machine_rights_verified": false,
+   "installed_product_match_verified": false,
+   "source_type": "manufacturer_public_manual_listing"
+  }
+ ]
+}

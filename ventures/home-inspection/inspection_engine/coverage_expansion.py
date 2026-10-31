@@ -282,3 +282,38 @@ def case_knowledge_packet(case:dict,system:str,*,include_specialties=True)->str:
             'alternative_explanation':risk['alternative_explanations'],
             'referral_to_consider':risk['referral']}
     return 'GOVERNED_CASE_RESEARCH_V6_JSON: '+json.dumps(packet,sort_keys=True,ensure_ascii=True)
+
+
+def lookup_indexed_model_manual(brand:str, model:str, *,path=None)->dict:
+    """Find exact official manufacturer listing, never presume a true installed match.
+
+    A document number and model list are public index metadata, NOT actual manual
+    text and NOT evidence that an appliance has a particular revision/serial.
+    """
+    data=json.loads(Path(path or BASE / 'model_manual_index_v6.json').read_text(encoding='utf-8'))
+    if data.get('schema_version')!=6 or not isinstance(data.get('documents'),list):
+        raise ReferenceBlock('Bad exact-model document index')
+    _day(data.get('reviewed_on'))
+    ids=set();found=[]
+    for item in data['documents']:
+        if item.get('id') in ids or not ID.fullmatch(item.get('id','')):
+            raise ReferenceBlock('Invalid or duplicate model document')
+        ids.add(item['id'])
+        if item.get('publisher')!='A. O. Smith' or item.get('source_type')!='manufacturer_public_manual_listing':
+            raise ReferenceBlock('Unverified manufacturer-index publisher')
+        if item.get('manual_content_retrieved') is not False or item.get('full_text_machine_rights_verified') is not False or item.get('installed_product_match_verified') is not False:
+            raise ReferenceBlock('Document index must not self-certify manual retrieval or rights')
+        if not re.fullmatch(r'[0-9]{5,12}',item.get('document_number','')):
+            raise ReferenceBlock('Invalid manufacturer document number')
+        if not isinstance(item.get('models'),list) or not item['models'] or len(set(item['models']))!=len(item['models']):
+            raise ReferenceBlock('Missing or duplicate model applicability')
+        _web(item.get('official_index_url'),'www.hotwater.com')
+        if not isinstance(item.get('title'),str) or not item['title'].strip():
+            raise ReferenceBlock('Missing manufacturer document identity')
+        if brand=='A. O. Smith' and model in item['models']:
+            found.append({'index_id':item['id'],'manual_document_number':item['document_number'],
+                          'official_index_url':item['official_index_url'],'title':item['title']})
+    if len(found)>1:raise ReferenceBlock('Multiple manual identifiers match; human revision adjudication required')
+    return {'status':'OFFICIAL_MODEL_LISTING_FOUND_MANUAL_NOT_VERIFIED' if found else 'EXACT_MODEL_NOT_IN_INDEX',
+            'brand':brand,'model':model,'candidates':found,'manual_file_verified':False,
+            'serial_or_revision_confirmed':False,'full_text_embedded':False,'customer_release_allowed':False}

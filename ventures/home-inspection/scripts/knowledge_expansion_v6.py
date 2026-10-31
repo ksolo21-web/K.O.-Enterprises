@@ -12,6 +12,7 @@ from pathlib import Path
 from inspection_engine.coverage_expansion import (
     CATALOGS, BASE, load_expansion, plan_municipal_verification,
     specialty_work_orders, ReferenceBlock)
+from inspection_engine.coverage_expansion import lookup_indexed_model_manual
 from inspection_engine.hazard_sweep import CATALOG, load_hazard_sweep,plan_hazard_sweep
 from inspection_engine.sop_scope import audit_sop_scope
 
@@ -23,6 +24,9 @@ def audit(case=None):
     hashes={kind:hashlib.sha256((BASE/path).read_bytes()).hexdigest()
             for kind,path in CATALOGS.items()}
     hashes['critical_hazards']=hashlib.sha256(CATALOG.read_bytes()).hexdigest()
+    manual_index=BASE/'model_manual_index_v6.json'
+    hashes['model_manual_index']=hashlib.sha256(manual_index.read_bytes()).hexdigest()
+    exact_model_docs=json.loads(manual_index.read_text())['documents']
     municipal=catalogs['municipal']['locations']
     manufacturers=catalogs['manufacturers']['portals']
     supplemental=catalogs['specialties']['topics']
@@ -33,6 +37,8 @@ def audit(case=None):
         'case_specific_ahj_verifications':sum(r['verified_case_ahj'] for r in municipal),
         'manufacturer_official_portals':len(manufacturers),
         'exact_model_manuals_verified':sum(r['manuals_locally_verified'] for r in manufacturers),
+        'manufacturer_model_listings_indexed':sum(len(x['models']) for x in exact_model_docs),
+        'manufacturer_manual_titles_indexed':len(exact_model_docs),
         'supplemental_specialties_indexed':len(supplemental),
         'supplemental_specialties_operationally_inspected':0,
         'sop_unresolved_mapping_topics':len(s['unresolved_topics']),

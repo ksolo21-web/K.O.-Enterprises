@@ -132,3 +132,25 @@ class SpecialistTests(unittest.TestCase):
   self.assertNotIn('GOVERNED_CASE_RESEARCH_V6_JSON',x)
 
 if __name__=='__main__':unittest.main()
+
+from inspection_engine.coverage_expansion import lookup_indexed_model_manual
+class ExactManufacturerIndexV6(unittest.TestCase):
+ def test_known_aos_tankless_model_maps_to_document(self):
+  r=lookup_indexed_model_manual('A. O. Smith','ATHR-160M 100')
+  self.assertEqual(r['candidates'][0]['manual_document_number'],'2000628591')
+  self.assertFalse(r['manual_file_verified'])
+ def test_other_aos_series_maps_to_separate_document(self):
+  r=lookup_indexed_model_manual('A. O. Smith','ATO-199X3-N 100')
+  self.assertEqual(r['candidates'][0]['manual_document_number'],'100385425')
+ def test_no_cross_brand_guess(self):
+  r=lookup_indexed_model_manual('Carrier','ATHR-160M 100');self.assertFalse(r['candidates'])
+ def test_model_guess_is_not_installed_evidence(self):
+  r=lookup_indexed_model_manual('A. O. Smith','ATHR-160M')
+  self.assertEqual(r['status'],'EXACT_MODEL_NOT_IN_INDEX')
+ def test_tampered_catalog_rights_refused(self):
+  import tempfile
+  source=Path(__file__).resolve().parents[1]/'knowledge/model_manual_index_v6.json'
+  d=json.loads(source.read_text());d['documents'][0]['full_text_machine_rights_verified']=True
+  with tempfile.TemporaryDirectory() as root:
+   p=Path(root)/'fake.json';p.write_text(json.dumps(d))
+   with self.assertRaises(ReferenceBlock):lookup_indexed_model_manual('A. O. Smith','ATHR-160M 100',path=p)
