@@ -10,7 +10,7 @@ from .capture import intake_files, video_frames, verify_custody
 from .vision import analyze_media, analyze_zoom_views, ollama_local, apply_predictions
 from .zoom import create_zoom_views, grid_regions, zoom_from_predictions
 from .video_photos import capture_video_photos, verify_selected_photo_pixels
-from .agents import plan_specialists, execute_specialists, SPECIALIST_SCHEMA
+from .agents import plan_specialists, execute_specialists
 from .critic import review_specialist_dossier, CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
 from .local_runtime import preflight_models
 from .model_smoke import smoke_probe
@@ -166,8 +166,8 @@ def main():
     elif args.command=='agents-run':
         _check_new_path(args.out_project,root)
         _check_new_path(args.dossier,root)
-        provider=lambda data,prompt:ollama_local(data,prompt,args.model,schema=SPECIALIST_SCHEMA)
-        reviewed,dossier=execute_specialists(doc,root,provider,media_ids=args.media_ids,
+        provider=lambda data,prompt,*,schema:ollama_local(data,prompt,args.model,schema=schema)
+        reviewed,dossier=execute_specialists(doc,root,provider,media_ids=args.media_ids,provider_accepts_schema=True,
                                 provider_id=f'local-ollama:{args.model}')
         # No project write if a control check fails. Review dossier can still be saved
         # separately by a bounded operator, but this command fails closed.

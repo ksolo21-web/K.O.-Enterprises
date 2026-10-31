@@ -14,7 +14,6 @@ import time
 
 from inspection_engine.core import DataError, safe_path
 from inspection_engine.vision import ollama_local, MAX_MODEL_REPLY
-from inspection_engine.agents import SPECIALIST_SCHEMA
 from inspection_engine.critic import CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
 
 
@@ -40,7 +39,10 @@ class TrialRecorder:
         _write(self.root / f'event-{self.event_count:04d}.json', value)
 
     def provider(self, role: str, model: str, controlled_provider=None):
-        def call(image: bytes, prompt: str) -> dict:
+        def call(image: bytes, prompt: str, *, schema=None) -> dict:
+            if role=='writer' and not isinstance(schema,dict):
+                raise DataError('Writer requires an explicit scoped generation schema')
+            effective_schema=schema if role=='writer' else CRITIC_SCHEMA
             self.call_count += 1
             prefix = f'{self.call_count:04d}-{role}'
             image_name = prefix + '.jpg'
@@ -50,7 +52,9 @@ class TrialRecorder:
                        'execution_kind':'local_ollama' if self.live else 'controlled_test',
                        'started_utc':datetime.now(timezone.utc).isoformat(),
                        'image_path':image_name, 'image_sha256':hashlib.sha256(image).hexdigest(),
-                       'prompt':prompt, 'prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest()}
+                       'prompt':prompt, 'prompt_sha256':hashlib.sha256(prompt.encode()).hexdigest(),
+                       'generation_schema':effective_schema,
+                       'generation_schema_sha256':hashlib.sha256(json.dumps(effective_schema,sort_keys=True,separators=(',',':')).encode()).hexdigest()}
             _write(self.root / (prefix + '.request.json'), request)
             response = {'call_id':prefix, 'role':role, 'model':model,
                         'execution_kind':request['execution_kind'],
@@ -75,7 +79,7 @@ class TrialRecorder:
             try:
                 if self.live:
                     answer = ollama_local(image, prompt, model, timeout=180,
-                        schema=SPECIALIST_SCHEMA if role=='writer' else CRITIC_SCHEMA,
+                        schema=effective_schema,
                         system_prompt=None if role=='writer' else CRITIC_SYSTEM_PROMPT,
                         response_audit=envelope)
                 else:

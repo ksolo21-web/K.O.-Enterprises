@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
-from inspection_engine.agents import ROLES, SYSTEM_OWNER, ROLE_BY_ID, plan_specialists, execute_specialists, _review_dossier
+from inspection_engine.agents import ROLES, SYSTEM_OWNER, ROLE_BY_ID, plan_specialists, execute_specialists, _review_dossier, specialist_schema
 from inspection_engine.core import DataError, SYSTEM_NAME, sha256, blockers, validate_project
 
 SOURCE=Path(__file__).resolve().parents[1]/'examples'/'v05_photo_from_video'
@@ -85,6 +85,75 @@ class SpecialistTests(unittest.TestCase):
                     'requests':[]}
         with self.assertRaisesRegex(DataError,'Feature code must belong'):
             execute_specialists(self.doc,self.root,model,media_ids=['P0001'])
+
+    def test_actual_a06_missing_feature_field_remains_rejected(self):
+        # Exact rejected A06 answer: do not infer a feature code from description.
+        answer={'candidates':[
+            {'type':'feature','system':'exterior','description':'cladding_type','status':'unknown'},
+            {'type':'feature','system':'exterior','description':'trim_decks_and_attached_features','status':'unknown'}],
+            'requests':[{'kind':'zoom','bbox':[0,0,1,1]}]}
+        with self.assertRaisesRegex(DataError,'Feature code must belong'):
+            execute_specialists(self.doc,self.root,lambda i,p:answer,media_ids=['P0001'])
+        self.assertEqual(self.doc['observations'],[])
+
+    def test_schema_opt_in_reaches_actual_ollama_request(self):
+        from unittest.mock import patch
+        from inspection_engine.vision import ollama_local
+        seen=[]
+        def transport(method,path,request,**kw):
+            seen.append(request)
+            return {'done':True,'response':json.dumps({'candidates':[],'requests':[]})}
+        with patch('inspection_engine.vision.local_json',transport):
+            execute_specialists(self.doc,self.root,
+                lambda image,prompt,*,schema:ollama_local(image,prompt,'test-model',schema=schema),
+                media_ids=['P0001'],provider_accepts_schema=True)
+        request=seen[0]
+        schema=request['format']
+        branches=schema['properties']['candidates']['items']['anyOf']
+        features=[b for b in branches if b['properties']['type']['enum']==['feature']]
+        self.assertEqual(len(features),1)
+        self.assertIn('feature_code',features[0]['required'])
+        self.assertEqual(features[0]['properties']['system']['enum'],['exterior'])
+        self.assertIn('cladding_type',features[0]['properties']['feature_code']['enum'])
+        self.assertNotIn('roof_covering',features[0]['properties']['feature_code']['enum'])
+        concerns=[b for b in branches if b['properties']['type']['enum']==['potential_concern']]
+        self.assertNotIn('feature_code',concerns[0]['properties'])
+        self.assertFalse(concerns[0]['additionalProperties'])
+        grounded=json.loads(request['prompt'].split('OUTPUT_JSON_SCHEMA: ')[1].splitlines()[0])
+        self.assertEqual(schema,grounded)
+        self.assertIn('[0,0,1,1] is unchanged',request['prompt'])
+
+    def test_work_order_cannot_claim_other_system_within_same_role(self):
+        with self.assertRaisesRegex(DataError,'outside delegated systems'):
+            execute_specialists(self.doc,self.root,lambda i,p:{'candidates':[
+                dict(self._feature(),system='roof',feature_code='roof_covering')],
+                'requests':[]},media_ids=['P0001'])
+
+    def test_invalid_schema_opt_in_stops_before_provider(self):
+        calls=[]
+        with self.assertRaisesRegex(DataError,'must be a boolean'):
+            execute_specialists(self.doc,self.root,lambda *a:calls.append(a),
+                media_ids=['P0001'],provider_accepts_schema=1)
+        self.assertEqual(calls,[])
+
+    def test_multi_system_schema_keeps_codes_coupled_and_actions_disjoint(self):
+        from inspection_engine.descriptors import REQUIRED_FEATURES
+        schema=specialist_schema(['plumbing','water_heating'],video_duration=4.0)
+        for branch in schema['properties']['candidates']['items']['anyOf']:
+            system=branch['properties']['system']['enum'][0]
+            if branch['properties']['type']['enum']==['feature']:
+                self.assertEqual(branch['properties']['feature_code']['enum'],list(REQUIRED_FEATURES[system]))
+        actions=schema['properties']['requests']['items']['anyOf']
+        self.assertEqual(actions[0]['required'],['kind','bbox'])
+        self.assertNotIn('timestamp_seconds',actions[0]['properties'])
+        self.assertEqual(actions[1]['required'],['kind','timestamp_seconds'])
+        self.assertNotIn('bbox',actions[1]['properties'])
+        self.assertEqual(actions[1]['properties']['timestamp_seconds']['exclusiveMaximum'],4.0)
+        photo_actions=specialist_schema(['exterior'])['properties']['requests']['items']['anyOf']
+        self.assertEqual(len(photo_actions),1)
+        self.assertEqual(photo_actions[0]['properties']['kind']['enum'],['zoom'])
+        for invalid in (0,-1,float('inf'),float('nan'),True):
+            with self.assertRaises(DataError):specialist_schema(['exterior'],video_duration=invalid)
 
     def test_standalone_photo_context_never_invents_video_or_forces_tool(self):
         seen=[]

@@ -67,7 +67,9 @@ AREA_SYSTEMS = {
 }
 
 
-# Optional local vision-model output format; app-side validation is authoritative.
+# Legacy generic format retained for importing clients. Live specialist entry
+# points use specialist_schema() for the narrower trusted work-order contract.
+# App-side validation is authoritative for both paths.
 SPECIALIST_SCHEMA = {
     'type':'object',
     'properties': {
@@ -80,6 +82,47 @@ SPECIALIST_SCHEMA = {
     },
     'required':['candidates','requests']
 }
+
+def specialist_schema(systems: list[str], *, video_duration: float | None = None) -> dict:
+    """Generation contract for one trusted work order; validation stays authoritative.
+
+    Feature and concern alternatives cannot exchange fields. Each feature code is
+    coupled to its own system rather than the union of a role's wider remit.
+    """
+    if not systems or len(systems)!=len(set(systems)) or any(s not in REQUIRED_FEATURES for s in systems):
+        raise DataError('Schema requires known unique delegated systems')
+    box={'type':'array','items':{'type':'number','minimum':0,'maximum':1},'minItems':4,'maxItems':4}
+    alternatives=[]
+    for system in systems:
+        for kind in ('feature','potential_concern'):
+            properties={
+                'type':{'type':'string','enum':[kind]},
+                'system':{'type':'string','enum':[system]},
+                'description':{'type':'string','minLength':1,'maxLength':320},
+                'location':{'type':'string','minLength':1,'maxLength':100},
+                'status':{'type':'string','enum':['observed','partially_observed','unknown']},
+                'bbox':deepcopy(box)}
+            required=['type','system','description','status']
+            if kind=='feature':
+                properties['feature_code']={'type':'string','enum':list(REQUIRED_FEATURES[system])}
+                required.append('feature_code')
+            alternatives.append({'type':'object','properties':properties,
+                                 'required':required,'additionalProperties':False})
+    actions=[{'type':'object','properties':{
+        'kind':{'type':'string','enum':['zoom']},'bbox':deepcopy(box)},
+        'required':['kind','bbox'],'additionalProperties':False}]
+    if video_duration is not None:
+        import math
+        if type(video_duration) not in (int,float) or not math.isfinite(video_duration) or video_duration<=0:
+            raise DataError('Video schema requires a positive finite duration')
+        actions.append({'type':'object','properties':{
+            'kind':{'type':'string','enum':['video_still']},
+            'timestamp_seconds':{'type':'number','minimum':0,'exclusiveMaximum':video_duration}},
+            'required':['kind','timestamp_seconds'],'additionalProperties':False})
+    return {'type':'object','properties':{
+        'candidates':{'type':'array','maxItems':12,'items':{'anyOf':alternatives}},
+        'requests':{'type':'array','maxItems':1,'items':{'anyOf':actions}}},
+        'required':['candidates','requests'],'additionalProperties':False}
 
 def plan_specialists(document: dict, media_ids: list[str] | None = None, *, max_jobs: int = 24) -> dict:
     """Create explicit, reproducible work orders from inspector-assigned areas.
@@ -120,11 +163,11 @@ def plan_specialists(document: dict, media_ids: list[str] | None = None, *, max_
             'status':'PLAN_NOT_INSPECTION'}
 
 
-def _provider_envelope(response:dict, role:Role, media:dict) -> tuple[list[dict],list[dict]]:
-    if not isinstance(response,dict) or set(response)-{'candidates','requests'}:
+def _provider_envelope(response:dict, role:Role, media:dict, *, systems=None) -> tuple[list[dict],list[dict]]:
+    if not isinstance(response,dict) or set(response)!={'candidates','requests'}:
         raise DataError('Specialist result must contain only candidates and requests')
     candidates=validate_proposal({'candidates':response.get('candidates',[])},media)
-    if any(c['system'] not in role.systems for c in candidates):
+    if any(c['system'] not in (systems if systems is not None else role.systems) for c in candidates):
         raise DataError('Specialist attempted findings outside delegated systems')
     requests=response.get('requests',[])
     if not isinstance(requests,list) or len(requests)>1:
@@ -183,20 +226,24 @@ def _review_dossier(dossier:dict,doc:dict,root:Path)->dict:
     return {'Q01':q01,'Q02':q02}
 
 
-def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],dict],
+def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                        *,media_ids:list[str],provider_id:str='fixture-provider',max_jobs:int=24,
-                       audit_event=None) -> tuple[dict,dict]:
+                       audit_event=None, provider_accepts_schema:bool=False) -> tuple[dict,dict]:
     """Exercise actual bounded specialist dispatch with a caller-supplied provider.
 
     Model may request native source zoom or saving a native still from a video.
     Every result remains an unverified provisional draft. Inputs are copied;
     model cannot invoke shell, network, approvals or arbitrary file operations.
     Output media/crops are locally saved via existing validated evidence tools.
+    Explicit schema opt-in passes a trusted per-work-order keyword; ordinary
+    two-argument providers retain the existing controlled replay interface.
     """
     if not isinstance(provider_id,str) or not 1<=len(provider_id)<=85:
         raise DataError('Provider identification required')
     if audit_event is not None and not callable(audit_event):
         raise DataError('Evidence event recorder must be callable')
+    if type(provider_accepts_schema) is not bool:
+        raise DataError('Schema provider opt-in must be a boolean')
     root=root.resolve()
     validate_project(document,root)
     if verify_custody(document,root):raise DataError('Cannot route evidence with invalid custody')
@@ -245,24 +292,28 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                                 'video_duration_seconds':info['duration_seconds'],
                                 'valid_requested_time_range':'0 <= timestamp_seconds < video_duration_seconds',
                                 'unseen_moments_are_not_visually_assessed':True})
+            schema=specialist_schema(job['systems'],video_duration=context.get('video_duration_seconds'))
             prompt=(f'ROLE {role.id}: {role.title}. Manager M00. Delegated systems: {json.dumps(job["systems"])}. '
                 f'Only these exact system-to-feature_code values are permitted: {json.dumps(allowed_feature_codes,sort_keys=True)}. '
                 f'Work order {job["id"]}; evidence ID {target["id"]}; area assigned by inspector {target["area"]}; '
                 f'normalized original-image region {current_region}. '
                 'Strictly observe only visible pixels. No concealed structure, operation, safety, code or defect-free conclusions. '
                 'Return JSON with candidates and requests only. For type=feature, choose feature_code exactly from the listed system map; '
+                'feature_code is a REQUIRED separate field; description must describe visible evidence in plain language, not repeat the feature code. '
                 'for type=potential_concern, omit feature_code. Never create new feature codes or claim a concealed detail. '
                 'If no permitted feature is visibly supported, return no feature candidate. '
                 'Candidate bboxes are normalized to the CURRENT view. '
                 'Allowed requests: zoom with bbox [left,top,right,bottom] within current view, '
                 'or video_still with timestamp_seconds if this photo came from an existing video. '
                 'Choose at most one request. Ask for better evidence rather than guessing. '
+                'A zoom must be a strictly smaller useful subregion of the current view (area below 98%); [0,0,1,1] is unchanged and will be rejected. '
                 'Tool choices are optional; no particular zoom region or timestamp is prescribed. '
                 'Video metadata is not visual evidence of unseen moments. '
                 'No customer release or self-approval is permitted.\n'
+                f'OUTPUT_JSON_SCHEMA: {json.dumps(schema,sort_keys=True)}\n'
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
-            response=provider(image,prompt)
-            candidates,requests=_provider_envelope(response,role,target)
+            response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
+            candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])
             mapped=[]
             for candidate in candidates:
                 proposed=deepcopy(candidate)

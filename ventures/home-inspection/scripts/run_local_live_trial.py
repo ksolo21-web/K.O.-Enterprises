@@ -82,7 +82,7 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
             selected.append(frames[0]['id'])
         staged,dossier=execute_specialists(project,root,writer,media_ids=selected,
                             provider_id='local-ollama:'+writer_model if live else 'controlled-test:'+writer_model,
-                            audit_event=recorder.event)
+                            audit_event=recorder.event,provider_accepts_schema=True)
         (root/'staged_project.json').write_text(json.dumps(staged,indent=2)+'\n')
         (root/'specialist_dossier.json').write_text(json.dumps(dossier,indent=2)+'\n')
         record.update({'specialist_work_orders':len(dossier['plan']['jobs']),

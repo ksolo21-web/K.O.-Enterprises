@@ -32,6 +32,9 @@ class FailedTrialEvidenceTests(unittest.TestCase):
             self.assertEqual(reply['status'],'RETURNED_UNVALIDATED_DATA')
             self.assertEqual(hashlib.sha256((root/'invocations'/request['image_path']).read_bytes()).hexdigest(),request['image_sha256'])
             self.assertEqual(hashlib.sha256(request['prompt'].encode()).hexdigest(),request['prompt_sha256'])
+            schema=request['generation_schema']
+            self.assertEqual(hashlib.sha256(json.dumps(schema,sort_keys=True,separators=(',',':')).encode()).hexdigest(),request['generation_schema_sha256'])
+            self.assertIn('feature_code',schema['properties']['candidates']['items']['anyOf'][0]['required'])
             self.assertEqual(reply['execution_kind'],'controlled_test')
             self.assertEqual(result['invocation_audit']['completed_live_calls'],{'writer':0,'reviewer':0})
             self.assertFalse((root/'technical_review.json').exists())
