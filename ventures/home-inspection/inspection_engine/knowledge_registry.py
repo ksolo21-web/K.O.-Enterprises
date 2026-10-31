@@ -201,7 +201,7 @@ def verify_recall_match(match:dict)->dict:
             'qualified_review_required':True,'customer_release_allowed':False}
 
 
-def safe_agent_reference_brief(property_context:dict,systems:list[str])->str:
+def _safe_agent_reference_brief_v6(property_context:dict,systems:list[str])->str:
     """Never drop original work orders because county or permit facts are missing.
 
     Instead make unverified AHJ explicit in the LLM context, with no code verdict.
@@ -233,3 +233,20 @@ def safe_agent_reference_brief(property_context:dict,systems:list[str])->str:
     except ReferenceBlock:
         return ('MICHIGAN_AHJ_REFERENCE_STATUS: UNVERIFIED_OR_INVALID_CASE; '
                 'no code conclusion, request qualified authority review')
+
+
+def safe_agent_reference_brief(property_context:dict,systems:list[str])->str:
+    """v5/v6 context preserved; add v7 official-read-access policy and case gates.
+
+    No model-supplied string can become an authoritative code provision solely
+    by appearing in the specialist prompt. Private licensed text is never copied.
+    """
+    previous=_safe_agent_reference_brief_v6(property_context,systems)
+    if not isinstance(property_context,dict) or property_context.get('state') not in ('MI','Michigan'):
+        return previous
+    from .case_research_v7 import agent_brief_v7
+    scope={'residential_one_two_family':'residential','residential':'residential',
+           'commercial':'commercial','commercial_general':'commercial','commercial_pca':'commercial'}
+    case=dict(property_context)
+    case['building_type']=scope.get(case.get('building_type'),case.get('building_type'))
+    return previous+'\n'+agent_brief_v7(case,systems)
