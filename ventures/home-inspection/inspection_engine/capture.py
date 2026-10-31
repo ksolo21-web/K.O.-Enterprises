@@ -130,6 +130,38 @@ def intake_files(document:dict,root:Path,files:list[Path],area:str, room:str='')
         raise
 
 
+def decode_video_frame(source: Path, destination: Path, requested: float, *,
+                       preview: bool=False, timeout: int=90) -> float:
+    """Decode one source-timeline frame with a unique FFmpeg PTS attestation.
+
+    Normalizing stream PTS avoids cross-version differences in input/output
+    seek timestamp resets. The select filter emits only the first decoded
+    frame at or after the requested time, not speculative codec prefetch.
+    """
+    if not math.isfinite(requested) or requested < 0:
+        raise DataError('Invalid frame selection time')
+    vf=(f"setpts=PTS-STARTPTS,select='gte(t\\,{requested:.6f})*isnan(prev_selected_t)',"
+        "showinfo")
+    if preview:
+        vf+=',scale=w=1280:h=1280:force_original_aspect_ratio=decrease'
+    cmd=['ffmpeg','-hide_banner','-nostdin','-loglevel','info',
+         '-i',str(source),'-vf',vf,'-frames:v','1',
+         '-fps_mode','passthrough']
+    if preview:
+        cmd+=['-q:v','3']
+    else:
+        cmd+=['-c:v','png']
+    cmd+=['-y',str(destination)]
+    _,stderr=run_command(cmd,timeout=timeout,with_stderr=True)
+    times=re.findall(rb'pts_time:([0-9]+(?:\.[0-9]+)?)',stderr)
+    if len(times)!=1:
+        raise DataError('Decoder did not attest one unambiguous selected source frame')
+    actual=round(float(times[0]),6)
+    if not destination.is_file() or destination.stat().st_size==0:
+        raise DataError('Decoder did not produce the selected video frame')
+    return actual
+
+
 def video_frames(document:dict,root:Path,video_id:str,max_frames:int=6)->list[dict]:
     """Extract evenly spaced representative stills, recording parent hash/time.
 
@@ -157,14 +189,8 @@ def video_frames(document:dict,root:Path,video_id:str,max_frames:int=6)->list[di
             with tempfile.NamedTemporaryFile(dir=frame_dir,prefix='.frame_',suffix='.jpg',delete=False) as handle:
                 tmp=Path(handle.name)
             staged.append((tmp,dst))
-            _, diagnostic=run_command(['ffmpeg','-hide_banner','-loglevel','info','-nostdin',
-                         '-copyts','-ss',f'{second:.3f}','-i',str(src),'-frames:v','1',
-                         '-vf','showinfo,scale=w=1280:h=1280:force_original_aspect_ratio=decrease',
-                         '-update','1','-q:v','3','-y',str(tmp)],timeout=45,with_stderr=True)
+            actual_second=decode_video_frame(src,tmp,second,preview=True,timeout=90)
             validate_image(tmp)
-            match=re.search(rb'pts_time:([0-9]+(?:\.[0-9]+)?)',diagnostic)
-            if not match:raise DataError('Cannot determine decoded frame timestamp')
-            actual_second=float(match.group(1))
             frame_id=f'{video_id}-F{index+1:02d}'
             if any(m['id']==frame_id for m in document['media']):raise DataError('Frame ID already exists')
             frames.append({'id':frame_id,'kind':'photo','path':dst.relative_to(root).as_posix(),

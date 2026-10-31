@@ -6,7 +6,11 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+# Repository checkout: root workflow at parent of ventures/. Standalone
+# archive: workflow reference can also be inside the product source tree.
 WORKFLOW = ROOT / '.github/workflows/home-inspection-live-synthetic-manual.yml'
+if not WORKFLOW.is_file():
+    WORKFLOW = ROOT.parent.parent / '.github/workflows/home-inspection-live-synthetic-manual.yml'
 
 class GithubManualVisionWorkflowTests(unittest.TestCase):
     @classmethod

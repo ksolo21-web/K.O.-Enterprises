@@ -12,7 +12,7 @@ import re
 import tempfile
 from pathlib import Path
 from PIL import Image
-from .capture import run_command, probe_video, validate_image, verify_custody, _next_id
+from .capture import decode_video_frame, probe_video, validate_image, verify_custody, _next_id
 from .core import DataError, safe_path, sha256, validate_project
 
 MAX_STILLS_PER_BATCH = 20
@@ -115,13 +115,7 @@ def capture_video_photos(document:dict,root:Path,video_id:str,
             staged.append((temp,dest))
             # Accurate seek after input, source dimensions unchanged; PNG preserves
             # decoded source pixels losslessly. -copyts keeps showinfo source timing.
-            _,stderr=run_command(['ffmpeg','-hide_banner','-nostdin','-loglevel','info',
-                                  '-copyts','-i',str(original),'-ss',f'{requested:.6f}',
-                                  '-frames:v','1','-vf','showinfo','-vsync','0',
-                                  '-c:v','png','-y',str(temp)],timeout=90,with_stderr=True)
-            matches=re.findall(rb'pts_time:([0-9]+(?:\.[0-9]+)?)',stderr)
-            if not matches:raise DataError('Decoder did not report frame timestamp')
-            actual=round(float(matches[-1]),6)
+            actual=decode_video_frame(original,temp,requested,timeout=90)
             if any(abs(actual-other['timestamp_seconds'])<0.0005 for other in records+existing):
                 raise DataError('Multiple selected times decode to the same source video frame')
             tolerance=max(0.15,1.1/max(info['fps'],0.1))
@@ -183,12 +177,8 @@ def verify_selected_photo_pixels(document:dict,root:Path,photo_id:str) -> dict:
     with tempfile.NamedTemporaryFile(suffix='.png',prefix='.video_photo_audit_',dir=root,delete=False) as f:
         tmp=Path(f.name)
     try:
-        _,stderr=run_command(['ffmpeg','-hide_banner','-nostdin','-loglevel','info',
-                             '-copyts','-i',str(src),'-ss',f"{photo['requested_seek_seconds']:.6f}",
-                             '-frames:v','1','-vf','showinfo','-vsync','0',
-                             '-c:v','png','-y',str(tmp)],timeout=90,with_stderr=True)
-        matches=re.findall(rb'pts_time:([0-9]+(?:\.[0-9]+)?)',stderr)
-        if not matches or abs(float(matches[-1])-photo['timestamp_seconds'])>0.001:
+        selected=decode_video_frame(src,tmp,photo['requested_seek_seconds'],timeout=90)
+        if abs(selected-photo['timestamp_seconds'])>0.001:
             raise DataError('Selected photo timestamp does not reproduce')
         with Image.open(tmp) as expected, Image.open(safe_path(root,photo['path'])) as observed:
             if expected.size!=observed.size or ImageChops.difference(expected.convert('RGB'),observed.convert('RGB')).getbbox():

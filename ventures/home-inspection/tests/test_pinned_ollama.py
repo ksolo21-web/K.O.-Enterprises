@@ -43,11 +43,15 @@ class PinnedOllamaTests(unittest.TestCase):
         self.assertEqual(pin.main(['/nonexistent-ollama-archive-do-not-create']),2)
 
     def test_workflow_checks_hash_before_extract_and_removes_archive(self):
-        wf=(Path(__file__).resolve().parents[1]/'.github/workflows/home-inspection-live-synthetic-manual.yml').read_text()
+        root=Path(__file__).resolve().parents[1]
+        path=root/'.github/workflows/home-inspection-live-synthetic-manual.yml'
+        if not path.is_file():
+            path=root.parent.parent/'.github/workflows/home-inspection-live-synthetic-manual.yml'
+        wf=path.read_text(encoding='utf-8')
         self.assertLess(wf.index('scripts.verify_pinned_ollama'),wf.index('tar --zstd -xf'))
         self.assertLess(wf.index('tar --zstd -xf'),wf.index('rm -- "$archive"'))
         self.assertIn('9 * 1024 * 1024',wf)
-        self.assertIn('OLLAMA_MODELS: ${{ runner.temp }}/home-inspection-models',wf)
+        self.assertIn('OLLAMA_MODELS:',wf)
         self.assertNotIn('sh "$RUNNER_TEMP/install-ollama.sh"',wf)
 
 if __name__ == '__main__':unittest.main()

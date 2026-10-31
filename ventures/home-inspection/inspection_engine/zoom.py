@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 from PIL import Image, ImageOps, ImageChops, UnidentifiedImageError
 from .core import DataError, safe_path, sha256, validate_project
-from .capture import run_command, verify_custody
+from .capture import decode_video_frame, verify_custody
 
 MAX_BATCH = 32  # per-command resource guard; commands can be repeated
 MAX_TILES_PER_AXIS = 8
@@ -61,12 +61,8 @@ def _native_image(document,root:Path,media:dict):
             temp=Path(f.name)
         try:
             # Accurate seek, native video pixels, and timestamp diagnostic.
-            _,diagnostic=run_command(['ffmpeg','-hide_banner','-loglevel','info','-nostdin',
-               '-copyts','-i',str(source),'-ss',f'{recorded:.6f}','-frames:v','1',
-               '-vf','showinfo','-y',str(temp)],timeout=85,with_stderr=True)
-            matches=re.findall(rb'pts_time:([0-9]+(?:\.[0-9]+)?)',diagnostic)
-            if not matches:raise DataError('Could not attest native video frame time')
-            actual=float(matches[-1])
+            selection=media.get('requested_seek_seconds',recorded)
+            actual=decode_video_frame(source,temp,selection,timeout=90)
             fps=max(float(parent.get('capture',{}).get('fps') or 1),0.1)
             if abs(actual-recorded)>max(0.15,1.1/fps):
                 raise DataError('Decoded native frame is not the selected video sample')
