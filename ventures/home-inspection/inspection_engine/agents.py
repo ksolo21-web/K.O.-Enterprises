@@ -21,6 +21,7 @@ from .capture import verify_custody
 from .vision import normalized_image, validate_proposal, apply_predictions, UNSUPPORTED_ASSURANCES, CANDIDATE_SCHEMA
 from .zoom import create_zoom_views, validate_bbox, verify_zoom_record
 from .video_photos import capture_video_photos
+from .descriptors import REQUIRED_FEATURES
 
 
 @dataclass(frozen=True)
@@ -225,11 +226,15 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
             else:
                 image=normalized_image(safe_path(root,target['path']))
                 current_region=[0,0,1,1]
+            allowed_feature_codes={system:list(REQUIRED_FEATURES[system]) for system in job['systems']}
             prompt=(f'ROLE {role.id}: {role.title}. Manager M00. Delegated systems: {json.dumps(job["systems"])}. '
+                f'Only these exact system-to-feature_code values are permitted: {json.dumps(allowed_feature_codes,sort_keys=True)}. '
                 f'Work order {job["id"]}; evidence ID {target["id"]}; area assigned by inspector {target["area"]}; '
                 f'normalized original-image region {current_region}. '
                 'Strictly observe only visible pixels. No concealed structure, operation, safety, code or defect-free conclusions. '
-                'Return JSON with candidates and requests only. Each candidate must use a delegated system and valid feature code. '
+                'Return JSON with candidates and requests only. For type=feature, choose feature_code exactly from the listed system map; '
+                'for type=potential_concern, omit feature_code. Never create new feature codes or claim a concealed detail. '
+                'If no permitted feature is visibly supported, return no feature candidate. '
                 'Candidate bboxes are normalized to the CURRENT view. '
                 'Allowed requests: zoom with bbox [left,top,right,bottom] within current view, '
                 'or video_still with timestamp_seconds if this photo came from an existing video. '

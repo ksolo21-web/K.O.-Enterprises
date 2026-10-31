@@ -67,6 +67,25 @@ class SpecialistTests(unittest.TestCase):
         self.assertFalse(dossier['customer_release_allowed'])
         self.assertTrue(blockers(updated))
         self.assertEqual(self.doc['observations'],[])
+    def test_specialist_prompt_enumerates_only_delegated_feature_codes(self):
+        prompts=[]
+        def model(image,prompt):
+            prompts.append(prompt)
+            return {'candidates':[],'requests':[]}
+        execute_specialists(self.doc,self.root,model,media_ids=['P0001'])
+        self.assertEqual(len(prompts),1)
+        self.assertIn('"exterior": ["cladding_type", "flashing_openings", "trim_decks_and_attached_features"]',prompts[0])
+        self.assertIn('For type=feature, choose feature_code exactly',prompts[0])
+        self.assertIn('for type=potential_concern, omit feature_code',prompts[0])
+        self.assertNotIn('"foundation_type"',prompts[0])
+
+    def test_invalid_model_feature_code_is_never_silently_corrected(self):
+        def model(image,prompt):
+            return {'candidates':[dict(self._feature(),feature_code='made_up_cladding_label')],
+                    'requests':[]}
+        with self.assertRaisesRegex(DataError,'Feature code must belong'):
+            execute_specialists(self.doc,self.root,model,media_ids=['P0001'])
+
     def test_specialist_cannot_make_other_roles_claims(self):
         with self.assertRaisesRegex(DataError,'outside delegated systems'):
             execute_specialists(self.doc,self.root,lambda image,prompt:{
