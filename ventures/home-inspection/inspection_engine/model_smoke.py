@@ -54,12 +54,15 @@ def _parse_visual_response(answer: str) -> tuple[str, str]:
     return colors[0], shapes[0]
 
 
-def smoke_probe(writer_model: str, reviewer_model: str, *, transport=local_json) -> dict:
+def smoke_probe(writer_model: str, reviewer_model: str, *, transport=local_json,
+                response_audit=None) -> dict:
     """Execute ACTUAL /api/generate calls and verify controlled images.
 
     transport injection is for deterministic unit tests only. The CLI uses the
     fixed loopback transport and identifies itself as a live attempt.
     """
+    if response_audit is not None and not callable(response_audit):
+        raise DataError('Probe response audit must be callable')
     # Preflight is a read-only model capability/installation check.
     is_live_transport = (transport is local_json)
     if is_live_transport:
@@ -86,9 +89,28 @@ def smoke_probe(writer_model: str, reviewer_model: str, *, transport=local_json)
             'keep_alive': 0,
         }
         start = time.monotonic()
-        result = transport('POST', '/api/generate', payload, timeout=180, max_bytes=20_000)
+        probe_id=f'{role}-{color}-{shape}'
+        if response_audit is not None:
+            response_audit({'probe_id':probe_id,'stage':'request','model':model,
+                            'synthetic_image_sha256':hashlib.sha256(image).hexdigest(),
+                            'request':payload,'execution_kind':'local_ollama' if is_live_transport else 'controlled_test'})
+        try:
+            result = transport('POST', '/api/generate', payload, timeout=180, max_bytes=20_000)
+        except (DataError,OSError,RuntimeError,ValueError,TimeoutError) as exc:
+            if response_audit is not None:
+                response_audit({'probe_id':probe_id,'stage':'transport_error',
+                                'error_type':type(exc).__name__,'error':str(exc)})
+            raise
         elapsed = round(time.monotonic()-start, 3)
-        if not isinstance(result, dict) or not result.get('done', False):
+        if response_audit is not None:
+            fields={'model','created_at','response','done','done_reason','error',
+                    'total_duration','load_duration','prompt_eval_count',
+                    'prompt_eval_duration','eval_count','eval_duration'}
+            response_audit({'probe_id':probe_id,'stage':'response','model':model,
+                            'elapsed_seconds':elapsed,
+                            'transport_response_untrusted':{k:v for k,v in result.items() if k in fields}
+                                if isinstance(result,dict) else {'invalid_envelope_type':type(result).__name__}})
+        if not isinstance(result, dict) or 'error' in result or result.get('done') is not True:
             raise DataError(f'{role} model did not complete image-conditioned inference')
         found = _parse_visual_response(result.get('response', ''))
         items.append({'role': role, 'model': model,

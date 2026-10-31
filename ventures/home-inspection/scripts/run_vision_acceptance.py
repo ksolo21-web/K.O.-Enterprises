@@ -62,7 +62,14 @@ def run_acceptance(root: Path, writer_model: str, review_model: str,
         if real and (not all(isinstance(d,str) and len(d)==64 for d in digests) or digests[0]==digests[1]):
             raise DataError('Two distinct model digests are required for an auditable live run')
         record['stage']='synthetic_image_probe'
-        challenge=smoke(writer_model,review_model)
+        probe_dir=root/'image_probe_calls'
+        probe_dir.mkdir()
+        probe_event_count=0
+        def record_probe(event):
+            nonlocal probe_event_count
+            probe_event_count+=1
+            _write_json(probe_dir/f'{probe_event_count:04d}.json',event)
+        challenge=smoke(writer_model,review_model,response_audit=record_probe)
         _write_json(root/'image_probe.json',challenge)
         record['image_probe_status']=challenge.get('status')
         probes=challenge.get('models')
@@ -84,8 +91,13 @@ def run_acceptance(root: Path, writer_model: str, review_model: str,
         record['technical_review_items']=report.get('technical_review_items',0)
         record['synthetic_video_temporal_change_verified']=bool(report.get('video_content_variation_verified',False))
         record['reviewer_visual_assessment_verified']=bool(real and report.get('reviewer_model_calls_completed'))
-        record['live_specialist_tool_use_verified']=bool(real and report.get('autonomous_zoom_request_count',0)>0 and
-                                                       (not with_video or report.get('autonomous_video_still_count',0)>0))
+        proof=report.get('tool_review_evidence',{})
+        if not isinstance(proof,dict):
+            raise DataError('Tool review evidence must be an explicit lineage record')
+        record['tool_review_evidence']=proof
+        record['live_specialist_tool_use_verified']=bool(real and proof.get('reviewed_zoom_ids') and
+            (not with_video or (proof.get('temporally_distinct_reviewed_video_still_ids') and
+                                proof.get('visibly_changed_reviewed_video_still_ids'))))
         if report.get('status')!='SYNTHETIC_TRIAL_COMPLETE_UNVERIFIED':
             raise DataError('Synthetic trial did not reach independent claim-review stage')
         if not report.get('technical_review_items',0):
@@ -96,6 +108,14 @@ def run_acceptance(root: Path, writer_model: str, review_model: str,
             raise DataError('Real specialist did not select a saved video photograph')
         if with_video and not record['synthetic_video_temporal_change_verified']:
             raise DataError('Synthetic video did not establish visibly changing source frames')
+        if not proof.get('reviewed_zoom_ids'):
+            raise DataError('No model zoom result reached a linked proposal and Q02 review')
+        if with_video and not proof.get('reviewed_video_still_ids'):
+            raise DataError('No model-selected still reached a linked proposal and Q02 review')
+        if with_video and not proof.get('temporally_distinct_reviewed_video_still_ids'):
+            raise DataError('Reviewed selected still did not reach a new source-video frame')
+        if with_video and not proof.get('visibly_changed_reviewed_video_still_ids'):
+            raise DataError('Reviewed selected still did not reveal changing synthetic pixels')
         if not real:
             raise DataError('Scripted providers cannot satisfy the live-model acceptance gate')
         if not report.get('real_model_invocations_completed') or not report.get('reviewer_model_calls_completed'):

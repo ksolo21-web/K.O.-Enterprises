@@ -86,6 +86,24 @@ class SpecialistTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError,'Feature code must belong'):
             execute_specialists(self.doc,self.root,model,media_ids=['P0001'])
 
+    def test_standalone_photo_context_never_invents_video_or_forces_tool(self):
+        seen=[]
+        def provider(image,prompt):
+            seen.append(json.loads(prompt.split('EVIDENCE_CONTEXT_JSON: ')[1].splitlines()[0]))
+            return {'candidates':[],'requests':[]}
+        _,dossier=execute_specialists(self.doc,self.root,provider,media_ids=['P0001'])
+        self.assertEqual(seen[0]['source_kind'],'standalone_photo')
+        self.assertFalse(seen[0]['video_still_available'])
+        self.assertNotIn('video_duration_seconds',seen[0])
+        self.assertEqual(dossier['tool_requests'],[])
+
+    def test_invalid_event_recorder_rejected_before_model(self):
+        seen=[]
+        with self.assertRaisesRegex(DataError,'recorder must be callable'):
+            execute_specialists(self.doc,self.root,lambda *a:seen.append(a),
+                                media_ids=['P0001'],audit_event='invalid')
+        self.assertEqual(seen,[])
+
     def test_specialist_cannot_make_other_roles_claims(self):
         with self.assertRaisesRegex(DataError,'outside delegated systems'):
             execute_specialists(self.doc,self.root,lambda image,prompt:{
@@ -181,6 +199,11 @@ class VideoStillSpecialistTest(unittest.TestCase):
             calls=[]
             def provider(img,prompt):
                 calls.append(prompt)
+                context=json.loads(prompt.split('EVIDENCE_CONTEXT_JSON: ')[1].splitlines()[0])
+                self.assertTrue(context['video_still_available'])
+                self.assertEqual(context['source_video_id'],'V0001')
+                self.assertEqual(context['video_duration_seconds'],4.0)
+                self.assertEqual(context['current_source_timestamp_seconds'],0.0 if len(calls)==1 else 1.0)
                 if len(calls)==1:return {'candidates':[],
                     'requests':[{'kind':'video_still','timestamp_seconds':1.0}]}
                 return {'candidates':[{'type':'feature','system':'exterior',

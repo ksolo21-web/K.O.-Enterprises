@@ -61,6 +61,11 @@ class ModelSmokeContractTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError,'did not complete'):
             smoke_probe('w','r',transport=lambda *a,**kw:{'response':'{}'})
 
+    def test_truthy_completion_or_error_cannot_be_live_probe(self):
+        for extra in ({'done':1},{'done':'true'},{'done':True,'error':'failed'}):
+            with self.subTest(extra=extra),self.assertRaises(DataError):
+                smoke_probe('w','r',transport=lambda *a,**kw:{'response':'{}',**extra})
+
     def test_unambiguous_attributes_required(self):
         for reply in ('red and blue square','a square','{"color":"red","shape":"thing?"}','invalid'):
             with self.subTest(reply=reply), self.assertRaises(DataError):_parse_visual_response(reply)

@@ -12,7 +12,7 @@ class LocalModelTransportTests(unittest.TestCase):
         seen=[]
         def fake_local(method,endpoint,payload,**kwargs):
             seen.append((method,endpoint,payload,kwargs))
-            return {'response':json.dumps({'decision':'insufficient_evidence',
+            return {'done':True,'response':json.dumps({'decision':'insufficient_evidence',
                 'reason':'Low resolution','missing_evidence':'Request new angle'})}
         with patch('inspection_engine.vision.local_json',side_effect=fake_local):
             answer=ollama_local(b'JPEG-TEST','Do not invent defect','vision-test',timeout=3,
@@ -41,9 +41,40 @@ class LocalModelTransportTests(unittest.TestCase):
                 ollama_local(b'abc','test','vision-test')
 
     def test_invalid_model_json_fails_closed(self):
-        with patch('inspection_engine.vision.local_json',return_value={'response':'not-json'}):
+        with patch('inspection_engine.vision.local_json',return_value={'done':True,'response':'not-json'}):
             with self.assertRaisesRegex(DataError,'invalid JSON'):
                 ollama_local(b'abc','test','vision-test')
+
+    def test_partial_missing_and_error_completion_envelopes_rejected(self):
+        payload=json.dumps({'candidates':[]})
+        for extra in ({},{'done':False},{'done':1},{'done':'true'},
+                      {'done':True,'error':'generation failed'}, {'done':True,'error':None}):
+            with self.subTest(extra=extra), patch('inspection_engine.vision.local_json',
+                    return_value={'response':payload,**extra}):
+                with self.assertRaisesRegex(DataError,'complete generation'):
+                    ollama_local(b'abc','test','vision-test')
+
+    def test_audit_sees_untrusted_reply_before_json_validation(self):
+        raw={'done':True,'response':'invalid-json'}
+        seen=[]
+        with patch('inspection_engine.vision.local_json',return_value=raw):
+            with self.assertRaisesRegex(DataError,'invalid JSON'):
+                ollama_local(b'abc','test','vision-test',response_audit=seen.append)
+        self.assertEqual(seen,[raw])
+
+    def test_audit_callback_cannot_turn_partial_reply_into_completion(self):
+        raw={'done':False,'response':'{"candidates":[]}'}
+        def mutate(copied): copied['done']=True
+        with patch('inspection_engine.vision.local_json',return_value=raw):
+            with self.assertRaisesRegex(DataError,'complete generation'):
+                ollama_local(b'abc','test','vision-test',response_audit=mutate)
+        self.assertFalse(raw['done'])
+
+    def test_invalid_audit_callback_rejected_before_connect(self):
+        with patch('inspection_engine.vision.local_json') as transport:
+            with self.assertRaisesRegex(DataError,'audit must be callable'):
+                ollama_local(b'abc','test','vision-test',response_audit='not-a-callback')
+        transport.assert_not_called()
 
     def test_model_reply_size_limit_propagates(self):
         with patch('inspection_engine.vision.local_json',side_effect=DataError('Local model response exceeds limit')):

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Callable
 
 from .core import DataError, SYSTEM_NAME, validate_project, sha256, safe_path, blockers
-from .capture import verify_custody
+from .capture import verify_custody, probe_video
 from .vision import normalized_image, validate_proposal, apply_predictions, UNSUPPORTED_ASSURANCES, CANDIDATE_SCHEMA
 from .zoom import create_zoom_views, validate_bbox, verify_zoom_record
 from .video_photos import capture_video_photos
@@ -184,7 +184,8 @@ def _review_dossier(dossier:dict,doc:dict,root:Path)->dict:
 
 
 def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],dict],
-                       *,media_ids:list[str],provider_id:str='fixture-provider',max_jobs:int=24) -> tuple[dict,dict]:
+                       *,media_ids:list[str],provider_id:str='fixture-provider',max_jobs:int=24,
+                       audit_event=None) -> tuple[dict,dict]:
     """Exercise actual bounded specialist dispatch with a caller-supplied provider.
 
     Model may request native source zoom or saving a native still from a video.
@@ -194,6 +195,8 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
     """
     if not isinstance(provider_id,str) or not 1<=len(provider_id)<=85:
         raise DataError('Provider identification required')
+    if audit_event is not None and not callable(audit_event):
+        raise DataError('Evidence event recorder must be callable')
     root=root.resolve()
     validate_project(document,root)
     if verify_custody(document,root):raise DataError('Cannot route evidence with invalid custody')
@@ -227,6 +230,21 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                 image=normalized_image(safe_path(root,target['path']))
                 current_region=[0,0,1,1]
             allowed_feature_codes={system:list(REQUIRED_FEATURES[system]) for system in job['systems']}
+            invocation_id=f'{job["id"]}:I{iteration+1:02d}'
+            context={'invocation_id':invocation_id,'work_order_id':job['id'],
+                     'iteration':iteration+1,'max_iterations':job['max_iterations'],
+                     'evidence_id':target['id'],'current_zoom_id':current_zoom['id'] if current_zoom else None,
+                     'source_kind':'standalone_photo','video_still_available':False}
+            if target.get('derived_from_id'):
+                source=next((m for m in work['media'] if m['id']==target['derived_from_id'] and m['kind']=='video'),None)
+                if source is None:raise DataError('Derived photo has no original video')
+                info=probe_video(safe_path(root,source['path']))
+                context.update({'source_kind':'video_derived_photo','video_still_available':True,
+                                'source_video_id':source['id'],'source_video_sha256':source['sha256'],
+                                'current_source_timestamp_seconds':target.get('timestamp_seconds'),
+                                'video_duration_seconds':info['duration_seconds'],
+                                'valid_requested_time_range':'0 <= timestamp_seconds < video_duration_seconds',
+                                'unseen_moments_are_not_visually_assessed':True})
             prompt=(f'ROLE {role.id}: {role.title}. Manager M00. Delegated systems: {json.dumps(job["systems"])}. '
                 f'Only these exact system-to-feature_code values are permitted: {json.dumps(allowed_feature_codes,sort_keys=True)}. '
                 f'Work order {job["id"]}; evidence ID {target["id"]}; area assigned by inspector {target["area"]}; '
@@ -239,7 +257,10 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                 'Allowed requests: zoom with bbox [left,top,right,bottom] within current view, '
                 'or video_still with timestamp_seconds if this photo came from an existing video. '
                 'Choose at most one request. Ask for better evidence rather than guessing. '
-                'No customer release or self-approval is permitted.')
+                'Tool choices are optional; no particular zoom region or timestamp is prescribed. '
+                'Video metadata is not visual evidence of unseen moments. '
+                'No customer release or self-approval is permitted.\n'
+                f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
             response=provider(image,prompt)
             candidates,requests=_provider_envelope(response,role,target)
             mapped=[]
@@ -258,7 +279,7 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                          'description':proposed['description'],'review':'review_pending',
                          'evidence_id':target['id'],'evidence_sha256':sha256(safe_path(root,target['path'])),
                          'zoom_view_ids':proposed.get('zoom_view_ids',[]),
-                         'iteration':iteration+1})
+                         'iteration':iteration+1,'invocation_id':invocation_id})
             result={'media_id':target['id'],'sha256':sha256(safe_path(root,target['path'])),
                     'source_video':target.get('derived_from_id'),
                     'timestamp_seconds':target.get('timestamp_seconds'),
@@ -268,11 +289,16 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                               'zoom_source_bbox':current_zoom['normalized_bbox']})
             pred_results.append(result)
             dossier['events'].append({'job_id':job['id'],'iteration':iteration+1,'media_id':target['id'],
+                'invocation_id':invocation_id,
                 'zoom_id':current_zoom['id'] if current_zoom else None,
                 'candidate_count':len(mapped),'request_count':len(requests),'state':'DRAFT'})
+            if audit_event is not None:
+                audit_event({'kind':'specialist_step','step':deepcopy(dossier['events'][-1])})
             if not requests:break
             if iteration+1>=job['max_iterations']:
                 dossier['tool_requests'].append({'job_id':job['id'],'status':'DENIED_BUDGET','kind':requests[0]['kind']})
+                if audit_event is not None:
+                    audit_event({'kind':'tool_execution','tool':deepcopy(dossier['tool_requests'][-1])})
                 break
             request=requests[0]
             if request['kind']=='zoom':
@@ -290,20 +316,27 @@ def execute_specialists(document:dict,root:Path,provider:Callable[[bytes,str],di
                          purpose=f'{job["id"]} native-evidence visual recheck')
                 current_zoom=crops[0]
                 dossier['tool_requests'].append({'job_id':job['id'],'status':'EXECUTED',
-                    'kind':'zoom','zoom_id':current_zoom['id'],'source_bbox':current_zoom['normalized_bbox']})
+                    'kind':'zoom','zoom_id':current_zoom['id'],'source_bbox':current_zoom['normalized_bbox'],
+                    'invocation_id':invocation_id,'requested_from_media_id':target['id']})
             else:
                 if not target.get('derived_from_id'):
                     raise DataError('Cannot request a video still from a standalone photograph')
                 key=('still',request['timestamp_seconds'])
                 if key in repeated:raise DataError('Repeated video still request')
                 repeated.add(key)
+                previous_target=target
                 stills=capture_video_photos(work,root,target['derived_from_id'],
                      times=[request['timestamp_seconds']],max_photos=1,requested_by=role.id,
                      note=f'{job["id"]} selected video moment requiring professional review')
                 target=stills[0];current_zoom=None
                 dossier['tool_requests'].append({'job_id':job['id'],'status':'EXECUTED',
                     'kind':'video_still','photo_id':target['id'],'source_video':target['derived_from_id'],
-                    'timestamp_seconds':target['timestamp_seconds']})
+                    'timestamp_seconds':target['timestamp_seconds'],'invocation_id':invocation_id,
+                    'requested_timestamp_seconds':request['timestamp_seconds'],
+                    'requested_from_media_id':previous_target['id'],
+                    'requested_from_timestamp_seconds':previous_target.get('timestamp_seconds')})
+            if audit_event is not None:
+                audit_event({'kind':'tool_execution','tool':deepcopy(dossier['tool_requests'][-1])})
         job['status']='DRAFT_PROPOSED_NOT_APPROVED' if any(e['job_id']==job['id'] and e['candidate_count'] for e in dossier['events']) else 'NO_FINDING_PROPOSED_NOT_VERIFIED'
     predictions={'schema_version':1,'provider':provider_id,'results':pred_results}
     # This validator is also the gate used by the original vision adapter.

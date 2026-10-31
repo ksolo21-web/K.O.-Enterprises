@@ -56,7 +56,7 @@ class NativeZoomAndVideoTrialTests(unittest.TestCase):
                 if 'evidence ID P0001' in prompt and 'region [0, 0, 1, 1]' in prompt:
                     return {'candidates':[],'requests':[{'kind':'zoom','bbox':[.15,.15,.55,.60]}]}
                 if 'evidence ID V0001-F01' in prompt and 'normalized original-image region [0, 0, 1, 1]' in prompt:
-                    return {'candidates':[],'requests':[{'kind':'video_still','timestamp_seconds':1.0}]}
+                    return {'candidates':[],'requests':[{'kind':'video_still','timestamp_seconds':2.5}]}
                 return {'candidates':[{'type':'feature','system':'exterior',
                        'feature_code':'cladding_type','status':'partially_observed',
                        'description':'Visible stylized exterior siding in a synthetic illustration',
@@ -73,3 +73,6 @@ class NativeZoomAndVideoTrialTests(unittest.TestCase):
             self.assertFalse(result['customer_release_allowed'])
             self.assertFalse(result['real_model_invocations_completed'])
             self.assertGreater(states['reviewer'],0)
+            self.assertEqual(result['tool_review_evidence']['reviewed_zoom_ids'],['Z0001'])
+            self.assertEqual(result['tool_review_evidence']['reviewed_video_still_ids'],['P0002'])
+            self.assertEqual(result['tool_review_evidence']['visibly_changed_reviewed_video_still_ids'],['P0002'])

@@ -15,11 +15,11 @@ import sys
 
 from inspection_engine.core import DataError, sha256, blockers
 from inspection_engine.capture import video_frames, probe_video
-from inspection_engine.agents import execute_specialists, SPECIALIST_SCHEMA
-from inspection_engine.critic import review_specialist_dossier, CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
-from inspection_engine.vision import ollama_local
+from inspection_engine.agents import execute_specialists
+from inspection_engine.critic import review_specialist_dossier
 from inspection_engine.local_runtime import preflight_models
 from scripts.generate_public_fixtures import generate
+from scripts.trial_evidence import TrialRecorder, tool_review_evidence
 
 
 def _distinct_video_sample_frames(first: Path, second: Path) -> bool:
@@ -47,11 +47,11 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
         raise DataError('Both provider slots must be real or both explicitly supplied in tests')
     if live:
         preflight_models(writer_model,reviewer_model)
-        writer=lambda image,prompt:ollama_local(image,prompt,writer_model,timeout=180,schema=SPECIALIST_SCHEMA)
-        reviewer=lambda image,prompt:ollama_local(image,prompt,reviewer_model,timeout=180,
-                    schema=CRITIC_SCHEMA,system_prompt=CRITIC_SYSTEM_PROMPT)
     if writer_model==reviewer_model:raise DataError('Writer/reviewer model identifiers must differ')
     root.mkdir(parents=True)
+    recorder=TrialRecorder(root,live=live)
+    writer=recorder.provider('writer',writer_model,writer)
+    reviewer=recorder.provider('reviewer',reviewer_model,reviewer)
     record={'status':'STARTED','project_id':'SYNTHETIC-M2-LIVE-TRIAL',
             'started_utc':datetime.now(timezone.utc).isoformat(),
             'writer_model':writer_model,'reviewer_model':reviewer_model,
@@ -81,7 +81,8 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
                 raise DataError('Synthetic video has no material change between sampled moments')
             selected.append(frames[0]['id'])
         staged,dossier=execute_specialists(project,root,writer,media_ids=selected,
-                            provider_id='local-ollama:'+writer_model if live else 'controlled-test:'+writer_model)
+                            provider_id='local-ollama:'+writer_model if live else 'controlled-test:'+writer_model,
+                            audit_event=recorder.event)
         (root/'staged_project.json').write_text(json.dumps(staged,indent=2)+'\n')
         (root/'specialist_dossier.json').write_text(json.dumps(dossier,indent=2)+'\n')
         record.update({'specialist_work_orders':len(dossier['plan']['jobs']),
@@ -90,6 +91,7 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
                        'q01_q02_control_contracts':dossier['review'],
                        'sampled_video_frames':sum(x.get('derived_from_id')=='V0001' for x in project['media']),
                        'video_sampling_is_exhaustive':False})
+        reviewed={'items':[]}
         if dossier['proposals']:
             reviewed=review_specialist_dossier(staged,root,dossier,reviewer,
                         reviewer_id='Q02',provider_id='local-ollama:'+reviewer_model if live else 'controlled-test:'+reviewer_model)
@@ -100,17 +102,23 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
             record['technical_review_items']=0
             record['review_note']='No model-generated candidate: separate claim-specific review cannot execute'
         record['status']='SYNTHETIC_TRIAL_COMPLETE_UNVERIFIED' if record['technical_review_items'] else 'INCOMPLETE_NO_REVIEWABLE_CLAIM'
-        record['real_model_invocations_completed']=bool(live and record['technical_review_items'])
-        record['writer_model_calls_completed']=live
-        record['reviewer_model_calls_completed']=bool(live and record['technical_review_items'])
+        proof=tool_review_evidence(staged,dossier,reviewed,root,_distinct_video_sample_frames)
+        (root/'tool_review_evidence.json').write_text(json.dumps(proof,indent=2)+'\n')
+        record['tool_review_evidence']=proof
         record['inspection_accuracy_verified']=False
         record['autonomous_zoom_request_count']=sum(x.get('kind')=='zoom' and x.get('status')=='EXECUTED' for x in dossier['tool_requests'])
         record['autonomous_video_still_count']=sum(x.get('kind')=='video_still' and x.get('status')=='EXECUTED' for x in dossier['tool_requests'])
         record['limitations']='Synthetic image test does not establish home defect accuracy, reliable autonomous tool requests, independent host identities, or inspector signoff.'
-    except (DataError, OSError, RuntimeError, ValueError, TimeoutError, subprocess.SubprocessError) as exc:
+    except (DataError, OSError, RuntimeError, ValueError, TypeError, TimeoutError, subprocess.SubprocessError) as exc:
         record['status']='BLOCKED'
         record['error']=str(exc)
     finally:
+        summary=recorder.summary()
+        record['invocation_audit']=summary
+        record['writer_model_calls_completed']=bool(summary['completed_live_calls']['writer'])
+        record['reviewer_model_calls_completed']=bool(summary['completed_live_calls']['reviewer'])
+        record['real_model_invocations_completed']=bool(
+            record['writer_model_calls_completed'] and record['reviewer_model_calls_completed'])
         (root/'trial_status.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64
 import json
 import re
+from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageOps
@@ -51,9 +52,12 @@ CANDIDATE_SCHEMA={
 }
 
 def ollama_local(image_bytes:bytes, prompt:str, model:str,timeout:int=100,
-                 schema:dict|None=None, system_prompt:str|None=None)->dict:
+                 schema:dict|None=None, system_prompt:str|None=None,
+                 response_audit=None)->dict:
     """Uses local Ollama /api/generate only. No external URLs or cloud fallbacks."""
     validate_model_name(model)
+    if response_audit is not None and not callable(response_audit):
+        raise DataError('Response audit must be callable')
     if system_prompt is not None and (not isinstance(system_prompt,str) or not 1<=len(system_prompt)<=5000):
         raise DataError('Invalid system prompt contract')
     request_data={'model':model,'prompt':prompt,'system':system_prompt or SYSTEM_PROMPT,
@@ -61,6 +65,12 @@ def ollama_local(image_bytes:bytes, prompt:str, model:str,timeout:int=100,
                   'format':schema if schema is not None else CANDIDATE_SCHEMA,'stream':False,
                   'options':{'temperature':0},'keep_alive':0}
     parsed=local_json('POST','/api/generate',request_data,timeout=timeout,max_bytes=MAX_MODEL_REPLY)
+    # A parseable partial/error envelope is not a completed model invocation.
+    # The opt-in trial recorder sees the original data before either gate.
+    if response_audit is not None:
+        response_audit(deepcopy(parsed))
+    if not isinstance(parsed,dict) or 'error' in parsed or parsed.get('done') is not True:
+        raise DataError('Local vision model did not complete generation successfully')
     try:
         if not isinstance(parsed.get('response'),str):raise ValueError('response missing')
         obj=json.loads(parsed['response'])
