@@ -1,0 +1,150 @@
+{
+  "schema_version": 6,
+  "reviewed_on": "2026-10-31",
+  "notes": "Human-authored triage prompts, not exhaustive hazards or guarantees",
+  "topics": [
+    {
+      "id": "SURFACE_WATER_FOUNDATION",
+      "system": "site",
+      "signal": "water concentrating toward foundation",
+      "possible_mechanisms": "negative grading, blocked drains or altered runoff",
+      "alternative_explanations": "soil settlement, flooding or hidden moisture",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "drainage contractor or qualified foundation specialist",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "FOUNDATION_MOVEMENT",
+      "system": "foundation",
+      "signal": "pronounced displacement or new cracks",
+      "possible_mechanisms": "differential settlement, expansive soils or hydrostatic pressure",
+      "alternative_explanations": "old stable crack or cosmetic coating movement",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "structural engineer or foundation specialist",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "FLOOR_SUPPORT_FAILURE",
+      "system": "subfloor",
+      "signal": "sagging or visibly decayed floor platform",
+      "possible_mechanisms": "rot, excessive span, altered loads or damaged supports",
+      "alternative_explanations": "minor cosmetic finish irregularity",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "structural engineer or qualified carpenter",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "STRUCTURAL_MEMBER_DAMAGE",
+      "system": "framing",
+      "signal": "cut or cracked load-bearing member",
+      "possible_mechanisms": "unpermitted modification, overloading or moisture",
+      "alternative_explanations": "non-load-bearing trim or old repair",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "structural engineer",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "LOOSE_FALLING_CLADDING",
+      "system": "exterior",
+      "signal": "detached or visibly unstable wall covering",
+      "possible_mechanisms": "failed fastening, wind or moisture damage",
+      "alternative_explanations": "temporary protective covering",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "qualified siding or exterior contractor",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "ROOF_LEAK_AND_DAMAGE",
+      "system": "roof",
+      "signal": "missing covering, active leakage or deformation",
+      "possible_mechanisms": "failed flashing, aging materials or storm damage",
+      "alternative_explanations": "prior repaired leak or condensation",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "qualified roofer; structural engineer if sagging",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "ATTIC_MOISTURE_COMBUSTION",
+      "system": "attic",
+      "signal": "dark staining, exposed suspect wiring or unsafe vent termination",
+      "possible_mechanisms": "water intrusion, humid air, combustion vent failure",
+      "alternative_explanations": "old dry staining or harmless surface discoloration",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "roofer, HVAC technician or licensed electrician as appropriate",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "STAIR_FALL_GUARDING",
+      "system": "interior",
+      "signal": "damaged or loose guard/handrail, unsafe tread",
+      "possible_mechanisms": "failed fastening, alteration, wear or movement",
+      "alternative_explanations": "cosmetic surface cracks",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "qualified stair/structural contractor",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "EXPOSED_ARCING_WIRING",
+      "system": "electrical",
+      "signal": "charred equipment, exposed conductors or visible arcing",
+      "possible_mechanisms": "overloading, faulty connections, wiring damage",
+      "alternative_explanations": "non-electrical staining or de-energized abandoned component",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "licensed electrician; emergency response if immediate fire risk",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "ACTIVE_WATER_INTRUSION",
+      "system": "plumbing",
+      "signal": "active visible leak, corrosion, water near electrical equipment",
+      "possible_mechanisms": "failed joint, freeze damage or drainage backup",
+      "alternative_explanations": "condensation or unrelated surface moisture",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "licensed plumber; electrician if energized components exposed",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "WATER_HEATER_VENTING_TPR",
+      "system": "water_heating",
+      "signal": "unsafe visible vent connector or discharge configuration",
+      "possible_mechanisms": "vent failure, improper installation or blocked relief path",
+      "alternative_explanations": "photographic perspective or equipment variation",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "licensed plumber or HVAC technician",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "COMBUSTION_BACKDRAFT",
+      "system": "hvac",
+      "signal": "disconnected vent or visible soot near combustion appliance",
+      "possible_mechanisms": "blocked vent, negative pressure or combustion fault",
+      "alternative_explanations": "old soot unrelated to active operation",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "licensed HVAC contractor; evacuate and emergency service for suspected CO emergency",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    },
+    {
+      "id": "CRAWLSPACE_SUPPORT_MOISTURE",
+      "system": "crawlspace",
+      "signal": "standing water, visibly rotted joists or destabilized piers",
+      "possible_mechanisms": "inadequate drainage, vapor entry, plumbing leaks",
+      "alternative_explanations": "transient wetting or superficial staining",
+      "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause",
+      "referral": "structural engineer, qualified moisture specialist or plumber",
+      "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+      "not_a_confirmed_defect": true
+    }
+  ]
+}

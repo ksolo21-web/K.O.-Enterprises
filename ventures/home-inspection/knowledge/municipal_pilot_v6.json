@@ -1,0 +1,46 @@
+{
+  "schema_version": 6,
+  "reviewed_on": "2026-10-31",
+  "purpose": "Official municipal entry points; not exhaustive amendment text or proof of a case's enforcing authority",
+  "state_authority": {
+    "id": "MI_LARA_BCC_AHJ_LIST",
+    "url": "https://www.michigan.gov/lara/-/media/Project/Websites/lara/bcc-media/ASD/StatewideJurisdictionList.pdf?hash=337442F1456C02A63BAAC230297C59FC&rev=fb9cb0fecd4342e4a084b1230a5ae28d",
+    "published_revision": "2026-10-06",
+    "role": "Find state/county/local enforcing agency separately for building, electrical, mechanical and plumbing. Entry-by-entry verification remains pending."
+  },
+  "locations": [
+    {
+      "id": "MI_WAYNE_WESTLAND_CITY", "county": "Wayne", "municipality": "Westland", "type": "city",
+      "publisher_host": "www.cityofwestland.com", "source_url": "https://www.cityofwestland.com/194/Building-Division",
+      "source_scope": "City Building Division identifies local construction, electrical, mechanical and plumbing permit services and current listed codes.",
+      "additional_url": "https://www.cityofwestland.com/202/Permit-Required",
+      "edition_conflict": false,
+      "verified_case_ahj": false,
+      "verified_local_amendments": false,
+      "applicable_to_exact_parcel": false,
+      "full_local_ordinance_text_embedded": false
+    },
+    {
+      "id": "MI_WAYNE_LIVONIA_CITY", "county": "Wayne", "municipality": "Livonia", "type": "city",
+      "publisher_host": "livonia.gov", "source_url": "https://livonia.gov/241/Inspection-Building-Enforcement",
+      "source_scope": "City Inspection Department lists residential/commercial inspections and four code disciplines; verify permit history and local property maintenance rules.",
+      "additional_url": "https://www.livonia.gov/DocumentCenter/View/3071/Current-Codes-PDF",
+      "edition_conflict": false,
+      "verified_case_ahj": false,
+      "verified_local_amendments": false,
+      "applicable_to_exact_parcel": false,
+      "full_local_ordinance_text_embedded": false
+    },
+    {
+      "id": "MI_WAYNE_DETROIT_CITY", "county": "Wayne", "municipality": "Detroit", "type": "city",
+      "publisher_host": "detroitmi.gov", "source_url": "https://detroitmi.gov/departments/buildings-safety-engineering-and-environmental-department/frequently-requested-services",
+      "source_scope": "BSEED FAQ lists 2021 Michigan Building Code, 2015 Residential Code and local ordinances; old secondary city building page mentions 2015 Michigan Building Code.",
+      "additional_url": "https://detroitmi.gov/departments/buildings-safety-engineering-and-environmental-department-bseed/bseed-divisions/permits-plan-review/building-permit-requirements",
+      "edition_conflict": true,
+      "verified_case_ahj": false,
+      "verified_local_amendments": false,
+      "applicable_to_exact_parcel": false,
+      "full_local_ordinance_text_embedded": false
+    }
+  ]
+}

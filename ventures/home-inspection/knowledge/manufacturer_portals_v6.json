@@ -1,0 +1,11 @@
+{
+  "schema_version": 6,
+  "reviewed_on": "2026-10-31",
+  "purpose": "Official manufacturer document-finder entry points, not all manuals or any exact model identification",
+  "portals": [
+    {"brand":"A. O. Smith","systems":["water_heating"],"url":"https://www.hotwater.com/find-documents-and-videos","host":"www.hotwater.com","document_types":["manual","service_handbook","specification","recall_check_pending"],"manuals_locally_verified":0},
+    {"brand":"Carrier","systems":["hvac"],"url":"https://www.carrier.com/us/en/product-documents/","host":"www.carrier.com","document_types":["installation_manual","owner_manual","product_data"],"manuals_locally_verified":0},
+    {"brand":"Goodman","systems":["hvac"],"url":"https://www.goodmanmfg.com/support/literature-library","host":"www.goodmanmfg.com","document_types":["product_spec","brochure","warranty"],"manuals_locally_verified":0},
+    {"brand":"Rheem","systems":["water_heating"],"url":"https://www.rheem.com/professionals/commercial-water-heating/product-documentation/","host":"www.rheem.com","document_types":["commercial_product_documents","serial_lookup"],"manuals_locally_verified":0}
+  ]
+}

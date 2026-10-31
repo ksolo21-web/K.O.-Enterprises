@@ -1,0 +1,42 @@
+{
+ "schema_version": 6,
+ "reviewed_on": "2026-10-31",
+ "topics": [
+   {
+     "id": "FIREPLACE_HEARTH", "scope": ["residential"], "sop_reference_url": "https://www.nachi.org/sop.htm",
+     "title": "Fireplace, chimney exterior and hearth",
+     "visual_cues": ["visible cracking or joint separation at hearth and firebox", "stains or evidence of moisture around chimney", "deterioration at accessible masonry or vent connections", "missing or unverified carbon monoxide alarm where required by applicable SOP and local rules"],
+     "possible_causes": ["thermal movement", "water infiltration", "settlement", "deferred maintenance", "combustion/venting problem"],
+     "alternative_explanations": ["historic repaired cosmetic deterioration", "surface discoloration unrelated to active leakage"],
+     "request_more_evidence": ["inspect readily accessible surfaces without entering a flue", "record type, location and limitation", "qualified chimney professional inspection and any necessary test"],
+     "urgent_triggers": ["smoke or combustion-gas leakage suspected", "active heat damage or uncontrolled flame hazard"],
+     "referral": "qualified chimney/fireplace professional; emergency response if an immediate life-safety danger is present",
+     "not_proven_by_photo": ["flue integrity", "hidden structural safety", "carbon monoxide concentration", "safe operation"],
+     "status": "SUPPLEMENTAL_INSPECTOR_TASK_PENDING_EXPLICIT_COVERAGE"
+   },
+   {
+     "id": "GARAGE_DOOR", "scope": ["residential"], "sop_reference_url": "https://www.nachi.org/sop.htm",
+     "title": "Garage vehicle doors and opener safety",
+     "visual_cues": ["damaged or frayed visible lift cables", "missing or obstructed photoelectric sensors", "bent tracks or damaged door panels", "damaged safety labels or manual release"],
+     "possible_causes": ["mechanical wear", "impact", "misalignment", "installation defect", "sensor misadjustment"],
+     "alternative_explanations": ["temporary alignment or obstruction", "inactive opener not safely testable"],
+     "request_more_evidence": ["inspect readily visible components", "qualified inspector to perform only permitted normal-controls operational checks where safe and within SOP", "refer suspected entrapping or broken tensioned components to qualified garage-door technician"],
+     "urgent_triggers": ["entrapment safety failure suspected", "broken spring or cable presenting imminent mechanical hazard"],
+     "referral": "qualified garage-door service professional",
+     "not_proven_by_photo": ["force/pressure auto-reverse operation", "balanced door", "safe operation", "code compliance"],
+     "status": "SUPPLEMENTAL_INSPECTOR_TASK_PENDING_EXPLICIT_COVERAGE"
+   },
+   {
+     "id": "COMMERCIAL_FIRE_LIFE_SAFETY", "scope": ["commercial"], "sop_reference_url": "https://store.astm.org/standards/e2018",
+     "title": "Commercial life-safety systems and specialty assessments",
+     "visual_cues": ["visible blocked exit path", "damage to fire door or firestopping", "missing signage where observed", "accessibility feature showing visible damage"],
+     "possible_causes": ["maintenance deficiency", "tenant modifications", "damage", "unverified design or inspection history"],
+     "alternative_explanations": ["approved alternative compliance design", "temporary condition with documented corrective action"],
+     "request_more_evidence": ["review contracted commercial PCA scope and fire department records", "obtain approved plans, tests and permits from AHJ", "qualified fire-protection/accessibility professional evaluation"],
+     "urgent_triggers": ["immediate obstruction of occupied egress", "obvious life-safety equipment damage"],
+     "referral": "licensed fire-protection engineer, local fire authority and other specialty professionals as appropriate",
+     "not_proven_by_photo": ["fire alarm functionality", "sprinkler coverage", "ADA compliance", "approved occupancy load", "latent system functionality"],
+     "status": "COMMERCIAL_SCOPE_REQUIRES_SEPARATE_PCA_AND_SPECIALISTS"
+   }
+ ]
+}

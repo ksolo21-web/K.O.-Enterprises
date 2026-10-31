@@ -218,7 +218,18 @@ def safe_agent_reference_brief(property_context:dict,systems:list[str])->str:
                 'building type, permit/alteration history and correct enforcing agency')
     c={'state':'MI','county':property_context['county'],'municipality':property_context['municipality'],
        'building_type':scope,'inspection_date':property_context.get('inspection_date','')}
-    try:return case_agent_packet(c,systems)
+    try:
+        original=case_agent_packet(c,systems)
+        # Add the city/township/village case research only when the inspector
+        # actually supplied that classification. Never silently invent "city".
+        locality_type=property_context.get('municipality_type')
+        if not locality_type:
+            return original+'\nGOVERNED_CASE_RESEARCH_V6_STATUS: MISSING_MUNICIPALITY_TYPE; obtain verified legal locality class'
+        from .coverage_expansion import case_knowledge_packet
+        case_v6=dict(c,municipality_type=locality_type)
+        try:return original+'\n'+case_knowledge_packet(case_v6,systems[0] if systems else 'site')
+        except ReferenceBlock:
+            return original+'\nGOVERNED_CASE_RESEARCH_V6_STATUS: CASE_LOCALITY_UNVERIFIED; request current AHJ records'
     except ReferenceBlock:
         return ('MICHIGAN_AHJ_REFERENCE_STATUS: UNVERIFIED_OR_INVALID_CASE; '
                 'no code conclusion, request qualified authority review')
