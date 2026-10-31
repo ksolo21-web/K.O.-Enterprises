@@ -31,7 +31,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: '1'
       OLLAMA_NUM_PARALLEL: '1'
       OLLAMA_MAX_LOADED_MODELS: '1'
-      OLLAMA_MODELS: ${{ runner.temp }}/home-inspection-models
+      OLLAMA_MODELS: /tmp/home-inspection-models
     steps:
       - name: Check out source (no persisted GitHub credentials)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -72,7 +72,10 @@ jobs:
           set -euo pipefail
           # Official Linux binary archive, fixed tag and published GitHub asset checksum.
           # No mutable installer script or arbitrary shell code from the network.
-          command -v zstd >/dev/null || { echo 'BLOCKED: runner missing zstd' >&2; exit 1; }
+          # Ubuntu hosted runners do not guarantee a zstd executable.
+          sudo apt-get update -qq
+          sudo apt-get install -y zstd
+          command -v zstd >/dev/null || { echo 'BLOCKED: could not install zstd' >&2; exit 1; }
           free_kib=$(df --output=avail -k "$RUNNER_TEMP" | tail -n 1)
           if (( free_kib < 9 * 1024 * 1024 )); then
             echo 'BLOCKED: less than 9 GiB disk available for binary and models' >&2
