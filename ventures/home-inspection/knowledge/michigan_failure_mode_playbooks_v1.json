@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "title": "Michigan-first cross-system building-failure differential prompts",
+  "status": "engineering_hypothesis_training_aids_not_source_verified_code",
+  "notice": "Examples support question selection, not causation proof; real conditions and new failure modes exceed the list.",
+  "systems": [
+    {
+      "system": "site",
+      "feature_codes": [
+        "grading_drainage",
+        "surface_water_management",
+        "walks_drives_retaining"
+      ],
+      "symptom_to_check": "Surface ponding adjacent to structure",
+      "possible_mechanism": "Negative surface grading or blocked runoff path",
+      "alternative_explanation": "Overflow from roof drainage or seasonal high groundwater",
+      "discriminating_verification": "Observe drainage during precipitation; measure surface slope; trace roof discharge",
+      "urgent_escalation_cue": "Concentrated water reaching foundation or pedestrian ice hazard",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "foundation",
+      "feature_codes": [
+        "foundation_type",
+        "foundation_material",
+        "support_configuration",
+        "visible_foundation_condition"
+      ],
+      "symptom_to_check": "Crack or displacement on accessible foundation face",
+      "possible_mechanism": "Material shrinkage or thermal movement",
+      "alternative_explanation": "Differential settlement or hydrostatic pressure",
+      "discriminating_verification": "Measure crack width and displacement; inspect drainage, history and structural load path; refer if movement suspected",
+      "urgent_escalation_cue": "Significant displacement, instability or active water entry",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "subfloor",
+      "feature_codes": [
+        "floor_platform_type",
+        "subfloor_material",
+        "visible_floor_supports"
+      ],
+      "symptom_to_check": "Uneven, sagging or moisture-marked floor surface",
+      "possible_mechanism": "Moisture deterioration of supporting material",
+      "alternative_explanation": "Span, load, foundation settlement or earlier repairs",
+      "discriminating_verification": "Inspect accessible underside, member condition, moisture readings and load paths",
+      "urgent_escalation_cue": "Unsupported or visibly failing floor platform",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "framing",
+      "feature_codes": [
+        "exterior_wall_structure",
+        "floor_structure",
+        "roof_structure"
+      ],
+      "symptom_to_check": "Visible bowed or altered member at accessible framing",
+      "possible_mechanism": "Material deformation under load",
+      "alternative_explanation": "Nonstructural irregularity, prior modification or moisture damage",
+      "discriminating_verification": "Confirm member size, span, connections, loading and alteration record with qualified professional",
+      "urgent_escalation_cue": "Cracked load-bearing member or visibly compromised connection",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "exterior",
+      "feature_codes": [
+        "cladding_type",
+        "flashing_openings",
+        "trim_decks_and_attached_features"
+      ],
+      "symptom_to_check": "Staining, cracking or separation near cladding and openings",
+      "possible_mechanism": "Water entry at absent/damaged flashing",
+      "alternative_explanation": "Surface condensation or non-active legacy staining",
+      "discriminating_verification": "Trace flashing and drainage-plane details where safely visible; moisture meter and targeted noninvasive evaluation",
+      "urgent_escalation_cue": "Loose facade components or ongoing water entry",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "roof",
+      "feature_codes": [
+        "roof_covering",
+        "roof_geometry_and_structure",
+        "roof_drainage",
+        "roof_access_method"
+      ],
+      "symptom_to_check": "Staining, damaged covering or ponding on visible roof area",
+      "possible_mechanism": "Age-related material distress or poor water shedding",
+      "alternative_explanation": "Storm damage, condensation or debris blockage",
+      "discriminating_verification": "Document drainage/flashings from safe vantage; review leak history and attic underside where accessible",
+      "urgent_escalation_cue": "Active leakage or apparent collapse risk; avoid unsafe roof access",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "attic",
+      "feature_codes": [
+        "attic_access",
+        "visible_roof_framing",
+        "insulation_type",
+        "ventilation_design"
+      ],
+      "symptom_to_check": "Discoloration, dampness or condensation on accessible attic material",
+      "possible_mechanism": "Air leakage with moisture condensation",
+      "alternative_explanation": "Roof covering leak, plumbing vent leakage or past inactive damage",
+      "discriminating_verification": "Measure moisture and humidity, observe vent terminations, compare weather history",
+      "urgent_escalation_cue": "Electrical hazard near wet materials or visibly unstable roof framing",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "interior",
+      "feature_codes": [
+        "walls_ceilings_floors",
+        "windows_doors_stairs",
+        "life_safety_observations"
+      ],
+      "symptom_to_check": "Localized wall, ceiling or flooring stain/crack",
+      "possible_mechanism": "Moisture from building envelope",
+      "alternative_explanation": "Plumbing source, condensation or historic repaired event",
+      "discriminating_verification": "Review adjacent rooms/above/below, moisture readings and leak history",
+      "urgent_escalation_cue": "Active water near electrical, failing stairs or unsafe guarding",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "electrical",
+      "feature_codes": [
+        "service_entry_type",
+        "panel_and_overcurrent",
+        "branch_wiring_visible",
+        "tested_devices_and_limitations"
+      ],
+      "symptom_to_check": "Exposed conductor, heat marks or panel corrosion where visible",
+      "possible_mechanism": "Damaged wiring, loose termination or water exposure",
+      "alternative_explanation": "Surface dirt, labeling issue or pre-existing non-active staining",
+      "discriminating_verification": "Qualified electrician to inspect de-energized condition and test as appropriate; do not open energized components",
+      "urgent_escalation_cue": "Arcing, hot equipment, damaged insulation or exposed live parts",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "plumbing",
+      "feature_codes": [
+        "visible_supply_materials",
+        "visible_drain_waste_vent",
+        "fixtures_and_water_controls"
+      ],
+      "symptom_to_check": "Moisture and corrosion near accessible joint",
+      "possible_mechanism": "Active joint leakage",
+      "alternative_explanation": "Condensation or historic water event",
+      "discriminating_verification": "Observe under operating conditions when safe, meter moisture, trace water source",
+      "urgent_escalation_cue": "Active uncontrolled leak or contaminated wastewater",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "water_heating",
+      "feature_codes": [
+        "heater_type_and_energy",
+        "rating_plate_make_model_serial",
+        "venting_and_safety",
+        "visible_condition"
+      ],
+      "symptom_to_check": "Rust, water trace or soot around water heater",
+      "possible_mechanism": "Leaking fitting or combustion/venting fault",
+      "alternative_explanation": "Ambient condensation or old staining",
+      "discriminating_verification": "Verify exact product/venting instructions and operating checks by qualified technician",
+      "urgent_escalation_cue": "Potential combustion-gas hazard, apparent unsafe venting or active leak",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "hvac",
+      "feature_codes": [
+        "heating_type",
+        "cooling_type",
+        "distribution_type",
+        "rating_plate_make_model_serial",
+        "operation_and_access_limitations"
+      ],
+      "symptom_to_check": "Corrosion, water pooling or irregular vent termination",
+      "possible_mechanism": "Condensate handling or venting defect",
+      "alternative_explanation": "Normal defrost drainage, inactive history or adjacent plumbing",
+      "discriminating_verification": "Review model-specific manufacturer instructions; qualified HVAC operational testing",
+      "urgent_escalation_cue": "Suspected combustion exhaust exposure or damaged gas piping",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    },
+    {
+      "system": "crawlspace",
+      "feature_codes": [
+        "space_type_and_access",
+        "soil_moisture_and_vapor_control",
+        "supports_and_observed_structure"
+      ],
+      "symptom_to_check": "Wet soil, stained members or displaced supports",
+      "possible_mechanism": "Ground moisture intrusion or poor vapor control",
+      "alternative_explanation": "Plumbing leak, surface runoff or seasonal flood history",
+      "discriminating_verification": "Moisture mapping, observe source routes, assess support geometry and access limitations",
+      "urgent_escalation_cue": "Visible structural instability, active flooding or suspected biological hazard",
+      "expertise_boundary": "A visual clue is not a diagnosis. Risk/urgency requires judgment; obtain professional testing or safe access as appropriate.",
+      "requires_case_evidence": true,
+      "may_declare_cause_proven": false,
+      "may_declare_code_violation": false,
+      "may_declare_no_defects": false
+    }
+  ]
+}

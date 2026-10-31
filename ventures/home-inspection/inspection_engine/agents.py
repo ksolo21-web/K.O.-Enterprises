@@ -22,6 +22,8 @@ from .vision import normalized_image, validate_proposal, apply_predictions, UNSU
 from .zoom import create_zoom_views, validate_bbox, verify_zoom_record
 from .video_photos import capture_video_photos
 from .source_of_truth import build_knowledge_brief
+from .michigan_authority import build_michigan_brief
+from .failure_modes import build_failure_mode_brief
 from .descriptors import REQUIRED_FEATURES
 from .adjudication import entries as ledger_entries, memory_context, require_new_candidate, build_queue
 
@@ -332,6 +334,14 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 f'UNRECORDED_FEATURE_TASKS_JSON: {json.dumps(gaps,sort_keys=True)}\n'
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
             prompt += '\n' + build_knowledge_brief(job['systems']) + '\n'
+            prompt += '\n' + build_failure_mode_brief(job['systems']) + '\n'
+            # Michigan-specific law is injected only when the case explicitly identifies MI.
+            # These are candidate state indexes, never automatic legal conclusions.
+            property_context = work.get('property', {})
+            if isinstance(property_context, dict) and property_context.get('state') in ('MI', 'Michigan'):
+                prompt += '\n' + build_michigan_brief(
+                    job['systems'], property_context.get('inspection_date', ''),
+                    property_context.get('building_type', 'unverified')) + '\n'
             if len(prompt.encode())>20000:raise DataError('Specialist prompt exceeds bounded context budget')
             response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
             candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])
