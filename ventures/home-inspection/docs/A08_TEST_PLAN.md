@@ -1,0 +1,17 @@
+# A08 — isolate the A07 first specialist request
+
+Baseline: `0c1d217be3b8e5a08f611813ceb77d63b2daddca`. A07's four geometry calls took82–92seconds each; its first specialist failed after180.101seconds without an envelope. Its generic error lost the cause. CPU latency, schema/request incompatibility and runtime failure remain hypotheses.
+
+## Dependency-aware execution and acceptance
+
+1. Pin the entire durable A07 failure document by SHA256. Verify decoded JPEG, prompt and schema hashes and current exterior schema. Reconstruct the same Ollama payload (same model, pixels, prompt, system prompt, schema, temperature0, streamfalse, keepalive0), changing only the diagnostic deadline. No customer file argument.
+2. Test actual loopback behavior for no redirect/retry, response-size cap and absolute deadline against missing headers and continuous body drips. Keep the application's existing180second transport untouched. Test bad digests, changed source, partial/error/length-stopped responses, invalid feature codes, unchanged zooms, raw response evidence and explicit zero tools/Q02/release.
+3. Separate critic reviews source, all tests and exact workflow/scope. Run the full product regression before any model download on the remote runner.
+4. One standard public Ubuntu24 job,25minutes overall, existing pinned actions, verified Ollama v0.40.13 archive,9GiB free-disk check. Only Qwen2.5VL3B with digest fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1. No Granite download, geometry rerun, second request or fallback. Metadata checks are read-only.
+5. One fixed loopback POST/api/generate.600second absolute watchdog shuts down the socket; outer timeout630seconds plus10second kill grace guards process failure. Capture actual request before sending, bounded untrusted response fields and hash before application validation, elapsed time, terminal completion/reason and model timing metrics. Never count partial/error/length output as complete.
+6. Always save up to128KiB of the normal server log (debug disabled), model process CPU/memory snapshot without command arguments, system memory and hashed file manifest. Record which outputs exist if failure stops an earlier stage. Three-day synthetic artifact only; preserve the decisive evidence durably afterward.
+7. Retrieve actual archive, validate hashes and review completed response or exact error. A completed response after180seconds supports a latency explanation for this new attempt, without retroactively proving A07's missing exception. Success at or before180seconds leaves prior transient causes unresolved. At600seconds record a blocked deadline, not schema incompatibility unless the logs directly show it.
+8. Check each proposed observation against the authoritative delegated-system/application contract, and reject unchanged full-image zooms. Proposed tools are recorded but never executed by this isolated diagnostic. No field accuracy or Q02 acceptance score.
+9. Separate critic reviews actual result, retire trigger and verify main, pause and ordinary workflow unchanged. No automatic retry.
+
+All source/protocol/evidence checks must pass before the attempt. Runtime results may honestly remain blocked. No result here establishes full specialist execution, useful zoom/video selection, Q02 review, field accuracy, authenticated separate hosts or customer release. All original Milestone2 acceptance gates remain mandatory.
