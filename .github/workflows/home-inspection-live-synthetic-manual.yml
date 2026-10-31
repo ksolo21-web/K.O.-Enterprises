@@ -9,10 +9,6 @@ on:
         description: 'Type SYNTHETIC_ONLY to confirm no customer media or release activity'
         required: true
         type: string
-      ollama_installer_sha256:
-        description: 'Expected SHA-256 of reviewed official Ollama install script (required for execution)'
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -35,6 +31,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: '1'
       OLLAMA_NUM_PARALLEL: '1'
       OLLAMA_MAX_LOADED_MODELS: '1'
+      OLLAMA_MODELS: ${{ runner.temp }}/home-inspection-models
     steps:
       - name: Check out source (no persisted GitHub credentials)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -69,24 +66,33 @@ jobs:
           command -v ffmpeg || { echo 'FFmpeg missing from runner image' >&2; exit 1; }
           python -m scripts.generate_public_fixtures
           python -m unittest discover -s tests -q
-      - name: Download and verify Ollama installer, then start CPU loopback service
+      - name: Verify disk budget and install pinned Ollama binary from verified archive
         shell: bash
         run: |
           set -euo pipefail
-          # Operator-supplied, independently reviewed SHA-256 is mandatory.
-          expected="${{ inputs.ollama_installer_sha256 }}"
-          if [[ ! "$expected" =~ ^[0-9a-fA-F]{64}$ ]]; then
-            echo 'BLOCKED: Ollama installer SHA-256 not supplied in valid format' >&2
+          # Official Linux binary archive, fixed tag and published GitHub asset checksum.
+          # No mutable installer script or arbitrary shell code from the network.
+          command -v zstd >/dev/null || { echo 'BLOCKED: runner missing zstd' >&2; exit 1; }
+          free_kib=$(df --output=avail -k "$RUNNER_TEMP" | tail -n 1)
+          if (( free_kib < 9 * 1024 * 1024 )); then
+            echo 'BLOCKED: less than 9 GiB disk available for binary and models' >&2
             exit 1
           fi
-          curl --fail --silent --show-error --location https://ollama.com/install.sh -o "$RUNNER_TEMP/install-ollama.sh"
-          printf '%s  %s\n' "$expected" "$RUNNER_TEMP/install-ollama.sh" | sha256sum --check --status || {
-            echo 'BLOCKED: downloaded Ollama installer fails authorized SHA-256 check' >&2
-            exit 1
-          }
-          sh "$RUNNER_TEMP/install-ollama.sh"
+          archive="$RUNNER_TEMP/ollama-linux-amd64.tar.zst"
+          install_dir="$RUNNER_TEMP/ollama-pinned"
+          mkdir -p "$install_dir"
+          curl --fail --silent --show-error --location --retry 3 --proto '=https' --proto-redir '=https' \
+            https://github.com/ollama/ollama/releases/download/v0.40.13/ollama-linux-amd64.tar.zst \
+            --output "$archive"
+          python -m scripts.verify_pinned_ollama "$archive"
+          tar --zstd -xf "$archive" -C "$install_dir"
+          rm -- "$archive" # recover SSD space for the two models
+          [[ -x "$install_dir/bin/ollama" ]] || { echo 'BLOCKED: verified archive lacks executable' >&2; exit 1; }
+          printf '%s\n' "$install_dir/bin" >> "$GITHUB_PATH"
+          export PATH="$install_dir/bin:$PATH"
+          ollama --version
           nohup ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
-          for i in $(seq 1 45); do
+          for i in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:11434/api/tags > /dev/null; then
               break
             fi

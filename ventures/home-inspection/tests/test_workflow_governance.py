@@ -38,8 +38,8 @@ class GithubManualVisionWorkflowTests(unittest.TestCase):
     def test_low_model_concurrency_and_nonrelease(self):
         self.assertIn("OLLAMA_MAX_LOADED_MODELS: '1'",self.data)
         self.assertIn('scripts.run_vision_acceptance',self.data)
-        self.assertIn('ollama_installer_sha256',self.data)
-        self.assertIn('sha256sum --check --status',self.data)
+        self.assertIn('scripts.verify_pinned_ollama',self.data)
+        self.assertNotIn('ollama.com/install.sh',self.data)
         doc=(ROOT/'docs/GITHUB_CPU_VISION_TRIAL_v1.3.md').read_text()
         self.assertIn('NOT EXECUTED',doc)
         self.assertIn('supply-chain review',doc)
