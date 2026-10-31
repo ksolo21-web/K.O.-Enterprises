@@ -13,6 +13,7 @@ from .video_photos import capture_video_photos, verify_selected_photo_pixels
 from .agents import plan_specialists, execute_specialists, SPECIALIST_SCHEMA
 from .critic import review_specialist_dossier, CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
 from .local_runtime import preflight_models
+from .model_smoke import smoke_probe
 
 
 def main():
@@ -76,6 +77,10 @@ def main():
     preflight=sub.add_parser('model-preflight', help='Read-only check for two installed local vision models')
     preflight.add_argument('--writer-model',required=True)
     preflight.add_argument('--review-model',required=True)
+    smoke=sub.add_parser('model-smoke', help='ACTUAL image-conditioned synthetic test; local Ollama only')
+    smoke.add_argument('--writer-model', required=True)
+    smoke.add_argument('--review-model', required=True)
+    smoke.add_argument('--out', type=Path, required=True, help='New local JSON record, refuse overwrite')
     args=ap.parse_args()
     if args.command == 'model-preflight':
         try:
@@ -86,6 +91,23 @@ def main():
                               'customer_release_allowed':False},indent=2))
             raise SystemExit(2) from None
         print(json.dumps(result,indent=2))
+        return
+    if args.command == 'model-smoke':
+        if args.out.exists():
+            raise SystemExit('Refusing to overwrite local smoke proof')
+        try:
+            result = smoke_probe(args.writer_model, args.review_model)
+        except DataError as exc:
+            result={'test':'SYNTHETIC_LIVE_VISION', 'status':'BLOCKED',
+                    'reason':str(exc), 'actual_image_inference_completed':False,
+                    'customer_release_allowed':False}
+            print(json.dumps(result,indent=2))
+            raise SystemExit(2) from None
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+        print(json.dumps(result,indent=2))
+        if result['status'] != 'SYNTHETIC_VISION_PROBE_PASSED':
+            raise SystemExit(3)
         return
     source=args.project.resolve();doc=load_project(source)
     root=source.parent

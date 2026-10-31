@@ -59,7 +59,7 @@ def ollama_local(image_bytes:bytes, prompt:str, model:str,timeout:int=100,
     request_data={'model':model,'prompt':prompt,'system':system_prompt or SYSTEM_PROMPT,
                   'images':[base64.b64encode(image_bytes).decode('ascii')],
                   'format':schema if schema is not None else CANDIDATE_SCHEMA,'stream':False,
-                  'options':{'temperature':0}}
+                  'options':{'temperature':0},'keep_alive':0}
     parsed=local_json('POST','/api/generate',request_data,timeout=timeout,max_bytes=MAX_MODEL_REPLY)
     try:
         if not isinstance(parsed.get('response'),str):raise ValueError('response missing')

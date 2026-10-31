@@ -24,3 +24,6 @@ examples/**/*.mp4
 examples/*.png
 examples/*.jpg
 examples/*.mp4
+# Live smoke/trial output might later include private inputs. Never commit.
+local-results/
+**/local-results/

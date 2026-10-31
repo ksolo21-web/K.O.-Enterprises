@@ -1,0 +1,25 @@
+{
+  "milestone": "M2 local vision runtime activation",
+  "updated": "2026-10-30",
+  "implementation": {
+    "local_model_protocol": "IMPLEMENTED",
+    "loopback_only": true,
+    "redirects_refused": true,
+    "unload_after_generation": true,
+    "separate_writer_and_Q02_models": "SUPPORTED_NOT_INSTALLED_HERE",
+    "image_conditioned_live_smoke": "IMPLEMENTED_NOT_RUN_HERE",
+    "synthetic_video_still_and_zoom_trial": "IMPLEMENTED_MOCK_VALIDATED",
+    "existing_photo_video_provenance": "PRESERVED",
+    "signed_customer_release": false
+  },
+  "acceptance_blockers": [
+    "This working environment has no Ollama binary or running server",
+    "This working environment has no installed vision-model weights and no outbound DNS/network access",
+    "Full local model smoke not executed here",
+    "Real-world expert-labeled property accuracy unknown",
+    "A separate model family does not prove independent runtime/agent identity",
+    "Human verification and customer-release authentication not implemented"
+  ],
+  "approval": "BLOCKED",
+  "production_use_allowed": false
+}

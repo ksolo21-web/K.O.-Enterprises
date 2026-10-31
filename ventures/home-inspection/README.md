@@ -40,3 +40,11 @@ The repository's `PAUSE_AUTONOMY` governance marker remains in effect for extern
 ## Current source and report status
 
 The working engine is in [`inspection_engine/`](inspection_engine/). Run and test it using [`docs/GITHUB_DEVELOPMENT.md`](docs/GITHUB_DEVELOPMENT.md). See [`docs/PAGINATION_ACCEPTANCE.md`](docs/PAGINATION_ACCEPTANCE.md) and [`docs/SOURCE_TRANSFER_COMPLETION.md`](docs/SOURCE_TRANSFER_COMPLETION.md) for fresh verified status. The earlier `SOURCE_TRANSFER_HANDOFF.md` reflects the pre-recovery point, not the current state.
+
+## Local vision runtime v1.0 (integration update)
+
+A real, optional **local Ollama** setup and two-model synthetic smoke probe are now implemented. See [runtime setup and safety gates](docs/LOCAL_VISION_RUNTIME_v1.0.md) and [current acceptance blockers](docs/RUNTIME_ACCEPTANCE_v1.0.json).
+
+The project has a Windows PowerShell and Linux/macOS shell setup helper (`scripts/setup_vision_models.ps1` / `scripts/setup_vision_models.sh`) that only downloads model weights when an authorized operator explicitly executes it. Default candidate models: `qwen2.5vl:3b` (specialist writer) and `granite3.2-vision:2b` (Q02 technical challenger).
+
+Commands `python -m inspection_engine model-smoke` and `python -m scripts.run_local_live_trial` are opt-in, loopback-only; the latter exercises original synthetic photo/video evidence and records any model-selected zooms/stills. **Live vision inference has NOT been executed in the development container** because it has no Ollama runtime/models or outbound model-download access. Current tests cover software behavior with controlled providers, not real inspection accuracy. No real customer media or credentials are stored in the public repository. `main` and `PAUSE_AUTONOMY` remain unchanged.
