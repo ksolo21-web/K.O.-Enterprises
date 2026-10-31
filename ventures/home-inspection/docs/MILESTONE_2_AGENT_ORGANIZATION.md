@@ -1,4 +1,6 @@
 # Milestone 2: specialist organization and controlled evidence work orders
+> Historical v0.6 design below. The current coordination and independent Q03 adjudication contract is [Observation Quality and Adjudication v1.5](OBSERVATION_QUALITY_AND_ADJUDICATION_v1.5.md). Q02 now has a separate callable visual-review stage; live Q02 success remains unproven. Q03 is an implemented local reasoning-provider interface with controlled tests, not a promoted live model or authenticated independent host. All earlier controls and human release requirements remain.
+
 **2026-10-30 | v0.6 | local engineering prototype | never a field inspection**
 
 ## Approved chain of command, preserved

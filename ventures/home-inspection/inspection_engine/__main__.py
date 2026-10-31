@@ -14,12 +14,13 @@ from .agents import plan_specialists, execute_specialists
 from .critic import review_specialist_dossier, CRITIC_SCHEMA, CRITIC_SYSTEM_PROMPT
 from .local_runtime import preflight_models
 from .model_smoke import smoke_probe
+from .adjudication import adjudicate,ollama_reasoner
 
 
 def main():
     ap=argparse.ArgumentParser(description='Local inspection prototype; NEVER a substitute for field review')
     sub=ap.add_subparsers(dest='command',required=True)
-    for op in ['report','audit','compare','intake','frames','video-photos','video-photo-audit','analyze','analyze-zoom','zoom','zoom-grid','zoom-proposals','apply','agents-plan','agents-run','agents-critic']:
+    for op in ['report','audit','compare','intake','frames','video-photos','video-photo-audit','analyze','analyze-zoom','zoom','zoom-grid','zoom-proposals','apply','agents-plan','agents-run','agents-critic','agents-adjudicate']:
         cmd=sub.add_parser(op)
         cmd.add_argument('project',type=Path)
         if op=='report':cmd.add_argument('--out',type=Path,required=True)
@@ -69,6 +70,11 @@ def main():
             cmd.add_argument('--dossier',type=Path,required=True)
             cmd.add_argument('--review-model',required=True,help='Separate, already-installed local Ollama vision model')
             cmd.add_argument('--out',type=Path,required=True)
+        if op=='agents-adjudicate':
+            cmd.add_argument('--technical-review',type=Path,required=True)
+            cmd.add_argument('--reasoning-model',required=True,help='Separate already-installed local Q03 model')
+            cmd.add_argument('--out',type=Path,required=True)
+            cmd.add_argument('--out-project',type=Path,required=True)
         if op=='agents-run':
             cmd.add_argument('--model',required=True,help='Already-installed local Ollama vision model')
             cmd.add_argument('--out-project',type=Path,required=True)
@@ -191,6 +197,18 @@ def main():
         args.out.write_text(json.dumps(answer,indent=2)+'\n',encoding='utf-8')
         answer={'review_file':str(args.out),'summary':answer['decision_summary'],
                 'human_approval_required':True,'customer_release_allowed':False}
+    elif args.command=='agents-adjudicate':
+        _check_new_path(args.out,root);_check_new_path(args.out_project,root)
+        if args.out.resolve()==args.out_project.resolve():raise DataError('Q03 report and project paths must differ')
+        technical=json.loads(args.technical_review.read_text(encoding='utf-8'))
+        result=adjudicate(doc,root,technical,lambda prompt,schema:ollama_reasoner(prompt,schema,args.reasoning_model),
+                          provider_id='local-ollama:'+args.reasoning_model)
+        from copy import deepcopy
+        reviewed=deepcopy(doc);reviewed['adjudication']=result
+        args.out.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+        _write_project(args.out_project,reviewed)
+        answer={'adjudication_file':str(args.out),'project':str(args.out_project),'status':result['status'],
+                'held_entry_ids':result['held_entry_ids'],'customer_release_allowed':False}
     elif args.command=='apply':
         _check_new_path(args.out_project,root)
         preds=json.loads(args.predictions.read_text(encoding='utf-8'))

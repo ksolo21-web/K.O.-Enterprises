@@ -190,6 +190,18 @@ def coverage(document: dict) -> list[dict]:
 
 def blockers(document: dict) -> list[str]:
     b=[]
+    if document.get('adjudication_queue') is not None or any(
+        item.get('model_proposal') for section in ('observations','findings') for item in document[section]):
+        from .adjudication import build_queue,validate_record
+        current=build_queue(document)
+        review=document.get('adjudication',{})
+        if current['entries']:
+            try:held=validate_record(document,review)
+            except (DataError,KeyError,TypeError,ValueError):
+                b.append('Q03 adjudication of the current observation ledger required')
+            else:
+                if held:
+                    b.append('Q03 duplicate, conflict or evidence holds require resolution')
     for item in coverage(document):
         if item['open']:
             b.append(f"{item['title']}: visual coverage or system description not verified")

@@ -2,23 +2,31 @@
 
 This is the home-inspection product track of **K.O. Enterprises**, kept on the separate Git branch `home-inspection-development` and isolated from the main company operating system.
 
+## Current coordination checkpoint — v1.5
+
+The source transfer is complete. The current observation-memory, Q03 adjudication and model-promotion requirements are in [Observation Quality and Adjudication](docs/OBSERVATION_QUALITY_AND_ADJUDICATION_v1.5.md).
+
+M00 now shares a bounded record ledger across work orders. Q02 challenges source pixels; a separate callable Q03 reasoner reconciles the combined records and Q02 explanations. Exact recurrence, stale evidence and incomplete adjudication retain report holds. These controls have local controlled tests; no replacement lead model or live Q03 capability is approved.
+
+[A08 actual results](docs/CHECKPOINT_v1.4.2_A08_RESULTS.md) show completed but poor specialist output in 217 seconds: repeated/misclassified claims and an invalid full-view zoom. Full Milestone 2, real-property quality and customer release remain blocked. The historical opening-package details below are not the current runtime/test status.
+
 ## Decision and scope
 - Parent organization: K.O. Enterprises.
 - GitHub repository: `ksolo21-web/K.O.-Enterprises`.
 - Development branch: `home-inspection-development`, branched from `main` on 2026-10-30.
-- Source location **when integrated**: `ventures/home-inspection/`.
+- Source location: `ventures/home-inspection/`.
 - Report design: approved Option 2, spacious navy-and-white editorial PDF.
 - Inspection evidence: original photos, video footage, extracted full-resolution stills, native zooms, and source/timestamp/hash traceability.
-- Specialist structure: inspection director, bounded technical work orders, separate Q01/Q02 reviews, and required authenticated professional/human approval.
+- Specialist structure: inspection director and shared ledger, bounded technical work orders, Q01 custody controls, Q02 visual challenge, Q03 reconciliation, and required professional/human approval.
 - No AI finding can be labeled verified or customer-ready solely because a model proposes or a reviewer echoes it.
 
-## Prototype baseline to integrate
+## Historical opening prototype baseline
 The latest **local** v0.7 package is `Home_Inspection_M2_Technical_Critic_v0.7_Source.zip`, SHA-256:
 `ba9dedcf000e4f77a746e614e0a55cc279e23343a3a436483e8ede75435cd025`.
 
 The local suite was rerun on 2026-10-30: **104 tests passed**. Synthetic model replies only; no real live vision-model/qualified-inspector benchmark yet.
 
-**Important:** This README establishes the GitHub branch and records the handoff. It does not claim the full v0.7 source ZIP is already uploaded to GitHub.
+**Historical handoff:** the branch originally held its checkpoint before full source transfer. That transfer is now complete; see [Source Transfer Completion](docs/SOURCE_TRANSFER_COMPLETION.md).
 
 ## Milestone gates
 1. Retain Milestone 1 intake, photo-from-video, frame provenance, zoom, crop audit and professional PDF rendering.
