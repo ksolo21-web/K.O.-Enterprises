@@ -37,7 +37,8 @@ def _preflight(writer,reviewer,reasoner):
 
 
 def run_reconciliation_trial(root,writer_model,reviewer_model,reasoning_model,*,
-        writer=None,reviewer=None,reasoner=None,with_video=True,allow_local_inference=False):
+        writer=None,reviewer=None,reasoner=None,with_video=True,allow_local_inference=False,
+        visual_first=False):
     root=Path(root).resolve()
     if root.exists():raise DataError('Refusing to overwrite an existing reconciliation trial')
     names=[validate_model_name(n) for n in (writer_model,reviewer_model,reasoning_model)]
@@ -48,7 +49,10 @@ def run_reconciliation_trial(root,writer_model,reviewer_model,reasoning_model,*,
     live=all(x is None for x in slots)
     if live and allow_local_inference is not True:raise DataError('Explicit local synthetic inference opt-in required')
     metadata=_preflight(*names) if live else []
-    base=run_trial(root,writer_model,reviewer_model,writer=writer,reviewer=reviewer,with_video=with_video,scope='residential')
+    # The separate opt-in path never changes legacy controlled-test calls.
+    if type(visual_first) is not bool:raise DataError('Visual-first flag must be boolean')
+    visual_opts={'visual_first':True} if visual_first else {}
+    base=run_trial(root,writer_model,reviewer_model,writer=writer,reviewer=reviewer,with_video=with_video,scope='residential',**visual_opts)
     result={'schema_version':1,'source_media':'SYNTHETIC_ONLY','execution_kind':'local_ollama' if live else 'controlled_test',
         'models':metadata,'base_trial_status':base['status'],'q03_model':reasoning_model,
         'q03_provider_invoked':False,'q03_live_call_completed':False,'status':'BLOCKED',
@@ -110,13 +114,14 @@ def main():
     p.add_argument('--writer-model',required=True);p.add_argument('--review-model',required=True)
     p.add_argument('--reasoning-model',required=True);p.add_argument('--out-dir',type=Path,required=True)
     p.add_argument('--allow-local-inference',action='store_true');p.add_argument('--no-video',action='store_true')
+    p.add_argument('--visual-first',action='store_true',help='Opt-in: bounded pixel stage with private deferred expert packet; not a field approval')
     a=p.parse_args()
     import signal
     if not hasattr(signal,'SIGALRM'):raise SystemExit('CLI requires an OS with SIGALRM for the 1800-second absolute deadline')
     def expired(signum,frame):raise TimeoutError('Synthetic reconciliation exceeded 1800-second absolute deadline; server cancellation is unverified')
     old_handler=signal.signal(signal.SIGALRM,expired);signal.alarm(1800)
     try:r=run_reconciliation_trial(a.out_dir,a.writer_model,a.review_model,a.reasoning_model,
-        with_video=not a.no_video,allow_local_inference=a.allow_local_inference)
+        with_video=not a.no_video,allow_local_inference=a.allow_local_inference,visual_first=a.visual_first)
     except (DataError,OSError,ValueError,TypeError,TimeoutError) as exc:r={'status':'BLOCKED','reason':str(exc),'customer_release_allowed':False}
     finally:
         signal.alarm(0);signal.signal(signal.SIGALRM,old_handler)

@@ -36,9 +36,10 @@ def _distinct_video_sample_frames(first: Path, second: Path) -> bool:
     return different >= 20
 
 
-def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,reviewer=None,with_video=True,scope=None)->dict:
+def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,reviewer=None,with_video=True,scope=None,visual_first=False)->dict:
     """Writes only synthetic evidence and explicitly unapproved trial JSON under root."""
     if scope not in (None,'residential','commercial'):raise DataError('Explicit trial scope must be residential/commercial')
+    if type(visual_first) is not bool:raise DataError('Visual-first flag must be boolean')
     root=root.resolve()
     if root.exists():
         raise DataError('Refusing to overwrite an existing live-trial directory')
@@ -84,7 +85,7 @@ def run_trial(root:Path,writer_model:str,reviewer_model:str,*,writer=None,review
             selected.append(frames[0]['id'])
         staged,dossier=execute_specialists(project,root,writer,media_ids=selected,
                             provider_id='local-ollama:'+writer_model if live else 'controlled-test:'+writer_model,
-                            audit_event=recorder.event,provider_accepts_schema=True)
+                            audit_event=recorder.event,provider_accepts_schema=True,visual_first=visual_first)
         (root/'staged_project.json').write_text(json.dumps(staged,indent=2)+'\n')
         (root/'specialist_dossier.json').write_text(json.dumps(dossier,indent=2)+'\n')
         record.update({'specialist_work_orders':len(dossier['plan']['jobs']),

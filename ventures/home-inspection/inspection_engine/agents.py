@@ -251,7 +251,8 @@ def _review_dossier(dossier:dict,doc:dict,root:Path)->dict:
 
 def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                        *,media_ids:list[str],provider_id:str='fixture-provider',max_jobs:int=24,
-                       audit_event=None, provider_accepts_schema:bool=False) -> tuple[dict,dict]:
+                       audit_event=None, provider_accepts_schema:bool=False,
+                       visual_first:bool=False) -> tuple[dict,dict]:
     """Exercise actual bounded specialist dispatch with a caller-supplied provider.
 
     Model may request native source zoom or saving a native still from a video.
@@ -267,6 +268,8 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
         raise DataError('Evidence event recorder must be callable')
     if type(provider_accepts_schema) is not bool:
         raise DataError('Schema provider opt-in must be a boolean')
+    if type(visual_first) is not bool or (visual_first and not provider_accepts_schema):
+        raise DataError('Visual-first stage requires explicit schema-aware provider opt-in')
     root=root.resolve()
     validate_project(document,root)
     if verify_custody(document,root):raise DataError('Cannot route evidence with invalid custody')
@@ -376,6 +379,19 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 prompt += '\n' + safe_agent_reference_brief(property_context,job['systems']) + '\n'
             if provider_accepts_schema:
                 prompt,input_profile=compact_writer_prompt(prompt,schema)
+                if visual_first:
+                    from .visual_stage import project_visual_stage, preserve_deferred_packet, VisualStageError
+                    full_expert_prompt=prompt
+                    try:
+                        prompt, visual_profile=project_visual_stage(full_expert_prompt,schema)
+                        deferred=preserve_deferred_packet(full_expert_prompt,visual_profile,
+                            invocation_id=invocation_id,evidence_id=target['id'])
+                    except VisualStageError as exc:
+                        raise DataError('Visual-first knowledge projection rejected: '+str(exc)) from exc
+                    dossier.setdefault('visual_stage_profiles',[]).append(visual_profile)
+                    dossier.setdefault('deferred_expert_packets',[]).append(deferred)
+                    if audit_event is not None:
+                        audit_event({'kind':'visual_first_projection','profile':deepcopy(visual_profile)})
                 input_profile['invocation_id']=invocation_id
                 dossier.setdefault('input_profiles',[]).append(input_profile)
                 if audit_event is not None:audit_event({'kind':'specialist_input_profile','profile':deepcopy(input_profile)})
