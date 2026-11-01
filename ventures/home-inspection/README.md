@@ -1,5 +1,8 @@
 # Home Inspection — development branch
 
+**Latest A09 result (2026-10-31):** all three pinned models installed and remote629tests passed, but the first updated writer request timed out at180.044seconds. No Q02/tool/Q03/report stage was reached. Logs show substantial CPU image/prompt processing; fullM2 remains blocked. [Actual result and preserved raw evidence](docs/CHECKPOINT_v1.6.2_A09_LIVE_RESULTS.md). The consumed one-time trigger is retired; main and autonomy pause remain unchanged.
+
+
 This is the home-inspection product track of **K.O. Enterprises**, kept on the separate Git branch `home-inspection-development` and isolated from the main company operating system.
 
 ## Current coordination checkpoint — v1.5

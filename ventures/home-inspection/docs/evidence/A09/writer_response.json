@@ -1,0 +1,14 @@
+{
+  "call_id": "0001-writer",
+  "role": "writer",
+  "model": "qwen2.5vl:3b",
+  "execution_kind": "local_ollama",
+  "status": "PROVIDER_ERROR",
+  "model_output_is_untrusted": true,
+  "error_type": "DataError",
+  "error": "Local Ollama request timed out before a completed response; generation may still be running",
+  "cause_types": [
+    "TimeoutError"
+  ],
+  "elapsed_seconds": 180.044
+}

@@ -1,0 +1,30 @@
+{
+  "status": "BLOCKED",
+  "project_id": "SYNTHETIC-M2-LIVE-TRIAL",
+  "started_utc": "2026-10-31T23:52:40.320495+00:00",
+  "writer_model": "qwen2.5vl:3b",
+  "reviewer_model": "granite3.2-vision:2b",
+  "source_media": "SYNTHETIC_ONLY",
+  "real_model_invocations_requested": true,
+  "real_model_invocations_completed": false,
+  "customer_release_allowed": false,
+  "independent_agent_host_verified": false,
+  "field_accuracy_verified": false,
+  "video_content_variation_verified": true,
+  "error": "Local Ollama request timed out before a completed response; generation may still be running",
+  "invocation_audit": {
+    "provider_call_count": 1,
+    "returned_provider_calls": {
+      "writer": 0,
+      "reviewer": 0
+    },
+    "completed_live_calls": {
+      "writer": 0,
+      "reviewer": 0
+    },
+    "engine_event_count": 0,
+    "records_are_acceptance_or_accuracy_approval": false
+  },
+  "writer_model_calls_completed": false,
+  "reviewer_model_calls_completed": false
+}

@@ -8,6 +8,7 @@ from scripts.a09_resources import sample,stop_owned
 
 ROOT=Path(__file__).resolve().parents[1]
 WORKFLOW=ROOT.parent.parent/'.github/workflows/home-inspection-one-time-20261031-a09.yml'
+if not WORKFLOW.is_file():WORKFLOW=ROOT/'docs/workflows/A09_RETIRED_WORKFLOW.yml'
 
 
 class A09ScopeTests(unittest.TestCase):

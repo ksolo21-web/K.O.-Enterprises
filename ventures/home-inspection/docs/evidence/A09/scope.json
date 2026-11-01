@@ -1,0 +1,7 @@
+{
+  "status": "ONE_EXACT_SYNTHETIC_EXCEPTION_VERIFIED",
+  "source_commit": "aef7abc8036e092463806182a9febfe64056ef3e",
+  "trigger_commit": "cee3a96382fb793642842276f70374b2b0ca9be2",
+  "pause_preserved": true,
+  "customer_release_allowed": false
+}

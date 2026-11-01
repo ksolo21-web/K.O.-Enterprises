@@ -1,0 +1,22 @@
+{
+  "models": [
+    {
+      "model": "qwen2.5vl:3b",
+      "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+      "role": "PREVIOUSLY_EXECUTED_VISION_MODEL"
+    },
+    {
+      "model": "granite3.2-vision:2b",
+      "digest": "3be41a661804ad72cd08269816c5a145f1df6479ad07e2b3a7e29dba575d2669",
+      "role": "PREVIOUSLY_EXECUTED_VISION_MODEL"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+      "role": "Q03_EVALUATION_CANDIDATE"
+    }
+  ],
+  "promoted": false,
+  "real_inference_completed": false,
+  "customer_release_allowed": false
+}

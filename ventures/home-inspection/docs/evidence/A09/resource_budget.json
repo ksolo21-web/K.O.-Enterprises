@@ -1,0 +1,8 @@
+{
+  "free_disk_bytes": 91471028224,
+  "available_memory_bytes": 15461683200,
+  "total_memory_bytes": 16759308288,
+  "three_model_layer_bytes": 10321565265,
+  "context_tokens_requested": 16384,
+  "max_loaded_models": 1
+}

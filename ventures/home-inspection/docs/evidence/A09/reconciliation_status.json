@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "source_media": "SYNTHETIC_ONLY",
+  "execution_kind": "local_ollama",
+  "models": [
+    {
+      "role": "writer",
+      "model": "qwen2.5vl:3b",
+      "digest": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1"
+    },
+    {
+      "role": "Q02",
+      "model": "granite3.2-vision:2b",
+      "digest": "3be41a661804ad72cd08269816c5a145f1df6479ad07e2b3a7e29dba575d2669"
+    },
+    {
+      "role": "Q03",
+      "model": "qwen2.5:7b",
+      "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e"
+    }
+  ],
+  "base_trial_status": "BLOCKED",
+  "q03_model": "qwen2.5:7b",
+  "q03_provider_invoked": false,
+  "q03_live_call_completed": false,
+  "status": "BLOCKED",
+  "call_budgets": {
+    "writer_maximum": 6,
+    "Q02_maximum": 48,
+    "Q03_maximum": 1,
+    "automatic_retries": 0
+  },
+  "full_milestone_2_approved": false,
+  "field_accuracy_verified": false,
+  "customer_release_allowed": false,
+  "reason": "Writer/Q02 trial blocked; inspect preserved base evidence"
+}

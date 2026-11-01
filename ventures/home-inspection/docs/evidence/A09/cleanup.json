@@ -1,0 +1,10 @@
+{
+  "tracked_owned_pids": [
+    5725,
+    5782,
+    5962
+  ],
+  "all_stopped": true,
+  "child_tracking_succeeded": true,
+  "command_arguments_recorded": false
+}
