@@ -17,23 +17,26 @@ def git(root,*args):
     return subprocess.check_output(['git','-C',str(root),*args],text=True,timeout=5).strip()
 
 
-def verify_scope(root:Path,env:dict):
+def verify_scope(root:Path,env:dict,*,auth_id=AUTH,approval_path=APPROVAL):
+    allowed={(AUTH,APPROVAL),('OWNER_APPROVED_SYNTHETIC_CPU_RUN_20261031_A10',
+        'ventures/home-inspection/docs/ONE_TIME_SYNTHETIC_TRIAL_APPROVAL_2026-10-31_A10.md')}
+    if (auth_id,approval_path) not in allowed:raise DataError('Unknown bounded synthetic-trial authorization')
     expected={'GITHUB_REPOSITORY':'ksolo21-web/K.O.-Enterprises','GITHUB_REF':'refs/heads/home-inspection-development',
         'GITHUB_EVENT_NAME':'push','GITHUB_RUN_ATTEMPT':'1','A09_REPOSITORY_VISIBILITY':'public'}
     if any(env.get(k)!=v for k,v in expected.items()):raise DataError('A09 event/repository/branch/attempt/visibility mismatch')
     if not (root/'PAUSE_AUTONOMY').is_file():raise DataError('Root pause must remain present')
     if git(root,'hash-object','PAUSE_AUTONOMY')!='37455fd13813683bb0169d36cb24b86a07094aa7':raise DataError('Root pause changed')
-    document=(root/APPROVAL).read_text()
-    if f'Authorization-ID: {AUTH}' not in document.splitlines():raise DataError('A09 authorization identity mismatch')
+    document=(root/approval_path).read_text()
+    if f'Authorization-ID: {auth_id}' not in document.splitlines():raise DataError('A09 authorization identity mismatch')
     if 'Authorization-Scope: one synthetic-only GitHub-hosted CPU reconciliation trial, no customers, no secrets, no deployment' not in document.splitlines():
         raise DataError('A09 authorization scope mismatch')
     matches=re.findall(r'^Source-Commit: ([0-9a-f]{40})$',document,re.M)
     if len(matches)!=1 or git(root,'rev-parse','HEAD^')!=matches[0]:raise DataError('A09 reviewed source parent mismatch')
     if git(root,'rev-parse','HEAD')!=env.get('GITHUB_SHA'):raise DataError('Checkout does not match triggering SHA')
-    if git(root,'log','-1','--format=%B')!=f'trial(home-inspection): {AUTH}':raise DataError('A09 trigger message mismatch')
-    if git(root,'diff-tree','--no-commit-id','--name-status','-r','HEAD').splitlines()!=['A\t'+APPROVAL]:
+    if git(root,'log','-1','--format=%B')!=f'trial(home-inspection): {auth_id}':raise DataError('A09 trigger message mismatch')
+    if git(root,'diff-tree','--no-commit-id','--name-status','-r','HEAD').splitlines()!=['A\t'+approval_path]:
         raise DataError('Trigger must add one NEW authorization record; consumed records cannot be reused')
-    parent_record=subprocess.run(['git','-C',str(root),'cat-file','-e','HEAD^:'+APPROVAL],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=5)
+    parent_record=subprocess.run(['git','-C',str(root),'cat-file','-e','HEAD^:'+approval_path],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=5)
     if parent_record.returncode==0:raise DataError('A09 authorization was already present in the parent')
     product=root/'ventures/home-inspection'
     if any((product/p).exists() for p in ('private_case','customer_data','client_data')):raise DataError('Unexpected customer evidence directory')

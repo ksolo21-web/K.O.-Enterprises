@@ -29,6 +29,7 @@ from .inspection_policy import build_inspection_knowledge_brief, active_sop_cont
 from .descriptors import REQUIRED_FEATURES
 from .adjudication import entries as ledger_entries, memory_context, require_new_candidate, build_queue
 from .coverage_workflow import AREA_ALIASES,inspection_scope,build_work_orders,attach_plan,task_ids_for
+from .input_compaction import compact_writer_prompt
 
 
 @dataclass(frozen=True)
@@ -373,6 +374,11 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
             # legal adoption and property-specific code findings are never inferred.
             if isinstance(property_context,dict) and property_context.get('state') in ('MI','Michigan'):
                 prompt += '\n' + safe_agent_reference_brief(property_context,job['systems']) + '\n'
+            if provider_accepts_schema:
+                prompt,input_profile=compact_writer_prompt(prompt,schema)
+                input_profile['invocation_id']=invocation_id
+                dossier.setdefault('input_profiles',[]).append(input_profile)
+                if audit_event is not None:audit_event({'kind':'specialist_input_profile','profile':deepcopy(input_profile)})
             if len(prompt.encode())>20000:raise DataError('Specialist prompt exceeds bounded context budget')
             response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
             candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])

@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "mode": "SCHEMA_AWARE_WRITER_COMPACT",
+  "original_prompt_sha256": "a5190fb02bfab53e1bb56ce72cfaf642e8abdea4851a6a0ccb7bd64f93f8f63e",
+  "prompt_sha256": "97457ffc8527e65cd85c7af0fa482207051cbf2f72d00a473ab6653251ddc120",
+  "provider_schema_sha256": "ace90d28fdcdc3de119cc7cfb26021e91770b7584c0ead4e5f09f19c2eb24959",
+  "original_characters": 11700,
+  "characters": 9588,
+  "original_bytes": 11702,
+  "bytes": 9590,
+  "saved_bytes": 2112,
+  "knowledge_memory_context_values_preserved": true,
+  "task_instructions_preserved": true,
+  "non_json_knowledge_text_preserved": true,
+  "task_projection": {
+    "canonical_task_cards": [
+      {
+        "assigned_to": "T03",
+        "catalog_sha256": "4cfbece97848feab4ace4d46b429d2bd447e11dc990d1fefa0bb252afde30e6a",
+        "evidence_ids": [
+          "P0001",
+          "V0001-F01",
+          "V0001-F02"
+        ],
+        "evidence_snapshot": {
+          "P0001": {
+            "sha256": "c0b8e433d59ffe9329840a3c64101c9a0bf6f8d04275ee4d8066f9be4e4947f3",
+            "source_video_id": null,
+            "source_video_sha256": null,
+            "timestamp_seconds": null
+          },
+          "V0001-F01": {
+            "sha256": "83a9db5ae71663a6fbdf665cc57653ba27d532a91ab181898375e99aa8201141",
+            "source_video_id": "V0001",
+            "source_video_sha256": "da24c988929d7ea9efb399f827aa49e2062d0eceb6f9465033f57d90c2857ba5",
+            "timestamp_seconds": 0.0
+          },
+          "V0001-F02": {
+            "sha256": "c4c8eaefb6d199cf9b4c404f54a506d34be067fc87b1858383c9004131a13301",
+            "source_video_id": "V0001",
+            "source_video_sha256": "da24c988929d7ea9efb399f827aa49e2062d0eceb6f9465033f57d90c2857ba5",
+            "timestamp_seconds": 3.5
+          }
+        },
+        "id": "HAZARD:exterior",
+        "inspection_date": "2026-10-30",
+        "instructions": {
+          "alternative_explanations": "temporary protective covering",
+          "id": "LOOSE_FALLING_CLADDING",
+          "not_a_confirmed_defect": true,
+          "possible_mechanisms": "failed fastening, wind or moisture damage",
+          "priority": "URGENT_TRIAGE_IF_MATERIAL_AND_PLAUSIBLE",
+          "referral": "qualified siding or exterior contractor",
+          "signal": "detached or visibly unstable wall covering",
+          "system": "exterior",
+          "verification": "Inspector observations and appropriate specialist tests needed; source imagery alone cannot prove concealed condition or root cause"
+        },
+        "kind": "hazard_sweep",
+        "physical_check_required": true,
+        "policy_sha256": "c742259d04b3d2968e68ea43b8185cdfe08c79d4c6775e70f7c85d2aa4ee9d70",
+        "project_id": "SYNTHETIC-M2-LIVE-TRIAL",
+        "scope": "residential",
+        "state": "OPEN_INSPECTOR_FOLLOWUP_REQUIRED",
+        "system": "exterior",
+        "task_sha256": "6e9cf9f8cce367268329c241cd8b715979fd367908ef5d5a1f9794d5dd61ce57",
+        "title": "Exterior envelope visual hazard and coverage check"
+      }
+    ],
+    "full_task_cards_sha256": "07636114e465ee98758abb009450eafd870db4d3bf6a68f5c95b37b364e475b4",
+    "prompt_task_cards_sha256": "cb23b34eaf8b78e3a3543810b4c63f0b88157b4e6d1bd4acc8e07370fa332f77",
+    "omitted_operational_fields": [
+      "catalog_sha256",
+      "evidence_ids",
+      "evidence_snapshot",
+      "policy_sha256"
+    ]
+  },
+  "token_counts_measured": false,
+  "latency_benchmarked": false,
+  "observation_quality_benchmarked": false,
+  "customer_release_allowed": false,
+  "source_request_sha256": "fb5c8d929938a6724014a8d9481ebf2394815380eba8c8a96aea987ec0ceeaa9",
+  "model": "qwen2.5vl:3b",
+  "image_sha256": "8a0511cb888a97140a67d47d1eb8c411398dc4e3eda749cbf1af23c592050313",
+  "image_bytes_unchanged": true,
+  "response_schema_unchanged": true,
+  "model_invocations": 0,
+  "source_request_unchanged": true
+}

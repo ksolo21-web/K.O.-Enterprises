@@ -137,8 +137,12 @@ class SpecialistTests(unittest.TestCase):
         concerns=[b for b in branches if b['properties']['type']['enum']==['potential_concern']]
         self.assertNotIn('feature_code',concerns[0]['properties'])
         self.assertFalse(concerns[0]['additionalProperties'])
-        grounded=json.loads(request['prompt'].split('OUTPUT_JSON_SCHEMA: ')[1].splitlines()[0])
-        self.assertEqual(schema,grounded)
+        from inspection_engine.input_compaction import digest
+        self.assertNotIn('OUTPUT_JSON_SCHEMA:',request['prompt'])
+        self.assertIn('OUTPUT_GUIDE:',request['prompt'])
+        grounded=request['prompt'].split('PROVIDER_SCHEMA_SHA256: ')[1].splitlines()[0]
+        self.assertEqual(digest(schema),grounded)
+        self.assertIn('observed|partially_observed|unknown',request['prompt'])
         self.assertIn('[0,0,1,1] is unchanged',request['prompt'])
 
     def test_work_order_cannot_claim_other_system_within_same_role(self):
