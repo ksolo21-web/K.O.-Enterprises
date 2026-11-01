@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import io
 import json
+import shutil
 from hashlib import sha256
 from pathlib import Path
 import tempfile
@@ -16,7 +17,7 @@ from reportlab.lib.utils import ImageReader
 from inspection_engine.core import DataError
 from inspection_engine.report_page_evidence import render_batch,record_visual_marks
 from inspection_engine.report_review_queue import build_review_queue,digest
-from inspection_engine.report_ocr_review import ocr_review_batch,validate_ocr_record,_words
+from inspection_engine.report_ocr_review import ocr_review_batch,validate_ocr_record,_words,_engine_version as REAL_OCR_ENGINE_VERSION
 from inspection_engine.report_document_coverage import plan_document,audit_document,cross_modal_queue,record_cross_modal_decisions
 
 
@@ -50,6 +51,17 @@ class ScannedReportTests(unittest.TestCase):
         self.registry={'synthetic':True}
         self.queue=build_review_queue(self.bundle,self.registry)
         self.groups=[]
+        self.real_ocr_engine_available=shutil.which('tesseract') is not None
+        # Portable controlled-contract tests: absent binaries do not silently
+        # skip checks or pretend a real OCR invocation occurred. The dedicated
+        # actual-OCR case below explicitly distinguishes real vs unavailable.
+        if not self.real_ocr_engine_available:
+            synthetic_tsv=(b'level\tleft\ttop\twidth\theight\tconf\ttext\n'
+                           b'5\t20\t20\t40\t20\t95\tPANEL\n')
+            a=patch('inspection_engine.report_ocr_review._engine_version',
+                    return_value=('controlled-test','tesseract 5.0.0'))
+            b=patch('inspection_engine.report_ocr_review._tsv',return_value=synthetic_tsv)
+            a.start();b.start();self.addCleanup(a.stop);self.addCleanup(b.stop)
 
     def render(self,pages,which):
         root=self.root/which
@@ -72,12 +84,23 @@ class ScannedReportTests(unittest.TestCase):
         self.assertTrue(out['ocr_words_are_unverified'])
         self.assertFalse(out['converted_to_reference_quotes'])
         self.assertFalse(out['training_approved']);self.assertFalse(out['customer_release_allowed'])
-        self.assertTrue(out['pages'][0]['ocr_word_count']>=2)
+        self.assertTrue(out['pages'][0]['ocr_word_count']>=2 if self.real_ocr_engine_available
+                        else out['pages'][0]['ocr_word_count']==1)
         words=' '.join(w['text_untrusted'] for w in out['pages'][0]['untrusted_ocr_words']).upper()
         self.assertIn('PANEL',words)
+        if not self.real_ocr_engine_available:
+            # Controlled TSV parser contract only, NOT real OCR acceptance.
+            self.assertFalse(out['training_approved'])
         self.assertEqual(out['pages'][0]['source_page_png_sha256'],man['pages'][0]['sha256'])
         self.assertEqual((root/'page-0002.png').read_bytes(),original)
         self.assertIs(validate_ocr_record(out,man),out)
+
+    def test_missing_ocr_binary_blocks_without_claiming_ocr(self):
+        with patch('inspection_engine.report_ocr_review.shutil.which',return_value=None):
+            with self.assertRaises(DataError):REAL_OCR_ENGINE_VERSION()
+        man,root=self.render([2],'pages')
+        with patch('inspection_engine.report_ocr_review._engine_version',side_effect=DataError('Engine unavailable')):
+            with self.assertRaises(DataError):ocr_review_batch(man,self.bundle,self.registry,self.pdf,root,pages=[2])
 
     def test_ocr_wrong_source_and_bad_page_refused(self):
         man,root=self.render([2],'pages')

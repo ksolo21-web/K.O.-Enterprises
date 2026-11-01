@@ -11,7 +11,7 @@ These modules bind offline OCR word boxes to prior source-validated PNGs, enumer
 ## Actual acceptance evidence
 
 - Local Tesseract was installed and used on a synthetic scanned page. Recognized the rendered panel text; original PDF and PNG bytes were unchanged.
-- New offline tests include tampered OCR records, invalid source/pages, duplicate render pages, incomplete coverage, two independent conflicting visual declarations and no invented PDF quotes.
+- New offline tests include a missing-binary fail-closed check and controlled TSV parsing on runners without Tesseract; when installed, actual OCR is tested. Other tests include tampered OCR records, invalid source/pages, duplicate render pages, incomplete coverage, two independent conflicting visual declarations and no invented PDF quotes.
 - Original v2 regression tests were run separately to avoid the older archived standalone test harness's module-stub interference. Full current GitHub branch regression is **not** established by this local subset.
 - No professional case imported, no qualified reviewer credential authenticated, no live model or external workflow invoked.
 
