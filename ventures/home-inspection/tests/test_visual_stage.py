@@ -2,21 +2,26 @@
 import copy
 import json
 from pathlib import Path
-import tempfile
 import unittest
-import zipfile
 
 from inspection_engine.visual_stage import VisualStageError,project_visual_stage,preserve_deferred_packet,MAX_VISUAL_PROMPT_BYTES
 
-ARTIFACT=Path('/mnt/data/HomeInspection_A10_Real_Run_Evidence.zip')
+ARTIFACT=Path(__file__).resolve().parent/'fixtures'/'a10_saved_writer_request.json'
 
 
 class VisualStageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if not ARTIFACT.is_file():raise unittest.SkipTest('Exact A10 evidence archive not available')
-        with zipfile.ZipFile(ARTIFACT) as z:
-            cls.request=json.loads(z.read('trial/invocations/0001-writer.request.json'))
+        cls.request=json.loads(ARTIFACT.read_text(encoding='utf-8'))
+
+    def test_fixture_provenance_is_fixed_and_synthetic(self):
+        import hashlib
+        self.assertEqual(hashlib.sha256(ARTIFACT.read_bytes()).hexdigest(),
+            'a32300101bf8e328f91aa82d762f737e2a2687641e18646a946d9fa367593944')
+        self.assertEqual(self.request['execution_kind'],'local_ollama')
+        self.assertEqual(self.request['role'],'writer')
+        self.assertEqual(self.request['image_sha256'],
+            '8a0511cb888a97140a67d47d1eb8c411398dc4e3eda749cbf1af23c592050313')
 
     def test_real_a10_replay_under_budget(self):
         d=self.request

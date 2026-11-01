@@ -18,7 +18,7 @@ Fixture: exact `trial/invocations/0001-writer.request.json` saved in the A10 syn
 
 - Baseline compact writer prompt: 9,590 UTF-8 bytes.
 - Projected visual-stage prompt: 2,651 UTF-8 bytes (a 72.4% reduction).
-- Offline dedicated tests: 11/11 PASS, including input/schema SHA identity, prior memory and evidence context equality, incomplete holds, oversized memory, duplicate structured labels, tampering, and whole original context provenance.
+- Offline dedicated tests: 12/12 PASS, including input/schema SHA identity, prior memory and evidence context equality, incomplete holds, oversized memory, duplicate structured labels, tampering, and whole original context provenance.
 - These bytes are not model-token counts. **No inference speedup, visual accuracy improvement, Q02/Q03 result or valid field report has been demonstrated.**
 
 ## Critical acceptance and recovery
@@ -31,3 +31,5 @@ Fixture: exact `trial/invocations/0001-writer.request.json` saved in the A10 syn
 6. Preserve `PAUSE_AUTONOMY`, keep `main` unchanged and do not activate an external compute workflow without new specific owner authorization.
 
 Internal review, not a separate agent review. Local replay test success does not approve Milestone 2.
+
+The committed replay fixture is synthetic-only and SHA-pinned (`tests/fixtures/a10_saved_writer_request.json`). Tests cannot skip due to a missing `/mnt/data` path.
