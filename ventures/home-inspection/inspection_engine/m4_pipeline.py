@@ -97,6 +97,20 @@ def _workspace(state_dir: str | Path) -> tuple[Path, dict]:
                 raise DataError("Invalid stage artifact digest")
             if not target.is_file() or sha256(target) != expected:
                 raise DataError("Saved stage artifact hash mismatch")
+    if "report" in state.get("completed", {}):
+        recorded = _load_json(work / "report_receipt.json")
+        for name_key, sha_key in (
+            ("draft_pdf_relative_path", "draft_pdf_sha256"),
+            ("draft_receipt_relative_path", "draft_receipt_sha256"),
+        ):
+            rel = recorded.get(name_key)
+            if not isinstance(rel, str) or not rel.startswith("option2_draft/") or (
+                (work / rel).resolve().parent != (work / "option2_draft").resolve()
+            ):
+                raise DataError("Private report artifact path invalid")
+            target = work / rel
+            if not target.is_file() or sha256(target) != recorded.get(sha_key):
+                raise DataError("Private report PDF/receipt hash mismatch")
     return work, state
 
 
@@ -263,6 +277,8 @@ def run_specialists(workspace: str | Path, provider: Callable, *,
 
 def run_q02(workspace: str | Path, provider: Callable, *, provider_id: str) -> dict:
     work, state, root, _ = _get_case(workspace)
+    if "specialists" not in state["completed"]:
+        raise DataError("Stage q02 requires completed specialists")
     dossier = _load_json(work / "specialist_dossier.json")
     staged = _staged(work, root)
     if not callable(provider) or not provider_id or provider_id == dossier.get("provider"):
@@ -283,6 +299,8 @@ def run_q02(workspace: str | Path, provider: Callable, *, provider_id: str) -> d
 
 def run_q03(workspace: str | Path, provider: Callable, *, provider_id: str) -> dict:
     work, state, root, _ = _get_case(workspace)
+    if "q02" not in state["completed"]:
+        raise DataError("Stage q03 requires completed q02")
     staged = _staged(work, root)
     review = _load_json(work / "technical_review.json")
     writer = _load_json(work / "specialist_dossier.json").get("provider")
@@ -307,6 +325,8 @@ def run_q03(workspace: str | Path, provider: Callable, *, provider_id: str) -> d
 def render_private_case(workspace: str | Path) -> dict:
     """Render only after source-bound Q01 + Q02 + Q03 stage receipts exist."""
     work, state, root, _ = _get_case(workspace)
+    if "q03" not in state["completed"]:
+        raise DataError("Stage report requires completed q03")
     reviewed = _load_json(work / "adjudicated_project.json")
     validate_project(reviewed, root)
     q02 = _load_json(work / "technical_review.json")
