@@ -193,6 +193,33 @@ class M4PipelineTests(unittest.TestCase):
             run_specialists(self.work, self.writer, provider_id="scripted-writer")
         self.assertEqual(self.calls["writer"], 1)
 
+    def test_tampered_pdf_disables_completed_status(self):
+        self.pipeline_to("report")
+        pdf = next((self.work / "option2_draft").glob("*.pdf"))
+        pdf.write_bytes(pdf.read_bytes() + b"UNAUTHORIZED")
+        with self.assertRaisesRegex(DataError, "PDF/receipt hash mismatch"):
+            status_case(self.work)
+
+    def test_private_workspace_inside_git_checkout_rejected(self):
+        checkout = self.base / "public_checkout"
+        checkout.mkdir()
+        (checkout / ".git").mkdir()
+        with self.assertRaisesRegex(DataError, "Git repository"):
+            prepare_case(self.project, checkout / "private_outputs")
+        self.assertFalse((checkout / "private_outputs" / "case_state.json").exists())
+
+    def test_interrupted_q02_cannot_rerun_without_manual_recovery(self):
+        self.pipeline_to("specialists")
+        def broken(*args):
+            self.calls["q02"] += 1
+            raise RuntimeError("simulated Q02 interruption")
+        with self.assertRaisesRegex(RuntimeError, "interruption"):
+            run_q02(self.work, broken, provider_id="broken-q02")
+        self.assertEqual(self.calls["q02"], 1)
+        with self.assertRaisesRegex(DataError, "manual audit"):
+            run_q02(self.work, self.q02_provider, provider_id="scripted-q02")
+        self.assertEqual(self.calls["q02"], 1)
+
     def test_unselected_video_remains_explicit_in_final_draft(self):
         movie = self.source_dir / "synthetic-video.mp4"
         movie.write_bytes(b"non-decodable synthetic placeholder")
