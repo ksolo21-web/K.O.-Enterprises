@@ -13,7 +13,7 @@ Scope: private offline review aids, not verified table interpretation or semanti
 5. [x] Integrate candidates/context into the existing offline viewer; preserve escaping, privacy, page coverage and no-release gates. Bound total assets and metadata.
 6. [x] Exercise real import, registry, queue, PDFium rendering/layout, local Tesseract and viewer without substituting source validators, using synthetic 3+ page input and multiple batches. New v6 tests: 22/22.
 7. [x] Independent critic checks actual code, regression and output evidence; fix and retest. **9.7/10 scoped PASS**, no blocking findings. Review in `evidence/m3-v6/independent-critic.md`.
-8. [ ] Commit only source, tests, docs and synthetic evidence summaries. Verify GitHub branch parity and unchanged pause/main.
+8. [x] Commit only source, tests, docs and synthetic evidence. Verified **24/24 GitHub file blobs** at `c4e59b66659591a13aeb8af49e5b35fb530c155c`, plus unchanged main/pause. Delivery receipt in `evidence/m3-v6/github-delivery.json`.
 
 No live model trial, customer report, external scheduled operation, professional adjudication, learning promotion or field benchmark is included. Overall M3 remains unapproved. Unsigned OCR receipts do not authenticate text; OCR remains untrusted even with a matching receipt.
 
@@ -23,4 +23,6 @@ See `M3_STRUCTURE_CONTEXT_V6.md` and `evidence/m3-v6/acceptance-evidence.json`. 
 
 26 preexisting failed/error cases were reproduced independently from the untouched base. Placeholder registry fixtures were replaced with real import/registration, and the consumed A10 workflow was restored solely as a historical record under `docs/workflows/`, byte-for-byte from `93c8593`. No production authority validator was weakened. One parent regression stalled at an existing loopback transport test; root cause remains unresolved, but the isolated 16-test module and the independent full 777-test suite passed.
 
-Next before commit: final critic review and exact GitHub source parity. Then continue M3 with geometric PDF/OCR text reconciliation and more robust ragged/multiline table proposals, preserving original evidence and uncertainty. Reliable semantics and deferred professional work remain outside this completed increment.
+The v6 increment passed all eight scoped gates. Final delivery/checkpoint documentation is a follow-up to the verified source commit above; all executable source and visual evidence remain identical to that tested commit.
+
+Next: continue M3 with geometric PDF/OCR text reconciliation and more robust ragged/multiline table proposals, preserving original evidence and uncertainty. Reliable semantics and deferred professional work remain outside this completed increment. Use `M3_STRUCTURE_CONTEXT_V6.md` for reproduction, limitations and exact acceptance evidence. No approval is inherited for new remote model trials or changes to company autonomy.

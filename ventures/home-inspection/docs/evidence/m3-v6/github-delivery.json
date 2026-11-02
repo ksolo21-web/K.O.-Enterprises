@@ -1,0 +1,14 @@
+{
+  "commit": "c4e59b66659591a13aeb8af49e5b35fb530c155c",
+  "files_verified": 24,
+  "tree": "8dcb114a41f49bcdabb971a1dc40a2d54bebb5df",
+  "pause_blob": "37455fd13813683bb0169d36cb24b86a07094aa7",
+  "main_sha": "61ca9202fbfe45aae4a0ed29326df44cf7b25c9e",
+  "main_unchanged": true,
+  "pause_unchanged": true,
+  "scope": "M3 v6 scoped engineering delivery; overall M3 unapproved",
+  "critic_score": 9.7,
+  "home_tests_passed": 777,
+  "company_tests_passed": 229,
+  "remote_inference_trial_launched": false
+}
