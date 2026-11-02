@@ -14,6 +14,7 @@ from pathlib import Path
 
 from PIL import Image
 from inspection_engine.core import DataError
+from inspection_engine.m4_pdf_audit import audit_private_pdf
 from inspection_engine.m4_pipeline import (
     prepare_case, status_case, run_specialists, run_q02,
     run_q03, render_private_case,
@@ -219,6 +220,28 @@ class M4PipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError, "manual audit"):
             run_q02(self.work, self.q02_provider, provider_id="scripted-q02")
         self.assertEqual(self.calls["q02"], 1)
+
+    def test_private_pdf_all_pages_render_and_source_media_disclosed(self):
+        self.pipeline_to("report")
+        result = audit_private_pdf(self.work)
+        audit = json.loads(Path(result["audit_json"]).read_text())
+        self.assertGreaterEqual(audit["total_pages"], 6)
+        self.assertEqual(result["raster_pages"], len(audit["pages"]))
+        self.assertTrue(audit["every_page_rasterized"])
+        self.assertTrue(audit["source_register_included"])
+        self.assertEqual(audit["source_media_ids"], ["P1"])
+        self.assertFalse(audit["qualified_visual_layout_review_completed"])
+        self.assertFalse(audit["customer_release_allowed"])
+        self.assertTrue(Path(result["contact_sheet"]).is_file())
+        self.assertEqual(len(list((self.work / "page_raster_audit").glob("page_*.png"))),
+                         audit["total_pages"])
+        for page in audit["pages"]:
+            self.assertGreater(max(page["rgb_standard_deviation"]), 3)
+
+    def test_pdf_audit_refuses_unfinished_pipeline(self):
+        prepare_case(self.project, self.work)
+        with self.assertRaisesRegex(DataError, "completed report"):
+            audit_private_pdf(self.work)
 
     def test_unselected_video_remains_explicit_in_final_draft(self):
         movie = self.source_dir / "synthetic-video.mp4"
