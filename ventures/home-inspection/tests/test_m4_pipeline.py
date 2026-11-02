@@ -115,6 +115,11 @@ class M4PipelineTests(unittest.TestCase):
         self.assertEqual(audit["draft_pdf_sha256"], self._digest(draft))
         self.assertFalse(audit["customer_release_allowed"])
         self.assertEqual(audit["Q03_status"], "ADJUDICATION_HOLD")
+        from pypdf import PdfReader
+        all_text = "\\n".join(page.extract_text() or "" for page in PdfReader(str(draft)).pages)
+        self.assertIn("SOURCE EVIDENCE", all_text)
+        self.assertIn("front.png", all_text)
+        self.assertIn("P1", all_text)
         self.assertEqual(os.stat(draft).st_mode & 0o777, 0o600)
         self.assertEqual(os.stat(self.work).st_mode & 0o777, 0o700)
 
