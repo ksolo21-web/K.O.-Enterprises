@@ -192,7 +192,7 @@ class HumanReviewTests(unittest.TestCase):
         registry = json.loads(self.trust.read_text())
         registry["reviewers"][0]["reviewer_id"] = "mock-q02"
         self.trust.write_text(json.dumps(registry))
-        with self.assertRaisesRegex(DataError, "registry"):
+        with self.assertRaisesRegex(DataError, "model-stage provider ID"):
             prepare_review_request(self.work, self.trust)
 
     def test_duplicate_signer_key_fails_distinctness(self):
