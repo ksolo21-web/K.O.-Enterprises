@@ -19,6 +19,8 @@ from inspection_engine.m4_pipeline import (
 from inspection_engine.m4_human_review import (
     prepare_review_request, sign_review, verify_reviews, _digest
 )
+from inspection_engine.m4_review_ui import build_review_worksheet
+from scripts.m4_review_cli import template
 
 
 class HumanReviewTests(unittest.TestCase):
@@ -200,6 +202,43 @@ class HumanReviewTests(unittest.TestCase):
         revised["note"] = "Changed answer after signature"
         with self.assertRaisesRegex(DataError, "cannot replace"):
             sign_review(self.work, self.trust, self.private_keys[0], revised)
+
+    def test_offline_worksheet_includes_source_image_and_all_checklists(self):
+        result = build_review_worksheet(self.work)
+        self.assertEqual(result["previewed_photos"], 1)
+        page = Path(result["worksheet"])
+        html = page.read_text(encoding="utf-8")
+        self.assertIn('connect-src \'none\'', html)
+        self.assertIn('data:image/jpeg;base64,', html)
+        self.assertIn('Every record, media asset, and system', html)
+        self.assertIn('"id":"P1"', html)
+        self.assertIn('customer_release_allowed', html)
+        self.assertEqual(page.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(build_review_worksheet(self.work)["status"], "REUSED")
+
+    def test_worksheet_never_exfiltrates_and_escapes_script_breakout(self):
+        from inspection_engine.m4_review_ui import HTML
+        self.assertNotIn("fetch(", HTML)
+        self.assertNotIn("XMLHttpRequest", HTML)
+        self.assertNotIn("https://", HTML)
+        self.assertIn("base-uri 'none'", HTML)
+        self.assertIn('document.createElement', HTML)
+        self.assertIn('textContent', HTML)
+
+    def test_unsigned_template_does_not_preaccept_evidence(self):
+        result = template(self.work, "qualified_inspector")
+        content = json.loads(Path(result["template"]).read_text())
+        self.assertEqual(content["request_digest"], _digest(self.packet))
+        self.assertTrue(all(x["decision"] == "" for x in content["items"]))
+        self.assertTrue(all(x["decision"] == "" for x in content["media"]))
+        self.assertTrue(all(x["decision"] == "" for x in content["systems"]))
+        self.assertEqual(template(self.work, "qualified_inspector")["status"], "REUSED")
+
+    def test_worksheet_rejects_changed_photo_after_packet_created(self):
+        photo = self.root / "source" / "synthetic.png"
+        photo.write_bytes(b"tampered")
+        with self.assertRaises((DataError, OSError)):
+            build_review_worksheet(self.work)
 
 
 if __name__ == "__main__":
