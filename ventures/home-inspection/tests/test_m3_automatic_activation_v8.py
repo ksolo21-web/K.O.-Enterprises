@@ -300,7 +300,13 @@ class AutomaticActivationTests(unittest.TestCase):
             '--source-pdf',str(self.pdf),'--study-dir',str(self.root/'prepared'),'--model','model:tag','--model-digest','a'*64,'--max-calls','5']
         with patch('inspection_engine.report_proposals.request_json',return_value={'models':[{'name':'model:tag','digest':'a'*64}]}), \
                 patch('inspection_engine.report_proposals.generate',side_effect=transport):
-            call(pipeline_main,base+['--candidate',str(root/'candidate.json'),'--benchmark',str(root/'benchmark.json'),'--out-dir',str(root/'proposals')])
+            call(pipeline_main,base+['--candidate',str(root/'candidate.json'),'--benchmark',str(root/'benchmark.json'),'--audit-dir',str(root/'private-model-audit'),'--out-dir',str(root/'proposals')])
+        audit=json.loads((root/'private-model-audit/manifest.json').read_text())
+        self.assertEqual(audit['status'],'COMPLETED')
+        self.assertEqual(audit['event_count'],10)
+        self.assertEqual(audit['events'][0]['kind'],'generation_request')
+        self.assertEqual(audit['events'][1]['kind'],'generation_response')
+        self.assertFalse(audit['customer_release_allowed'])
         (root/'runs.json').write_text(json.dumps([str(root/'proposals/model-proposals.json')]))
         call(activation.main,['evaluate','--candidate',str(root/'candidate.json'),'--benchmark',str(root/'benchmark.json'),
             '--runs',str(root/'runs.json'),'--out',str(root/'evaluation.json')])
