@@ -54,7 +54,7 @@ def _trust(path: Path) -> dict:
         key = row.get("public_key_hex")
         if not isinstance(name, str) or not ID_RE.fullmatch(name):
             raise DataError("Reviewer identifier is malformed")
-        if role not in ROLES or not isinstance(key, str):
+        if role not in ROLES or not isinstance(key, str) or not re.fullmatch(r"[0-9a-f]{64}", key):
             raise DataError("Reviewer role or Ed25519 key absent")
         try:
             raw = bytes.fromhex(key)
@@ -217,7 +217,7 @@ def _registered(trust: dict, reviewer_id: str, role: str) -> dict:
 def sign_review(workspace: str | Path, trust_file: str | Path,
                 private_key_file: str | Path, response: dict) -> dict:
     """Require explicit prepared reviewer choices and a local private Ed25519 key."""
-    work, state, _, _ = _get_case(workspace)
+    work, state, root, _ = _get_case(workspace)
     packet = _get_packet(work, state)
     trust_path = Path(trust_file).resolve(strict=True)
     if sha256(trust_path) != packet["trust_file_sha256"]:
@@ -226,7 +226,7 @@ def sign_review(workspace: str | Path, trust_file: str | Path,
     _response_valid(packet, response)
     person = _registered(trust, response["reviewer_id"], response["role"])
     key_path = Path(private_key_file).resolve(strict=True)
-    if key_path.is_relative_to(work) or any((p / ".git").exists() for p in (key_path.parent, *key_path.parents)):
+    if key_path.is_relative_to(work) or key_path.is_relative_to(root) or any((p / ".git").exists() for p in (key_path.parent, *key_path.parents)):
         raise DataError("Private signing key must remain outside case workspace and Git")
     if key_path.stat().st_mode & 0o077:
         raise DataError("Private signing key must be accessible to its owner only")
