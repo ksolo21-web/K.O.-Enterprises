@@ -312,6 +312,11 @@ class AutomaticActivationTests(unittest.TestCase):
         self.assertEqual(verified['model_calls_verified'],5)
         self.assertTrue(verified['request_response_integrity_verified'])
         self.assertFalse(verified['semantic_accuracy_verified'])
+        recorded=root/'private-model-audit/0001-generation_request.json'
+        original=recorded.read_bytes();recorded.write_bytes(original+b' ')
+        with self.assertRaises(DataError):
+            verify_private_audit(root/'private-model-audit',root/'proposals/model-proposals.json')
+        recorded.write_bytes(original)
         (root/'runs.json').write_text(json.dumps([str(root/'proposals/model-proposals.json')]))
         call(activation.main,['evaluate','--candidate',str(root/'candidate.json'),'--benchmark',str(root/'benchmark.json'),
             '--runs',str(root/'runs.json'),'--out',str(root/'evaluation.json')])
