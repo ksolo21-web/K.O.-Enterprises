@@ -12,7 +12,7 @@ import re
 import tempfile
 from pathlib import Path
 
-from .core import DataError, load_project, sha256, safe_path, blockers
+from .core import DataError, load_project, validate_project, sha256, safe_path, blockers
 from .capture import verify_custody
 from .adjudication import validate_record
 from .m4_workflow import preflight_case
@@ -88,7 +88,8 @@ def _evidence_ledger(document: dict, root: Path) -> dict:
 
 def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
                            *, q02: dict | None = None,
-                           q03: dict | None = None) -> dict:
+                           q03: dict | None = None,
+                           evidence_root: Path | None = None) -> dict:
     """Produce an internal PDF and a deterministic audit receipt.
 
     Re-running the same input is safe; different source states cannot overwrite
@@ -96,14 +97,15 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
     """
     source = Path(project_path).resolve(strict=True)
     original_project_sha = sha256(source)
-    root = source.parent
-    document = load_project(source)
+    root = Path(evidence_root).resolve() if evidence_root is not None else source.parent
+    document = (validate_project(json.loads(source.read_text(encoding='utf-8')), root)
+                if evidence_root is not None else load_project(source))
     errors = verify_custody(document, root)
     if errors:
         raise DataError("Q01 custody failure: " + "; ".join(errors))
     ledger = _evidence_ledger(document, root)
-    preflight = preflight_case(source)
-    if q03 is not None and q02 is None:
+    preflight = preflight_case(source, evidence_root=root)
+    if q03 is not None and (q02 is None or not isinstance(q03, dict)):
         raise DataError("Q03 requires the corresponding Q02 record")
     q03_held = None
     if q03 is not None:
@@ -129,6 +131,7 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
         "stage": "PRIVATE_OPTION2_DRAFT",
         "project_id": document["project_id"],
         "source_project_sha256": original_project_sha,
+        "evidence_root_sha256": _digest([{\"id\":m[\"id\"], \"sha256\":m[\"sha256\"]} for m in ledger[\"media\"]]),
         "evidence": ledger,
         "specialist_plan_sha256": _digest(preflight["specialist_plan"]),
         "unrouted_evidence": preflight["unrouted_evidence"],
