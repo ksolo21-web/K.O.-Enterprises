@@ -1,0 +1,13 @@
+{
+  "source_commit": "e96380f7a2c5c1a6cf652ab0ba7e7cdb10a40263",
+  "source_tree": "296cca0559d1f8388784d9f90dfb0e1d590ed08e",
+  "files_verified": 19,
+  "main_sha": "61ca9202fbfe45aae4a0ed29326df44cf7b25c9e",
+  "pause_blob": "37455fd13813683bb0169d36cb24b86a07094aa7",
+  "main_unchanged": true,
+  "pause_unchanged": true,
+  "original_m3_complete": false,
+  "engineering_critic_score": 9.7,
+  "inspection_tests_passed": 804,
+  "company_tests_passed": 229
+}

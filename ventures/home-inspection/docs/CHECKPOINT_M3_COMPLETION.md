@@ -9,7 +9,7 @@ Base `be982b1101658cbe481f160c2a205c08c002ac47`; development branch only.
 - [x] Repair nested Form XObject image locator defect; actual translated/scaled transformed-form test passed.
 - [x] Real end-to-end synthetic preparation, mapping, completion-gate and regression evidence: focused 27/27; independent full 804/804, zero skips, source hashes unchanged; company 229/229. Browser widths 360/390/768/1280 and real source links passed.
 - [x] Separate critic review of actual source/output, repairs and retests: **9.7/10 scoped engineering PASS**. **Original M3 NOT COMPLETE; approval withheld.** See `evidence/m3-v7/independent-critic.md`.
-- [ ] GitHub parity, durable evidence and unchanged main/pause.
+- [x] GitHub parity: **19/19 source/test/document/evidence file blobs** match commit `e96380f7a2c5c1a6cf652ab0ba7e7cdb10a40263`; main and pause unchanged. `evidence/m3-v7/github-delivery.json` records the verified source delivery. This checkpoint/receipt follow-up changes no executable source.
 - [ ] Full report understanding accepted against inspector-reviewed section/finding/evidence mappings: **blocked by missing professionally reviewed cases and evaluated semantic extraction**.
 - [ ] Approved learning/promotion with authenticated review, durable case governance and held-out evaluation: **deferred; no authenticated evidence or validated promotion path**.
 
