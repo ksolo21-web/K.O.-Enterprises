@@ -79,6 +79,9 @@ class M4DraftTests(unittest.TestCase):
         self.assertEqual(receipt["review"]["Q02"], "NOT_PROVIDED")
         self.assertEqual(receipt["review"]["Q03"], "NOT_PROVIDED")
         self.assertEqual([m["id"] for m in receipt["evidence"]["media"]], ["P1"])
+        self.assertEqual(receipt["evidence"]["media"][0], self.doc["media"][0])
+        self.assertEqual(next(r["source_record"] for r in receipt["evidence"]["records"]
+                              if r["id"] == "F1"), self.doc["findings"][0])
         self.assertEqual({r["id"] for r in receipt["evidence"]["records"]},
                          {"O1", "F1", "L1"})
         self.assertEqual({r["evidence_class"] for r in receipt["evidence"]["records"]},
