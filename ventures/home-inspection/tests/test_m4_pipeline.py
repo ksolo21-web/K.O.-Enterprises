@@ -119,6 +119,8 @@ class M4PipelineTests(unittest.TestCase):
         from pypdf import PdfReader
         all_text = "\\n".join(page.extract_text() or "" for page in PdfReader(str(draft)).pages)
         self.assertIn("SOURCE EVIDENCE", all_text)
+        self.assertIn("Original source photographs", all_text)
+        self.assertIn("ORIGINAL PHOTO / P1", all_text)
         self.assertIn("front.png", all_text)
         self.assertIn("P1", all_text)
         self.assertEqual(os.stat(draft).st_mode & 0o777, 0o600)
