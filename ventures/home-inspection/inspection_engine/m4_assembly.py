@@ -155,7 +155,7 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
         raise DataError("Incomplete prior output; inspect before recovery")
     if audit.exists():
         old = json.loads(audit.read_text(encoding="utf-8"))
-        if old != receipt or old.get("pdf_sha256") != sha256(pdf):
+        if ({k: v for k, v in old.items() if k != "pdf_sha256"} != receipt\n                or old.get("pdf_sha256") != sha256(pdf)):
             raise DataError("Existing draft bound to different inputs; use a new output directory")
         return {"pdf": str(pdf), "receipt": str(audit), "reused": True,
                 "customer_release_allowed": False, "holds": len(report_holds)}
