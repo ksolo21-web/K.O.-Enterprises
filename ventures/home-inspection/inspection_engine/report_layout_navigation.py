@@ -69,6 +69,11 @@ def _run_worker(raw:bytes,pages:list[int]):
             if not isinstance(obj,pdfium.PdfImage):continue
             count+=1
             if count>MAX_IMAGES_PER_PAGE:raise DataError('Embedded image count requires explicit batching')
+            # Nested Form XObject bounds are form-local. Without composing all
+            # parent transforms they are not page coordinates; never draw them.
+            if obj.level>0:
+                unlocated+=1
+                continue
             coords=_pdf_to_display_bbox(obj.get_bounds(),rotation,width,height)
             if coords is None:unlocated+=1
             else:boxes.append(coords)

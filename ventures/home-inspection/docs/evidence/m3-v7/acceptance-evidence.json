@@ -1,0 +1,67 @@
+{
+  "date_local": "2026-11-01",
+  "base_commit": "be982b1101658cbe481f160c2a205c08c002ac47",
+  "scope": "Source-backed declared report-understanding workflow and quarantined learning preparation; original M3 not complete",
+  "source_sha256": {
+    "inspection_engine/report_layout_navigation.py": "08202c316d1a0d3a8a74a9b61c5a8c61872b365c9d7cd9944477bee807058be1",
+    "inspection_engine/report_understanding.py": "0a12c1e825655c9b15e3110fc723ce6e04cbd4d76965e399438f8086b4f679aa",
+    "inspection_engine/report_study_pipeline.py": "e08443af26fd1f72f134ce52a39507ab9e98398bf6c68680d6dc51629ba14f5e",
+    "inspection_engine/report_learning_candidate.py": "9b50972b84a61073d66546f3729274c8e71eeec5a949de146f511dc8aae20e94",
+    "tests/test_m3_completion_v7.py": "398987f84caa701671a41239a0ef365ddb0d50474f58905be4ec86a830cd3df4",
+    "scripts/review_m3_mapping.cjs": "15f499192110b9b2cff02db37b76c6bcca9e5160db12330bb5bafa19cc94b479"
+  },
+  "focused_tests": {
+    "passed": 27,
+    "run": 27,
+    "skipped": 0,
+    "seconds": 28.931
+  },
+  "independent_full_inspection_tests": {
+    "passed": 804,
+    "run": 804,
+    "skipped": 0,
+    "seconds": 85.534,
+    "log_sha256": "c3c72bd57734ed7ef7c5ea1346ded96a3cc4750d73cf0c23b04658b16fc91ca0",
+    "tested_source_unchanged": true
+  },
+  "company_tests": {
+    "passed": 229,
+    "run": 229,
+    "seconds": 16.1
+  },
+  "additional_lifecycle_cli_success_paths": 3,
+  "nested_form_locator": "Nested rasters counted but unlocated; actual translated/scaled form regression passed",
+  "rehashed_injected_html": "Rejected against source-reconstructed canonical viewer; partial output removed",
+  "browser": {
+    "synthetic_only": true,
+    "browser": "153.0.8010.0",
+    "widths": [
+      360,
+      390,
+      768,
+      1280
+    ],
+    "typed_table_cells": 3,
+    "source_page_links_passed": true,
+    "keyboard_details_passed": true,
+    "original_completion_gate_blocked": true,
+    "document_overflow": false,
+    "remote_requests": [],
+    "page_errors": [],
+    "screenshots": [
+      "desktop-acceptance.png",
+      "desktop-cross-page.png",
+      "desktop-table.png",
+      "mobile-acceptance.png",
+      "mobile-original-scan.png",
+      "mobile-table.png"
+    ]
+  },
+  "all_exported_directory_modes": "0700",
+  "all_exported_file_modes": "0600",
+  "authenticated_professional_understanding": false,
+  "authorized_learning_promotion_implemented": false,
+  "training_approved": false,
+  "customer_release_allowed": false,
+  "full_milestone_3_complete": false
+}

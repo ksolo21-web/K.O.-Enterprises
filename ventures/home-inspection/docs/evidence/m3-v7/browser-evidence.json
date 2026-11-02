@@ -1,0 +1,25 @@
+{
+  "synthetic_only": true,
+  "browser": "153.0.8010.0",
+  "widths": [
+    360,
+    390,
+    768,
+    1280
+  ],
+  "typed_table_cells": 3,
+  "source_page_links_passed": true,
+  "keyboard_details_passed": true,
+  "original_completion_gate_blocked": true,
+  "document_overflow": false,
+  "remote_requests": [],
+  "page_errors": [],
+  "screenshots": [
+    "desktop-acceptance.png",
+    "desktop-cross-page.png",
+    "desktop-table.png",
+    "mobile-acceptance.png",
+    "mobile-original-scan.png",
+    "mobile-table.png"
+  ]
+}
