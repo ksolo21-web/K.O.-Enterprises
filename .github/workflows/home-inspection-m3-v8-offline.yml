@@ -37,6 +37,7 @@ jobs:
       - name: Execute M3 V8 audit and proposal contract regressions
         run: |
           python -m unittest discover -s tests -p 'test_m3_proposal*.py' -v
+          python -m unittest discover -s tests -p 'test_m3_v8_private_audit.py' -v
           python -m unittest discover -s tests -p 'test_m3_automatic_activation_v8.py' -v
       - name: Execute all offline inspection tests
         run: |
