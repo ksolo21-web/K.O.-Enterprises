@@ -141,6 +141,8 @@ def prepare_case(source_project: str | Path, workspace: str | Path,
     work = Path(workspace).resolve()
     if work == source.parent or work == source:
         raise DataError("M4 workspace must be separate from source project directory")
+    if any((parent / ".git").exists() for parent in (work, *work.parents)):
+        raise DataError("Private M4 workspace cannot be inside a Git repository")
     work.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(work, 0o700)
     state_path = work / "case_state.json"
@@ -165,7 +167,7 @@ def prepare_case(source_project: str | Path, workspace: str | Path,
             or current["source_media_digest"] != state["source_media_digest"]
         ):
             raise DataError("Workspace already belongs to a different source/selection")
-        return {"status": "PREVIOUS_CHECKPOINT", "completed": list(current["completed"]),
+        return {"status": "PREVIOUS_CHECKPOINT", "completed": [p for p in STAGES if p in current["completed"]],
                 "customer_release_allowed": False}
     _atomic_json(state_path, state)
     return {"status": "PREPARED", "jobs": len(plan["jobs"]),
@@ -178,7 +180,7 @@ def status_case(workspace: str | Path) -> dict:
     _, _, _ = _source_bound(state)
     return {
         "milestone": "M4", "project_id": state["project_id"],
-        "completed": list(state["completed"]),
+        "completed": [p for p in STAGES if p in state["completed"]],
         "in_flight": (work / "in_flight.json").exists(),
         "unselected_media_retained_in_source": True,
         "customer_release_allowed": False,
