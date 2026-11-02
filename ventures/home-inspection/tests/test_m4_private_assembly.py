@@ -106,6 +106,9 @@ class M4DraftTests(unittest.TestCase):
         self.assertIn("Condition & next steps", pages)
         self.assertIn("NOT RELEASED", pages)
         self.assertIn("Synthetic", pages)
+        self.assertIn("SOURCE EVIDENCE", pages)
+        self.assertIn("SHA256", pages)
+        self.assertIn("field.png", pages)
 
     def test_q02_supplied_record_preserved_but_not_approved(self):
         self.save()
