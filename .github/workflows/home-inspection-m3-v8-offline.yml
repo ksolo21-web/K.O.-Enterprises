@@ -1,0 +1,46 @@
+# Offline code validation only. No model downloads, customer data, or live activation.
+name: Home Inspection M3 V8 - Offline Regression
+on:
+  push:
+    branches: [home-inspection-development]
+    paths:
+      - 'ventures/home-inspection/**'
+      - '.github/workflows/home-inspection-m3-v8-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  m3-v8-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      OLLAMA_HOST: '127.0.0.1:11434'
+      COMPANY_OS_PAUSED: '1'
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install offline test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tesseract-ocr ffmpeg
+          python -m pip install -r requirements.txt
+      - name: Compile all inspection modules and tests
+        run: python -m compileall -q -f inspection_engine scripts tests
+      - name: Execute M3 V8 audit and proposal contract regressions
+        run: |
+          python -m unittest discover -s tests -p 'test_m3_proposal*.py' -v
+          python -m unittest discover -s tests -p 'test_m3_automatic_activation_v8.py' -v
+      - name: Execute all offline inspection tests
+        run: |
+          python -m scripts.generate_public_fixtures
+          python -m unittest discover -s tests -q
+      - name: Verify tracked source files remain unchanged
+        run: git diff --exit-code -- .
