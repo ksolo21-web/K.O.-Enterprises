@@ -235,7 +235,7 @@ def build_pdf(document:dict,project_dir:Path,target:Path):
                 if p.is_file(): photos.append((p,m))
             except (OSError,ValueError):pass
     hero=photos[0] if photos else None
-    c=cv.Canvas(str(target),pagesize=letter, pageCompression=1)
+    c=cv.Canvas(str(target),pagesize=letter, pageCompression=1, invariant=1)
     c.setTitle('Residential Property Condition Report - Option 2 Editorial Draft')
     c.setAuthor('Inspection Engine - Design Demonstration')
     # page 1: cover
