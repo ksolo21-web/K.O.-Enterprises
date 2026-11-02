@@ -5,6 +5,7 @@ Failed builds remove their new output only. Existing files are never overwritten
 """
 from __future__ import annotations
 import argparse
+from contextlib import nullcontext
 from copy import deepcopy
 import hashlib
 import html
@@ -215,6 +216,7 @@ def main(argv=None):
                 q.add_argument('--benchmark',type=Path,help='Optional pre-frozen evaluation; only its digest reaches run metadata')
                 q.add_argument('--candidate',type=Path,help='Optional quarantined lesson candidate to evaluate through the same runtime DATA block')
                 q.add_argument('--lesson-store',type=Path);q.add_argument('--lesson-policy',type=Path)
+                q.add_argument('--audit-dir',type=Path,help='New private directory for exact model requests and filtered replies; preserve on failure')
     a=p.parse_args(argv)
     try:
         b=_read_json(a.reference);r=_read_json(a.registry)
@@ -231,14 +233,18 @@ def main(argv=None):
             if a.benchmark:
                 frozen=_read_json(a.benchmark);clean=deepcopy(frozen);benchmark_sha=clean.pop('benchmark_sha256',None)
                 if benchmark_sha!=digest(clean):raise DataError('Frozen benchmark changed')
-            run=propose_report(b,r,a.source_pdf,a.study_dir,loopback_provider(a.model,a.model_digest,timeout=a.timeout),
-                provider_id='local-ollama:'+a.model,model_digest=a.model_digest,max_calls=a.max_calls,
-                benchmark_sha256=benchmark_sha,candidate=_read_json(a.candidate) if a.candidate else None,
-                lesson_store=a.lesson_store,lesson_policy=a.lesson_policy)
-            m,g=record_mapping(b,r,a.source_pdf,a.study_dir,run['mapping']['declarations'],a.out_dir,origin='model_proposed')
-            try:_write_new(a.out_dir/'model-proposals.json',run)
-            except BaseException:
-                shutil.rmtree(a.out_dir);raise
+            from .proposal_evidence import PrivateProposalAudit
+            context=PrivateProposalAudit(a.audit_dir) if a.audit_dir is not None else nullcontext(None)
+            with context as audit_event:
+                run=propose_report(b,r,a.source_pdf,a.study_dir,
+                    loopback_provider(a.model,a.model_digest,timeout=a.timeout,audit_event=audit_event),
+                    provider_id='local-ollama:'+a.model,model_digest=a.model_digest,max_calls=a.max_calls,
+                    benchmark_sha256=benchmark_sha,candidate=_read_json(a.candidate) if a.candidate else None,
+                    lesson_store=a.lesson_store,lesson_policy=a.lesson_policy)
+                m,g=record_mapping(b,r,a.source_pdf,a.study_dir,run['mapping']['declarations'],a.out_dir,origin='model_proposed')
+                try:_write_new(a.out_dir/'model-proposals.json',run)
+                except BaseException:
+                    shutil.rmtree(a.out_dir);raise
             answer={'status':'MODEL_PROPOSALS_REQUIRE_HUMAN_REVIEW','model_calls':len(run['calls']),'acceptance_blockers':g['blockers']}
         print(json.dumps(dict(answer,training_approved=False,customer_release_allowed=False,full_milestone_3_complete=False)))
         return 0
