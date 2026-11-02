@@ -210,3 +210,24 @@ def verify_private_audit(directory, proposal_path):
             'events_verified':len(rows),'request_response_integrity_verified':True,
             'model_execution_authenticated':False,'semantic_accuracy_verified':False,
             'professional_review_complete':False,'customer_release_allowed':False}
+
+
+def main(argv=None):
+    import argparse
+    parser = argparse.ArgumentParser(description='Offline verification of private V8 model-call evidence')
+    parser.add_argument('--audit-dir', type=Path, required=True)
+    parser.add_argument('--proposals', type=Path, required=True)
+    args = parser.parse_args(argv)
+    try:
+        result = verify_private_audit(args.audit_dir, args.proposals)
+        print(json.dumps(result, sort_keys=True))
+        return 0
+    except (DataError, OSError, ValueError, KeyError, TypeError, UnicodeError) as exc:
+        print(json.dumps({'status':'BLOCKED','error_type':type(exc).__name__,
+                          'semantic_accuracy_verified':False,
+                          'customer_release_allowed':False}))
+        return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
