@@ -1,0 +1,9 @@
+test_altered_oracle_is_rejected (test_m3_source_probe_v9.FrozenSourceProbeTests.test_altered_oracle_is_rejected) ... ok
+test_altered_pdf_and_scan_parent_are_rejected (test_m3_source_probe_v9.FrozenSourceProbeTests.test_altered_pdf_and_scan_parent_are_rejected) ... ok
+test_existing_directory_is_never_overwritten (test_m3_source_probe_v9.FrozenSourceProbeTests.test_existing_directory_is_never_overwritten) ... ok
+test_three_cases_preserve_polarity_table_and_blank_gold (test_m3_source_probe_v9.FrozenSourceProbeTests.test_three_cases_preserve_polarity_table_and_blank_gold) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.934s
+
+OK

@@ -1,0 +1,698 @@
+{
+  "kind": "FROZEN_SYNTHETIC_SOURCE_READING_ORACLE_V9",
+  "model": "qwen2.5vl:3b",
+  "model_manifest_sha256": "fb90415cde1ef08aa669ae74b082d49b158729b6db1ab183c941417d507e71a1",
+  "maximum_generation_calls": 3,
+  "maximum_generation_calls_per_case": 1,
+  "blank_cell_minimum_iou": 0.5,
+  "fixture_script_sha256": "6ece11eb7a7ce6a05959da182244bb9604414da6db9d959bf27e49ae80261f8a",
+  "scan_parent_pdf_sha256": "dda829024b5dee33c3f782cceae77fe32bb7353caa815f25473d4a6dcd5457bc",
+  "scan_source_png_sha256": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+  "cases": [
+    {
+      "id": "A",
+      "case_id": "SYNTH-M3-READ-A",
+      "modality": "pdf_text",
+      "reference": "A-reference.json",
+      "source_pdf": "A.pdf",
+      "study_dir": "A-study",
+      "source_pdf_sha256": "45c06033572edc9e0116d21038120a03cf53bf79539d48cba46d19460d3f4814",
+      "source_png_sha256": "d7168287b3f6c2364a550f31e5f375941e1f02c3edd1077ff5cd125444503b3a",
+      "preparation_sha256": "9ae75f21ea1da28079b63f3c4ab65b00eea564dde50c0fbc9c42a9b550cd5817",
+      "ocr_record_sha256": "5b29a7dd2068777ecd85c6bb2fca5c4c784417640212ab5ecf0941e93d72ea00",
+      "polarity_source_sentence": "Leak observed at vent.",
+      "polarity_expectation": "reported_affirmative",
+      "inspection_limitation": "Panel cover not removed / Not inspected",
+      "table_count": 1,
+      "row_count": 4,
+      "column_count": 3,
+      "cells": [
+        {
+          "row": 1,
+          "column": 1,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "System",
+          "bbox": [
+            0.041666666666666664,
+            0.31875,
+            0.25,
+            0.45
+          ],
+          "ocr_word_indices": [
+            17
+          ],
+          "ocr_text": "System"
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Observation",
+          "bbox": [
+            0.25,
+            0.31875,
+            0.6875,
+            0.45
+          ],
+          "ocr_word_indices": [
+            18
+          ],
+          "ocr_text": "Observation"
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Status",
+          "bbox": [
+            0.6875,
+            0.31875,
+            0.9583333333333334,
+            0.45
+          ],
+          "ocr_word_indices": [
+            19
+          ],
+          "ocr_text": "Status"
+        },
+        {
+          "row": 2,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Roof",
+          "bbox": [
+            0.041666666666666664,
+            0.45,
+            0.25,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            20
+          ],
+          "ocr_text": "Roof"
+        },
+        {
+          "row": 2,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Vent condition",
+          "bbox": [
+            0.25,
+            0.45,
+            0.6875,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            21,
+            22
+          ],
+          "ocr_text": "Vent condition"
+        },
+        {
+          "row": 2,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "See note",
+          "bbox": [
+            0.6875,
+            0.45,
+            0.9583333333333334,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            23,
+            24
+          ],
+          "ocr_text": "See note"
+        },
+        {
+          "row": 3,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Panel",
+          "bbox": [
+            0.041666666666666664,
+            0.58125,
+            0.25,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            25
+          ],
+          "ocr_text": "Panel"
+        },
+        {
+          "row": 3,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Cover not removed",
+          "bbox": [
+            0.25,
+            0.58125,
+            0.6875,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            26,
+            27,
+            28
+          ],
+          "ocr_text": "Cover not removed"
+        },
+        {
+          "row": 3,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Not inspected",
+          "bbox": [
+            0.6875,
+            0.58125,
+            0.9583333333333334,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            29,
+            30
+          ],
+          "ocr_text": "Not inspected"
+        },
+        {
+          "row": 4,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "HVAC",
+          "bbox": [
+            0.041666666666666664,
+            0.7125,
+            0.25,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            31
+          ],
+          "ocr_text": "HVAC"
+        },
+        {
+          "row": 4,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Filter",
+          "bbox": [
+            0.25,
+            0.7125,
+            0.6875,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            32
+          ],
+          "ocr_text": "Filter"
+        },
+        {
+          "row": 4,
+          "column": 3,
+          "column_span": 1,
+          "role": "blank",
+          "printed_text": "",
+          "bbox": [
+            0.6875,
+            0.7125,
+            0.9583333333333334,
+            0.84375
+          ],
+          "ocr_word_indices": [],
+          "ocr_text": ""
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "case_id": "SYNTH-M3-READ-B",
+      "modality": "pdf_text",
+      "reference": "B-reference.json",
+      "source_pdf": "B.pdf",
+      "study_dir": "B-study",
+      "source_pdf_sha256": "dda829024b5dee33c3f782cceae77fe32bb7353caa815f25473d4a6dcd5457bc",
+      "source_png_sha256": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+      "preparation_sha256": "f05eb1a57a04367320c0f3e21eb8333e74ce29f152b1e622502282f758eec7b8",
+      "ocr_record_sha256": "275d8ab147066893b62b06e6b62dcb527beaccc81c9fe74977acdfe35396cd54",
+      "polarity_source_sentence": "No leak observed at vent.",
+      "polarity_expectation": "reported_negation",
+      "inspection_limitation": "Panel cover not removed / Not inspected",
+      "table_count": 1,
+      "row_count": 4,
+      "column_count": 3,
+      "cells": [
+        {
+          "row": 1,
+          "column": 1,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "System",
+          "bbox": [
+            0.041666666666666664,
+            0.31875,
+            0.25,
+            0.45
+          ],
+          "ocr_word_indices": [
+            18
+          ],
+          "ocr_text": "System"
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Observation",
+          "bbox": [
+            0.25,
+            0.31875,
+            0.6875,
+            0.45
+          ],
+          "ocr_word_indices": [
+            19
+          ],
+          "ocr_text": "Observation"
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Status",
+          "bbox": [
+            0.6875,
+            0.31875,
+            0.9583333333333334,
+            0.45
+          ],
+          "ocr_word_indices": [
+            20
+          ],
+          "ocr_text": "Status"
+        },
+        {
+          "row": 2,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Roof",
+          "bbox": [
+            0.041666666666666664,
+            0.45,
+            0.25,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            21
+          ],
+          "ocr_text": "Roof"
+        },
+        {
+          "row": 2,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Vent condition",
+          "bbox": [
+            0.25,
+            0.45,
+            0.6875,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            22,
+            23
+          ],
+          "ocr_text": "Vent condition"
+        },
+        {
+          "row": 2,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "See note",
+          "bbox": [
+            0.6875,
+            0.45,
+            0.9583333333333334,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            24,
+            25
+          ],
+          "ocr_text": "See note"
+        },
+        {
+          "row": 3,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Panel",
+          "bbox": [
+            0.041666666666666664,
+            0.58125,
+            0.25,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            26
+          ],
+          "ocr_text": "Panel"
+        },
+        {
+          "row": 3,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Cover not removed",
+          "bbox": [
+            0.25,
+            0.58125,
+            0.6875,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            27,
+            28,
+            29
+          ],
+          "ocr_text": "Cover not removed"
+        },
+        {
+          "row": 3,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Not inspected",
+          "bbox": [
+            0.6875,
+            0.58125,
+            0.9583333333333334,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            30,
+            31
+          ],
+          "ocr_text": "Not inspected"
+        },
+        {
+          "row": 4,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "HVAC",
+          "bbox": [
+            0.041666666666666664,
+            0.7125,
+            0.25,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            32
+          ],
+          "ocr_text": "HVAC"
+        },
+        {
+          "row": 4,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Filter",
+          "bbox": [
+            0.25,
+            0.7125,
+            0.6875,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            33
+          ],
+          "ocr_text": "Filter"
+        },
+        {
+          "row": 4,
+          "column": 3,
+          "column_span": 1,
+          "role": "blank",
+          "printed_text": "",
+          "bbox": [
+            0.6875,
+            0.7125,
+            0.9583333333333334,
+            0.84375
+          ],
+          "ocr_word_indices": [],
+          "ocr_text": ""
+        }
+      ]
+    },
+    {
+      "id": "C",
+      "case_id": "SYNTH-M3-READ-C",
+      "modality": "image_only_scan",
+      "reference": "C-reference.json",
+      "source_pdf": "C.pdf",
+      "study_dir": "C-study",
+      "source_pdf_sha256": "3683813d17b7b8e0302ba705276a9c5ea7f44b9fbb224b591d664dcd8bf925f5",
+      "source_png_sha256": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+      "preparation_sha256": "9914d6c43f070510c88f24656a3f1c95937fb6f071b5ac87439618ddf7735fd3",
+      "ocr_record_sha256": "0d26247736356431e9ef0c8f64d6e1d74a69350c372d1b345b782a71e667bccb",
+      "polarity_source_sentence": "No leak observed at vent.",
+      "polarity_expectation": "reported_negation",
+      "inspection_limitation": "Panel cover not removed / Not inspected",
+      "table_count": 1,
+      "row_count": 4,
+      "column_count": 3,
+      "cells": [
+        {
+          "row": 1,
+          "column": 1,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "System",
+          "bbox": [
+            0.041666666666666664,
+            0.31875,
+            0.25,
+            0.45
+          ],
+          "ocr_word_indices": [
+            18
+          ],
+          "ocr_text": "System"
+        },
+        {
+          "row": 1,
+          "column": 2,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Observation",
+          "bbox": [
+            0.25,
+            0.31875,
+            0.6875,
+            0.45
+          ],
+          "ocr_word_indices": [
+            19
+          ],
+          "ocr_text": "Observation"
+        },
+        {
+          "row": 1,
+          "column": 3,
+          "column_span": 1,
+          "role": "header",
+          "printed_text": "Status",
+          "bbox": [
+            0.6875,
+            0.31875,
+            0.9583333333333334,
+            0.45
+          ],
+          "ocr_word_indices": [
+            20
+          ],
+          "ocr_text": "Status"
+        },
+        {
+          "row": 2,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Roof",
+          "bbox": [
+            0.041666666666666664,
+            0.45,
+            0.25,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            21
+          ],
+          "ocr_text": "Roof"
+        },
+        {
+          "row": 2,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Vent condition",
+          "bbox": [
+            0.25,
+            0.45,
+            0.6875,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            22,
+            23
+          ],
+          "ocr_text": "Vent condition"
+        },
+        {
+          "row": 2,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "See note",
+          "bbox": [
+            0.6875,
+            0.45,
+            0.9583333333333334,
+            0.58125
+          ],
+          "ocr_word_indices": [
+            24,
+            25
+          ],
+          "ocr_text": "See note"
+        },
+        {
+          "row": 3,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Panel",
+          "bbox": [
+            0.041666666666666664,
+            0.58125,
+            0.25,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            26
+          ],
+          "ocr_text": "Panel"
+        },
+        {
+          "row": 3,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Cover not removed",
+          "bbox": [
+            0.25,
+            0.58125,
+            0.6875,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            27,
+            28,
+            29
+          ],
+          "ocr_text": "Cover not removed"
+        },
+        {
+          "row": 3,
+          "column": 3,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Not inspected",
+          "bbox": [
+            0.6875,
+            0.58125,
+            0.9583333333333334,
+            0.7125
+          ],
+          "ocr_word_indices": [
+            30,
+            31
+          ],
+          "ocr_text": "Not inspected"
+        },
+        {
+          "row": 4,
+          "column": 1,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "HVAC",
+          "bbox": [
+            0.041666666666666664,
+            0.7125,
+            0.25,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            32
+          ],
+          "ocr_text": "HVAC"
+        },
+        {
+          "row": 4,
+          "column": 2,
+          "column_span": 1,
+          "role": "data",
+          "printed_text": "Filter",
+          "bbox": [
+            0.25,
+            0.7125,
+            0.6875,
+            0.84375
+          ],
+          "ocr_word_indices": [
+            33
+          ],
+          "ocr_text": "Filter"
+        },
+        {
+          "row": 4,
+          "column": 3,
+          "column_span": 1,
+          "role": "blank",
+          "printed_text": "",
+          "bbox": [
+            0.6875,
+            0.7125,
+            0.9583333333333334,
+            0.84375
+          ],
+          "ocr_word_indices": [],
+          "ocr_text": ""
+        }
+      ]
+    }
+  ],
+  "manual_polarity_and_scope_review_required": true,
+  "professional_accuracy_verified": false,
+  "lesson_activation_allowed": false,
+  "oracle_sha256": "f091c67e20813e4a904aa2d734beb7b8481c9ea7d428c92fbc6fb8b7a35840b1"
+}

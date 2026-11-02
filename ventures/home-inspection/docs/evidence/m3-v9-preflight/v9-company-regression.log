@@ -1,0 +1,228 @@
+test_autonomy (unittest.loader._FailedTest.test_autonomy) ... ERROR
+test_cli (unittest.loader._FailedTest.test_cli) ... ERROR
+test_corporate (unittest.loader._FailedTest.test_corporate) ... ERROR
+test_bootstrap_org_status_and_internal_cycle (test_corporate_cli.CorporateCLITests.test_bootstrap_org_status_and_internal_cycle) ... ok
+test_complete_work_lifecycle_through_cli (test_corporate_cli.CorporateCLITests.test_complete_work_lifecycle_through_cli) ... ok
+test_invalid_work_json_returns_domain_error_without_traceback (test_corporate_cli.CorporateCLITests.test_invalid_work_json_returns_domain_error_without_traceback) ... ok
+test_management_escalation_can_be_routed_through_cli (test_corporate_cli.CorporateCLITests.test_management_escalation_can_be_routed_through_cli) ... ok
+test_scheduled_cycle_fails_closed_while_paused (test_corporate_cli.CorporateCLITests.test_scheduled_cycle_fails_closed_while_paused) ... ok
+test_account_id_accepts_variable_widths_and_outer_whitespace_safely (test_oanda_demo.PracticeSafetyTests.test_account_id_accepts_variable_widths_and_outer_whitespace_safely) ... ok
+test_bad_price_wrong_market_duplicate_time_and_incomplete_data_rejected (test_oanda_demo.PracticeSafetyTests.test_bad_price_wrong_market_duplicate_time_and_incomplete_data_rejected) ... ok
+test_credentials_are_required_and_account_cannot_inject_a_path (test_oanda_demo.PracticeSafetyTests.test_credentials_are_required_and_account_cannot_inject_a_path) ... ok
+test_future_candles_do_not_change_earlier_signals (test_oanda_demo.PracticeSafetyTests.test_future_candles_do_not_change_earlier_signals) ... ok
+test_only_fixed_practice_get_routes_are_available (test_oanda_demo.PracticeSafetyTests.test_only_fixed_practice_get_routes_are_available) ... ok
+test_redirect_and_http_error_never_disclose_credentials (test_oanda_demo.PracticeSafetyTests.test_redirect_and_http_error_never_disclose_credentials) ... ok
+test_replay_is_deterministic_separate_holdouts_are_virtual_and_unoptimized (test_oanda_demo.PracticeSafetyTests.test_replay_is_deterministic_separate_holdouts_are_virtual_and_unoptimized) ... ok
+test_stop_wins_ambiguous_bar_and_spread_is_paid (test_oanda_demo.PracticeSafetyTests.test_stop_wins_ambiguous_bar_and_spread_is_paid) ... ok
+test_client_refuses_live_and_unapproved_routes_before_network (test_oanda_forward_lab.OandaForwardLabTests.test_client_refuses_live_and_unapproved_routes_before_network) ... ok
+test_execution_requires_exact_short_lived_plan_permit (test_oanda_forward_lab.OandaForwardLabTests.test_execution_requires_exact_short_lived_plan_permit) ... ok
+test_existing_trade_blocks_plan_before_market_scanning (test_oanda_forward_lab.OandaForwardLabTests.test_existing_trade_blocks_plan_before_market_scanning) ... ok
+test_plan_caps_units_and_virtual_risk (test_oanda_forward_lab.OandaForwardLabTests.test_plan_caps_units_and_virtual_risk) ... FAIL
+test_selector_switches_between_current_trend_and_reversal_arms (test_oanda_forward_lab.OandaForwardLabTests.test_selector_switches_between_current_trend_and_reversal_arms) ... ok
+test_shared_parser_minimum_is_satisfied (test_oanda_forward_lab.OandaForwardLabTests.test_shared_parser_minimum_is_satisfied) ... ok
+test_current_like_snapshot_selects_gbp_and_rejects_unconfirmed_aud (test_oanda_forward_probe.OandaForwardProbeTests.test_current_like_snapshot_selects_gbp_and_rejects_unconfirmed_aud) ... ok
+test_existing_trade_blocks_before_candle_or_price_reads (test_oanda_forward_probe.OandaForwardProbeTests.test_existing_trade_blocks_before_candle_or_price_reads) ... ok
+test_price_parser_rejects_crossed_or_missing_market (test_oanda_forward_probe.OandaForwardProbeTests.test_price_parser_rejects_crossed_or_missing_market) ... ok
+test_price_parser_tolerates_missing_units_available (test_oanda_forward_probe.OandaForwardProbeTests.test_price_parser_tolerates_missing_units_available) ... ok
+test_probe_plan_is_capped_at_one_virtual_dollar (test_oanda_forward_probe.OandaForwardProbeTests.test_probe_plan_is_capped_at_one_virtual_dollar) ... ok
+test_export_contains_only_first_eighty_percent_and_no_account_data (test_oanda_preholdout_export.OandaPreholdoutExportTests.test_export_contains_only_first_eighty_percent_and_no_account_data) ... ok
+test_cli_fails_closed_without_writing_on_reader_error (test_oanda_read_only_fetch.ReadOnlyFetchTests.test_cli_fails_closed_without_writing_on_reader_error) ... ok
+test_cli_writes_only_candles_and_does_not_disclose_account_values (test_oanda_read_only_fetch.ReadOnlyFetchTests.test_cli_writes_only_candles_and_does_not_disclose_account_values) ... ok
+test_snapshot_reads_summary_and_candles_even_with_open_demo_trades (test_oanda_read_only_fetch.ReadOnlyFetchTests.test_snapshot_reads_summary_and_candles_even_with_open_demo_trades) ... ok
+test_common_copy_paste_wrappers_are_removed_without_changing_token (test_oanda_token_probe.OandaTokenProbeTests.test_common_copy_paste_wrappers_are_removed_without_changing_token) ... ok
+test_diagnosis_normalizes_account_wrapper_and_reports_adjustment (test_oanda_token_probe.OandaTokenProbeTests.test_diagnosis_normalizes_account_wrapper_and_reports_adjustment) ... ok
+test_empty_duplicate_and_malformed_account_lists_are_rejected (test_oanda_token_probe.OandaTokenProbeTests.test_empty_duplicate_and_malformed_account_lists_are_rejected) ... ok
+test_http_error_and_bad_payload_do_not_disclose_credentials (test_oanda_token_probe.OandaTokenProbeTests.test_http_error_and_bad_payload_do_not_disclose_credentials) ... ok
+test_invalid_config_recovers_only_one_authorized_account (test_oanda_token_probe.OandaTokenProbeTests.test_invalid_config_recovers_only_one_authorized_account) ... ok
+test_invalid_config_with_multiple_accounts_fails_closed (test_oanda_token_probe.OandaTokenProbeTests.test_invalid_config_with_multiple_accounts_fails_closed) ... ok
+test_matching_config_is_used_without_recovery (test_oanda_token_probe.OandaTokenProbeTests.test_matching_config_is_used_without_recovery) ... ok
+test_practice_rejection_and_live_success_are_classified_live_only (test_oanda_token_probe.OandaTokenProbeTests.test_practice_rejection_and_live_success_are_classified_live_only) ... ok
+test_probe_uses_only_fixed_practice_account_list_get (test_oanda_token_probe.OandaTokenProbeTests.test_probe_uses_only_fixed_practice_account_list_get) ... ok
+test_rejection_by_both_environments_is_specific_and_redacted (test_oanda_token_probe.OandaTokenProbeTests.test_rejection_by_both_environments_is_specific_and_redacted) ... ok
+test_token_validation_rejects_missing_or_embedded_whitespace (test_oanda_token_probe.OandaTokenProbeTests.test_token_validation_rejects_missing_or_embedded_whitespace) ... ok
+test_unapproved_origin_is_rejected_before_network (test_oanda_token_probe.OandaTokenProbeTests.test_unapproved_origin_is_rejected_before_network) ... ok
+test_valid_but_unauthorized_config_never_falls_back (test_oanda_token_probe.OandaTokenProbeTests.test_valid_but_unauthorized_config_never_falls_back) ... ok
+test_backtest_is_deterministic_and_future_data_cannot_change_past (test_oanda_tournament.OandaTournamentTests.test_backtest_is_deterministic_and_future_data_cannot_change_past) ... ok
+test_candidate_catalog_is_fresh_and_bounded (test_oanda_tournament.OandaTournamentTests.test_candidate_catalog_is_fresh_and_bounded) ... ok
+test_every_signal_uses_only_completed_history (test_oanda_tournament.OandaTournamentTests.test_every_signal_uses_only_completed_history) ... ok
+test_full_tournament_is_deterministic_and_sanitized (test_oanda_tournament.OandaTournamentTests.test_full_tournament_is_deterministic_and_sanitized) ... ok
+test_parse_rejects_crossed_or_duplicate_candles (test_oanda_tournament.OandaTournamentTests.test_parse_rejects_crossed_or_duplicate_candles) ... ok
+test_reader_rejects_non_get_research_routes_before_network (test_oanda_tournament.OandaTournamentTests.test_reader_rejects_non_get_research_routes_before_network) ... ok
+test_diagnostics_are_deterministic_and_never_touch_holdout (test_oanda_tournament_diagnostics.OandaTournamentDiagnosticsTests.test_diagnostics_are_deterministic_and_never_touch_holdout) ... ok
+test_failed_preholdout_gate_never_inspects_holdout (test_oanda_wave2.OandaWave2Tests.test_failed_preholdout_gate_never_inspects_holdout) ... ok
+test_signal_requires_primary_shock_and_two_same_direction_confirmations (test_oanda_wave2.OandaWave2Tests.test_signal_requires_primary_shock_and_two_same_direction_confirmations) ... ok
+test_signal_uses_the_completed_bar_before_entry (test_oanda_wave2.OandaWave2Tests.test_signal_uses_the_completed_bar_before_entry) ... ok
+test_stress_metrics_charge_two_pips_per_trade (test_oanda_wave2.OandaWave2Tests.test_stress_metrics_charge_two_pips_per_trade) ... ok
+test_export_withholds_final_twenty_percent_and_strips_account_data (test_oanda_wave3_cross_data.OandaWave3CrossDataTests.test_export_withholds_final_twenty_percent_and_strips_account_data) ... ok
+test_instrument_universe_is_disjoint_from_opened_wave1_pairs (test_oanda_wave3_cross_data.OandaWave3CrossDataTests.test_instrument_universe_is_disjoint_from_opened_wave1_pairs) ... ok
+test_parser_rejects_wrong_granularity_crossed_quotes_and_duplicates (test_oanda_wave3_cross_data.OandaWave3CrossDataTests.test_parser_rejects_wrong_granularity_crossed_quotes_and_duplicates) ... ok
+test_reader_refuses_order_and_live_routes_before_network (test_oanda_wave3_cross_data.OandaWave3CrossDataTests.test_reader_refuses_order_and_live_routes_before_network) ... ok
+test_extra_cost_is_deducted_in_risk_units (test_oanda_wave3_evaluate.OandaWave3EvaluateTests.test_extra_cost_is_deducted_in_risk_units) ... ok
+test_failed_preholdout_never_opens_sealed_holdout_or_leaks_account_data (test_oanda_wave3_evaluate.OandaWave3EvaluateTests.test_failed_preholdout_never_opens_sealed_holdout_or_leaks_account_data) ... ok
+test_signal_enters_only_after_completed_extreme_reversal (test_oanda_wave3_evaluate.OandaWave3EvaluateTests.test_signal_enters_only_after_completed_extreme_reversal) ... ok
+test_breadth_setup_uses_all_completed_pairs (test_oanda_wave4_evaluate.OandaWave4EvaluateTests.test_breadth_setup_uses_all_completed_pairs) ... ok
+test_entry_occurs_after_signal_and_has_protection_distance (test_oanda_wave4_evaluate.OandaWave4EvaluateTests.test_entry_occurs_after_signal_and_has_protection_distance) ... ok
+test_jpy_pip_stress_is_deducted_in_risk_units (test_oanda_wave4_evaluate.OandaWave4EvaluateTests.test_jpy_pip_stress_is_deducted_in_risk_units) ... ok
+test_export_withholds_final_twenty_percent_and_strips_account_data (test_oanda_wave4_jpy_data.OandaWave4JpyDataTests.test_export_withholds_final_twenty_percent_and_strips_account_data) ... ok
+test_parser_rejects_wrong_granularity_crossed_quotes_and_duplicates (test_oanda_wave4_jpy_data.OandaWave4JpyDataTests.test_parser_rejects_wrong_granularity_crossed_quotes_and_duplicates) ... ok
+test_reader_refuses_write_live_and_unapproved_routes_before_network (test_oanda_wave4_jpy_data.OandaWave4JpyDataTests.test_reader_refuses_write_live_and_unapproved_routes_before_network) ... ok
+test_universe_is_new_and_all_pairs_share_jpy_quote (test_oanda_wave4_jpy_data.OandaWave4JpyDataTests.test_universe_is_new_and_all_pairs_share_jpy_quote) ... ok
+test_organization (unittest.loader._FailedTest.test_organization) ... ERROR
+test_policy (unittest.loader._FailedTest.test_policy) ... ERROR
+test_reporting (unittest.loader._FailedTest.test_reporting) ... ERROR
+test_ci_is_least_privilege_pinned_and_paused (test_repository_hygiene.RepositoryHygieneTests.test_ci_is_least_privilege_pinned_and_paused) ... ok
+test_no_common_live_secret_shape_in_text_files (test_repository_hygiene.RepositoryHygieneTests.test_no_common_live_secret_shape_in_text_files) ... ok
+test_no_runtime_state_or_obvious_secret_file_is_tracked (test_repository_hygiene.RepositoryHygieneTests.test_no_runtime_state_or_obvious_secret_file_is_tracked) ... ok
+test_pause_marker_is_present_and_explains_scope (test_repository_hygiene.RepositoryHygieneTests.test_pause_marker_is_present_and_explains_scope) ... ok
+test_required_sensitive_patterns_are_ignored (test_repository_hygiene.RepositoryHygieneTests.test_required_sensitive_patterns_are_ignored) ... ok
+test_runtime (unittest.loader._FailedTest.test_runtime) ... ERROR
+test_scoring (unittest.loader._FailedTest.test_scoring) ... ERROR
+test_storage (unittest.loader._FailedTest.test_storage) ... ERROR
+
+======================================================================
+ERROR: test_autonomy (unittest.loader._FailedTest.test_autonomy)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_autonomy
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_autonomy.py", line 11, in <module>
+    from company_os.autonomy import AutonomousCompany, ROLE_TO_CODEX_AGENT
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_cli (unittest.loader._FailedTest.test_cli)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_cli
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_cli.py", line 13, in <module>
+    from company_os.cli import _terminal_text
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_corporate (unittest.loader._FailedTest.test_corporate)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_corporate
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_corporate.py", line 10, in <module>
+    from company_os.corporate import CorporateOperations, DecisionClass
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_organization (unittest.loader._FailedTest.test_organization)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_organization
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_organization.py", line 8, in <module>
+    from company_os.errors import ValidationError
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_policy (unittest.loader._FailedTest.test_policy)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_policy
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_policy.py", line 12, in <module>
+    from company_os.errors import ValidationError
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_reporting (unittest.loader._FailedTest.test_reporting)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_reporting
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_reporting.py", line 9, in <module>
+    from company_os.policy import ApprovalClass
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_runtime (unittest.loader._FailedTest.test_runtime)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_runtime
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_runtime.py", line 8, in <module>
+    from company_os.errors import ConflictError, ValidationError
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_scoring (unittest.loader._FailedTest.test_scoring)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_scoring
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_scoring.py", line 8, in <module>
+    from company_os.errors import ValidationError
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+ERROR: test_storage (unittest.loader._FailedTest.test_storage)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_storage
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_storage.py", line 16, in <module>
+    from company_os.errors import ConflictError, StorageError, ValidationError
+ModuleNotFoundError: No module named 'company_os'
+
+
+======================================================================
+FAIL: test_plan_caps_units_and_virtual_risk (test_oanda_forward_lab.OandaForwardLabTests.test_plan_caps_units_and_virtual_risk)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/c11d907b8103/ko-enterprises/tests/test_oanda_forward_lab.py", line 182, in test_plan_caps_units_and_virtual_risk
+    self.assertTrue(plan["eligible"])
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 80 tests in 11.851s
+
+FAILED (failures=1, errors=9)

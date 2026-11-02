@@ -1,0 +1,41 @@
+{
+  "status": "PREFLIGHT_ONLY_NOT_APPROVED",
+  "oracle_sha256": "f091c67e20813e4a904aa2d734beb7b8481c9ea7d428c92fbc6fb8b7a35840b1",
+  "cases": 3,
+  "visually_inspected_pages": 3,
+  "ocr_cells_matching_printed_gold": 36,
+  "controlled_contract_tests_passed": 7,
+  "fixture_custody_tests_passed": 4,
+  "actual_model_generation_attempts": 0,
+  "independent_critic": "UNAVAILABLE_USAGE_LIMIT_NO_REVIEW_COMPLETED",
+  "internal_review": "Source recipe and rendered A/B/C inspected; no independent approval claimed",
+  "company_regression": {
+    "tests": 229,
+    "failures": 1,
+    "errors": 0,
+    "reason": "Unchanged test_plan_caps_units_and_virtual_risk uses current UTC price time; run at 20 UTC, blocked by unchanged FORBIDDEN_UTC_HOURS=(20,21)."
+  },
+  "initial_company_invocation": "Missing PYTHONPATH=src caused 9 import errors; corrected invocation retained above",
+  "runtime_and_fixture_recovery": "Workspace reverted to v7 during session; restored saved v8 via fast-forward. Prior uncommitted runtime/fixtures absent. Rebuilt fixture recipe and froze this NEW oracle before any inference.",
+  "full_milestone_3_approved": false,
+  "professional_accuracy_verified": false,
+  "lesson_activation_performed": false,
+  "next_actions": [
+    "Independent review of recovered recipe, schemas and local bounded runner",
+    "Reacquire pinned local runtime and verify checksums",
+    "At most one actual call per frozen case, three total, 180 seconds each; retain failures with no silent retries",
+    "Review source assignments, table roles and polarity separately; professional gates remain open"
+  ],
+  "home_inspection_regression": {
+    "tests": 839,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 159.354
+  },
+  "separate_fixture_tests": {
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 3.934
+  }
+}

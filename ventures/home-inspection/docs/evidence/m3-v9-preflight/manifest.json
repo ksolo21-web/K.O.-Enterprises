@@ -1,0 +1,18 @@
+{
+  "kind": "V9_PREFLIGHT_EVIDENCE_MANIFEST",
+  "files": {
+    "v9-company-corrected.log": "5273e07d07766122cdb6fbf637aacdd3bf2daf2d424b6fde9fc2ed5fd03fac7e",
+    "v9-company-regression.log": "a7d230e000dbb5fa12d3eb91d863f59184a9c0cf90e4db53221105af7768a06e",
+    "v9-home-regression.log": "13fc9d7009a37ce4bdf7c5f97c789a826488a228b313c90cac6fe44cc2753338",
+    "v9-probe-tests.log": "162e5f7af4b745747acbc54667dfbb5590bbfdf4e36790523ad247a4c649ae27",
+    "A.pdf": "45c06033572edc9e0116d21038120a03cf53bf79539d48cba46d19460d3f4814",
+    "B-render.png": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+    "B-scan-source.png": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+    "preflight-status.json": "a96656153274f8b5009b1b7a072fc4fdb81c67f3edfc8ebe4acebf853c143106",
+    "A-render.png": "d7168287b3f6c2364a550f31e5f375941e1f02c3edd1077ff5cd125444503b3a",
+    "B.pdf": "dda829024b5dee33c3f782cceae77fe32bb7353caa815f25473d4a6dcd5457bc",
+    "C-render.png": "5ee58a4782b1865b1cd24e96afcb137ffdd927098fc2ae53b6839071b179ffe6",
+    "oracle.json": "b59f5f70e2220a178a7cd85bd04bafef439bcbb9cc7dcd742e230eb757d63f9d",
+    "C.pdf": "3683813d17b7b8e0302ba705276a9c5ea7f44b9fbb224b591d664dcd8bf925f5"
+  }
+}
