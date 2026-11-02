@@ -10,7 +10,7 @@ Base `b9947577a87e0ad19994954544c0415494c8798a`, development branch only. Kaleb 
 4. [x] Ed25519 owner+reviewer signatures, independent fingerprints, scoped policy, expiry/revocation, store identity, nonce replay and CAS-locked atomic journal.
 5. [x] Actual temporary-store promote/load/consume/version/rollback execution and complete controlled CLI workflow; real repository pause remains intact and blocks production operations.
 6. [x] Final independent full regression **832/832** (150.497s), zero skips/errors/failures, ten tested source hashes unchanged; company **229/229**. Actual model-origin browser inspection passes four widths, three source table cells, original-page navigation and unresolved/model-origin labels, with no remote requests/page errors. Separate critic **9.7/10 bounded-engineering PASS**, original full M3 approval withheld; see `evidence/m3-v8/independent-critic.md`.
-7. [ ] Persist source/evidence, verify exact GitHub parity and unchanged main/pause.
+7. [x] Source/evidence persisted at `941fb3b9da91e6b3302608ca3879340b3499f1a8`; **29/29 file blobs verified**, full Git tree matched, remote main/pause unchanged. `evidence/m3-v8/github-delivery.json` records the verified source delivery; checkpoint/receipt follow-up changes no executable source.
 
 Focused latest **28/28 tests passed** (56.193s); controlled providers/ephemeral keys only. No Ollama executable or actual model inference was available/executed in this container. No real trust policy, signing keys or production lesson pack was enrolled/activated.
 
