@@ -471,10 +471,44 @@ def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_regi
             txt(c,f"{dims[0]} x {dims[1]} native px / no AI enlargement",M+13,top-194,'Lato',8.5,MUTED)
             txt(c,'UNREVIEWED SOURCE EVIDENCE',x,top-194,'LatoB',8.1,BRONZE)
         c.showPage()
+    # M4 private-only photo gallery: every original standalone photo gets a
+    # labeled evidence page even when no model claim was assigned to it.
+    # Other renderer entry points retain their approved five-page synopsis.
+    gallery=[m for m in document.get('media',[])
+             if m.get('kind')=='photo' and m.get('capture_origin')!='selected_video_still'] if include_evidence_register else []
+    first_gallery_page=preceding+1+(len(selected)+1)//2
+    for offset in range(0,len(gallery),2):
+        pn=first_gallery_page+offset//2
+        page(c,pn,'original photography',synthetic)
+        header(c,'PHOTO APPENDIX / '+str(offset//2+1).zfill(2),
+               'Original source photographs',
+               'Unreviewed and provisional evidence photographs. The source registry provides full provenance and original hashes.')
+        for slot,m in enumerate(gallery[offset:offset+2]):
+            top=549-slot*240
+            box(c,M,top-216,CW,216,PALE if slot==0 else SAND)
+            box(c,M,top-216,4,216,BRONZE)
+            try:
+                original=safe_path(project_dir,m.get('path',''))
+                if not img(c,original,M+12,top-171,250,158):
+                    raise OSError('image could not be drawn')
+            except (OSError,ValueError):
+                box(c,M+12,top-171,250,158,LIGHT)
+                txt(c,'IMAGE UNAVAILABLE',M+22,top-93,'LatoB',9,MUTED)
+            x=M+275
+            txt(c,'ORIGINAL PHOTO / '+str(m.get('id','')),x,top-26,'LatoB',9,BRONZE)
+            para(c,str(m.get('area','unknown')).replace('_',' ').title(),
+                 x,top-54,215,11.5,15,NAVY,'LatoB',maxlines=2)
+            para(c,m.get('caption','No caption supplied'),x,top-89,212,9.0,12.5,DARK,
+                 maxlines=3)
+            para(c,'SHA256 '+str(m.get('sha256','UNHASHED'))[:18]+'...',x,top-156,214,
+                 8.2,10,MUTED,maxlines=2)
+            txt(c,'NOT CERTIFIED / NOT RELEASED',x,top-194,'LatoB',8.1,BRONZE)
+        c.showPage()
     # Mandatory complete ledger. The fixed editorial synopsis may use preview
     # ellipses; the exhaustive ledger below never truncates supplied records.
     if include_evidence_register or _needs_complete_appendix(document):
-        _full_record_appendix(c,document,synthetic,preceding+1+(len(selected)+1)//2,
+        _full_record_appendix(c,document,synthetic,
+                              first_gallery_page+(len(gallery)+1)//2,
                               include_source_evidence=include_evidence_register)
     c.save()
     return target
