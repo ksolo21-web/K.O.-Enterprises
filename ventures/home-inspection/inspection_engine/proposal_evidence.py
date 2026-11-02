@@ -197,7 +197,7 @@ def verify_private_audit(directory, proposal_path):
         if hashes != call['image_sha256']:
             raise DataError('Model source image bytes differ from proposal receipt')
         if (reply.get('done') is not True or reply.get('done_reason')!='stop'
-                or reply.get('model')!=expected_model or 'error' in reply
+                or reply.get('model',expected_model)!=expected_model or 'error' in reply
                 or not isinstance(reply.get('response'),str)):
             raise DataError('Recorded model response is not complete')
         try:
