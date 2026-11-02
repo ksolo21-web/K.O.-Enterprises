@@ -176,6 +176,13 @@ class HumanReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError, "registry has changed"):
             verify_reviews(self.work, self.trust)
 
+    def test_signing_key_inside_source_media_directory_rejected(self):
+        key = self.root / "source" / "unacceptable_private_key.pem"
+        key.write_bytes(self.private_keys[0].read_bytes())
+        os.chmod(key, 0o600)
+        with self.assertRaisesRegex(DataError, "outside case workspace"):
+            sign_review(self.work, self.trust, key, self.response(0))
+
     def test_key_file_must_be_private(self):
         os.chmod(self.private_keys[0], 0o644)
         with self.assertRaisesRegex(DataError, "owner only"):
