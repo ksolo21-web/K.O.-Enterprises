@@ -307,6 +307,11 @@ class AutomaticActivationTests(unittest.TestCase):
         self.assertEqual(audit['events'][0]['kind'],'generation_request')
         self.assertEqual(audit['events'][1]['kind'],'generation_response')
         self.assertFalse(audit['customer_release_allowed'])
+        from inspection_engine.proposal_evidence import verify_private_audit
+        verified=verify_private_audit(root/'private-model-audit',root/'proposals/model-proposals.json')
+        self.assertEqual(verified['model_calls_verified'],5)
+        self.assertTrue(verified['request_response_integrity_verified'])
+        self.assertFalse(verified['semantic_accuracy_verified'])
         (root/'runs.json').write_text(json.dumps([str(root/'proposals/model-proposals.json')]))
         call(activation.main,['evaluate','--candidate',str(root/'candidate.json'),'--benchmark',str(root/'benchmark.json'),
             '--runs',str(root/'runs.json'),'--out',str(root/'evaluation.json')])
