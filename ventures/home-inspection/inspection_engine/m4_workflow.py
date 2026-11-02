@@ -6,15 +6,19 @@ to turn a report preview or a specialist plan into a customer-release approval.
 from __future__ import annotations
 
 from pathlib import Path
-from .core import load_project, blockers, coverage
+import json
+from .core import load_project, validate_project, blockers, coverage
 from .agents import plan_specialists
 from .capture import verify_custody
 
 
-def preflight_case(project_path: str | Path, media_ids: list[str] | None = None) -> dict:
+def preflight_case(project_path: str | Path, media_ids: list[str] | None = None,
+                   *, evidence_root: Path | None = None) -> dict:
     path = Path(project_path).resolve()
-    document = load_project(path)
-    custody_errors = verify_custody(document, path.parent)
+    root = Path(evidence_root).resolve() if evidence_root is not None else path.parent
+    document = (validate_project(json.loads(path.read_text(encoding='utf-8')), root)
+                if evidence_root is not None else load_project(path))
+    custody_errors = verify_custody(document, root)
     plan = plan_specialists(document, media_ids)
     unresolved = list(plan['unassigned_media']) + list(plan['unreviewed_videos'])
     quality_blockers = blockers(document)
