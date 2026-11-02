@@ -15,6 +15,8 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.utils import ImageReader
 
 from inspection_engine.core import DataError
+from inspection_engine.report_learning import import_reference
+from inspection_engine.study_registry import empty_registry, register_bundle
 from inspection_engine.report_page_evidence import render_batch,record_visual_marks
 from inspection_engine.report_review_queue import build_review_queue,digest
 from inspection_engine.report_ocr_review import ocr_review_batch,validate_ocr_record,_words,_engine_version as REAL_OCR_ENGINE_VERSION
@@ -37,18 +39,9 @@ class ScannedReportTests(unittest.TestCase):
         doc.showPage()
         doc.setFont('Helvetica',12);doc.drawString(20,245,'Water heater disconnected, not inspected.')
         doc.showPage();doc.save()
-        raw=self.pdf.read_bytes()
-        # The M3 v2 isolated test harness verifies source identity through its
-        # stubbed source registry; production validators remain unchanged.
-        self.bundle={'case_id':'SYNTHETIC-SCAN','partition':'locked_holdout',
-            'kind':'UNVERIFIED_REFERENCE_TEXT','bundle_sha256':'a'*64,
-            'source':{'format':'pdf','sha256':sha256(raw).hexdigest(),'bytes':len(raw)},
-            'pages':[{'number':1,'text':'Roof inspection narrative: no leaks observed.',
-                'text_available':True,'has_raster_images':False},
-                {'number':2,'text':'','text_available':False,'has_raster_images':True},
-                {'number':3,'text':'Water heater disconnected, not inspected.',
-                'text_available':True,'has_raster_images':False}]}
-        self.registry={'synthetic':True}
+        self.bundle=import_reference(self.pdf,case_id='SYNTHETIC-SCAN',partition='locked_holdout',
+            authorized_use=True,consented=True)
+        self.registry=register_bundle(self.bundle,empty_registry())
         self.queue=build_review_queue(self.bundle,self.registry)
         self.groups=[]
         self.real_ocr_engine_available=shutil.which('tesseract') is not None
@@ -136,8 +129,14 @@ class ScannedReportTests(unittest.TestCase):
         self.assertFalse(plan['qualified_inspector_approved'])
         self.assertFalse(plan['training_approved'])
         with self.assertRaises(DataError):plan_document(self.bundle,{'synthetic':False})
-        large=copy.deepcopy(self.bundle);large['pages']=[dict(self.bundle['pages'][0],number=i) for i in range(1,201)]
-        result=plan_document(large,self.registry)
+        source=self.root/'large.pdf';doc=Canvas(str(source))
+        for i in range(1,201):
+            doc.drawString(30,700,f'Synthetic coverage page {i}');doc.showPage()
+        doc.save()
+        large=import_reference(source,case_id='SYNTHETIC-200',partition='locked_holdout',
+            authorized_use=True,consented=True)
+        registry=register_bundle(large,empty_registry())
+        result=plan_document(large,registry)
         self.assertEqual(len(result['batches']),25)
         self.assertEqual(result['batches'][-1]['pages'],[193,194,195,196,197,198,199,200])
 

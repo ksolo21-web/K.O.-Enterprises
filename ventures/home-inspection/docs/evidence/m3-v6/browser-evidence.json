@@ -1,0 +1,37 @@
+{
+  "synthetic_only": true,
+  "browser": "153.0.8010.0",
+  "desktop": [
+    1280,
+    960
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "original_page_images_loaded": 3,
+  "table_candidate_cells": 12,
+  "overlay_container_matches_image": {
+    "containerWidth": 875,
+    "imageWidth": 875,
+    "containerHeight": 1167,
+    "imageHeight": 1167
+  },
+  "page_navigation_passed": true,
+  "details_controls_passed": true,
+  "boundary_mobile_single_column": true,
+  "missing_page_navigation_passed": true,
+  "horizontal_document_overflow": false,
+  "remote_requests": [],
+  "page_errors": [],
+  "screenshots": [
+    "boundary-context.png",
+    "desktop-page-three.png",
+    "desktop-top.png",
+    "mobile-boundary-context.png",
+    "mobile-missing-page.png",
+    "mobile-page-one.png",
+    "mobile-table-candidate.png",
+    "table-candidate.png"
+  ]
+}

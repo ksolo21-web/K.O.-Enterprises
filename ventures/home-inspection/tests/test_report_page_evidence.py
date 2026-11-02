@@ -15,6 +15,8 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.utils import ImageReader
 
 from inspection_engine.core import DataError
+from inspection_engine.report_learning import import_reference
+from inspection_engine.study_registry import empty_registry, register_bundle
 from inspection_engine.report_page_evidence import (render_batch,validate_page_evidence,
     record_visual_marks,main, MAX_BATCH_PAGES, digest)
 
@@ -42,13 +44,9 @@ class PDFPageEvidenceTests(unittest.TestCase):
             writer.add_page(page)
         with (self.root/'rotated.pdf').open('wb') as fh:writer.write(fh)
         self.pdf=(self.root/'rotated.pdf')
-        raw=self.pdf.read_bytes()
-        self.bundle={'case_id':'SYNTHETIC-M3-PAGE','partition':'locked_holdout',
-            'kind':'UNVERIFIED_REFERENCE_TEXT', 'bundle_sha256':'a'*64,
-            'source':{'format':'pdf','sha256':sha256(raw).hexdigest(),'bytes':len(raw)},
-            'pages':[{'number':i,'text':'','text_available':False,'has_raster_images':i==2}
-                     for i in (1,2,3)]}
-        self.registry={'synthetic':True}
+        self.bundle=import_reference(self.pdf,case_id='SYNTHETIC-M3-PAGE',partition='locked_holdout',
+            authorized_use=True,consented=True)
+        self.registry=register_bundle(self.bundle,empty_registry())
         self.output=self.root/'private_pages'
 
     def render(self,pages=None):

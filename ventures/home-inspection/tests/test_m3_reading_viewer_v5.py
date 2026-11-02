@@ -107,6 +107,7 @@ class ViewerTests(unittest.TestCase):
                      'bundle_sha256':'a'*64,'pages':[{'number':1},{'number':2}]}
         self.registry={};self.queue={'spans':[{'page':1,'span_id':'P0001-C000000','text':'<script>alert("XSS")</script>\nA roof photo is not proof.'}]}
         self.batch={'manifest':self.manifest,'layout':self.layout,'ocr_record':self.ocr,'render_dir':self.render_dir}
+        self.queue['queue_sha256']='d'*64
 
     def build(self,out=None,batches=None):
         # Isolated fixture supplies the already-verified upstream source receipts.
@@ -115,6 +116,7 @@ class ViewerTests(unittest.TestCase):
         stub_registry=types.SimpleNamespace(require_registered=lambda b,r:r)
         with patch.dict(sys.modules,{'inspection_engine.report_learning':stub_learn,'inspection_engine.study_registry':stub_registry}), \
              patch('inspection_engine.report_study_viewer.validate_review_queue',return_value=self.queue), \
+             patch('inspection_engine.report_structure_candidates.validate_review_queue',return_value=self.queue), \
              patch('inspection_engine.report_study_viewer.validate_layout_index',return_value=self.layout), \
              patch('inspection_engine.report_study_viewer._source',side_effect=lambda path:Path(path).read_bytes()):
             return build_study_viewer(self.bundle,self.registry,self.queue,self.src,
