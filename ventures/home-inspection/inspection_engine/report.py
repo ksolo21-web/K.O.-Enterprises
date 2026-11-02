@@ -4,6 +4,7 @@ Deterministic, photo-led report. Media captions indicate whether photographs are
 illustrative. It does not infer defects from photographs or release inspections.
 """
 from __future__ import annotations
+import json
 from io import BytesIO
 from pathlib import Path
 from PIL import Image, ImageOps
@@ -138,7 +139,7 @@ def _needs_complete_appendix(doc):
     if any(len(wraps(x.get('description',x.get('condition','')),'Lato',9.1,CW-232))>9 for x in model_items):return True
     return False
 
-def _full_record_appendix(c, doc, synthetic, next_page):
+def _full_record_appendix(c, doc, synthetic, next_page, *, include_source_evidence=False):
     """Lossless plain-language record ledger; pages expand with input rather than truncating.
 
     The photo-led five-page design is retained as a visual synopsis. Every source
@@ -146,6 +147,17 @@ def _full_record_appendix(c, doc, synthetic, next_page):
     Neither editorial cards nor image previews are authoritative complete text.
     """
     groups=[]
+    if include_source_evidence:
+        # Enumerate every original and derived media object, including unassigned
+        # footage. These pages disclose records; they do not imply visual review.
+        for media in doc.get('media', []):
+            fields=[(str(key).upper(), json.dumps(value, sort_keys=True,
+                     ensure_ascii=True)) for key, value in sorted(media.items())]
+            groups.append(('SOURCE EVIDENCE', str(media.get('id', 'unassigned')), fields))
+        for zoom in doc.get('zoom_views', []):
+            fields=[(str(key).upper(), json.dumps(value, sort_keys=True,
+                     ensure_ascii=True)) for key, value in sorted(zoom.items())]
+            groups.append(('NATIVE CROP RECORD', str(zoom.get('id', 'unassigned')), fields))
     for entry in doc.get('findings',[]):
         groups.append(('FINDING',str(entry.get('id','unassigned')),[
             ('SYSTEM',entry.get('system','unknown')),
@@ -224,7 +236,7 @@ def _full_record_appendix(c, doc, synthetic, next_page):
     c.showPage()
     return page_no
 
-def build_pdf(document:dict,project_dir:Path,target:Path):
+def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_register:bool=False):
     target=Path(target);target.parent.mkdir(parents=True,exist_ok=True)
     prop=document['property'];synthetic=bool(prop.get('synthetic'))
     photos=[]
@@ -461,7 +473,8 @@ def build_pdf(document:dict,project_dir:Path,target:Path):
         c.showPage()
     # Mandatory complete ledger. The fixed editorial synopsis may use preview
     # ellipses; the exhaustive ledger below never truncates supplied records.
-    if _needs_complete_appendix(document):
-        _full_record_appendix(c,document,synthetic,preceding+1+(len(selected)+1)//2)
+    if include_evidence_register or _needs_complete_appendix(document):
+        _full_record_appendix(c,document,synthetic,preceding+1+(len(selected)+1)//2,
+                              include_source_evidence=include_evidence_register)
     c.save()
     return target
