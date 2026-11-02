@@ -166,7 +166,7 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
 
     with tempfile.TemporaryDirectory(prefix=".m4_pending_", dir=out) as work:
         candidate = Path(work) / "draft.pdf"
-        build_pdf(document, root, candidate)
+        build_pdf(document, root, candidate, include_evidence_register=True)
         if sha256(source) != original_project_sha or _evidence_ledger(document, root) != ledger:
             raise DataError("Source evidence changed during report generation")
         if not candidate.is_file() or candidate.stat().st_size == 0:
