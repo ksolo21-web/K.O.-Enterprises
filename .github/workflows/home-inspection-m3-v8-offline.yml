@@ -7,6 +7,9 @@ on:
       - 'ventures/home-inspection/**'
       - '.github/workflows/home-inspection-m3-v8-offline.yml'
   workflow_dispatch:
+concurrency:
+  group: m3-v8-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
