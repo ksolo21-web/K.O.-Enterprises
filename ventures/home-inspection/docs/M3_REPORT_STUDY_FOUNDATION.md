@@ -1,5 +1,7 @@
 # Milestone 3 report-study foundation
 
+Current continuation: `M3_AUTOMATIC_AND_SIGNED_RUNTIME_V8.md` and `CHECKPOINT_M3_V8.md`. The implementation statuses below are the historical v1.6 foundation; the original acceptance requirements remain binding. Automatic source-backed proposals and signed local lesson activation now have implementations, while real professional/empirical acceptance remains unestablished.
+
 2026-10-31. Source foundation only; full Milestone 3 remains incomplete.
 
 ## Requirements and dependency-aware milestones

@@ -252,7 +252,8 @@ def _review_dossier(dossier:dict,doc:dict,root:Path)->dict:
 def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                        *,media_ids:list[str],provider_id:str='fixture-provider',max_jobs:int=24,
                        audit_event=None, provider_accepts_schema:bool=False,
-                       visual_first:bool=False) -> tuple[dict,dict]:
+                       visual_first:bool=False,lesson_store:Path|None=None,
+                       lesson_policy:Path|None=None) -> tuple[dict,dict]:
     """Exercise actual bounded specialist dispatch with a caller-supplied provider.
 
     Model may request native source zoom or saving a native still from a video.
@@ -270,6 +271,11 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
         raise DataError('Schema provider opt-in must be a boolean')
     if type(visual_first) is not bool or (visual_first and not provider_accepts_schema):
         raise DataError('Visual-first stage requires explicit schema-aware provider opt-in')
+    lesson_context='';lesson_pack=None
+    if (lesson_store is None)!=(lesson_policy is None):raise DataError('Both lesson store and pinned policy are required')
+    if lesson_store is not None:
+        from .lesson_activation import runtime_lesson_context
+        lesson_context,lesson_pack=runtime_lesson_context(lesson_store,lesson_policy,model_digest=getattr(provider,'model_digest',None),task_scope='photo_specialist')
     root=root.resolve()
     validate_project(document,root)
     if verify_custody(document,root):raise DataError('Cannot route evidence with invalid custody')
@@ -357,6 +363,9 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 f'UNRECORDED_FEATURE_TASKS_JSON: {json.dumps(gaps,sort_keys=True)}\n'
                 f'ASSIGNED_COVERAGE_TASKS_JSON: {json.dumps(assigned_tasks,sort_keys=True)}\n'
                 f'EVIDENCE_CONTEXT_JSON: {json.dumps(context,sort_keys=True)}\n')
+            if lesson_context:
+                prompt+='\n'+lesson_context+'\n'
+                dossier['learned_lesson_pack_sha256']=lesson_pack
             prompt += '\n' + build_knowledge_brief(job['systems']) + '\n'
             prompt += '\n' + build_failure_mode_brief(job['systems']) + '\n'
             # Original national/MI policy remains embedded; select only relevant cards per work order.
@@ -396,7 +405,13 @@ def execute_specialists(document:dict,root:Path,provider:Callable[...,dict],
                 dossier.setdefault('input_profiles',[]).append(input_profile)
                 if audit_event is not None:audit_event({'kind':'specialist_input_profile','profile':deepcopy(input_profile)})
             if len(prompt.encode())>20000:raise DataError('Specialist prompt exceeds bounded context budget')
+            if lesson_store is not None:
+                fresh_context,fresh_pack=runtime_lesson_context(lesson_store,lesson_policy,model_digest=getattr(provider,'model_digest',None),task_scope='photo_specialist')
+                if (fresh_context,fresh_pack)!=(lesson_context,lesson_pack):raise DataError('Learned lesson state changed during specialist execution')
             response=provider(image,prompt,schema=schema) if provider_accepts_schema else provider(image,prompt)
+            if lesson_store is not None:
+                fresh_context,fresh_pack=runtime_lesson_context(lesson_store,lesson_policy,model_digest=getattr(provider,'model_digest',None),task_scope='photo_specialist')
+                if (fresh_context,fresh_pack)!=(lesson_context,lesson_pack):raise DataError('Learned lesson state changed during specialist execution')
             candidates,requests=_provider_envelope(response,role,target,systems=job['systems'])
             mapped=[]
             for candidate in candidates:

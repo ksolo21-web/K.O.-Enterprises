@@ -1,0 +1,104 @@
+{
+  "date_local": "2026-11-02",
+  "base_commit": "b9947577a87e0ad19994954544c0415494c8798a",
+  "scope": "Automatic report proposals and executable default-off signed report lesson runtime",
+  "source_sha256": {
+    "inspection_engine/__main__.py": "0327797b988b9457ee8e55cd452bc30e4e5d84202c72d7765a4571d2478bbbd0",
+    "inspection_engine/agents.py": "454f3d8d9b3ba1f61320bfc9cb256e3fe6722d0663b2831652954258197db6b8",
+    "inspection_engine/bounded_generation.py": "eb9af1a7e05c65b285801d6163b65637f1d91c9b4fa573a1dd92c2780222a016",
+    "inspection_engine/lesson_activation.py": "60e0293713cea3a5ca24384586981cdc693fca9fa816b97b0d6f1d5088397549",
+    "inspection_engine/report_proposals.py": "6f9aa68f7b232497240b8a0e2bca437702fc4f05b89b007259ec8f064637a873",
+    "inspection_engine/report_study_pipeline.py": "23f82314303b7682e26e1042a2805563c03ee94c5c5cdb9ec4b087c12e16dbfe",
+    "inspection_engine/report_understanding.py": "f735a3f8425fec41a890a994bac9d2db7f77c1bb79e1d7a5b9f97d17568861bb",
+    "inspection_engine/vision.py": "9cc0a11b80f4788ee9f4d31b8d8c310ed40be33cbfdfcf8c62203c3e5727b9a1",
+    "requirements.txt": "c173877b8206fe6e85ebf5f9b4dcf9c1ffa5d6143b902bacb3879b225b789735",
+    "tests/test_m3_automatic_activation_v8.py": "bf50c5648d0d889edee79beb01c571c7f1949bc65d2597b6072af2ecaf995de1"
+  },
+  "focused_tests": {
+    "passed": 28,
+    "run": 28,
+    "seconds": 56.193,
+    "real_model_inference": false,
+    "real_signing_keys_enrolled": false
+  },
+  "independent_inspection_regression": {
+    "passed": 832,
+    "run": 832,
+    "skipped": 0,
+    "seconds": 150.497,
+    "tested_source_unchanged": true,
+    "log_sha256": "6fd1a8d45f973365c7b41b7959feb76165059a816df6283ffc77528dff48b195"
+  },
+  "company_regression": {
+    "passed": 229,
+    "run": 229,
+    "seconds": 13.61
+  },
+  "executed_temp_store_flow": [
+    "freeze_benchmark",
+    "staged_context_in_proposals",
+    "compute_exact_finding_metrics",
+    "two_independent_Ed25519_signatures",
+    "CAS_promotion",
+    "pinned_factory_report_consumption",
+    "second_version_promotion",
+    "fresh_authorized_rollback",
+    "reload_predecessor"
+  ],
+  "adversarial_controls": [
+    "baseline_cannot_approve_untested_lessons",
+    "wrong_model_or_task_rejected",
+    "same_key_aliases_rejected",
+    "stale_state_nonce_and_cross_store_replay_rejected",
+    "revoked_expired_missing_wrong_role_signatures_rejected",
+    "root_and_environment_pause_enforced",
+    "pause_during_provider_or_before_state_replace_rejected",
+    "state_and_journal_tamper_rejected",
+    "absolute_metadata_generation_deadlines",
+    "HTTP10_late_header_body_stall_rejected"
+  ],
+  "browser": {
+    "synthetic_controlled_provider_only": true,
+    "real_model_inference": false,
+    "browser": "153.0.8010.0",
+    "widths": [
+      360,
+      390,
+      768,
+      1280
+    ],
+    "model_origin_label": true,
+    "human_review_never_claimed": true,
+    "source_table_cells": 3,
+    "all_source_pages_unresolved": 3,
+    "source_navigation": true,
+    "keyboard_details": true,
+    "document_overflow": false,
+    "remote_requests": [],
+    "page_errors": [],
+    "screenshots": [
+      "desktop-model-origin.png",
+      "desktop-source-table.png",
+      "mobile-model-origin.png",
+      "mobile-original-page.png",
+      "mobile-source-table.png"
+    ]
+  },
+  "positive_table_namespace_probe": {
+    "calls": 5,
+    "source_cells": [
+      "Item",
+      "State",
+      "Action"
+    ],
+    "cell_reference": "P0001-C1",
+    "all_pages_unresolved": true
+  },
+  "root_pause_changed": false,
+  "production_trust_policy_created": false,
+  "production_activation": false,
+  "real_model_inference": false,
+  "professional_qualifications_verified": false,
+  "field_accuracy_verified": false,
+  "full_milestone_3_approved": false
+}

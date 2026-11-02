@@ -10,7 +10,7 @@ await context.route('**/*',r=>{if(!r.request().url().startsWith('file:')){networ
 const page=await context.newPage();page.on('pageerror',e=>errors.push(String(e)));
 const url=require('url').pathToFileURL(require('path').resolve(source)).href;
 await page.goto(url);assert.ok((await page.locator('body').innerText()).includes('SYNTH-M3-V6'));assert.equal(await page.locator('table td').count(),3);
-assert.ok((await page.locator('body').innerText()).includes('APPROVED_LEARNING_PROMOTION_NOT_IMPLEMENTED_OR_AUTHORIZED'));
+assert.ok((await page.locator('body').innerText()).includes('LEARNING_FRAMEWORK_REQUIRES_TRUSTED_ENROLLMENT_AND_REAL_EVALUATION'));
 await page.screenshot({path:out+'/desktop-acceptance.png'});
 await page.locator('article').filter({has:page.getByRole('heading',{name:'Declared table T1',exact:true})}).screenshot({path:out+'/desktop-table.png'});
 await page.locator('article').filter({has:page.getByRole('heading',{name:'Declared continuation',exact:true})}).screenshot({path:out+'/desktop-cross-page.png'});

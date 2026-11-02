@@ -52,7 +52,8 @@ def checked_sources(bundle,registry,queue,pdf_path,batches):
     return audit,pages,words
 
 
-def capture_report_mapping(bundle,registry,queue,pdf_path,batches,declarations):
+def capture_report_mapping(bundle,registry,queue,pdf_path,batches,declarations,*,origin='human_declared'):
+    if origin not in ('human_declared','model_proposed'):raise DataError('Invalid mapping origin')
     audit,pages,words=checked_sources(bundle,registry,queue,pdf_path,batches)
     _fields(declarations,'reviewer_id coverage sections tables figures findings relations','declaration')
     _text(declarations['reviewer_id'],'reviewer ID',80)
@@ -184,7 +185,8 @@ def capture_report_mapping(bundle,registry,queue,pdf_path,batches,declarations):
         if any(n not in pages for n in range(min(involved),max(involved)+1)):
             raise DataError('Cross-page relation cannot skip unrendered intervening pages')
         relations.append(dict(deepcopy(item),anchors=aa,relation_verified=False,records_merged=False))
-    result={'schema_version':1,'kind':'HUMAN_DECLARED_REPORT_UNDERSTANDING_V7','case_id':bundle['case_id'],
+    result={'schema_version':1,'kind':('HUMAN_DECLARED_REPORT_UNDERSTANDING_V7' if origin=='human_declared' else 'MODEL_PROPOSED_REPORT_UNDERSTANDING_V8'),
+        'origin':origin,'case_id':bundle['case_id'],
         'reference_bundle_sha256':bundle['bundle_sha256'],'source_pdf_sha256':bundle['source']['sha256'],
         'document_audit_sha256':audit['audit_sha256'],'declarations':deepcopy(declarations),
         'coverage':sorted(coverage,key=lambda x:x['page']),'sections':sections,'tables':tables,
@@ -200,7 +202,7 @@ def capture_report_mapping(bundle,registry,queue,pdf_path,batches,declarations):
 
 
 def validate_report_mapping(record,bundle,registry,queue,pdf_path,batches):
-    if not isinstance(record,dict) or record!=capture_report_mapping(bundle,registry,queue,pdf_path,batches,record.get('declarations')):
+    if not isinstance(record,dict) or record!=capture_report_mapping(bundle,registry,queue,pdf_path,batches,record.get('declarations'),origin=record.get('origin','human_declared')):
         raise DataError('Report mapping stale, altered or incomplete')
     return record
 
@@ -208,13 +210,14 @@ def validate_report_mapping(record,bundle,registry,queue,pdf_path,batches):
 def milestone_readiness(mapping):
     """Non-authorizing status, never accepts freely supplied professional flags."""
     clean=deepcopy(mapping);received=clean.pop('mapping_sha256',None)
-    if (received!=digest(clean) or mapping.get('kind')!='HUMAN_DECLARED_REPORT_UNDERSTANDING_V7'
+    if (received!=digest(clean) or mapping.get('kind') not in ('HUMAN_DECLARED_REPORT_UNDERSTANDING_V7','MODEL_PROPOSED_REPORT_UNDERSTANDING_V8')
             or any(mapping.get(k) is not False for k in ('reviewer_authenticated','semantic_understanding_verified',
                 'training_approved','customer_release_allowed'))):raise DataError('Invalid mapping readiness input')
     blockers=['INSPECTOR_REVIEWED_SEMANTIC_EXTRACTION_NOT_ESTABLISHED',
         'AUTHENTICATED_REVIEW_AND_CASE_PROVENANCE_NOT_ESTABLISHED',
         'HELD_OUT_SEMANTIC_AND_LEARNING_EVALUATION_NOT_COMPLETED',
-        'APPROVED_LEARNING_PROMOTION_NOT_IMPLEMENTED_OR_AUTHORIZED']
+        'LEARNING_FRAMEWORK_REQUIRES_TRUSTED_ENROLLMENT_AND_REAL_EVALUATION']
+    if mapping.get('origin')=='model_proposed':blockers.append('MODEL_PROPOSALS_REQUIRE_HUMAN_SOURCE_REVIEW')
     if mapping['unresolved_pages']:blockers.append('UNRESOLVED_PAGE_DISPOSITIONS')
     if mapping['missing_rendered_pages']:blockers.append('MISSING_RENDERED_PAGES')
     if mapping['missing_ocr_for_textless_pages']:blockers.append('MISSING_SCAN_OCR')

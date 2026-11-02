@@ -1,0 +1,500 @@
+{
+  "kind": "M3_AUTOMATIC_REPORT_PROPOSALS_V8",
+  "preparation_sha256": "87c2ffa25562ba7dd8e737a84619c302bad20b92c7d1790c6f349e5f5c83a6fb",
+  "benchmark_sha256": null,
+  "evaluated_candidate_sha256": null,
+  "candidate_context_sha256": null,
+  "active_lesson_pack_sha256": null,
+  "provider_id": "CONTROLLED-FIXTURE-NOT-REAL-INFERENCE",
+  "model_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "calls": [
+    {
+      "kind": "PAGE_STRUCTURE",
+      "pages": [
+        1
+      ],
+      "prompt_sha256": "f6d9849e3c3b3705434859f356b920dcaf023bff7db68aae1d87aad4adcef557",
+      "image_sha256": [
+        "5a1759aa7cf07931d30845dd63a3ef6071c18e7cfaf434b8299393cc86dd08ac"
+      ],
+      "response_sha256": "071155c12e52fd62285efce7f18c9a0bcac0eee6b8d8467037b17f2ff349cb64"
+    },
+    {
+      "kind": "PAGE_STRUCTURE",
+      "pages": [
+        2
+      ],
+      "prompt_sha256": "cebf446b97cb5b1d5c38d68bdcfe3afd2ecdec284e90d2fe297ce80337cffb6b",
+      "image_sha256": [
+        "20dcbde767ed052d7950f844b2324b1bde2c8c3b0a8796b161898df54b37227e"
+      ],
+      "response_sha256": "af6c9fdaf4b43ec0fe41e8c42038508d829b8d62bd7cab8877433e36f290f320"
+    },
+    {
+      "kind": "PAGE_STRUCTURE",
+      "pages": [
+        3
+      ],
+      "prompt_sha256": "7fe02b6f0dcc36898afa930cc3d4f3f7a847d46bb8bbb013ee40f73b9c47dc82",
+      "image_sha256": [
+        "a5ace39757dddbe371e7fd57ab03ca2fd611598017b4c2cb4d0b82ca639e95f9"
+      ],
+      "response_sha256": "163ad80daa83338db10f1b19fb6edaec99d9fc006c35f13f731d7eb1f5af74c9"
+    },
+    {
+      "kind": "ADJACENT_PAGE_RELATIONSHIPS",
+      "pages": [
+        1,
+        2
+      ],
+      "prompt_sha256": "b8ab7d64ac73682ec2a649c96d3bb73bc4c308a5e8efbcbff0892e4bfb899fe2",
+      "image_sha256": [
+        "5a1759aa7cf07931d30845dd63a3ef6071c18e7cfaf434b8299393cc86dd08ac",
+        "20dcbde767ed052d7950f844b2324b1bde2c8c3b0a8796b161898df54b37227e"
+      ],
+      "response_sha256": "096ac3df03946e078dbe269a92a8543208cd3a306619c8121a6cf651f2586842"
+    },
+    {
+      "kind": "ADJACENT_PAGE_RELATIONSHIPS",
+      "pages": [
+        2,
+        3
+      ],
+      "prompt_sha256": "8b027185178cdad5057f9cd9f47166f268812f373375458a9862989adf01d1cf",
+      "image_sha256": [
+        "20dcbde767ed052d7950f844b2324b1bde2c8c3b0a8796b161898df54b37227e",
+        "a5ace39757dddbe371e7fd57ab03ca2fd611598017b4c2cb4d0b82ca639e95f9"
+      ],
+      "response_sha256": "096ac3df03946e078dbe269a92a8543208cd3a306619c8121a6cf651f2586842"
+    }
+  ],
+  "mapping": {
+    "schema_version": 1,
+    "kind": "MODEL_PROPOSED_REPORT_UNDERSTANDING_V8",
+    "origin": "model_proposed",
+    "case_id": "SYNTH-M3-V6",
+    "reference_bundle_sha256": "3f7ae8ad8f6758eecfbbe86ec5a37ca86587c9efb223e7bb958c8b59c1ebbc08",
+    "source_pdf_sha256": "25a33cf604831be68ac4b0eca952472cb78e4034eb9add785b45863ddd27402b",
+    "document_audit_sha256": "680e7cc50654893e55dfa5701db39cbed115cd69a6c0b69cc8c6cc5a680c15f5",
+    "declarations": {
+      "reviewer_id": "MODEL-PROPOSAL-NOT-HUMAN",
+      "coverage": [
+        {
+          "page": 1,
+          "status": "unresolved",
+          "note": "Automatic proposal only; human source review required"
+        },
+        {
+          "page": 2,
+          "status": "unresolved",
+          "note": "Automatic proposal only; human source review required"
+        },
+        {
+          "page": 3,
+          "status": "unresolved",
+          "note": "Automatic proposal only; human source review required"
+        }
+      ],
+      "sections": [
+        {
+          "id": "P0001-S",
+          "title": "Report section",
+          "anchors": [
+            {
+              "kind": "pdf_text",
+              "page": 1,
+              "span_id": "P0001-C000000",
+              "offset": 0,
+              "quote": "SYNTHETIC STUDY - NOT A R"
+            }
+          ]
+        },
+        {
+          "id": "P0003-S",
+          "title": "Report section",
+          "anchors": [
+            {
+              "kind": "pdf_text",
+              "page": 3,
+              "span_id": "P0003-C000000",
+              "offset": 0,
+              "quote": "Source page three starts "
+            }
+          ]
+        }
+      ],
+      "tables": [
+        {
+          "id": "P0001-T",
+          "page": 1,
+          "column_count": 3,
+          "rows": [
+            {
+              "id": "P0001-ROW",
+              "cells": [
+                {
+                  "id": "P0001-C1",
+                  "column": 1,
+                  "column_span": 1,
+                  "role": "header",
+                  "anchors": [
+                    {
+                      "kind": "ocr_words",
+                      "page": 1,
+                      "word_indices": [
+                        8
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "P0001-C2",
+                  "column": 2,
+                  "column_span": 1,
+                  "role": "header",
+                  "anchors": [
+                    {
+                      "kind": "ocr_words",
+                      "page": 1,
+                      "word_indices": [
+                        9
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "P0001-C3",
+                  "column": 3,
+                  "column_span": 1,
+                  "role": "header",
+                  "anchors": [
+                    {
+                      "kind": "ocr_words",
+                      "page": 1,
+                      "word_indices": [
+                        25
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "figures": [
+        {
+          "id": "P0002-FIG",
+          "kind": "unclassified",
+          "region": {
+            "kind": "image_region",
+            "page": 2,
+            "bbox": [
+              0,
+              0,
+              1,
+              1
+            ]
+          },
+          "caption_anchors": []
+        }
+      ],
+      "findings": [
+        {
+          "id": "P0001-F",
+          "system": "roof",
+          "location": "Source page 1",
+          "description": "Reported source page 1",
+          "anchors": [
+            {
+              "kind": "pdf_text",
+              "page": 1,
+              "span_id": "P0001-C000000",
+              "offset": 0,
+              "quote": "SYNTHETIC STUDY - NOT A R"
+            }
+          ],
+          "section_ids": [
+            "P0001-S"
+          ],
+          "figure_ids": [],
+          "table_cell_ids": [
+            "P0001-C1"
+          ]
+        },
+        {
+          "id": "P0003-F",
+          "system": "plumbing",
+          "location": "Source page 3",
+          "description": "Reported source page 3",
+          "anchors": [
+            {
+              "kind": "pdf_text",
+              "page": 3,
+              "span_id": "P0003-C000000",
+              "offset": 0,
+              "quote": "Source page three starts "
+            }
+          ],
+          "section_ids": [
+            "P0003-S"
+          ],
+          "figure_ids": [],
+          "table_cell_ids": []
+        }
+      ],
+      "relations": []
+    },
+    "coverage": [
+      {
+        "page": 1,
+        "status": "unresolved",
+        "note": "Automatic proposal only; human source review required"
+      },
+      {
+        "page": 2,
+        "status": "unresolved",
+        "note": "Automatic proposal only; human source review required"
+      },
+      {
+        "page": 3,
+        "status": "unresolved",
+        "note": "Automatic proposal only; human source review required"
+      }
+    ],
+    "sections": [
+      {
+        "id": "P0001-S",
+        "title": "Report section",
+        "anchors": [
+          {
+            "kind": "pdf_text",
+            "page": 1,
+            "span_id": "P0001-C000000",
+            "offset": 0,
+            "quote": "SYNTHETIC STUDY - NOT A R",
+            "source_text_sha256": "499fceb25da2bb74bf47269af3009f2188883eb6b1fba7e75bbf93d1f7ca80f9",
+            "source_page_offset": 0,
+            "interpretation_verified": false
+          }
+        ]
+      },
+      {
+        "id": "P0003-S",
+        "title": "Report section",
+        "anchors": [
+          {
+            "kind": "pdf_text",
+            "page": 3,
+            "span_id": "P0003-C000000",
+            "offset": 0,
+            "quote": "Source page three starts ",
+            "source_text_sha256": "a315d2ad0e71a76ee398da0c32e044762a30b1660baae0770e01b82d5a14e2b5",
+            "source_page_offset": 0,
+            "interpretation_verified": false
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "id": "P0001-T",
+        "page": 1,
+        "column_count": 3,
+        "rows": [
+          {
+            "id": "P0001-ROW",
+            "cells": [
+              {
+                "id": "P0001-C1",
+                "column": 1,
+                "column_span": 1,
+                "role": "header",
+                "anchors": [
+                  {
+                    "kind": "ocr_words",
+                    "page": 1,
+                    "word_indices": [
+                      8
+                    ],
+                    "source_words_untrusted": [
+                      {
+                        "text_untrusted": "Item",
+                        "bbox_normalized": [
+                          0.0857143,
+                          0.1688089,
+                          0.1371429,
+                          0.1962296
+                        ],
+                        "confidence_untrusted": 92.06,
+                        "word_index": 8
+                      }
+                    ],
+                    "source_page_png_sha256": "5a1759aa7cf07931d30845dd63a3ef6071c18e7cfaf434b8299393cc86dd08ac",
+                    "text_is_verified_pdf_quote": false
+                  }
+                ],
+                "role_verified": false
+              },
+              {
+                "id": "P0001-C2",
+                "column": 2,
+                "column_span": 1,
+                "role": "header",
+                "anchors": [
+                  {
+                    "kind": "ocr_words",
+                    "page": 1,
+                    "word_indices": [
+                      9
+                    ],
+                    "source_words_untrusted": [
+                      {
+                        "text_untrusted": "State",
+                        "bbox_normalized": [
+                          0.3851429,
+                          0.1722365,
+                          0.448,
+                          0.1885176
+                        ],
+                        "confidence_untrusted": 96.61,
+                        "word_index": 9
+                      }
+                    ],
+                    "source_page_png_sha256": "5a1759aa7cf07931d30845dd63a3ef6071c18e7cfaf434b8299393cc86dd08ac",
+                    "text_is_verified_pdf_quote": false
+                  }
+                ],
+                "role_verified": false
+              },
+              {
+                "id": "P0001-C3",
+                "column": 3,
+                "column_span": 1,
+                "role": "header",
+                "anchors": [
+                  {
+                    "kind": "ocr_words",
+                    "page": 1,
+                    "word_indices": [
+                      25
+                    ],
+                    "source_words_untrusted": [
+                      {
+                        "text_untrusted": "Action",
+                        "bbox_normalized": [
+                          0.6834286,
+                          0.1722365,
+                          0.76,
+                          0.1876607
+                        ],
+                        "confidence_untrusted": 96.59,
+                        "word_index": 25
+                      }
+                    ],
+                    "source_page_png_sha256": "5a1759aa7cf07931d30845dd63a3ef6071c18e7cfaf434b8299393cc86dd08ac",
+                    "text_is_verified_pdf_quote": false
+                  }
+                ],
+                "role_verified": false
+              }
+            ],
+            "unassigned_columns": []
+          }
+        ],
+        "structure_verified": false
+      }
+    ],
+    "figures": [
+      {
+        "id": "P0002-FIG",
+        "kind": "unclassified",
+        "region": {
+          "kind": "image_region",
+          "page": 2,
+          "bbox": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "source_page_png_sha256": "20dcbde767ed052d7950f844b2324b1bde2c8c3b0a8796b161898df54b37227e",
+          "image_semantics_verified": false
+        },
+        "caption_anchors": [],
+        "classification_verified": false
+      }
+    ],
+    "findings": [
+      {
+        "id": "P0001-F",
+        "system": "roof",
+        "location": "Source page 1",
+        "description": "Reported source page 1",
+        "anchors": [
+          {
+            "kind": "pdf_text",
+            "page": 1,
+            "span_id": "P0001-C000000",
+            "offset": 0,
+            "quote": "SYNTHETIC STUDY - NOT A R",
+            "source_text_sha256": "499fceb25da2bb74bf47269af3009f2188883eb6b1fba7e75bbf93d1f7ca80f9",
+            "source_page_offset": 0,
+            "interpretation_verified": false
+          }
+        ],
+        "section_ids": [
+          "P0001-S"
+        ],
+        "figure_ids": [],
+        "table_cell_ids": [
+          "P0001-C1"
+        ],
+        "finding_verified": false
+      },
+      {
+        "id": "P0003-F",
+        "system": "plumbing",
+        "location": "Source page 3",
+        "description": "Reported source page 3",
+        "anchors": [
+          {
+            "kind": "pdf_text",
+            "page": 3,
+            "span_id": "P0003-C000000",
+            "offset": 0,
+            "quote": "Source page three starts ",
+            "source_text_sha256": "a315d2ad0e71a76ee398da0c32e044762a30b1660baae0770e01b82d5a14e2b5",
+            "source_page_offset": 0,
+            "interpretation_verified": false
+          }
+        ],
+        "section_ids": [
+          "P0003-S"
+        ],
+        "figure_ids": [],
+        "table_cell_ids": [],
+        "finding_verified": false
+      }
+    ],
+    "relations": [],
+    "unresolved_pages": [
+      1,
+      2,
+      3
+    ],
+    "missing_rendered_pages": [],
+    "missing_ocr_for_textless_pages": [],
+    "reviewer_authenticated": false,
+    "semantic_understanding_verified": false,
+    "training_approved": false,
+    "customer_release_allowed": false,
+    "status": "PROFESSIONAL_STRUCTURE_REVIEW_PENDING",
+    "mapping_sha256": "4ac811d16c51591be5a379e40ed4ac91f574264410fabaeb492c506f8ed6d9ec"
+  },
+  "human_review_performed": false,
+  "field_accuracy_verified": false,
+  "training_approved": false,
+  "customer_release_allowed": false,
+  "proposal_sha256": "6e7bd635681e881b67db3492afcd0806ff801173fee488127f276d3ab2f45265"
+}

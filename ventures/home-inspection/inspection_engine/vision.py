@@ -80,6 +80,21 @@ def ollama_local(image_bytes:bytes, prompt:str, model:str,timeout:int=100,
     return obj
 
 
+def pinned_vision_provider(model:str,model_digest:str):
+    """Explicit lesson-runtime provider; verify the installed model before each call."""
+    validate_model_name(model)
+    if not isinstance(model_digest,str) or not re.fullmatch(r'[0-9a-f]{64}',model_digest):
+        raise DataError('Pinned model digest required for learned lesson consumption')
+    def provider(image,prompt,*,schema):
+        from .bounded_generation import request_json
+        rows=request_json('GET','/api/tags',timeout=5,max_bytes=500000).get('models',[])
+        matches=[m for m in rows if isinstance(m,dict) and m.get('name')==model]
+        if len(matches)!=1 or matches[0].get('digest')!=model_digest:raise DataError('Runtime model pin mismatch')
+        return ollama_local(image,prompt,model,schema=schema)
+    provider.model_digest=model_digest
+    return provider
+
+
 
 def normalized_image(path:Path)->bytes:
     try:

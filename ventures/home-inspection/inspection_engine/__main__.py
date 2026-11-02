@@ -79,6 +79,8 @@ def main():
             cmd.add_argument('--model',required=True,help='Already-installed local Ollama vision model')
             cmd.add_argument('--out-project',type=Path,required=True)
             cmd.add_argument('--dossier',type=Path,required=True)
+            cmd.add_argument('--lesson-store',type=Path);cmd.add_argument('--lesson-policy',type=Path)
+            cmd.add_argument('--lesson-model-digest',help='Pinned installed model digest; lessons remain default-off')
 
     preflight=sub.add_parser('model-preflight', help='Read-only check for two installed local vision models')
     preflight.add_argument('--writer-model',required=True)
@@ -173,8 +175,13 @@ def main():
         _check_new_path(args.out_project,root)
         _check_new_path(args.dossier,root)
         provider=lambda data,prompt,*,schema:ollama_local(data,prompt,args.model,schema=schema)
+        if args.lesson_store is not None or args.lesson_policy is not None or args.lesson_model_digest is not None:
+            if args.lesson_store is None or args.lesson_policy is None or args.lesson_model_digest is None:
+                raise DataError('Learned lessons require store, pinned policy and model digest')
+            from .vision import pinned_vision_provider
+            provider=pinned_vision_provider(args.model,args.lesson_model_digest)
         reviewed,dossier=execute_specialists(doc,root,provider,media_ids=args.media_ids,provider_accepts_schema=True,
-                                provider_id=f'local-ollama:{args.model}')
+                                provider_id=f'local-ollama:{args.model}',lesson_store=args.lesson_store,lesson_policy=args.lesson_policy)
         # No project write if a control check fails. Review dossier can still be saved
         # separately by a bounded operator, but this command fails closed.
         if not all(row['passed'] for row in dossier['review'].values()):

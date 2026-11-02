@@ -1,5 +1,7 @@
 # Milestone 3 completion work — original scope retained
 
+**Superseded for current implementation status by `CHECKPOINT_M3_V8.md`.** The two v7 software gaps (automatic proposals and real activation/consumption/rollback) were subsequently implemented. This file preserves the verified v7 state and original remaining professional gates; do not repeat its historical code-absence statements as current facts.
+
 Base `be982b1101658cbe481f160c2a205c08c002ac47`; development branch only.
 
 ## Original requirement status

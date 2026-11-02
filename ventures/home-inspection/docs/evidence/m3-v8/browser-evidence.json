@@ -1,0 +1,27 @@
+{
+  "synthetic_controlled_provider_only": true,
+  "real_model_inference": false,
+  "browser": "153.0.8010.0",
+  "widths": [
+    360,
+    390,
+    768,
+    1280
+  ],
+  "model_origin_label": true,
+  "human_review_never_claimed": true,
+  "source_table_cells": 3,
+  "all_source_pages_unresolved": 3,
+  "source_navigation": true,
+  "keyboard_details": true,
+  "document_overflow": false,
+  "remote_requests": [],
+  "page_errors": [],
+  "screenshots": [
+    "desktop-model-origin.png",
+    "desktop-source-table.png",
+    "mobile-model-origin.png",
+    "mobile-original-page.png",
+    "mobile-source-table.png"
+  ]
+}

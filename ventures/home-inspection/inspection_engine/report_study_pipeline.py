@@ -161,7 +161,7 @@ def mapping_html(mapping,readiness):
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; connect-src \'none\'; base-uri \'none\'; form-action \'none\'">'
         '<title>Private report structure review</title><style>body{font:16px/1.5 system-ui;background:#111620;color:#e8edf6;max-width:1000px;margin:auto;padding:20px;overflow-wrap:anywhere}article,details{background:#192230;border:1px solid #52667f;border-radius:10px;padding:16px;margin:16px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}summary{cursor:pointer;font-weight:bold}summary:focus,a:focus{outline:3px solid #efbd65}.notice{border-left:5px solid #efbd65;padding:12px}small{color:#bbc7d8}a{color:#a6d3ff}.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%}td{min-width:140px;border:1px solid #52667f;padding:10px}td ul{padding-left:18px}</style></head><body>'
-        '<h1>Report structure and evidence review</h1><p class="notice">HUMAN-DECLARED — UNVERIFIED. No professional authentication, learning activation or customer release.</p>'
+        '<h1>Report structure and evidence review</h1><p class="notice">'+('MODEL-PROPOSED' if mapping.get('origin')=='model_proposed' else 'HUMAN-DECLARED')+' — UNVERIFIED. No professional authentication, learning activation or customer release.</p>'
         '<p>Case: '+safe(mapping['case_id'])+'</p><article><h2>Original Milestone 3 acceptance</h2><ul>'
         +''.join('<li>'+safe(b)+'</li>' for b in readiness['blockers'])+'</ul></article>'+''.join(content)
         +''.join('<details><summary>'+safe(key.title())+' ('+str(len(mapping[key]))+')</summary><pre>'
@@ -169,9 +169,9 @@ def mapping_html(mapping,readiness):
             for key in ('coverage','sections','tables','figures','findings','relations'))+'</body></html>')
 
 
-def record_mapping(bundle,registry,pdf_path,study_dir,declarations,out_dir):
+def record_mapping(bundle,registry,pdf_path,study_dir,declarations,out_dir,*,origin='human_declared'):
     receipt,queue,groups=load_prepared(study_dir,bundle,registry)
-    mapping=capture_report_mapping(bundle,registry,queue,pdf_path,groups,declarations)
+    mapping=capture_report_mapping(bundle,registry,queue,pdf_path,groups,declarations,origin=origin)
     validate_report_mapping(mapping,bundle,registry,queue,pdf_path,groups)
     readiness=milestone_readiness(mapping)
     markup=mapping_html(mapping,readiness).encode()
@@ -202,20 +202,44 @@ def record_mapping(bundle,registry,pdf_path,study_dir,declarations,out_dir):
 
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='command',required=True)
-    for name in ('prepare','map'):
+    for name in ('prepare','map','propose'):
         q=sub.add_parser(name)
         for key in ('reference','registry','source-pdf','out-dir'):q.add_argument('--'+key,type=Path,required=True)
         if name=='prepare':q.add_argument('--ocr',action='store_true');q.add_argument('--batch-size',type=int,default=8)
-        else:q.add_argument('--study-dir',type=Path,required=True);q.add_argument('--declarations',type=Path,required=True)
+        else:
+            q.add_argument('--study-dir',type=Path,required=True)
+            if name=='map':q.add_argument('--declarations',type=Path,required=True)
+            else:
+                q.add_argument('--model',required=True);q.add_argument('--model-digest',required=True)
+                q.add_argument('--max-calls',type=int,default=25);q.add_argument('--timeout',type=int,default=120)
+                q.add_argument('--benchmark',type=Path,help='Optional pre-frozen evaluation; only its digest reaches run metadata')
+                q.add_argument('--candidate',type=Path,help='Optional quarantined lesson candidate to evaluate through the same runtime DATA block')
+                q.add_argument('--lesson-store',type=Path);q.add_argument('--lesson-policy',type=Path)
     a=p.parse_args(argv)
     try:
         b=_read_json(a.reference);r=_read_json(a.registry)
         if a.command=='prepare':
             result=prepare_study(b,r,a.source_pdf,a.out_dir,ocr=a.ocr,batch_size=a.batch_size)
             answer={'status':result['status'],'rendered_pages':len(result['rendered_pages'])}
-        else:
+        elif a.command=='map':
             m,g=record_mapping(b,r,a.source_pdf,a.study_dir,_read_json(a.declarations),a.out_dir)
             answer={'status':m['status'],'acceptance_blockers':g['blockers']}
+        else:
+            from .report_proposals import propose_report,loopback_provider
+            if a.out_dir.exists() or a.out_dir.is_symlink():raise DataError('Proposal output must be new')
+            benchmark_sha=None
+            if a.benchmark:
+                frozen=_read_json(a.benchmark);clean=deepcopy(frozen);benchmark_sha=clean.pop('benchmark_sha256',None)
+                if benchmark_sha!=digest(clean):raise DataError('Frozen benchmark changed')
+            run=propose_report(b,r,a.source_pdf,a.study_dir,loopback_provider(a.model,a.model_digest,timeout=a.timeout),
+                provider_id='local-ollama:'+a.model,model_digest=a.model_digest,max_calls=a.max_calls,
+                benchmark_sha256=benchmark_sha,candidate=_read_json(a.candidate) if a.candidate else None,
+                lesson_store=a.lesson_store,lesson_policy=a.lesson_policy)
+            m,g=record_mapping(b,r,a.source_pdf,a.study_dir,run['mapping']['declarations'],a.out_dir,origin='model_proposed')
+            try:_write_new(a.out_dir/'model-proposals.json',run)
+            except BaseException:
+                shutil.rmtree(a.out_dir);raise
+            answer={'status':'MODEL_PROPOSALS_REQUIRE_HUMAN_REVIEW','model_calls':len(run['calls']),'acceptance_blockers':g['blockers']}
         print(json.dumps(dict(answer,training_approved=False,customer_release_allowed=False,full_milestone_3_complete=False)))
         return 0
     except (DataError,OSError,ValueError,TypeError,KeyError,UnicodeError) as exc:

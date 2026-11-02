@@ -2,3 +2,4 @@ reportlab>=4,<5
 Pillow>=10,<12
 pypdf>=5,<7 # PDF regression checks; no network service
 pypdfium2>=5.8,<6 # private PDF raster; permissive licensing; check distribution notices
+cryptography>=46,<51 # optional signed local lesson-pack authorization (Ed25519)

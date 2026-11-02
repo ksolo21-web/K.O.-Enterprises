@@ -1,5 +1,7 @@
 # Original Milestone 3 — completion status and v7 workflow
 
+**Continuation note:** This preserves the v7 disposition. V8 subsequently implemented automatic proposals and an actual signed local promotion/consumption/rollback framework; see `M3_AUTOMATIC_AND_SIGNED_RUNTIME_V8.md` and `CHECKPOINT_M3_V8.md` for current software status. Original professional/empirical acceptance remains incomplete. Historical statements below that activation or automatic proposal code is absent describe v7, not the current branch.
+
 The original scope is retained. **Full Milestone 3 is not complete or approved.** The new workflow completes an executable private preparation/mapping path and quarantined learning-lifecycle preparation. It cannot replace professionally evaluated report understanding or approved learning.
 
 ## Original requirement matrix
