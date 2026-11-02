@@ -86,6 +86,35 @@ class M4DraftTests(unittest.TestCase):
         self.assertEqual(receipt["pdf_sha256"], hashlib.sha256(pdf.read_bytes()).hexdigest())
         self.assertGreater(result["holds"], 0)
 
+    def test_reproducible_pdf_across_separate_private_runs(self):
+        self.save()
+        first = assemble_private_draft(self.project, self.out)
+        second = assemble_private_draft(self.project, self.root / "private_again")
+        self.assertEqual(Path(first["pdf"]).read_bytes(), Path(second["pdf"]).read_bytes())
+
+    def test_option2_pdf_has_editorial_sections_and_draft_notice(self):
+        from pypdf import PdfReader
+        self.save()
+        result = assemble_private_draft(self.project, self.out)
+        reader = PdfReader(result["pdf"])
+        self.assertGreaterEqual(len(reader.pages), 5)
+        pages = "\\n".join(page.extract_text() or "" for page in reader.pages)
+        self.assertIn("Property condition", pages)
+        self.assertIn("Condition & next steps", pages)
+        self.assertIn("NOT RELEASED", pages)
+        self.assertIn("Synthetic", pages)
+
+    def test_q02_supplied_record_preserved_but_not_approved(self):
+        self.save()
+        record = {"project_id": self.doc["project_id"],
+                  "state": "SECOND_PASS_COMPLETE_HUMAN_REVIEW_REQUIRED",
+                  "items": [{"decision": "insufficient_evidence", "source_media_id": "P1"}]}
+        result = assemble_private_draft(self.project, self.out, q02=record)
+        receipt = json.loads(Path(result["receipt"]).read_text())
+        self.assertEqual(receipt["review_records"]["Q02"], record)
+        self.assertEqual(receipt["review"]["Q02"], "ATTACHED_UNVALIDATED")
+        self.assertFalse(receipt["customer_release_allowed"])
+
     def test_idempotent_same_source(self):
         self.save()
         first = assemble_private_draft(self.project, self.out)
