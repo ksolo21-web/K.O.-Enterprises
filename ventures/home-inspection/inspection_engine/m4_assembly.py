@@ -144,6 +144,8 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
     # Bind any externally supplied review records without claiming independent execution.
     receipt["Q02_sha256"] = _digest(q02) if q02 is not None else None
     receipt["Q03_sha256"] = _digest(q03) if q03 is not None else None
+    # Private source-bound disclosure: retain actual review decisions, not just digests.
+    receipt["review_records"] = {"Q02": q02, "Q03": q03}
 
     out = Path(output_dir).resolve()
     out.mkdir(mode=0o700, parents=True, exist_ok=True)
