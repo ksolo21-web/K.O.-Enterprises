@@ -56,19 +56,15 @@ def _evidence_ledger(document: dict, root: Path) -> dict:
         actual = sha256(safe_path(root, m["path"]))
         if actual != m["sha256"]:
             raise DataError("Evidence source hash mismatch")
-        row = {k: m.get(k) for k in (
-            "id", "kind", "area", "sha256", "derived_from_id",
-            "original_sha256", "timestamp_seconds", "requested_seek_seconds",
-            "capture_origin", "evidence_state"
-        )}
+        # Retain the entire case-local original record, including capture context,
+        # video timing, provenance, inspector labels and evidence state.
+        row = dict(m)
         media.append(row)
         index[m["id"]] = row
     zooms = []
     for z in document.get("zoom_views", []):
         verify_zoom_record(z, document, root, deep=True)
-        zooms.append({k: z.get(k) for k in (
-            "id", "media_id", "sha256", "normalized_bbox", "derived_from_id"
-        )})
+        zooms.append(dict(z))
     records = []
     for section in ("observations", "findings", "equipment", "limitations"):
         for item in document[section]:
@@ -85,6 +81,7 @@ def _evidence_ledger(document: dict, root: Path) -> dict:
                 "evidence_class": _evidence_class(item),
                 "evidence_ids": cited,
                 "zoom_view_ids": list(item.get("zoom_view_ids", [])),
+                "source_record": dict(item),
             })
     return {"media": media, "zooms": zooms, "records": records}
 
