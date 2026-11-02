@@ -98,6 +98,7 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
     a previously assembled draft. No customer-release pathway exists here.
     """
     source = Path(project_path).resolve(strict=True)
+    original_project_sha = sha256(source)
     root = source.parent
     document = load_project(source)
     errors = verify_custody(document, root)
@@ -130,7 +131,7 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
         "milestone": "M4",
         "stage": "PRIVATE_OPTION2_DRAFT",
         "project_id": document["project_id"],
-        "source_project_sha256": sha256(source),
+        "source_project_sha256": original_project_sha,
         "evidence": ledger,
         "specialist_plan_sha256": _digest(preflight["specialist_plan"]),
         "unrouted_evidence": preflight["unrouted_evidence"],
@@ -165,6 +166,8 @@ def assemble_private_draft(project_path: str | Path, output_dir: str | Path,
     with tempfile.TemporaryDirectory(prefix=".m4_pending_", dir=out) as work:
         candidate = Path(work) / "draft.pdf"
         build_pdf(document, root, candidate)
+        if sha256(source) != original_project_sha or _evidence_ledger(document, root) != ledger:
+            raise DataError("Source evidence changed during report generation")
         if not candidate.is_file() or candidate.stat().st_size == 0:
             raise DataError("Option 2 renderer did not produce a PDF")
         receipt["pdf_sha256"] = sha256(candidate)
