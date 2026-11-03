@@ -88,6 +88,11 @@ def _read(path: str | Path) -> dict:
             object_pairs_hook=_unique_fields,
             parse_constant=_reject_constant
         )
+    except DataError:
+        # Fail closed with the exact security reason. DataError is also a
+        # ValueError subclass, so a broad catch would accidentally mask
+        # duplicate JSON keys and NaN/Infinity injection.
+        raise
     except (OSError, UnicodeError, ValueError) as exc:
         raise DataError("Invalid governance JSON encoding") from exc
     if not isinstance(result, dict):
