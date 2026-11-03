@@ -4,6 +4,8 @@
 **Current validated code SHA:** `6af4724d75c867cf1cc4b131da2be0c282332666`.  
 **Status:** PASS for this synthetic engineering test increment only; Milestone 4 production approval remains **BLOCKED**.
 
+**Preserved candidate-model research (2026-11-03):** [DeepSeek-V4-Pro/Qwen3.5-9B third-party GGUF investigation and evaluation hold](CHECKPOINT_M4_MODEL_CANDIDATE_DEEPSEEK_QWEN35_9B_2026-11-03.md). This is a research candidate, NOT an approved replacement or released inference provider. Its model-card claims require direct benchmarking.
+
 ## Implemented and observed in this increment
 
 1. **Uncropped source evidence:** `inspection_engine/report.py` now draws source photo, native zoom, context, and extracted video stills using `evidence_img`, preserving the full image and original aspect ratio. The editorial cover intentionally retains crop-to-fill to match the approved Option 2 design.
