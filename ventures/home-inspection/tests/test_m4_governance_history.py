@@ -191,6 +191,33 @@ class M4GovernanceHistoryTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError, "duplicated"):
             self.verify()
 
+    def test_duplicate_json_fields_in_governance_history_rejected(self):
+        original = self.history_path.read_text()
+        needle = '"schema_version": 1,'
+        self.assertIn(needle, original)
+        self.history_path.write_text(original.replace(
+            needle, '"schema_version": 1, "schema_version": 1,', 1))
+        with self.assertRaisesRegex(DataError, "Duplicate governance JSON field"):
+            self.verify()
+
+    def test_duplicate_json_fields_in_signed_witness_rejected(self):
+        original = self.witness_path.read_text()
+        needle = '"schema_version": 1,'
+        self.assertIn(needle, original)
+        self.witness_path.write_text(original.replace(
+            needle, '"schema_version": 1, "schema_version": 1,', 1))
+        with self.assertRaisesRegex(DataError, "Duplicate governance JSON field"):
+            self.verify()
+
+    def test_nonstandard_nan_in_governance_history_rejected(self):
+        original = self.history_path.read_text()
+        needle = '"schema_version": 1,'
+        self.assertIn(needle, original)
+        self.history_path.write_text(original.replace(
+            needle, '"schema_version": 1, "invented_accuracy": NaN,', 1))
+        with self.assertRaisesRegex(DataError, "Nonstandard governance numeric constant"):
+            self.verify()
+
     def test_no_events_fails_closed(self):
         self.events.clear()
         self.b.b._save(self.history_path, {
