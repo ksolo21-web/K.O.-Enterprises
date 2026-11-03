@@ -199,10 +199,10 @@ def score_media_grounded_safety_audit(
     for key,(med,_box) in labels_by_key.items():
         if media_by_key[med]["review_status"] != "reviewed":
             raise BenchmarkBlock("No-defect control cannot contain an adjudicated defect")
+    labeled_media={location[0] for location in labels_by_key.values()}
     for row in media_manifest:
-        if row["review_status"]=="reviewed" and not any(
-            loc[0]==(row["case_id"],row["media_id"]) for loc in labels_by_key.values()
-        ):
+        if (row["review_status"]=="reviewed"
+            and (row["case_id"],row["media_id"]) not in labeled_media):
             raise BenchmarkBlock("Reviewed media without labels must be declared a negative control")
 
     _keys(grounding_snapshot,GROUNDING_FIELDS,"pre-review media grounding snapshot")
