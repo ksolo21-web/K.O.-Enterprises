@@ -169,6 +169,7 @@ def score_frozen_safety_audit(
         raise BenchmarkBlock("Predictions not bound to frozen model, cohort or training exclusion")
 
     prediction_keys=set()
+    predictions_by_key={}
     for row in model_predictions:
         _keys(row,{"case_id","prediction_id","system","source_evidence_sha256"},
               "pre-review model prediction")
@@ -182,6 +183,7 @@ def score_frozen_safety_audit(
         if row["source_evidence_sha256"]!=case["evidence_sha256"]:
             raise BenchmarkBlock("Prediction not grounded to exact source evidence")
         prediction_keys.add(key)
+        predictions_by_key[key]=row
 
     _keys(adjudication_snapshot,
           {"schema_version","evaluation_id","case_manifest_sha256",
@@ -229,7 +231,7 @@ def score_frozen_safety_audit(
             claimed_labels.add(lk)
         elif lid is not None:
             raise BenchmarkBlock("Unmatched/inconclusive predictions cannot claim a true label")
-        pred=next(p for p in model_predictions if p["case_id"]==key[0] and p["prediction_id"]==key[1])
+        pred=predictions_by_key[key]
         if disp=="matched" and pred["system"]!=label_by_key[(key[0],lid)]["system"]:
             raise BenchmarkBlock("Wrong-system label match not accepted")
         detection_rows.append({
