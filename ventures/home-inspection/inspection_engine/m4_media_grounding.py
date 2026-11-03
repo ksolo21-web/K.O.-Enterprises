@@ -258,10 +258,14 @@ def score_media_grounded_safety_audit(
     # Negative controls must themselves be free of model false-positive
     # proposals to meet the stricter pilot gate; false alarms are still
     # reported and scored when present, not converted into a pass.
-    negative_cases = {c["case_id"] for c in cases if not c["labels"]}
+    # A photo independently adjudicated clear is a negative control even when
+    # another photo of the SAME PROPERTY has a real defect. Do not dilute
+    # photo-level false alarms by hiding them among positive case labels.
     negative_false_alarms = [
         m["prediction_id"] for m in human_matches
-        if m["case_id"] in negative_cases and m["disposition"] != "matched"
+        if m["disposition"] != "matched"
+        and media_by_key[preds_by_key[(m["case_id"], m["prediction_id"])][0]][
+            "review_status"] == "reviewed_no_defect"
     ]
     grounded_pass = (result["metric_thresholds_met_only"] and has_negatives
                      and not negative_false_alarms)
