@@ -69,6 +69,29 @@ def img(c,path,x,y,w,h):
         return True
     except (OSError,ValueError):return False
 
+def evidence_img(c, path, x, y, w, h):
+    """Fit entire evidence image into frame; NEVER crop inspection pixels.
+
+    The editorial cover intentionally uses crop-to-fill for presentation, but a
+    cropped source photo in a defect/inspector review can hide critical edges.
+    """
+    try:
+        with Image.open(path) as picture:
+            picture=ImageOps.exif_transpose(picture).convert('RGB')
+            available=(max(1,int(w*2)),max(1,int(h*2)))
+            picture.thumbnail(available,Image.Resampling.LANCZOS)
+            data=BytesIO()
+            picture.save(data,format='JPEG',quality=88,optimize=True)
+            data.seek(0)
+            box(c,x,y,w,h,PALE)
+            draw_w=w*picture.width/available[0]
+            draw_h=h*picture.height/available[1]
+            c.drawImage(ImageReader(data),x+(w-draw_w)/2,y+(h-draw_h)/2,
+                        width=draw_w,height=draw_h,mask='auto')
+        return True
+    except (OSError,ValueError):return False
+
+
 def page(c,pn,section,synthetic):
     if pn>1:
         box(c,0,H-12,W,12,NAVY)
@@ -405,8 +428,8 @@ def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_regi
                 except (OSError,ValueError):pass
             if detail_path and media_path:
                 # Keep source context adjacent to close-up, not a free-floating crop.
-                ok_context=img(c,media_path,M+12,top-159,88,141)
-                ok_detail=img(c,detail_path,M+109,top-159,88,141)
+                ok_context=evidence_img(c,media_path,M+12,top-159,88,141)
+                ok_detail=evidence_img(c,detail_path,M+109,top-159,88,141)
                 if ok_context and ok_detail:
                     txt(c,'CONTEXT',M+13,top-172,'LatoB',7.3,MUTED)
                     txt(c,'NATIVE DETAIL',M+110,top-172,'LatoB',7.3,MUTED)
@@ -414,7 +437,7 @@ def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_regi
                     box(c,M+12,top-170,185,154,LIGHT)
                     txt(c,'IMAGE UNAVAILABLE',M+25,top-86,'LatoB',9,MUTED)
             elif media_path:
-                if not img(c,media_path,M+12,top-170,185,154):
+                if not evidence_img(c,media_path,M+12,top-170,185,154):
                     box(c,M+12,top-170,185,154,LIGHT)
                     txt(c,'IMAGE UNAVAILABLE',M+25,top-86,'LatoB',9,MUTED)
             else:
@@ -455,7 +478,7 @@ def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_regi
             path=None
             try:path=safe_path(project_dir,m['path'])
             except (ValueError,OSError):pass
-            if path and img(c,path,M+12,top-169,253,154):
+            if path and evidence_img(c,path,M+12,top-169,253,154):
                 pass
             else:
                 box(c,M+12,top-169,253,154,LIGHT)
@@ -489,7 +512,7 @@ def build_pdf(document:dict,project_dir:Path,target:Path,*,include_evidence_regi
             box(c,M,top-216,4,216,BRONZE)
             try:
                 original=safe_path(project_dir,m.get('path',''))
-                if not img(c,original,M+12,top-171,250,158):
+                if not evidence_img(c,original,M+12,top-171,250,158):
                     raise OSError('image could not be drawn')
             except (OSError,ValueError):
                 box(c,M+12,top-171,250,158,LIGHT)
