@@ -274,7 +274,7 @@ class M4GovernanceHistoryTests(unittest.TestCase):
         self.genesis["trustees"][1]["organization_id"] = self.genesis["trustees"][0]["organization_id"]
         self.genesis_pin = _digest(self.genesis)
         self.save()
-        with self.assertRaisesRegex(DataError, "independent governance trustee identities"):
+        with self.assertRaisesRegex(DataError, "Independent governance trustee identities"):
             self.verify()
 
     def test_witness_not_allowed_to_be_governor(self):
