@@ -58,7 +58,7 @@ def _registry(path: Path, reviewer_keys: set[str], reviewer_ids: set[str]) -> di
     reg = _load_json(path)
     if reg.get("schema_version") != 1 or set(reg) != {"schema_version", "qualification_officer", "revocation_officer"}:
         raise DataError("Professional-review officer registry contract invalid")
-    officer_keys, officer_ids = set(), set()
+    officer_keys, officer_ids, officer_orgs = set(), set(), set()
     for role in ("qualification_officer", "revocation_officer"):
         o = reg[role]
         if not isinstance(o, dict) or set(o) != {"officer_id", "public_key_hex", "active", "organization_id"}:
@@ -68,10 +68,11 @@ def _registry(path: Path, reviewer_keys: set[str], reviewer_ids: set[str]) -> di
         org = _ident(o["organization_id"], "officer organization")
         if o["active"] is not True or key in reviewer_keys or ident in reviewer_ids:
             raise DataError("Reviewer cannot self-verify professional qualifications or revocations")
-        if ident in officer_ids or key in officer_keys:
-            raise DataError("Qualification and revocation officers must be different")
+        if ident in officer_ids or key in officer_keys or org in officer_orgs:
+            raise DataError("Qualification and revocation officers and organizations must be different")
         officer_ids.add(ident)
         officer_keys.add(key)
+        officer_orgs.add(org)
         try:
             Ed25519PublicKey.from_public_bytes(bytes.fromhex(key))
         except ValueError as exc:
@@ -133,12 +134,15 @@ def professional_review_preflight(workspace: str | Path,
                                   qualification_attestation: str | Path,
                                   revocation_attestation: str | Path,
                                   proof_root: str | Path, *,
+                                  minimum_revocation_sequence: int,
                                   as_of: date | None = None) -> dict:
     """Return internal precheck only when every required evidence gate passes.
 
     A complete pass establishes consistency of locally supplied signed records,
     not real legal authority, independent identity proof, or report release.
     """
+    if type(minimum_revocation_sequence) is not int or minimum_revocation_sequence < 1:
+        raise DataError("A trusted external minimum revocation sequence is required")
     when = as_of if as_of is not None else date.today()
     if not isinstance(when, date) or isinstance(when, __import__("datetime").datetime):
         raise DataError("Preflight date must be a calendar date")
@@ -230,8 +234,14 @@ def professional_review_preflight(workspace: str | Path,
         until = _date(record["valid_until"], "credential valid until")
         if not verified_on <= when <= until or when > verified_on + timedelta(days=30):
             raise DataError("Professional qualification evidence is expired or stale")
-        proof = safe_path(proot, record["evidence_path"])
-        if proof.is_symlink() or not proof.is_relative_to(proot):
+        rel = record["evidence_path"]
+        if not isinstance(rel, str) or not rel or Path(rel).is_absolute() or ".." in Path(rel).parts:
+            raise DataError("Unsafe qualification evidence path")
+        raw = proot / rel
+        if any(part.is_symlink() for part in (raw, *list(raw.parents)[:len(Path(rel).parts)])):
+            raise DataError("Symlinked qualification evidence is prohibited")
+        proof = safe_path(proot, rel)
+        if not proof.is_relative_to(proot):
             raise DataError("Unsafe external qualification proof")
         if sha256(proof) != _sha(record["evidence_sha256"], "professional credential proof"):
             raise DataError("Professional qualification proof has changed")
@@ -252,8 +262,10 @@ def professional_review_preflight(workspace: str | Path,
     if (rev_on > when or rev_until < when or rev_until > rev_on + timedelta(days=2)
         or when - rev_on > timedelta(days=1)):
         raise DataError("Revocation attestation expired, stale or future-dated")
-    if type(revocations["revocation_sequence"]) is not int or revocations["revocation_sequence"] < 1:
-        raise DataError("Revocation sequence missing")
+    if type(revocations["revocation_sequence"]) is not int or (
+        revocations["revocation_sequence"] < minimum_revocation_sequence
+    ):
+        raise DataError("Revocation sequence is missing, stale, or rolled back")
     for field in ("revoked_reviewer_ids", "revoked_officer_ids"):
         entries = revocations[field]
         if not isinstance(entries, list) or any(not isinstance(x, str) for x in entries) or len(entries) != len(set(entries)):
@@ -267,6 +279,7 @@ def professional_review_preflight(workspace: str | Path,
         "verified_credential_proof_files": 2,
         "qualification_attestation_signature_verified": True,
         "fresh_revocation_signature_verified": True,
+        "minimum_revocation_sequence_enforced": minimum_revocation_sequence,
         "distinct_organizations_declared": True,
         "jurisdiction": "US-MI",
         "jurisdiction_snapshot_current_in_bundle": True,
