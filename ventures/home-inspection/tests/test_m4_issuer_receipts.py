@@ -120,7 +120,7 @@ class M4IssuerReceiptTests(unittest.TestCase):
             self.assertFalse(result[k])
 
     def test_issuer_root_hash_mismatch_is_fail_closed(self):
-        with self.assertRaisesRegex(DataError,"root pin"):
+        with self.assertRaisesRegex(DataError,"registry digest mismatch"):
             self.check(root_pin="0"*64)
 
     def test_receipt_forgery_without_correct_signature_is_fail_closed(self):
