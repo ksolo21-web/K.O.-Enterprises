@@ -385,6 +385,30 @@ class MediaGroundingTests(unittest.TestCase):
         self.assertFalse(r["media_grounded_metric_thresholds_met_only"])
         self.assertEqual(r["v8_audit"]["false_positives"],1)
 
+    def test_clean_photo_false_alarm_on_otherwise_defective_property_blocks(self):
+        self._hundred_case_fixture(negative=10)
+        case=self.base.cases[0]   # Has a correctly detected critical defect.
+        clean=photo(case["case_id"],"photo-002",review="reviewed_no_defect")
+        self.media.append(clean)
+        pid="false-alarm-other-clean-photo"
+        self.base.predictions.append({
+            "case_id":case["case_id"],"prediction_id":pid,"system":"electrical",
+            "source_evidence_sha256":case["evidence_sha256"]
+        })
+        self.base.matches.append({
+            "case_id":case["case_id"],"prediction_id":pid,
+            "adjudicator_id":case["independent_adjudicator_id"],
+            "disposition":"false_positive","matched_label_id":None,
+            "reason":"Synthetic false alarm on a reviewed clear photo at a property with real defects"
+        })
+        self.p_regions.append(region(case["case_id"],pid,clean))
+        self.seal()
+        result=self.score()
+        self.assertTrue(result["v8_audit"]["metric_thresholds_met_only"])
+        self.assertEqual(result["negative_control_false_alarms"],1)
+        self.assertFalse(result["media_grounded_metric_thresholds_met_only"])
+        self.assertFalse(result["customer_release_allowed"])
+
     def test_critical_miss_even_with_clean_controls_blocks(self):
         self._hundred_case_fixture(negative=10)
         self.base.matches[0]=v8.matched(self.base.cases[0],disposition="inconclusive")
