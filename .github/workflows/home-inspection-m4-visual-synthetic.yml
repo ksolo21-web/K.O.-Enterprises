@@ -1,0 +1,54 @@
+# Separate synthetic-only browser and PDF acceptance; no customer data, local AI, secrets or paid APIs.
+name: Home Inspection M4 V4 - Synthetic Browser and PDF Visual Evidence
+on:
+  push:
+    branches: [home-inspection-development]
+    paths:
+      - 'ventures/home-inspection/scripts/m4_browser_visual_acceptance.py'
+      - 'ventures/home-inspection/inspection_engine/m4_review_ui.py'
+      - 'ventures/home-inspection/inspection_engine/m4_pdf_audit.py'
+      - 'ventures/home-inspection/inspection_engine/m4_human_review.py'
+      - 'ventures/home-inspection/inspection_engine/report.py'
+      - '.github/workflows/home-inspection-m4-visual-synthetic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: m4-v4-visual-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  synthetic-browser-pdf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      COMPANY_OS_PAUSED: '1'
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install synthetic-only Python and free Chromium test dependencies
+        run: |
+          python -m pip install -r requirements.txt 'playwright>=1.55,<2'
+          python -m playwright install --with-deps chromium
+      - name: Run actual browser interaction and full PDF visual evidence capture
+        run: |
+          python -m scripts.m4_browser_visual_acceptance --output "$RUNNER_TEMP/m4-v4-synthetic-browser"
+      - name: Publish only the entirely synthetic browser and PDF test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: m4-v4-synthetic-browser-pdf-evidence
+          path: ${{ runner.temp }}/m4-v4-synthetic-browser
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Reject modification of tracked source or public customer data
+        run: |
+          git diff --exit-code -- .
+          test ! -d customer_data
