@@ -45,7 +45,7 @@ python -m scripts.m4_governance_cli history \
 
 The case subcommand additionally requires the existing V5/V6 private file paths and `--minimum-revocation-sequence` from a separate monotonic revocation source. Never commit any actual private case evidence, reviewer identification records, original photos, credentials, PEM signing keys or issuer replies to this public repository.
 
-## Acceptance / evidence / resumption
+**Next verified M4 increment:** [V8 frozen and blinded serious-defect benchmark audit](CHECKPOINT_M4_FROZEN_SERIOUS_DEFECT_V8.md). The V8 code baseline passed 1,008/1,008 offline tests; this measures synthetic benchmark-integrity controls, not real model accuracy. External trust and customer release restrictions remain in force.\n\n## Acceptance / evidence / resumption
 
 - [x] Code committed on `home-inspection-development` with 32 added synthetic tests.
 - [x] Original V6 936-test baseline preserved in existing branch history.
