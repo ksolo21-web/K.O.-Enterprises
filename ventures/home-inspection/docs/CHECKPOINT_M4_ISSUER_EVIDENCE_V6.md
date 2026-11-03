@@ -79,6 +79,6 @@ The CLI fails closed without any required input. Never store real personal crede
 
 The software-only V6 preflight increment passes its synthetic negative and regression checks (21 new tests). A separately callable independent critic agent was not available. No real issuer, credential or actual inspector was authenticated; the return contract explicitly says so. Full Milestone 4 remains below 9/10 overall because official credential enrollment, independently established trust pins, live issuer status, serious-defect accuracy and legally qualified human sign-off have **not** been verified. No amount of synthetic regression passing can remove those blockers.
 
-## Next critical-path work
+**Next V7 engineering checkpoint:** [Witnessed two-trustee enrollment and revocation history](CHECKPOINT_M4_WITNESSED_GOVERNANCE_V7.md). This adds hash-linked, double-signed verifier events and externally pinned witness requirements; no actual external authority or customer release has been verified.\n\n## Next critical-path work
 
 After validating V6 on the newest branch SHA, build a **tamper-evident external trust enrollment and revocation timeline**, including independently retained hash anchors, separate organization officer permissions, nonreplay signing challenges, and a date-scoped case-verification packet. Only then pursue live issuer identity confirmation through supported official APIs or permitted manual professional checks using real authorized identities. Do not substitute synthesized screenshots or self-attested enrollment for actual issuer proof.
