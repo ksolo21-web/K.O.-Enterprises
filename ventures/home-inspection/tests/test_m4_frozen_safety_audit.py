@@ -9,7 +9,7 @@ import copy
 import hashlib
 import unittest
 
-from inspection_engine.m4_frozen_safety_audit import score_frozen_safety_audit, digest
+from inspection_engine.m4_frozen_safety_audit import score_frozen_safety_audit, digest, blinded_evidence_view
 from inspection_engine.serious_defect_benchmark import BenchmarkBlock, SYSTEMS
 
 
@@ -77,7 +77,7 @@ class FrozenSafetyAuditTests(unittest.TestCase):
             "model_sha256":self.training["model_sha256"],
             "prompt_sha256":sha("SYNTHETIC_PROMPT"),
             "generated_at_utc":"2026-11-03T13:00:00Z",
-            "case_manifest_sha256":digest(self.cases),
+            "case_manifest_sha256":digest(blinded_evidence_view(self.cases)),
             "training_index_sha256":digest(self.training),
             "predictions_sha256":digest(self.predictions),
             "blinded_to_labels_declared":True,
@@ -112,6 +112,21 @@ class FrozenSafetyAuditTests(unittest.TestCase):
         self.assertFalse(result["customer_release_allowed"])
         self.assertFalse(result["real_world_case_consent_independently_verified"])
         self.assertFalse(result["model_never_saw_labels_independently_proven"])
+
+    def test_model_blinded_manifest_excludes_all_label_data(self):
+        view=blinded_evidence_view(self.cases)
+        self.assertEqual(len(view),1)
+        self.assertNotIn("labels",view[0])
+        self.assertNotIn("qualified_labeler_id",view[0])
+        self.assertNotIn("independent_adjudicator_id",view[0])
+        self.assertNotIn("consented_for_evaluation",view[0])
+        self.assertEqual(self.model["case_manifest_sha256"],digest(view))
+
+    def test_human_labels_change_without_changing_blinded_model_fingerprint(self):
+        previous=digest(blinded_evidence_view(self.cases))
+        self.cases[0]["labels"][0]["severity"]="moderate"
+        self.assertEqual(previous,digest(blinded_evidence_view(self.cases)))
+        self.assertNotEqual(self.adjudication["case_manifest_sha256"],digest(self.cases))
 
     def test_missing_critical_defect_is_recorded_and_blocks(self):
         self.predictions=[]
