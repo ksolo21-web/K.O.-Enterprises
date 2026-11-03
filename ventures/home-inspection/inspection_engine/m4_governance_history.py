@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 from pathlib import Path
+import json
 import re
 
 from cryptography.exceptions import InvalidSignature
@@ -63,11 +64,35 @@ def _verify(pub: Ed25519PublicKey, signature: object, payload: dict, what: str) 
         raise DataError("Invalid signed trust history: " + what) from exc
 
 
+def _unique_fields(pairs: list[tuple[str, object]]) -> dict:
+    """Reject ambiguous JSON: never let duplicate fields change interpretation."""
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise DataError("Duplicate governance JSON field: " + key)
+        out[key] = value
+    return out
+
+
+def _reject_constant(value: str) -> None:
+    raise DataError("Nonstandard governance numeric constant: " + value)
+
+
 def _read(path: str | Path) -> dict:
     resolved = Path(path).resolve(strict=True)
-    if resolved.stat().st_size > MAX_HISTORY_BYTES:
-        raise DataError("Governance history exceeds safe file size")
-    return _load_json(resolved)
+    if not resolved.is_file() or resolved.stat().st_size > MAX_HISTORY_BYTES:
+        raise DataError("Governance history is not a bounded regular file")
+    try:
+        result = json.loads(
+            resolved.read_text(encoding="utf-8"),
+            object_pairs_hook=_unique_fields,
+            parse_constant=_reject_constant
+        )
+    except (OSError, UnicodeError, ValueError) as exc:
+        raise DataError("Invalid governance JSON encoding") from exc
+    if not isinstance(result, dict):
+        raise DataError("Governance file must contain an object")
+    return result
 
 
 def verify_governance_history(
