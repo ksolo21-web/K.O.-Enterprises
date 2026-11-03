@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -30,6 +31,7 @@ def run(output: Path) -> dict:
     try:
         ws=build_review_worksheet(fixture.work)
         audit=audit_private_pdf(fixture.work)
+        shutil.copytree(Path(audit["audit_json"]).parent, output / "pdf_pages")
         worksheet=Path(ws["worksheet"])
         result={"schema_version":1, "synthetic":True,
                 "pdf_audit":json.loads(Path(audit["audit_json"]).read_text()),
