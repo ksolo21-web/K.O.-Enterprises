@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import math
 import unittest
 
 from inspection_engine.m4_media_grounding import (
@@ -166,9 +167,15 @@ class MediaGroundingTests(unittest.TestCase):
         for box in ([.4,.2,.2,.4],[0,0,2,1],[0,0,float("nan"),1],["0",0,1,1]):
             with self.subTest(box=box):
                 self.p_regions[0]["bbox"]=box
-                self.seal()
-                with self.assertRaises(BenchmarkBlock):
-                    self.score()
+                if any(type(v) is float and not math.isfinite(v) for v in box):
+                    # A NaN cannot be frozen into canonical JSON. Earlier
+                    # rejection is the intended fail-closed behavior.
+                    with self.assertRaisesRegex(BenchmarkBlock,"Noncanonical"):
+                        self.seal()
+                else:
+                    self.seal()
+                    with self.assertRaises(BenchmarkBlock):
+                        self.score()
 
     def test_unsorted_photo_inventory_rejected(self):
         second=photo(self.base.cases[0]["case_id"],"aaa-photo",review="reviewed_no_defect")
