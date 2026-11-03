@@ -25,8 +25,8 @@ from .m4_credential_gate import (
 )
 
 ISSUER_HOSTS = {
-    "ASHI": ("www.homeinspector.org", "homeinspector.org"),
-    "INTERNACHI": ("www.nachi.org", "nachi.org"),
+    "ASHI_CERTIFIED": ("www.homeinspector.org", "homeinspector.org"),
+    "INTERNACHI_CPI": ("www.nachi.org", "nachi.org"),
 }
 MAX_CAPTURE_BYTES = 8_000_000
 SHA512_SIG = re.compile("[0-9a-f]{128}\\Z")
@@ -41,9 +41,9 @@ def _validated_issuer_source(issuer: str, url: str) -> None:
         or p.fragment or p.query or not p.path.startswith("/")
         or any(token in p.path for token in ("%2e", "%2E", "//", ".."))):
         raise DataError("Receipt does not reference an approved issuer-controlled URL")
-    if issuer == "ASHI" and not p.path.startswith(("/for-consumers/find-an-inspector", "/membership/")):
+    if issuer == "ASHI_CERTIFIED" and not p.path.startswith(("/for-consumers/find-an-inspector", "/membership/")):
         raise DataError("ASHI source must be its inspector directory or member channel")
-    if issuer == "INTERNACHI" and not p.path.startswith(("/verify/", "/members/", "/certification/")):
+    if issuer == "INTERNACHI_CPI" and not p.path.startswith(("/verify/", "/members/", "/certification/")):
         raise DataError("InterNACHI source must be a membership/credential verification channel")
 
 
