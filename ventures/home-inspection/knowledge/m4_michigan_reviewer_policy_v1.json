@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "policy_id": "US-MI-GENERAL-PRIVATE-HOME-INSPECTION-2026-11-03-V1",
+  "jurisdiction": "US-MI",
+  "scope": "private_residential_visual_home_inspection",
+  "state_home_inspector_license": "not_issued_for_general_home_inspection",
+  "snapshot_date": "2026-11-03",
+  "recheck_by": "2026-12-03",
+  "professional_basis": "documented_competence_not_imaginary_state_license",
+  "sources": [
+    {
+      "label": "Michigan LARA occupational professions list; home inspectors are not listed as a regulated BPL occupation",
+      "url": "https://www.michigan.gov/en/lara/bureau-list/bpl/occ"
+    },
+    {
+      "label": "Michigan LARA Construction Codes Licensing Section; code officials and inspector plan reviewers are distinct regulated roles",
+      "url": "https://www.michigan.gov/lara/bureau-list/bcc/sections/licensing-section"
+    },
+    {
+      "label": "National Home Inspector Examination — Michigan state regulations (unregulated home inspection)",
+      "url": "https://nationalhomeinspectorexam.org/regulations/michigan/"
+    }
+  ]
+}
