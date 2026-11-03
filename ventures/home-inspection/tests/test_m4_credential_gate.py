@@ -14,14 +14,14 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from inspection_engine.core import DataError, sha256
 from inspection_engine.m4_human_review import _digest, _bytes
 from inspection_engine.m4_credential_gate import professional_review_preflight, POLICY
-from test_m4_human_review import HumanReviewTests
+import test_m4_human_review as human_review_tests
 
 
 class M4ProfessionalCredentialGateTests(unittest.TestCase):
     def setUp(self):
         # Reuse the actual M4 source-to-PDF, Q01/Q02/Q03 and reviewer signing
         # fixture rather than bypassing the completed pipeline.
-        self.fixture=HumanReviewTests("test_two_distinct_key_verified_reviews_never_release")
+        self.fixture=human_review_tests.HumanReviewTests("test_two_distinct_key_verified_reviews_never_release")
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         self.f=self.fixture
