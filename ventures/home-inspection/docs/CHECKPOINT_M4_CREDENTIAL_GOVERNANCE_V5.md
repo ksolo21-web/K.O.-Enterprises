@@ -45,7 +45,7 @@ python -m scripts.m4_credential_cli \
 - No claim of real verified identity, issuer/registry status, legal compliance, independent ownership of organizations or actual field competence is made, even when the synthetic precheck returns a passing `LOCAL_SIGNED_CREDENTIAL_EVIDENCE_PRECHECK_ONLY` status.
 - There is no programmatic `release_allowed=True`, customer delivery, professional final approval, or way for a model to self-certify.
 - New synthetic security tests in `tests/test_m4_credential_gate.py` verify successful non-releasing precheck and negative cases for missing signed reviewer, altered proof, tampered officer signature, self-certification, shared officer key/organization, stale/expired/future qualification and revocation data, conflicting organizations, untrusted credential basis, identity mismatch, revocation after signing, stale legal policy, private/Git path restrictions, symlinks and revocation rollback.
-- Existing 892/892 tests and V4 Chromium three-viewport + 13-page PDF synthetic visual evidence are preserved; a full new HEAD-CI must verify V5 integration. Do not assume success merely because files were committed.
+- The previous V4 baseline was 892/892 tests plus Chromium three-viewport and 13-page PDF visual evidence. **V5 code was subsequently verified: 915/915 inspection tests passing** at code+checkpoint head commit `d20b6acea029e51a61d5cba1deb672aa6afd4f21` in GitHub Actions run [41607146196](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41607146196). Compilation, 7+5+28 targeted M3 tests, full suite, and tracked-source check all succeeded.
 
 ## Security limitations / mandatory remaining work
 
@@ -57,6 +57,13 @@ python -m scripts.m4_credential_cli \
 6. **Actual customer release is prohibited.** Do not merge such capabilities into this increment; retain reviewer feedback and Q03/report holds until professional approval architecture is separately implemented.
 
 **Internal review only; no separate callable critic agent was available.** Acceptance is limited to synthetic testable enforcement, not professional/business readiness. Strict >9/10 plus every mandatory check is required for true production approval.
+
+## Verification evidence and internal review
+
+- GitHub Actions workflow: [Home Inspection M3 V8 - Offline Regression, 41607146196](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41607146196), completed SUCCESS.
+- Validated branch SHA `d20b6acea029e51a61d5cba1deb672aa6afd4f21`. The V5 code and its tests are all included.
+- Full offline test suite: **915 tests, 915 passed**. New V5 file contains **23 synthetic tests**. No person was actually identity-proofed, no actual professional credential was fetched, and no model was changed or used live.
+- Internal critic determination for the **software-only V5 preflight increment**: synthetically exercised and regression-clean. **Overall production readiness remains below the >9/10 acceptance threshold** because identity authority, official issuer updates, independently anchored revocation and actual field-case validation are unverified. No independent callable critic agent was available.
 
 ## Resume instruction
 
