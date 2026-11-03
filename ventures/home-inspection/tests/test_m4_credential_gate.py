@@ -115,6 +115,7 @@ class M4ProfessionalCredentialGateTests(unittest.TestCase):
         return professional_review_preflight(
             self.f.work,self.f.trust,self.officers,
             self.qualification_file,self.revocation_file,self.evidence_root,
+            minimum_revocation_sequence=kwargs.get("minimum_revocation_sequence",17),
             as_of=kwargs.get("as_of",self.now))
 
     def test_synthetic_credential_and_revocation_preflight_pass_still_never_releases(self):
@@ -209,6 +210,24 @@ class M4ProfessionalCredentialGateTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError,"Revoked reviewer"):
             self.check()
 
+    def test_outdated_revocation_sequence_blocks_even_validly_signed_snapshot(self):
+        with self.assertRaisesRegex(DataError, "rolled back"):
+            self.check(minimum_revocation_sequence=18)
+
+    def test_proof_symlink_inside_evidence_directory_is_denied(self):
+        linked=self.evidence_root/"linked-proof.txt"
+        linked.symlink_to(self.proofs[0])
+        self.qualification_payload["reviewers"][0]["evidence_path"]="linked-proof.txt"
+        self.resign()
+        with self.assertRaisesRegex(DataError,"Symlinked qualification evidence"):
+            self.check()
+
+    def test_officers_from_same_organization_cannot_check_each_other(self):
+        self.reg["revocation_officer"]["organization_id"]=self.reg["qualification_officer"]["organization_id"]
+        self._save(self.officers,self.reg)
+        with self.assertRaisesRegex(DataError, "organizations must be different"):
+            self.check()
+
     def test_officer_revocation_blocks_gate(self):
         self.revocation_payload["revoked_officer_ids"].append(self.officer_ids[1])
         self.resign()
@@ -240,7 +259,8 @@ class M4ProfessionalCredentialGateTests(unittest.TestCase):
         with self.assertRaisesRegex(DataError,"cannot be kept"):
             professional_review_preflight(
                 self.f.work,self.f.trust,self.officers,self.qualification_file,
-                self.revocation_file,inside,as_of=self.now)
+                self.revocation_file,inside,
+                minimum_revocation_sequence=17,as_of=self.now)
 
     def test_verifier_cannot_swap_reviewer_identity(self):
         self.qualification_payload["reviewers"][1]["reviewer_id"]="synthetic-other"
