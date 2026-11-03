@@ -79,6 +79,30 @@ def _index(values: object, label: str, *, sha: bool=False) -> set[str]:
     return seen
 
 
+def blinded_evidence_view(cases: list[dict]) -> list[dict]:
+    """Only source/partition metadata; human label content is NEVER emitted.
+
+    A separate trusted operator must produce and pin the full adjudicated
+    case bundle. This function is a privacy/label-separation contract,
+    not independent evidence that the model truly received no labels.
+    """
+    if not isinstance(cases,list):
+        raise BenchmarkBlock("Case bundle is not a list")
+    rows=[]
+    for case in cases:
+        if not isinstance(case,dict):
+            raise BenchmarkBlock("Blinded evidence input must be a case record")
+        rows.append({
+            "case_id":_ident(case.get("case_id"),"blind case"),
+            "source_group_id":_ident(case.get("source_group_id"),"blind property group"),
+            "evidence_sha256":_hex(case.get("evidence_sha256"),"blind evidence"),
+            "partition":case.get("partition"),
+            "scope":case.get("scope"),
+            "jurisdiction":case.get("jurisdiction"),
+        })
+    return sorted(rows,key=lambda row:row["case_id"])
+
+
 def score_frozen_safety_audit(
     cases: list[dict],
     model_predictions: list[dict],
@@ -163,7 +187,7 @@ def score_frozen_safety_audit(
     _hex(model_snapshot["prompt_sha256"],"prompt receipt")
     model_time=_time(model_snapshot["generated_at_utc"],"model freeze")
     if (model_hash!=training_model
-        or model_snapshot["case_manifest_sha256"]!=digest(cases)
+        or model_snapshot["case_manifest_sha256"]!=digest(blinded_evidence_view(cases))
         or model_snapshot["training_index_sha256"]!=digest(training_index)
         or model_snapshot["predictions_sha256"]!=digest(model_predictions)):
         raise BenchmarkBlock("Predictions not bound to frozen model, cohort or training exclusion")
@@ -261,6 +285,7 @@ def score_frozen_safety_audit(
         "status":"FROZEN_EVALUATION_METRICS_ONLY_NOT_PRODUCTION_APPROVAL",
         "evaluation_id":eval_id,"model_artifact_sha256":model_hash,
         "case_manifest_sha256":digest(cases),
+        "blinded_evidence_view_sha256":digest(blinded_evidence_view(cases)),
         "frozen_prediction_sha256":digest(model_snapshot),
         "independent_match_snapshot_sha256":digest(adjudication_snapshot),
         "training_index_sha256":digest(training_index),
