@@ -84,8 +84,12 @@ def evidence_img(c, path, x, y, w, h):
             picture.save(data,format='JPEG',quality=88,optimize=True)
             data.seek(0)
             box(c,x,y,w,h,PALE)
-            draw_w=w*picture.width/available[0]
-            draw_h=h*picture.height/available[1]
+            # The raster may be smaller than the 2x decode cap. Fit using
+            # the ACTUAL decoded dimensions, not the 2x cap: otherwise small
+            # original photos are accidentally displayed at half size.
+            draw_scale=min(w/picture.width,h/picture.height)
+            draw_w=picture.width*draw_scale
+            draw_h=picture.height*draw_scale
             c.drawImage(ImageReader(data),x+(w-draw_w)/2,y+(h-draw_h)/2,
                         width=draw_w,height=draw_h,mask='auto')
         return True
