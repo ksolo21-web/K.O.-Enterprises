@@ -65,6 +65,8 @@ python -m scripts.m4_credential_cli \
 - Full offline test suite: **915 tests, 915 passed**. New V5 file contains **23 synthetic tests**. No person was actually identity-proofed, no actual professional credential was fetched, and no model was changed or used live.
 - Internal critic determination for the **software-only V5 preflight increment**: synthetically exercised and regression-clean. **Overall production readiness remains below the >9/10 acceptance threshold** because identity authority, official issuer updates, independently anchored revocation and actual field-case validation are unverified. No independent callable critic agent was available.
 
+**Next validated increment:** [V6 source-bound professional issuer corroboration and 936-test acceptance](CHECKPOINT_M4_ISSUER_EVIDENCE_V6.md). V6 adds independent receipt signatures and private ASHI/InterNACHI source-capture custody checks. It does NOT constitute authenticated credential/issuer status or customer release.
+
 ## Resume instruction
 
 On a subsequent **“continue Milestone 4”**, first verify HEAD CI for this V5 checkpoint and repair any failed tests, then prioritize independent identity/credential issuer verification and a controlled, immutable revocation source, followed by larger-case visual stress tests and supervised field-label evaluation. Preserve the experimental DeepSeek/Qwen model checkpoint separately; no model was downloaded or installed in V5.
