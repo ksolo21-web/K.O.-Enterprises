@@ -70,7 +70,7 @@ python -m scripts.m4_safety_benchmark_cli \
 
 Never calculate the purported *independent* values from the six same-origin files merely to pass this CLI; a separately governed record is needed for real trust. Never store real source photos, customer addresses, private report bundles or signing keys in Git.
 
-## Resume / critical next action
+**Next verified milestone:** [V9 original photo/video-frame source localization and clean-image pilot controls](CHECKPOINT_M4_SOURCE_MEDIA_GROUNDING_V9.md). The V9 synthetic code passed 1,044/1,044 offline tests. It does not prove actual photo contents, inspector credentials or real-world model competence.\n\n## Resume / critical next action
 
 1. Verify that GitHub's final checkpoint/documentation-linked run passes on the latest branch head; the V8 code was already green at 1,008/1,008 as evidenced above.
 2. Develop a **preregistered independent benchmark protocol and professional labeling workflow** with consent, separation of model builders from blinded label adjudicators, independent trust custody, clear severe-defect taxonomy, handling of "not visible"/"not inspected" states, and negative controls. Do not claim it has been run on actual professional cases.
