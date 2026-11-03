@@ -68,12 +68,16 @@ The CLI fails closed without any required input. Never store real personal crede
 - [x] Exact issuer claim-to-reviewer and credential binding with independent third-role signature and separately supplied pin.
 - [x] Exact captured-document SHA checks, bounded files, URL issuer allowlist, unsupported-claim rejection and no release.
 - [x] 21 synthetic negative/positive tests implemented in `tests/test_m4_issuer_receipts.py`.
-- [ ] Latest-branch full Python test suite and CI **must pass** before marking V6 software increment validated.
+- [x] V6 software integration **validated:** latest source commit `49e7696cfe92e478c511aa6dbb7aeda98fc60932`; GitHub Actions [run 41670261317](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41670261317) completed **SUCCESS**; Python compilation, targeted M3 7+5+28 cases, all **936/936 offline inspection tests** and tracked source integrity check passed.
 - [ ] Actual independently governed enrollment trust and issuer-authenticated credential verification are **not performed**.
 - [ ] Real issuer documents, actual professional-qualification evidence, signed timestamp authority and revocation governance remain **unverified**.
 - [ ] Real labeled defect-detection corpus, qualified-inspector legal sign-off and secure customer-delivery product remain **blocked**.
 
 **Internal review, not independent agent.** Production Milestone 4 score stays under the >9/10 acceptance threshold until all real-world gates pass. Even full synthetic CI cannot convert this into real credential verification, legal status or customer-release authorization.
+
+## Internal critic and acceptance evidence
+
+The software-only V6 preflight increment passes its synthetic negative and regression checks (21 new tests). A separately callable independent critic agent was not available. No real issuer, credential or actual inspector was authenticated; the return contract explicitly says so. Full Milestone 4 remains below 9/10 overall because official credential enrollment, independently established trust pins, live issuer status, serious-defect accuracy and legally qualified human sign-off have **not** been verified. No amount of synthetic regression passing can remove those blockers.
 
 ## Next critical-path work
 
