@@ -1,5 +1,9 @@
 # Home Inspection — development branch
 
+## Current decision — original M5 engineering complete; separate external gates remain open (2026-11-04)
+
+**[M5 closeout and M6 discovery](docs/M5_CLOSEOUT_AND_M6_DISCOVERY_2026_11_04.md):** V8 original GitHub/synthetic M5 engineering is verified ([1,150/1,150 offline tests](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41844315900), [87 M5 focused tests](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41844316272)). Independent branch/reviewer enforcement is still **blocked** ([issue #26](https://github.com/ksolo21-web/K.O.-Enterprises/issues/26)); qualified professional real-case field validation and legal/insurance release decisions are still **blocked** ([issue #27](https://github.com/ksolo21-web/K.O.-Enterprises/issues/27)). Neither a reviewed production release nor a valid real-home defect benchmark exists. **There is no confirmed approved Milestone 6 plan** in the accessible project documents; the README's six technical gates do not define a separately authorized M6. No M6 implementation was initiated. Root autonomy pause, `main` and customer release blocking remain unchanged.
+
 ## Current Home Inspections M5 V8 engineering closure work — 2026-11-04
 
 V7 was [merged in PR #24](https://github.com/ksolo21-web/K.O.-Enterprises/pull/24), with [post-merge 1,132/1,132 full offline tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41840060056) and the [dedicated synthetic recovery quality workflow passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41840060038). The main branch and root autonomy pause remain unchanged.
