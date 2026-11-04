@@ -9,6 +9,7 @@ import unittest
 from scripts.m5_release_quality_gate import (
     ROOT, MANIFEST, EXAMPLE_PATHS, QualityGateBlock,
     _blob_sha, verify_versioned_examples, verify_reproducible_report,
+    BASELINE_FILE, verify_pinned_render_baseline,
 )
 
 
@@ -77,6 +78,33 @@ class RepositoryM5Tests(unittest.TestCase):
         self.assertEqual(len(report["page_visual_and_text_fingerprint"]), 64)
         self.assertFalse(report["customer_release_allowed"])
         self.assertFalse(report["model_accuracy_verified"])
+        self.assertEqual(report["approved_synthetic_render_baseline"],
+                         "m5-option2-synthetic-ubuntu24-py312-v1")
+
+    def test_wrong_golden_visual_fingerprint_rejected(self):
+        reference = json.loads((ROOT / BASELINE_FILE).read_text())
+        with self.assertRaisesRegex(QualityGateBlock, "pinned"):
+            verify_pinned_render_baseline(reference, 16, "0" * 64)
+
+    def test_missing_report_pages_rejected_by_golden(self):
+        reference = json.loads((ROOT / BASELINE_FILE).read_text())
+        with self.assertRaisesRegex(QualityGateBlock, "pinned"):
+            verify_pinned_render_baseline(
+                reference, 15, reference["expected_visual_and_text_fingerprint"])
+
+    def test_dependency_drift_rejected_even_with_same_pixels(self):
+        reference = json.loads((ROOT / BASELINE_FILE).read_text())
+        reference["packages"]["Pillow"] = "0.0.0"
+        with self.assertRaisesRegex(QualityGateBlock, "runtime dependency"):
+            verify_pinned_render_baseline(
+                reference, 16, reference["expected_visual_and_text_fingerprint"])
+
+    def test_baseline_not_customer_release_permission(self):
+        reference = json.loads((ROOT / BASELINE_FILE).read_text())
+        reference["customer_release_allowed"] = True
+        with self.assertRaisesRegex(QualityGateBlock, "Unapproved"):
+            verify_pinned_render_baseline(
+                reference, 16, reference["expected_visual_and_text_fingerprint"])
 
 
 if __name__ == "__main__":

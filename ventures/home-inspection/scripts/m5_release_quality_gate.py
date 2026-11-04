@@ -7,6 +7,8 @@ must agree exactly. Does not test real inspection or permit customer release.
 from __future__ import annotations
 import copy
 import hashlib
+from importlib.metadata import version as package_version
+import sys
 import json
 from pathlib import Path
 import tempfile
@@ -105,6 +107,41 @@ def _pdf_signature(path: Path) -> tuple:
     return tuple(rows)
 
 
+
+BASELINE_FILE = "examples/option2_report_baseline_v1.json"
+BASELINE_KEYS = {"schema_version", "baseline_id", "fixture_manifest_version",
+                 "expected_pages", "expected_visual_and_text_fingerprint",
+                 "python_major_minor", "packages", "note", "customer_release_allowed"}
+BASELINE_PACKAGES = {"Pillow", "reportlab", "pypdf", "pypdfium2"}
+
+
+def verify_pinned_render_baseline(reference, page_count: int, fingerprint: str):
+    """Cross-run golden baseline: no self-approval if identical builds both drift."""
+    if (not isinstance(reference, dict) or set(reference) != BASELINE_KEYS
+            or reference["schema_version"] != 1
+            or reference["fixture_manifest_version"] != 1
+            or reference["customer_release_allowed"] is not False
+            or reference["baseline_id"] != "m5-option2-synthetic-ubuntu24-py312-v1"
+            or not isinstance(reference["note"], str)):
+        raise QualityGateBlock("Unapproved PDF reproducibility baseline schema")
+    expected = reference["expected_visual_and_text_fingerprint"]
+    if (not isinstance(expected, str) or len(expected) != 64
+            or any(c not in "0123456789abcdef" for c in expected)
+            or type(reference["expected_pages"]) is not int
+            or reference["expected_pages"] < 5):
+        raise QualityGateBlock("Malformed golden page fingerprint or page count")
+    if reference["expected_pages"] != page_count or expected != fingerprint:
+        raise QualityGateBlock("Report pages differ from pinned repository baseline")
+    if (reference["python_major_minor"] != f"{sys.version_info.major}.{sys.version_info.minor}"
+            or not isinstance(reference["packages"], dict)
+            or set(reference["packages"]) != BASELINE_PACKAGES):
+        raise QualityGateBlock("Baseline Python or package runtime mismatch")
+    for name, pinned in reference["packages"].items():
+        if not isinstance(pinned, str) or package_version(name) != pinned:
+            raise QualityGateBlock("Synthetic raster runtime dependency changed: " + name)
+    return reference["baseline_id"]
+
+
 def verify_reproducible_report(root: Path = ROOT) -> dict:
     """Generate clean synthetic sources twice; compare EVERY page's pixels and text."""
     base = verify_versioned_examples(root)
@@ -127,12 +164,23 @@ def verify_reproducible_report(root: Path = ROOT) -> dict:
     if signatures[0] != signatures[1]:
         raise QualityGateBlock("Option 2 page text/pixels changed between clean builds")
     raw = json.dumps(signatures[0], sort_keys=True, separators=(",", ":")).encode()
+    fingerprint = hashlib.sha256(raw).hexdigest()
+    reference_path = Path(root) / BASELINE_FILE
+    if reference_path.is_symlink() or not reference_path.is_file():
+        raise QualityGateBlock("Missing or symlinked approved report baseline")
+    try:
+        reference = json.loads(reference_path.read_text(encoding="utf-8"))
+    except (ValueError, OSError) as exc:
+        raise QualityGateBlock("Unreadable approved report baseline") from exc
+    reference_id = verify_pinned_render_baseline(
+        reference, len(signatures[0]), fingerprint)
     return {
         "schema_version": 1,
+        "approved_synthetic_render_baseline": reference_id,
         "status": "SYNTHETIC_RENDER_AND_VERSIONED_EXAMPLES_REPRODUCIBLE_ONLY",
         **base,
         "rendered_page_count": len(signatures[0]),
-        "page_visual_and_text_fingerprint": hashlib.sha256(raw).hexdigest(),
+        "page_visual_and_text_fingerprint": fingerprint,
         "all_pages_raster_and_text_reproducible": True,
         "real_customer_inspection_coverage_verified": False,
         "model_accuracy_verified": False,

@@ -1,0 +1,9 @@
+# M5 V3 checkpoint — pinned synthetic render baseline
+
+2026-11-04 · `home-inspection-development` · **customer release blocked**
+
+Milestone 5 is GitHub engineering: automated tests, versioned synthetic inputs, benchmark quality gates and reproducible Option 2 reports. M5 V2.1 passed **1,081/1,081** offline tests [here](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41819525966), plus a dedicated [synthetic quality run](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41819525267) that produced identical text and pixels on all **16** pages from two independent clean renders.
+
+V3 now also requires that both builds match the previously recorded **repository-controlled** golden fingerprint `053db289faff8313950bac8b5beec58aac09c38b6a8b2a8fc52ce80218ab062c` and exact report-render dependency versions; four new tests reject unauthorized page/hash/runtime/release changes. The reference is NOT independently authenticated, and editing it needs manual source review.
+
+**V3 CI pending** until an exact source run passes. Real professional labels, accredited/authorized reviewers, authenticated custody and the ≥100-case/≥30-critical/13-system held-out inspection benchmark remain untested. Do not enable real customer delivery, modify `main`, remove `PAUSE_AUTONOMY`, or represent this as a professional inspection approval.

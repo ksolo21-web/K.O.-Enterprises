@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "baseline_id": "m5-option2-synthetic-ubuntu24-py312-v1",
+  "fixture_manifest_version": 1,
+  "expected_pages": 16,
+  "expected_visual_and_text_fingerprint": "053db289faff8313950bac8b5beec58aac09c38b6a8b2a8fc52ce80218ab062c",
+  "python_major_minor": "3.12",
+  "packages": {
+    "Pillow": "11.3.0",
+    "reportlab": "4.5.1",
+    "pypdf": "6.21.4",
+    "pypdfium2": "5.14.0"
+  },
+  "note": "Pinned synthetic CI reference only; model accuracy and inspector approval remain unverified.",
+  "customer_release_allowed": false
+}
