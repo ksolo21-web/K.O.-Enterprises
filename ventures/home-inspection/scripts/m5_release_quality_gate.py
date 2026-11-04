@@ -109,13 +109,18 @@ def verify_reproducible_report(root: Path = ROOT) -> dict:
     """Generate clean synthetic sources twice; compare EVERY page's pixels and text."""
     base = verify_versioned_examples(root)
     project_path = Path(root) / "examples" / "editorial_demo_project.json"
-    source = load_project(project_path)
     signatures = []
     with tempfile.TemporaryDirectory(prefix="m5_synthetic_repro_") as folder:
         for label in ("a", "b"):
             workspace = Path(folder) / label
             workspace.mkdir()
             generate(workspace, video=False)
+            # load_project validates media relative to its JSON location.
+            # Bundle the *pinned* example manifest with each newly generated,
+            # clean-room synthetic image set before validating the project.
+            replica = workspace / "examples" / "editorial_demo_project.json"
+            replica.write_bytes(project_path.read_bytes())
+            source = load_project(replica)
             output = workspace / "draft.pdf"
             build_pdf(copy.deepcopy(source), workspace / "examples", output)
             signatures.append(_pdf_signature(output))
