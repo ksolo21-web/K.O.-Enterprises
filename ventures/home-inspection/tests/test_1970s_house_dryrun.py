@@ -89,6 +89,13 @@ class SyntheticNeglectedHomeInventoryTests(unittest.TestCase):
         self.assertEqual(empty, {"candidates": [], "requests": []})
         self.assertEqual(calls["writer"], ["P01", "P14"])
 
+    def test_basement_alias_never_claims_a_concealed_crawlspace_finding(self):
+        calls = {"writer": []}
+        answer = _propose_by_script(
+            None, "ROLE T02; evidence ID P08; area assigned by inspector basement;", calls)
+        self.assertEqual(answer, {"candidates": [], "requests": []})
+        self.assertEqual(calls["writer"], ["P08"])
+
     def test_q02_refuses_to_confirm_schematic_as_real_evidence(self):
         calls = {"q02": 0, "unfamiliar_q02_prompts": 0}
         result = _q02_script(None, "UNTRUSTED HYPOTHESIS", calls)

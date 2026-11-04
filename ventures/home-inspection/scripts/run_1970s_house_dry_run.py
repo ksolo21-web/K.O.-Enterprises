@@ -193,6 +193,12 @@ def _propose_by_script(image, prompt, counter: dict):
     if ident not in HYPOTHESIS_BY_ID:
         return {"candidates": [], "requests": []}
     _, area, room, hint = HYPOTHESIS_BY_ID[ident]
+    # An area alias can route a work order, but it cannot by itself support
+    # a concealed-system finding. 'basement' routes to the 'crawlspace'
+    # system in this application's taxonomy; retain the correct room name,
+    # skip the unsupported claim, and leave the coverage task for humans.
+    if SYSTEM_FOR_AREA[area] != area:
+        return {"candidates": [], "requests": []}
     return {
         "candidates": [{
             "type": "potential_concern",
