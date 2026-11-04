@@ -48,8 +48,13 @@ jobs:
           python -m scripts.m5_synthetic_recovery --create "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip"
           python -m scripts.m5_synthetic_recovery --verify "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip"
           python -m scripts.m5_synthetic_recovery --restore "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip" "$RUNNER_TEMP/m5-restored-evidence"
+      - name: Bind synthetic evidence receipt to CI checkout and verify it independently
+        run: |
+          python -m scripts.m5_engineering_receipt --create "$RUNNER_TEMP/m5-engineering-receipt.json" --archive "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip" --commit "$GITHUB_SHA" --event "$GITHUB_EVENT_NAME" --run-id "$GITHUB_RUN_ID"
+          python -m scripts.m5_engineering_receipt --verify "$RUNNER_TEMP/m5-engineering-receipt.json" --archive "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip" --commit "$GITHUB_SHA" --event "$GITHUB_EVENT_NAME" --run-id "$GITHUB_RUN_ID"
       - name: Run adversarial synthetic recovery, fixture, governance and pilot-design tests
         run: |
+          python -m unittest discover -s tests -p 'test_m5_engineering_receipt.py' -v
           python -m unittest discover -s tests -p 'test_m5_benchmark_contract_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_synthetic_recovery.py' -v
           python -m unittest discover -s tests -p 'test_m5_safety_change_gate.py' -v
@@ -60,7 +65,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: m5-synthetic-inspection-recovery
-          path: ${{ runner.temp }}/m5-synthetic-inspection-evidence.zip
+          path: |
+            ${{ runner.temp }}/m5-synthetic-inspection-evidence.zip
+            ${{ runner.temp }}/m5-engineering-receipt.json
           if-no-files-found: error
           retention-days: 7
       - name: Verify tracked source integrity and keep customer release blocked
