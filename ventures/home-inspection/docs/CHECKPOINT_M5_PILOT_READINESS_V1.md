@@ -1,4 +1,6 @@
-# M5 V1 — professional field pilot readiness, not deployment
+# M5 V1 — supplemental professional field pilot readiness, not deployment
+
+**Roadmap clarification (2026-11-04):** The approved original Milestone 5 is GitHub engineering/maintenance (versioned synthetic examples, automated CI, benchmark quality gates and reproducible report rendering). This cohort-design instrument is an additive supporting tool, not the original milestone's complete scope. See [M5 GitHub reproducibility V2](CHECKPOINT_M5_GITHUB_REPRODUCIBILITY_V2.md).
 
 Date: 2026-11-04. Repository: `ksolo21-web/K.O.-Enterprises`, branch `home-inspection-development`.
 

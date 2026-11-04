@@ -1,0 +1,47 @@
+# M5 GitHub engineering milestone: offline reproducibility and versioned fixtures.
+# Synthetic-only: no real evidence, models, secrets, external APIs or customer release.
+name: Home Inspection M5 - Versioned Synthetic and PDF Reproducibility
+on:
+  push:
+    branches: [home-inspection-development]
+    paths:
+      - 'ventures/home-inspection/**'
+      - '.github/workflows/home-inspection-m5-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m5-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      COMPANY_OS_PAUSED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install reproducible offline report dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Validate versioned public synthetic examples and two complete PDF renders
+        run: python -m scripts.m5_release_quality_gate
+      - name: Run adversarial synthetic fixture and pilot-design tests
+        run: |
+          python -m unittest discover -s tests -p 'test_m5_release_quality_gate.py' -v
+          python -m unittest discover -s tests -p 'test_m5_pilot_readiness.py' -v
+      - name: Verify tracked source integrity and keep customer release blocked
+        run: |
+          git diff --exit-code -- .
+          test ! -d customer_data

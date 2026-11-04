@@ -12,7 +12,7 @@ Date: 2026-11-04. Branch: `home-inspection-development`. All evidence and all id
 
 - Baseline: V9, 1,044/1,044 historical synthetic tests, [V9 checkpoint](CHECKPOINT_M4_SOURCE_MEDIA_GROUNDING_V9.md).
 - New V10 tests: synthetic original bytes, file substitution, altered image with updated hash, path traversal, symlinks, no locator, wrong pin, Git check, real lossless video parent/frame replay, wrong timestamp, missing parent, and changed frame pixels with valid recomputed hash.
-- **CI and regression status pending until this exact commit is tested.** Do not claim V10 acceptance based on writing code.
+- **V10 offline engineering regression VERIFIED:** 1,058 / 1,058 tests passed, including 14 V10 cases; compilation, M3 inherited tests and tracked-file integrity passed on source commit `f4a5ef1a32b3bfb31013696600f72d52a2a46d71` in [GitHub Actions run 41817691316](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41817691316). This is synthetic engineering validation, not real-world source authentication or defect recognition.
 
 ## Remaining Milestone 4 blockers
 

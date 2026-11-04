@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "milestone": "M5",
+  "status": "VERSIONED_SYNTHETIC_EXAMPLES_ONLY",
+  "customer_release_allowed": false,
+  "examples": [
+    {
+      "path": "examples/demo_project.json",
+      "git_blob_sha1": "1272dab3482e5c1658c0599c73a67b5ee29df278",
+      "classification": "synthetic_inspection_project"
+    },
+    {
+      "path": "examples/editorial_demo_project.json",
+      "git_blob_sha1": "71b88372335fa6ae6de6d88c13d186514adbfec5",
+      "classification": "synthetic_inspection_project"
+    },
+    {
+      "path": "examples/human_reference.json",
+      "git_blob_sha1": "f56cd35985b88659dbc9184653a36899d070821a",
+      "classification": "human_authored_synthetic_comparison_only"
+    },
+    {
+      "path": "scripts/generate_public_fixtures.py",
+      "git_blob_sha1": "0662decfb4a33553d195fdfe0db2e6515f0519d8",
+      "classification": "synthetic_source_generator"
+    }
+  ]
+}
