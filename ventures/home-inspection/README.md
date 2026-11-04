@@ -1,5 +1,11 @@
 # Home Inspection — development branch
 
+## Current Home Inspections M5 V6 checkpoint — 2026-11-04
+
+**M5 V6 serious-defect benchmark contract + PR safeguards:** [1,130/1,130 full offline inspection tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41834071159); [69 dedicated quality/recovery/contract tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41834070883). Nine deterministic synthetic scoring scenarios check 100 invented cases, 90 labeled defects (30 critical, 30 major, 30 moderate), all 13 inspection systems, 10 clean controls and residential/commercial scopes; missing critical/major defects, failing precision and cohort criteria block. Both inspection workflows now run read-only on pull requests targeting the development branch. [V6 checkpoint](docs/CHECKPOINT_M5_BENCHMARK_AND_PR_V6.md).
+
+**Release and branch-control limitation:** This is synthetic source regression **not real model accuracy**, source authentication, professional credential verification, or customer-release approval. GitHub reports `home-inspection-development` **unprotected** with no repository rulesets, and the integration cannot administer branch protection. PR status checks are voluntary until a repository admin enables required independent review and checks. Keep `main`, `PAUSE_AUTONOMY`, and all customer release restrictions unchanged.
+
 ## Current Home Inspections M5 V5 checkpoint — 2026-11-04
 
 **M5 V5 synthetic evidence recovery:** [1,112/1,112 full offline inspection tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828847493); [54 focused tests and recovery workflow passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828847583). One real GitHub Actions **synthetic-only** artifact was downloaded and checked: five members, exact receipt hashes, and a complete 16-page PDF matching the pinned renderer baseline. [V5 checkpoint](docs/CHECKPOINT_M5_SYNTHETIC_RECOVERY_V5.md).
