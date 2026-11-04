@@ -1,5 +1,13 @@
 # Home Inspection — development branch
 
+## Current Home Inspections M5 V8 engineering closure work — 2026-11-04
+
+V7 was [merged in PR #24](https://github.com/ksolo21-web/K.O.-Enterprises/pull/24), with [post-merge 1,132/1,132 full offline tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41840060056) and the [dedicated synthetic recovery quality workflow passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41840060038). The main branch and root autonomy pause remain unchanged.
+
+**V8 (under CI):** Add a bounded synthetic engineering receipt tied to Git checkout SHA, source pins, nine benchmark scenarios, PDF visual/text baseline and the exact ZIP recovery bytes; add 18 adversarial tests and a seven-day on-push receipt+ZIP QA artifact. The [original M5 engineering acceptance matrix](docs/MILESTONE_5_ACCEPTANCE_MATRIX_V8.md) and [V8 checkpoint](docs/CHECKPOINT_M5_ENGINEERING_RECEIPT_V8.md) separate reproducible software checks from real inspection validation. Until V8 CI passes, do not mark the new gate accepted.
+
+**External blockers:** An administrator still needs to enforce required branch checks and genuine independent review. Real source consent/custody, qualified inspector identity, professional real-case serious-defect benchmark, independent field/legal/insurance review, and customer release all remain unverified or disabled.
+
 ## Current Home Inspections M5 V6 checkpoint — 2026-11-04
 
 **M5 V6 serious-defect benchmark contract + PR safeguards:** [1,130/1,130 full offline inspection tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41834071159); [69 dedicated quality/recovery/contract tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41834070883). Nine deterministic synthetic scoring scenarios check 100 invented cases, 90 labeled defects (30 critical, 30 major, 30 moderate), all 13 inspection systems, 10 clean controls and residential/commercial scopes; missing critical/major defects, failing precision and cohort criteria block. Both inspection workflows now run read-only on pull requests targeting the development branch. [V6 checkpoint](docs/CHECKPOINT_M5_BENCHMARK_AND_PR_V6.md).
