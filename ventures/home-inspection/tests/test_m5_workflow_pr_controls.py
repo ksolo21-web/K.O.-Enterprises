@@ -1,6 +1,8 @@
-"""Static M5 V6 workflow PR checks: read-only, synthetic, never release.
+"""M5 V7 PR workflow security: read-only, unfiltered required checks.
 
-Not GitHub branch protection, independent peer review, or an approved field run.
+Static protections for the current GitHub Actions configs. This detects
+configuration drift; it does NOT install branch rules or verify reviewer
+independence. An actual PR red/green rehearsal provides separate CI evidence.
 """
 from pathlib import Path
 import unittest
@@ -10,21 +12,67 @@ REPO = ROOT.parents[1]
 M3 = REPO / ".github/workflows/home-inspection-m3-v8-offline.yml"
 M5 = REPO / ".github/workflows/home-inspection-m5-quality.yml"
 
+
+def trigger_sections(workflow: str):
+    """Parse our intentionally simple YAML event declarations without dependencies."""
+    events = workflow.split("\non:\n", 1)
+    if len(events) != 2 or "  workflow_dispatch:" not in events[1]:
+        raise ValueError("Expected explicit GitHub events")
+    events = events[1].split("  workflow_dispatch:", 1)[0]
+    if "  push:\n" not in events or "  pull_request:\n" not in events:
+        raise ValueError("Required push and pull request trigger missing")
+    push = events.split("  push:\n", 1)[1].split("  pull_request:\n", 1)[0]
+    pull = events.split("  pull_request:\n", 1)[1]
+    return push, pull
+
+
+def verify_premerge_triggers(workflow: str, name: str) -> bool:
+    """Never path-filter PR checks that must become required status checks."""
+    push, pull = trigger_sections(workflow)
+    if "    branches: [home-inspection-development]" not in push:
+        raise ValueError("Missing development push trigger")
+    if "    paths:\n      - 'ventures/home-inspection/**'" not in push:
+        raise ValueError("Inspection-only push optimization changed")
+    if f"      - '.github/workflows/{name}'" not in push:
+        raise ValueError("Workflow self-change push trigger missing")
+    if pull.strip() != "branches: [home-inspection-development]":
+        raise ValueError("Pull requests must be unfiltered and only target development")
+    return True
+
+
 class WorkflowPremergeGuards(unittest.TestCase):
-    def test_both_workflows_trigger_on_pull_requests_to_dev_only(self):
-        for path in [M3, M5]:
+    def test_both_workflows_always_run_for_prs_to_inspection_dev(self):
+        for path in (M3, M5):
             with self.subTest(workflow=path.name):
                 s = path.read_text(encoding="utf-8")
-                trigger = s[s.index("\non:"):s.index("\npermissions:")] if "\npermissions:" in s else s[s.index("\non:"):s.index("\nconcurrency:")]
-                self.assertIn("\n  pull_request:\n    branches: [home-inspection-development]", trigger)
-                self.assertIn("\n    paths:\n      - 'ventures/home-inspection/**'", trigger)
-                self.assertIn(f"      - '.github/workflows/{path.name}'", trigger)
-                self.assertIn("\n  push:\n    branches: [home-inspection-development]", trigger)
-                self.assertNotIn("pull_request_target:", trigger)
-                self.assertNotIn("branches: [main]", trigger)
+                self.assertTrue(verify_premerge_triggers(s, path.name))
+                self.assertNotIn("pull_request_target:", s)
+                self.assertNotIn("branches: [main]", s)
+
+    def test_path_filtered_pr_regression_is_rejected(self):
+        for path in (M3, M5):
+            with self.subTest(workflow=path.name):
+                s = path.read_text(encoding="utf-8")
+                changed = s.replace(
+                    "  pull_request:\n    branches: [home-inspection-development]\n",
+                    "  pull_request:\n    branches: [home-inspection-development]\n"
+                    "    paths:\n      - 'ventures/home-inspection/**'\n")
+                self.assertNotEqual(s, changed)
+                with self.assertRaisesRegex(ValueError, "unfiltered"):
+                    verify_premerge_triggers(changed, path.name)
+
+    def test_wrong_pr_target_is_rejected(self):
+        for path in (M3, M5):
+            s = path.read_text(encoding="utf-8")
+            wrong = s.replace(
+                "  pull_request:\n    branches: [home-inspection-development]\n",
+                "  pull_request:\n    branches: [main]\n")
+            self.assertNotEqual(s, wrong)
+            with self.assertRaisesRegex(ValueError, "unfiltered"):
+                verify_premerge_triggers(wrong, path.name)
 
     def test_both_premerge_jobs_use_read_only_token_and_ephemeral_checkout(self):
-        for path in [M3, M5]:
+        for path in (M3, M5):
             with self.subTest(workflow=path.name):
                 s = path.read_text(encoding="utf-8")
                 self.assertIn("permissions:\n  contents: read", s)
