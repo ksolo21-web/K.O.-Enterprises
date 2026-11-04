@@ -35,10 +35,13 @@ jobs:
           python-version: '3.12'
       - name: Install reproducible offline report dependencies
         run: python -m pip install -r requirements.txt
+      - name: Reject unregistered changes to inspection safety modules and autonomy pause
+        run: python -m scripts.m5_safety_change_gate
       - name: Validate versioned public synthetic examples and two complete PDF renders
         run: python -m scripts.m5_release_quality_gate
-      - name: Run adversarial synthetic fixture and pilot-design tests
+      - name: Run adversarial synthetic fixture, governance, and pilot-design tests
         run: |
+          python -m unittest discover -s tests -p 'test_m5_safety_change_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_release_quality_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_pilot_readiness.py' -v
       - name: Verify tracked source integrity and keep customer release blocked

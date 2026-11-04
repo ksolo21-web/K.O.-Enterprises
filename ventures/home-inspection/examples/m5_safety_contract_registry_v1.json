@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "registry_type": "M5_SAFETY_CHANGE_DETECTION_ONLY",
+  "required_branch": "home-inspection-development",
+  "root_pause_autonomy_blob_sha1": "37455fd13813683bb0169d36cb24b86a07094aa7",
+  "customer_release_allowed": false,
+  "files": [
+    {
+      "path": "inspection_engine/serious_defect_benchmark.py",
+      "git_blob_sha1": "49d9e487e35caa5b02d4326b59be049cb29e8a53"
+    },
+    {
+      "path": "inspection_engine/m4_frozen_safety_audit.py",
+      "git_blob_sha1": "84da43424a672c667e20e835992cce72ccc19602"
+    },
+    {
+      "path": "inspection_engine/m4_media_grounding.py",
+      "git_blob_sha1": "4ff59da38467c35fc9a2d872cb7b639e47e3e16e"
+    },
+    {
+      "path": "inspection_engine/m4_source_byte_custody.py",
+      "git_blob_sha1": "1d37bb2b412575ab34e30e7e7d0467e1e72d6e5c"
+    },
+    {
+      "path": "inspection_engine/m4_credential_gate.py",
+      "git_blob_sha1": "bcc939192aa3193cd688e6a53b45c5bedd509ad3"
+    },
+    {
+      "path": "inspection_engine/m4_human_review.py",
+      "git_blob_sha1": "cbf3952aad3c362a836f7dc0000e5041cc6673e3"
+    },
+    {
+      "path": "inspection_engine/m4_governance_history.py",
+      "git_blob_sha1": "8ea688cba95d9dc18d22294908e7ec2f398e66f7"
+    },
+    {
+      "path": "inspection_engine/m4_issuer_receipts.py",
+      "git_blob_sha1": "a6549ea8871f67c136b50e0c33a24e30a990568c"
+    },
+    {
+      "path": "inspection_engine/m4_workflow.py",
+      "git_blob_sha1": "6b813765effe52854a10e7b9be71028c8033574b"
+    },
+    {
+      "path": "inspection_engine/m4_pipeline.py",
+      "git_blob_sha1": "57284da9ca4ae20505d659418d9d7b8e64c487ea"
+    }
+  ]
+}
