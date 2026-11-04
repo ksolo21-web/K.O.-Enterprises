@@ -17,7 +17,7 @@ V10 original-byte private media checks and V9/V8 evidence-grounded serious-defec
 
 ## Acceptance
 
-V4 CI **pending** until the exact-source full regression and dedicated quality workflow pass. This must not alter `main`, the root pause marker, inspection benchmark thresholds, heldout media requirements or disabled customer delivery.
+V4 CI **VERIFIED** on commit `af9d6b83cc9b6a4da8a4915435dc4016fccb4c1b`: [full 1,098/1,098 offline tests](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828210590) passed with compilation, M3 checks and source integrity; [dedicated M5 governance/visual quality run](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828210561) also passed. This must not alter `main`, the root pause marker, inspection benchmark thresholds, heldout media requirements or disabled customer delivery.
 
 M4 production acceptance remains BLOCKED for real professional identity and issuer authority, externally controlled media/custody pins, consented professionally labeled 100+ heldout cases/30+ critical defects across all 13 systems and both scopes, no missed major/critical labels, ≥95% human-verified precision, reviewed clean controls, and genuine authorized human release. No actual real-world accuracy has been demonstrated.
 

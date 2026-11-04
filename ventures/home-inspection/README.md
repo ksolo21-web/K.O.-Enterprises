@@ -1,5 +1,13 @@
 # Home Inspection — development branch
 
+## Current Home Inspections M5 V5 checkpoint — 2026-11-04
+
+**M5 V5 synthetic evidence recovery:** [1,112/1,112 full offline inspection tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828847493); [54 focused tests and recovery workflow passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41828847583). One real GitHub Actions **synthetic-only** artifact was downloaded and checked: five members, exact receipt hashes, and a complete 16-page PDF matching the pinned renderer baseline. [V5 checkpoint](docs/CHECKPOINT_M5_SYNTHETIC_RECOVERY_V5.md).
+
+**M5 V4 safety-change check:** CI now pins ten inspection safety modules and the root `PAUSE_AUTONOMY` marker. [V4 checkpoint](docs/CHECKPOINT_M5_CHANGE_GOVERNANCE_V4.md). This detects source changes, but it cannot enforce independent code review or branch protection.
+
+**Still blocked:** independent qualified professional reviewers, genuine custodian and media consent, real heldout severe-defect evaluations across 13 systems, verified model accuracy, legal/insurance arrangements, and qualified human approval. No customer reports, genuine media, production authorization or autonomous operations. Keep `main`, `PAUSE_AUTONOMY` and release gates unchanged.
+
 ## Current Home Inspections M4/M5 checkpoint — 2026-11-04
 
 **M4 V10:** Private original-media byte and exact video-frame replay engineering checks are implemented. [1,058/1,058 synthetic offline tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41817691316). [V10 checkpoint](docs/CHECKPOINT_M4_ORIGINAL_SOURCE_BYTES_V10.md).
