@@ -1,5 +1,14 @@
 # Home Inspection — development branch
 
+## Current Home Inspections M4/M5 checkpoint — 2026-11-04
+
+**M4 V10:** Private original-media byte and exact video-frame replay engineering checks are implemented. [1,058/1,058 synthetic offline tests passed](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41817691316). [V10 checkpoint](docs/CHECKPOINT_M4_ORIGINAL_SOURCE_BYTES_V10.md).
+
+**M5 V3:** The original GitHub engineering milestone now has versioned synthetic examples, the existing full regression, a dedicated quality workflow, and cross-run pinned, pixel/text-reproducible **16-page Option 2 PDF**. [1,085/1,085 full offline tests](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41820097246) and [dedicated 27-test quality workflow](https://github.com/ksolo21-web/K.O.-Enterprises/actions/runs/41820097350) passed on source commit `c8c414955078685d4cf55c84d4e2f6e183798792`. [M5 current checkpoint](docs/CHECKPOINT_M5_GOLDEN_BASELINE_V3.md). The separate [pilot cohort planner](docs/CHECKPOINT_M5_PILOT_READINESS_V1.md) is ancillary, not a replacement for M5's original GitHub scope.
+
+**Critical boundary:** This is **synthetic software validation**, not demonstrated real-home defect recognition or a launched inspection business. Independently verified professional reviewers, lawful/consented real case custody, severe-defect heldout benchmarks, company legal/insurance decisions and qualified human report signoff remain open. No customer release, no changes to `main` or `PAUSE_AUTONOMY`. Experimental DeepSeek/Qwen remains research-only.
+
+
 **Latest M3 corrective engineering — v8:** [Automatic source-backed report proposals and an executable signed lesson runtime](docs/M3_AUTOMATIC_AND_SIGNED_RUNTIME_V8.md) now implement the two paths left open in v7. Staged lessons are actually used by evaluation prompts; two-key scoped authorization, model/corpus/state bindings, promotion, report consumption and rollback execute in private temporary tests. Independent full regression: **832/832 inspection tests**, plus **229/229 company tests**. Real model/professional validation and real trusted enrollment/activation remain unperformed; original M3 approval is withheld. [Current checkpoint](docs/CHECKPOINT_M3_V8.md).
 
 **Latest M3 completion work — v7:** [Full local study preparation, typed source-backed report mappings, and quarantined version/evaluation/rollback preparation](docs/M3_COMPLETION_STATUS.md) are implemented. A nested PDF form locator defect was repaired. **Original Milestone 3 remains incomplete:** professional semantic extraction acceptance, authenticated case governance and approved learning/promotion are still absent. The completion report preserves those original gates instead of treating manual mappings or synthetic tests as full understanding. [Current checkpoint](docs/CHECKPOINT_M3_COMPLETION.md).
