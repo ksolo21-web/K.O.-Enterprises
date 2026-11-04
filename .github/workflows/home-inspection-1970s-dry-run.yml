@@ -1,0 +1,87 @@
+# Whole-house regression using 20 GENERATED SCHEMATICS, never real client photos.
+# Three explicitly scripted providers exercise M4 routing, Q02/Q03, private report.
+name: Home Inspection - 1970s 1500 sqft Full Synthetic Dry Run
+on:
+  push:
+    branches: [home-inspection-1970s-house-dryrun]
+    paths:
+      - 'ventures/home-inspection/scripts/run_1970s_house_dry_run.py'
+      - 'ventures/home-inspection/tests/test_1970s_house_dryrun.py'
+      - '.github/workflows/home-inspection-1970s-dry-run.yml'
+  pull_request:
+    branches: [home-inspection-development]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  whole-house-synthetic-dryrun:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: ventures/home-inspection
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      COMPANY_OS_PAUSED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install only local PDF and imaging dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Verify 1970s house synthetic inventory and scenario safety
+        run: python -m unittest discover -s tests -p 'test_1970s_house_dryrun.py' -v
+      - name: Execute full source custody to Q01 specialist Q02 Q03 private PDF and visual audit
+        run: python -m scripts.run_1970s_house_dry_run --out-dir "$RUNNER_TEMP/1970s-house-e2e"
+      - name: Verify all generated report and safety audit artifacts
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"1970s-house-e2e"
+          summary=json.loads((root/"dry_run_summary.json").read_text())
+          assert summary["status"]=="SYNTHETIC_END_TO_END_PRIVATE_DRAFT_COMPLETE_WITH_HOLDS"
+          assert summary["source_images"]==20 and summary["routed_specialist_jobs"]==20
+          assert len(summary["unique_specialist_roles"])==8
+          assert summary["inspected_system_scopes"]==13
+          assert summary["Q03_status"]=="ADJUDICATION_HOLD"
+          assert summary["Q03_held_entry_count"]>0
+          assert summary["PDF_pages_audited"]>=6
+          assert summary["all_pdf_pages_rasterized"]
+          assert all(summary["negative_tests"].values())
+          assert not summary["customer_release_allowed"]
+          assert not summary["AI_model_inference_performed"]
+          assert not summary["professional_reviewer_signed"]
+          assert len(list((root/"private_case"/"option2_draft").glob("*.pdf")))==1
+          assert (root/"private_case"/"page_raster_audit"/"all_pages_contact_sheet.png").is_file()
+          print("VERIFIED_FULL_SYNTHETIC_HOUSE_E2E_ONLY",summary["PDF_pages_audited"],"pages",summary["Q03_held_entry_count"],"Q03 holds")
+          PY
+          git diff --exit-code -- .
+          test ! -d customer_data
+      - name: Publish safe synthetic scenario PDF, source schematics and full stage receipts
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/home-inspection-1970s-house-dryrun'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: simulated-1970s-home-1500sqft-complete-dryrun
+          path: |
+            ${{ runner.temp }}/1970s-house-e2e/dry_run_summary.json
+            ${{ runner.temp }}/1970s-house-e2e/source/synthetic_project.json
+            ${{ runner.temp }}/1970s-house-e2e/source/media/*.png
+            ${{ runner.temp }}/1970s-house-e2e/private_case/case_state.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/specialist_dossier.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/staged_project.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/technical_review.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/adjudication.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/adjudicated_project.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/report_receipt.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/option2_draft/*.pdf
+            ${{ runner.temp }}/1970s-house-e2e/private_case/option2_draft/*.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/page_raster_audit/audit.json
+            ${{ runner.temp }}/1970s-house-e2e/private_case/page_raster_audit/all_pages_contact_sheet.png
+          if-no-files-found: error
+          retention-days: 7
