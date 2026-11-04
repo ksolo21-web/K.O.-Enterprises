@@ -1,0 +1,24 @@
+# Home Inspections M5 V6 — benchmark contract and pre-merge verification
+
+**2026-11-04 · branch `home-inspection-development` · customer release permanently disabled at this checkpoint**
+
+## Preserve original scope and dependencies
+
+V6 extends original M5 GitHub engineering rather than redefining M4 field acceptance. Keep M4 V8/V9/V10 benchmark/custody, qualified reviewer/revocation and source-pin conditions unchanged; keep the M5 V3 16-page PDF baseline, V4 ten safety-source pins, and V5 verified synthetic archive/restore. Never upload real photographs, inspection report records, credential material or secrets to this public repository. Root `PAUSE_AUTONOMY` must remain untouched.
+
+## Implementation — M5 V6
+
+1. `scripts/m5_benchmark_contract_gate.py` assembles **100 deterministic invented properties**, including **90 invented adjudicated defects (30 critical, 30 major, 30 moderate)**, **10 clean cases and 10 clean-media declarations**, all **13** systems, and both commercial/residential scopes. They are not collected real cases, don't have authenticated consent, do not run an inference model and use visibly **UNVERIFIED** placeholder reviewer identities. Some production scoring fields must use the schema declarations `synthetic=false` and `consented_for_evaluation=true`; these **are demonstrably invented assertions** in generated offline test fixtures, not real-world evidence.
+2. The gate tests **nine distinct software scenarios**: fully matched, one false alarm, five false alarms below the 95% precision floor, missing critical, missing major, cohort only 99, missing moderate tracked without an automatic serious-defect hard failure, nine clean control cases, and training-family overlap. Each scenario asserts exact safe behavior and never releases a real report. A successful synthetic metric score still returns `METRIC_THRESHOLDS_MET_EXTERNAL_REVIEW_PENDING`; it **cannot** establish real model performance.
+3. `tests/test_m5_benchmark_contract_gate.py` adds **15** adversarial test cases including three mutation tests (simulating dangerous source changes), verifying the contract fails closed when scoring wrongly permits missed critical hazards or production release, or when a pilot-design assessor falsely authorizes field use.
+4. `home-inspection-m3-v8-offline.yml` and `home-inspection-m5-quality.yml` run read-only, synthetic-only checks on **pull requests targeting `home-inspection-development`** in addition to existing development pushes; M5 quality now runs the benchmark matrix before packaging its synthetic-only archive. M5 upload skips pull requests; no extra tokens/secrets/write scopes. `tests/test_m5_workflow_pr_controls.py` statically confirms these invariants.
+
+## Known limits and independent review required
+
+A GitHub workflow that runs on pull requests does **not require a pull request**, automatically reject merges or enforce distinct approvers. As of 2026-11-04, the GitHub branch API reports `protected=false`; repository rulesets GET returned no rulesets, while the branch-protection administration endpoint returned integration access denied. No branch ruleset was applied. For genuine enforcement, an authorized repository administrator must configure required M3/M5 status checks and at least one independently qualified approving reviewer with stale-review dismissal and restricted direct pushes. Do not mistake a self-updated registry for peer review.
+
+The matrix is a **contract regression**, not a real professionally adjudicated benchmark and no actual model was run. M4/M5 external field acceptance remains blocked until there is independent source custody, legally authorized private media, qualified professionals, real adjudicated cases ≥100/critical findings ≥30, all 13 systems and scopes, clean controls, **zero missed major/critical defects**, ≥95% precision, and authorized human signoff with legal/insurance/privacy decisions.
+
+## Evidence
+
+**Implementation staged pending two exact-commit CI results.** Validate full offline inspection regression, dedicated M5 benchmark/restore workflow, artifact presence, tracked-source integrity, all 15 benchmark mutation tests and 3 premerge workflow tests. If either fails, fix and retest rather than accepting a partial pass. The next critical path is authenticated field-study intake and repository branch-rule enforcement by an authorized admin; neither can be self-attested by CI.

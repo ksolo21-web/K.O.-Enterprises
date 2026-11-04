@@ -7,6 +7,11 @@ on:
     paths:
       - 'ventures/home-inspection/**'
       - '.github/workflows/home-inspection-m5-quality.yml'
+  pull_request:
+    branches: [home-inspection-development]
+    paths:
+      - 'ventures/home-inspection/**'
+      - '.github/workflows/home-inspection-m5-quality.yml'
   workflow_dispatch:
 
 permissions:
@@ -39,6 +44,8 @@ jobs:
         run: python -m scripts.m5_safety_change_gate
       - name: Validate versioned public synthetic examples and two complete PDF renders
         run: python -m scripts.m5_release_quality_gate
+      - name: Enforce nine synthetic serious-defect quality contract scenarios
+        run: python -m scripts.m5_benchmark_contract_gate
       - name: Build, verify and restore bounded synthetic-only evidence archive
         run: |
           python -m scripts.m5_synthetic_recovery --create "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip"
@@ -46,12 +53,13 @@ jobs:
           python -m scripts.m5_synthetic_recovery --restore "$RUNNER_TEMP/m5-synthetic-inspection-evidence.zip" "$RUNNER_TEMP/m5-restored-evidence"
       - name: Run adversarial synthetic recovery, fixture, governance and pilot-design tests
         run: |
+          python -m unittest discover -s tests -p 'test_m5_benchmark_contract_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_synthetic_recovery.py' -v
           python -m unittest discover -s tests -p 'test_m5_safety_change_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_release_quality_gate.py' -v
           python -m unittest discover -s tests -p 'test_m5_pilot_readiness.py' -v
       - name: Upload only generated synthetic inspection recovery evidence
-        if: success()
+        if: success() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: m5-synthetic-inspection-recovery
