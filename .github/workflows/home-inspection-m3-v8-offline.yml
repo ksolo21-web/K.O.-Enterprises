@@ -8,9 +8,6 @@ on:
       - '.github/workflows/home-inspection-m3-v8-offline.yml'
   pull_request:
     branches: [home-inspection-development]
-    paths:
-      - 'ventures/home-inspection/**'
-      - '.github/workflows/home-inspection-m3-v8-offline.yml'
   workflow_dispatch:
 concurrency:
   group: m3-v8-${{ github.ref }}

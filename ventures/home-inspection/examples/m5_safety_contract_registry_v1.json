@@ -7,7 +7,7 @@
   "files": [
     {
       "path": "inspection_engine/serious_defect_benchmark.py",
-      "git_blob_sha1": "0000000000000000000000000000000000000000"
+      "git_blob_sha1": "49d9e487e35caa5b02d4326b59be049cb29e8a53"
     },
     {
       "path": "inspection_engine/m4_frozen_safety_audit.py",

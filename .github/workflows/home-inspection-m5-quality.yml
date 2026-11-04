@@ -9,9 +9,6 @@ on:
       - '.github/workflows/home-inspection-m5-quality.yml'
   pull_request:
     branches: [home-inspection-development]
-    paths:
-      - 'ventures/home-inspection/**'
-      - '.github/workflows/home-inspection-m5-quality.yml'
   workflow_dispatch:
 
 permissions:
