@@ -10,6 +10,19 @@
 
 > **Continuity rule:** This file is the canonical, version-controlled plan across conversations and execution sessions. Read it and current GitHub issue/PR/test evidence before editing, planning, or claiming progress. Keep a dated, verifiable checkpoint after each milestone. Do not confuse a memory summary, a proposed plan, a passing offline test, or an agent role label with real execution evidence.
 
+## Company-wide launch dependency — mandatory before ANY K.O. business launch
+
+**CEO-directed requirement (2026-11-05):** The shared competitive intelligence engine must **automatically start on approved protected infrastructure and be verifiably live, healthy, current, genuinely independently reviewed, and protected by a global fail-closed release gate** before **any** K.O. Enterprises venture can launch, including the Market Intelligence and Contractor Operations lines. See [Competitive Engine Launch Prerequisite](../../strategy/COMPETITIVE_ENGINE_LAUNCH_PREREQUISITE.md).
+
+- **CE-0:** Implement company policy enforcement, signed short-lived health preflight and adversarial launch-blocking tests (first engineering increment). This is not a live service.
+- **CE-1:** Deliver lawful primary-source gathering/provenance and competitive work output; shares Market Intelligence M1.
+- **CE-2:** Deploy monitored, protected automatically restarted service with durable queues, authenticated separate reviewer and private retention; no assumption GitHub Actions is a persistent host.
+- **CE-3:** Build a real separate critic, render-and-inspect PDF pages, monitor real evidence, and revoke readiness on incident.
+- **CE-4:** Wire every real launch/deployment connector to the same authenticated release controller and demonstrate no bypass, pause precedence, source freshness and approval.
+- **CE-5:** Only after actual production readiness demonstrations and explicit owner approval may individual K.O. businesses seek their separate launch authorization.
+
+**Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
+
 ## 1. Agreed business scope
 
 K.O. Enterprises has two active, separately accounted business lines:
