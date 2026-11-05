@@ -11,6 +11,7 @@ dependencies = []
 
 [project.optional-dependencies]
 source-verification = ["cryptography==50.0.2"]
+procurement-pdf = ["pypdf==6.21.4"]
 
 [project.scripts]
 company-os = "company_os.cli:main"
