@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**CE-1C PDF package preflight (not live):** [Original PDFs, attachments and addenda](docs/strategy/CE1C_PDF_PACKAGE_PREFLIGHT.md). Reviews synthetic and permitted local PDF packages for missing records, mismatched hashes, conflicting source-page evidence, deadlines and mandatory events; final status is always BLOCK or HOLD, never customer authorization.
+
 **CE-1B2 trust-boundary upgrade:** The source-permit reader now checks Ed25519 signatures using an approved **public key only**, not a shared HMAC signing secret. The separate private signing authority and real live deployment remain unbuilt and cannot authorize a business launch.
 
 **Protected retrieval prototype (CE-1B, not live):** [Approved DNS-pinned HTTPS source fetch](docs/strategy/CE1B_PROTECTED_SOURCE_FETCH.md) adds an approval-first, permit-scoped text/HTML retrieval path and 48 adversarial tests. CI uses mocked network responses, and no company research fetch is active under PAUSE_AUTONOMY.
