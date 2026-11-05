@@ -33,20 +33,39 @@ _STAGE_FIELDS = frozenset(f.name for f in dataclasses.fields(StagedSource))
 _PROTOCOL_FIELDS = frozenset({"schema_version", "operation", "staged"})
 
 
-def socket_path(repo_root: Path | str) -> Path:
+def socket_path(
+    repo_root: Path | str, *, shared_group_gid: int | None = None,
+) -> Path:
     root = Path(repo_root).resolve()
     if not root.is_dir():
         raise EvidenceError("signer root missing")
+    if shared_group_gid is not None and (
+        type(shared_group_gid) is not int or shared_group_gid < 0
+    ):
+        raise EvidenceError("invalid preprovisioned signer IPC group")
     path = root
     for name in ("state", "competitive_engine", "signer_ipc"):
         path = path / name
         if path.is_symlink() or (path.exists() and not path.is_dir()):
             raise EvidenceError("signer IPC path unsafe")
-        path.mkdir(mode=0o700, exist_ok=True)
+        if shared_group_gid is None:
+            path.mkdir(mode=0o700, exist_ok=True)
+            if os.name == "posix":
+                path.chmod(0o700)
+        else:
+            # The privileged installer, never this worker, creates 0710
+            # group-traversable directories with no group write/world access.
+            if not path.is_dir():
+                raise EvidenceError("shared signer IPC path not provisioned")
+            info = path.stat()
+            perms = info.st_mode & 0o777
+            if (info.st_gid != shared_group_gid or perms != 0o710
+                    or (name == "signer_ipc" and info.st_uid != os.geteuid())):
+                raise EvidenceError("shared signer IPC ownership or mode unsafe")
+            if name == "signer_ipc" and not info.st_mode & 0o2000:
+                raise EvidenceError("signer IPC directory must inherit configured group")
         if not path.resolve().is_relative_to(root):
             raise EvidenceError("signer IPC path escapes root")
-        if os.name == "posix":
-            path.chmod(0o700)
     return path / "staging-signer.sock"
 
 
@@ -118,6 +137,7 @@ def serve_one(
     key_id: str,
     allowed_client_uid: int,
     test_only_same_uid: bool = False,
+    shared_group_gid: int | None = None,
 ) -> dict[str, Any]:
     """Process exactly one local IPC connection; no socket/TCP daemon.
 
@@ -136,6 +156,8 @@ def serve_one(
         raise EvidenceError("invalid approved signer caller UID")
     if allowed_client_uid == os.geteuid() and not test_only_same_uid:
         raise EvidenceError("signer and capture client must have distinct OS identities")
+    if not test_only_same_uid and shared_group_gid is None:
+        raise EvidenceError("cross-UID signer requires preprovisioned private shared IPC group")
     if not isinstance(signer, Ed25519PrivateKey):
         raise EvidenceError("signer process private key unavailable")
     policy = verify_governance_policy(policy_envelope)
@@ -147,15 +169,22 @@ def serve_one(
     ):
         raise EvidenceError("injected signer key mismatches root-signed trust registry")
 
-    with StagingTrustLedger(root) as ledger:
+    with StagingTrustLedger(root, shared_parent_gid=shared_group_gid) as ledger:
         ledger.accept_policy(policy_envelope)
-        addr = socket_path(root)
+        addr = socket_path(root, shared_group_gid=shared_group_gid)
         if addr.is_symlink() or addr.exists():
             raise EvidenceError("existing signer socket refused; no replacement")
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
             sock.settimeout(TIMEOUT_SECONDS)
             sock.bind(str(addr))
-            addr.chmod(0o600)
+            if shared_group_gid is None:
+                addr.chmod(0o600)
+            else:
+                # This is only valid for a root-provisioned setgid directory.
+                # Never create/change a shared group or widen parents here.
+                if addr.stat().st_gid != shared_group_gid:
+                    raise EvidenceError("signer socket inherited wrong approved group")
+                addr.chmod(0o660)
             sock.listen(1)
             try:
                 conn, _ = sock.accept()
