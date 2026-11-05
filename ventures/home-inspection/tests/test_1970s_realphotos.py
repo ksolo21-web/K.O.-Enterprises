@@ -13,7 +13,7 @@ from inspection_engine.core import SYSTEMS
 
 class RealPhotoCompositeContract(unittest.TestCase):
     def test_all_reference_images_are_different_real_source_files(self):
-        self.assertGreaterEqual(len(PHOTOS), 14)
+        self.assertEqual(len(PHOTOS), 13)
         self.assertEqual(len({x[0] for x in PHOTOS}), len(PHOTOS))
         self.assertEqual(len({x[3] for x in PHOTOS}), len(PHOTOS))
         self.assertTrue(CASE_ID.startswith("COMPOSITE-"))
@@ -38,7 +38,7 @@ class RealPhotoCompositeContract(unittest.TestCase):
 
     def test_major_systems_and_two_bathrooms_present(self):
         codes={p[1] for p in PHOTOS}
-        self.assertTrue({"roof","attic","site","foundation","basement","electrical","plumbing","water_heating","hvac","garage","exterior","interior","framing"}<=codes)
+        self.assertTrue({"roof","attic","site","foundation","basement","electrical","plumbing","water_heating","hvac","garage","interior"}<=codes)
         names=" ".join(p[2].lower() for p in PHOTOS)
         self.assertIn("en-suite",names)
         self.assertIn("hall full bath",names)

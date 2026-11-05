@@ -58,6 +58,7 @@ UNVERIFIED_SPACES = [
     "Attached garage: example spring only; no door reversal/force tests, garage separation or fire safety checks",
     "Kitchen/laundry: no sink, drain, supply, appliances or laundry vent physical tests",
     "All mechanical equipment: no rating plates, combustion/venting, operating test or age confirmation",
+    "Actual exterior wall finish, exposed framing and subfloor: no verified case-specific photo; remain open",
     "All life safety: smoke/CO alarms, egress openings, GFCI/AFCI and handrails untested",
 ]
 # id, area, zone, Wikimedia file title, photographer, license,
@@ -74,13 +75,11 @@ PHOTOS = [
 ("P09","garage","Attached garage door hardware","Garage door spring needs a safety cable through it.jpg","Tomwsulcer","CC0 1.0","URGENT SAFETY","An extension-type garage-door spring is shown without an obvious containment/safety cable.","Do not operate or adjust the door until a qualified garage-door technician checks spring containment, cables, safety reversal and hardware. Tensioned springs are hazardous."),
 ("P10","interior","Bedroom ceiling example","Ceiling water damage.jpg","Atomicdragon136","CC BY 3.0","MAJOR","Ceiling finish shows localized staining/discoloration consistent with prior wetting.","Identify and remedy water source; verify ceiling material stability, moisture readings and any concealed deterioration before cosmetic repairs. No active leak established from this still."),
 ("P11","attic","Accessible attic reference","AtticInsulation.jpg","Jason Dale","CC BY-SA 3.0","FURTHER EVALUATION","Insulation, ducts and roof-space materials are visible in an attic example.","A qualified onsite inspector must safely assess insulation depth/coverage, ventilation paths, roof sheathing, exhaust routing, wiring and moisture. No deficiency is conclusively established here."),
-("P12","exterior","Exterior wall finish","Missing pieces in the wall of the old abandoned house.jpg","Shixart1985","CC BY 2.0","MAJOR","Exterior wall surface appears deteriorated with cracking and missing/peeling finish.","Evaluate substrate and water protection; repair failed cladding/finish after determining causes. In a 1970s house, test suspect coatings for lead before disturbing them; photo is from another property."),
 ("P13","hvac","Cooling equipment reference","Hoarders House - Abandoned Cooling (15804516978).jpg","darkday","CC BY 2.0","FURTHER EVALUATION","Photograph records neglected cooling-related equipment; serviceability is not demonstrated.","An HVAC professional should identify equipment and inspect electrical connections, refrigerant-side condition, drainage, ventilation and safe operation. Do not assign age or performance without labels and test data."),
 ("P14","site","Patio/foundation edge","Mortar to keep basement dry.jpg","Tomwsulcer","CC0 1.0","FURTHER EVALUATION","An exterior patio-to-building junction is shown with applied mortar and potential water-management context.","Inspect actual finished grade, downspouts, hardscape slope and wall penetrations under real conditions. A photograph of a repaired seam does not establish drainage performance."),
-("P15","framing","Bedroom structural finishes","20220127-RD-LSC-0704 (51869379040).jpg","USDA / Lance Cheung","Public domain US federal","URGENT SAFETY","Photographed room shows severe ceiling/finish deterioration with displaced materials and temporary supports.","Restrict access where collapse risk exists. Have a structural professional assess load path, damaged ceiling/floor framing and moisture source before occupancy. Actual capacity cannot be determined from photo."),
 ]
 SEVERITY_ORDER = {"URGENT SAFETY":0,"MAJOR":1,"FURTHER EVALUATION":2}
-ALLOWED_LICENCES = {"CC BY-SA 3.0","Public domain US federal","CC BY 2.0","Wikimedia Commons licensed",
+ALLOWED_LICENCES = {"CC BY-SA 3.0","Public domain US federal","CC BY 2.0",
                     "CC BY 4.0","Public domain","CC0 1.0","CC BY 3.0"}
 
 
@@ -131,7 +130,9 @@ def _make_source(out: Path):
     images=src/"media"
     images.mkdir()
     media=[]
-    for ident,area,zone,title,author,license_,severity,observation,recommendation in PHOTOS:
+    for index,(ident,area,zone,title,author,license_,severity,observation,recommendation) in enumerate(PHOTOS):
+        if index:
+            time.sleep(2.5)  # Respect upstream image-request limits; one active run only.
         if license_ not in ALLOWED_LICENCES:
             raise DataError("Unapproved image license: "+ident)
         raw=_fetch_real_photo(title)
