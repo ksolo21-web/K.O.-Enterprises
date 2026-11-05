@@ -276,8 +276,9 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     for sev in ("URGENT SAFETY","MAJOR","FURTHER EVALUATION"):
         bucket=[x for x in rows if x["severity"]==sev]
         body.append(P(f"{sev}: {len(bucket)} photo-based example reviews","KO_Sub"))
-        for r in bucket:
-            body.append(P(f"{r['id']} | {r['zone']}: {r['observation']}"))
+        if sev=="URGENT SAFETY":
+            for r in bucket:
+                body.append(P(f"{r['id']} | {r['zone']} - obtain qualified safety assessment"))
     body.append(PageBreak())
     body += [P("Complete room and system coverage","KO_Title"),
              P("A photo of an example roof does not prove the fictional home's roof condition. Room-by-room site photographs and inspections are required even where these examples depict deterioration."),
@@ -288,14 +289,15 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     body.append(PageBreak())
     body += [P("Photo-backed training findings","KO_Title"),
              P("Each record includes the exact public source, licensed author, visible condition, scoped recommendation and two levels of simulated review. Source photos are real; case association is fictional.","KO_Body")]
-    for r in rows:
-        body.append(PageBreak())
+    for index,r in enumerate(rows):
+        if index:
+            body.append(PageBreak())
         body.append(P(f"{r['id']} | {r['zone']}","KO_Head"))
         body.append(P(f"TRIAGE: {r['severity']} - REAL REFERENCE PHOTO, NOT CASE EVIDENCE","KO_Red"))
         img=Image.open(r["photo_path"])
         iw,ih=img.size
         targetw=6.8*inch
-        targeth=3.3*inch
+        targeth=3.8*inch
         scale=min(targetw/iw,targeth/ih)
         body.append(RLImage(r["photo_path"],width=iw*scale,height=ih*scale))
         body += [
@@ -308,7 +310,7 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
             P("Q03 reconciliation - simulated","KO_Sub"),
             P("Keep this localized entry distinct. Preserve source link, independent verification and full system coverage holds; no human sign-off or customer release."),
             P("Photo source and reuse terms","KO_Sub"),
-            P(f"{r['author']} | {r['license']} | Wikimedia Commons. Resized and EXIF metadata removed; original-photo SHA256 {r['original_sha'][:22]}...","KO_Tiny"),
+            P(f"{r['author']} | {r['license']} | Wikimedia Commons. Resized and EXIF metadata removed; downloaded-source SHA256 {r['original_sha'][:22]}...","KO_Tiny"),
             P(r["commons_url"],"KO_Tiny"),
         ]
     body.append(PageBreak())

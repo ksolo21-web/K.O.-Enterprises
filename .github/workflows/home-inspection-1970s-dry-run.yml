@@ -65,7 +65,7 @@ jobs:
           assert report["Q03_status"]=="ADJUDICATION_HOLD" and report["Q03_holds"]>0
           assert report["report_holds"]>0 and report["specialist_work_orders"]==13
           assert report["m4_private_PDF_pages"]>=10
-          assert report["photo_case_study_PDF_pages"]>=17
+          assert report["photo_case_study_PDF_pages"]>=16
           assert not report["customer_release_allowed"]
           assert not report["original_house_photographs"]
           assert not report["AI_vision_model_inference_performed"]
@@ -77,7 +77,18 @@ jobs:
                   assert img.format=="JPEG" and min(img.size)>=250
                   img.verify()
           detailed=root/"1970s_composite_REAL_PHOTO_DETAILED_DRY_RUN.pdf"
-          assert len(PdfReader(str(detailed)).pages)==report["photo_case_study_PDF_pages"]
+          pages=list(PdfReader(str(detailed)).pages)
+          assert len(pages)==report["photo_case_study_PDF_pages"]
+          # Reject orphan heading / overflow-only pages: every page must carry
+          # substantial narrative, and all 13 real photo images must be inside.
+          word_counts=[len((p.extract_text() or "").split()) for p in pages]
+          assert min(word_counts)>=80, f"Near-blank composite PDF page: {word_counts}"
+          assert sum(len(p.images) for p in pages)==13
+          fulltext="\n".join(p.extract_text() or "" for p in pages)
+          assert "Photo-backed training findings" in fulltext
+          assert "NOT A REAL PROPERTY INSPECTION" in fulltext
+          assert all(row["id"] in fulltext for row in sources)
+          assert all(len(row["recommendation"])>=55 and row["license"] for row in sources)
           assert (root/"m4_private_case"/"page_raster_audit"/"all_pages_contact_sheet.png").exists()
           print("VERIFIED_REAL_LICENSED_PHOTO_COMPOSITE",len(sources),
                 report["photo_case_study_PDF_pages"],report["Q03_holds"])
