@@ -38,7 +38,7 @@ class RealPhotoCompositeContract(unittest.TestCase):
 
     def test_major_systems_and_two_bathrooms_present(self):
         codes={p[1] for p in PHOTOS}
-        self.assertTrue({"roof","attic","site","foundation","basement","electrical","plumbing","water_heating","hvac","garage","interior"}<=codes)
+        self.assertTrue({"roof","attic","site","foundation","crawlspace","electrical","plumbing","water_heating","hvac","garage","interior"}<=codes)
         names=" ".join(p[2].lower() for p in PHOTOS)
         self.assertIn("en-suite",names)
         self.assertIn("hall full bath",names)
