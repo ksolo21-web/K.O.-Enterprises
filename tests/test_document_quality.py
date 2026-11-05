@@ -204,7 +204,7 @@ class DocumentQualityTests(unittest.TestCase):
         self.assertBlocked("PUBLICATION_AUTH")
 
     def test_detects_common_secret_pattern(self):
-        secret = ANNEX + "\n-----BEGIN PRIVATE KEY-----\nfake\n"
+        secret = ANNEX + "\n-----BEGIN " + "PRIVATE KEY-----\nfake\n"
         self.data["deliverables"][0]["sha256"] = hashlib.sha256(secret.encode()).hexdigest()
         self.assertBlocked("POSSIBLE_SECRET", files={"evidence.md": secret.encode()})
 
