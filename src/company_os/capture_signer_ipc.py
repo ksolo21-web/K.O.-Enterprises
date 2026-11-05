@@ -78,6 +78,10 @@ def _read_message(conn: socket.socket) -> dict[str, Any]:
         obj = json.loads(raw.decode("utf-8"), object_pairs_hook=unique,
                          parse_constant=lambda _: (_ for _ in ()).throw(
                              EvidenceError("nonfinite signer request")))
+    except EvidenceError:
+        # Preserve fail-closed schema/duplicate-key diagnostics instead of
+        # accidentally concealing them as generic parse errors.
+        raise
     except (UnicodeError, ValueError) as exc:
         raise EvidenceError("invalid signer request JSON") from exc
     if not isinstance(obj, dict) or set(obj) != _PROTOCOL_FIELDS:
