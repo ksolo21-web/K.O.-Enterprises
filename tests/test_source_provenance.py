@@ -212,6 +212,48 @@ class SourceProvenanceTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             self.capture(raw=changed, evidence_excerpt="Janitorial Schedule 2 is limited to registered firms.")
 
+    def test_changed_issuer_identity_is_not_silently_accepted(self):
+        self.capture()
+        for changes in (
+            {"origin_id": "another-agency"},
+            {"publisher": "Unrelated Publisher"},
+            {"source_kind": "company_self_claim"},
+        ):
+            with self.subTest(changes=changes):
+                with self.assertRaises(EvidenceError):
+                    self.capture(observed_at=self.now + timedelta(minutes=1),
+                                 now=self.now + timedelta(minutes=1), **changes)
+
+    def test_same_time_metadata_mutation_cannot_be_idempotent(self):
+        self.capture()
+        for changes in (
+            {"complete_document": True},
+            {"rights_basis": "licensed"},
+            {"title": "New claim about the issuer"},
+            {"acquisition_reference": "new-person-claims-same-observation"},
+        ):
+            with self.subTest(changes=changes):
+                with self.assertRaises(EvidenceError):
+                    self.capture(**changes)
+
+    def test_unreviewed_source_change_does_not_vanish_on_unchanged_recheck(self):
+        self.capture()
+        revised = self.raw.replace(b"certified firms", b"registered firms")
+        new_quote = "Janitorial Schedule 2 is limited to registered firms."
+        self.capture(raw=revised, evidence_excerpt=new_quote,
+                     observed_at=self.now + timedelta(hours=1),
+                     now=self.now + timedelta(hours=1))
+        self.capture(raw=revised, evidence_excerpt=new_quote,
+                     observed_at=self.now + timedelta(hours=2),
+                     now=self.now + timedelta(hours=2))
+        state = self.ledger.assess(now=self.now + timedelta(hours=2))
+        self.assertIn("detroit-janitorial", state["source_changes_to_review"])
+
+    def test_double_slash_authority_style_path_rejected(self):
+        with self.assertRaises(EvidenceError):
+            validate_source_url("https://detroitmi.gov//attacker.example/p",
+                                ("detroitmi.gov",))
+
     def test_document_id_cannot_switch_url(self):
         self.capture()
         with self.assertRaises(EvidenceError):
