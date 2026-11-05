@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "business_line": "market_intelligence",
+  "output_type": "test_fixture",
+  "classification": "public_demo",
+  "pack_id": "SYNTHETIC-UNAPPROVED-001",
+  "title": "Synthetic Unapproved Draft",
+  "author": "fixture_author",
+  "scope": "Offline CI negative control only",
+  "limitations": "Entirely fictional and unreviewed",
+  "prepared_at": "2026-11-05",
+  "publication_authorization": false,
+  "sources": [
+    {
+      "id": "S-001",
+      "title": "Synthetic Issuer",
+      "publisher": "Fictional Agency",
+      "type": "primary",
+      "url": "https://example.org/synthetic-do-not-use",
+      "access": "complete",
+      "checked_at": "2026-11-05",
+      "verification": "verified",
+      "verification_method": "Synthetic test fixture only",
+      "record_reference": "fixture://synthetic/issuer",
+      "evidence_excerpt": "A fictional agency lists a November 30, 2026 response date.",
+      "excerpt_sha256": "51db4ffcabf46febdcd8b88dc2934b76ff54f624b673cf33c92e6934ec5e69da"
+    }
+  ],
+  "claims": [
+    {
+      "id": "C-001",
+      "text": "A fictional agency has a fictional November 30, 2026 response deadline.",
+      "kind": "fact",
+      "risk": "deadline",
+      "status": "verified",
+      "source_ids": [
+        "S-001"
+      ],
+      "verified_at": "2026-11-05",
+      "counterevidence_checked": true,
+      "evidence_reasoning": "Synthetic fixture only",
+      "limitations": "Not a real issuer or market fact"
+    }
+  ],
+  "opportunities": [],
+  "deliverables": [
+    {
+      "path": "evidence.md",
+      "sha256": "5e80ad6d9b82160596c6108408ddea7354f8841ed728cbd1f954d37ab476a155"
+    }
+  ]
+}
