@@ -22,14 +22,14 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from company_os.procurement_package import assess_package
 from company_os.signed_capture_receipts import inspect_signed_capture_bundle
 from company_os.source_provenance import EvidenceError
-from test_procurement_package import ProcurementPackagePreflightTests
+import test_procurement_package as fixture_support
 
 
 class SignedCaptureReceiptsTests(unittest.TestCase):
     def setUp(self):
         # Reuse actual *parsed* synthetic PDF fixture, without inheriting or
         # duplicating its 53 existing test methods.
-        self.fixture = ProcurementPackagePreflightTests(
+        self.fixture = fixture_support.ProcurementPackagePreflightTests(
             "test_full_synthetic_pdf_package_remains_on_independent_review_hold"
         )
         self.fixture.setUp()
@@ -44,7 +44,7 @@ class SignedCaptureReceiptsTests(unittest.TestCase):
         self.env = patch.dict(os.environ, {
             "KO_CAPTURE_RECEIPT_PUBLIC_KEY_B64": public,
             "KO_SOURCE_APPROVED_HOSTS": "issuer.example",
-        }, clear=True)
+        }, clear=False)
         self.env.start()
         self.addCleanup(self.env.stop)
         self.listing_file = self.folder / "issuer-listing.html"
