@@ -67,10 +67,10 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.folder = Path(self.tmp.name)
         self.now = datetime(2026, 11, 5, 16, tzinfo=timezone.utc)
-        self.proposal = "Current synthetic solicitation: bids due November 25 2026 at 17:00 UTC."
-        self.addendum = "Addendum 1 revises submissions: bids due November 27 2026 at 18:00 UTC."
+        self.proposal = "Current synthetic solicitation: bids due 2026-11-25T17:00:00+00:00."
+        self.addendum = "Addendum 1 revises submissions: bids due 2026-11-27T18:00:00+00:00."
         self.attach = "The required contractor insurance attachment specifies a certificate."
-        self.event = "Mandatory site walk on November 4 2026 at 13:00 UTC."
+        self.event = "Mandatory site walk on 2026-11-04T13:00:00+00:00."
         self.doc_text = {
             "solicitation": self.proposal + " " + self.event,
             "addendum-1": self.addendum,
@@ -231,25 +231,25 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         raw = self.originals["attachment-1"]
         (self.folder / "attachment-1.pdf").write_bytes(raw)
         self.manifest["documents"][2]["sha256"] = hashlib.sha256(raw).hexdigest()
-        self.blocked("extractor")
+        self.blocked("extraction")
 
     def test_scanned_or_empty_pdf_is_blocked(self):
         raw = make_pdf(self.attach, scanned=True)
         (self.folder / "attachment-1.pdf").write_bytes(raw)
         self.manifest["documents"][2]["sha256"] = hashlib.sha256(raw).hexdigest()
-        self.blocked("extractor")
+        self.blocked("extraction")
 
     def test_active_pdf_actions_are_blocked(self):
         raw = make_pdf(self.attach, active=True)
         (self.folder / "attachment-1.pdf").write_bytes(raw)
         self.manifest["documents"][2]["sha256"] = hashlib.sha256(raw).hexdigest()
-        self.blocked("extractor")
+        self.blocked("extraction")
 
     def test_corrupt_pdf_with_valid_declared_hash_is_blocked(self):
         raw = b"%PDF-1.7\n" + b"not a real PDF record" * 15
         (self.folder / "attachment-1.pdf").write_bytes(raw)
         self.manifest["documents"][2]["sha256"] = hashlib.sha256(raw).hexdigest()
-        self.blocked("extractor")
+        self.blocked("extraction")
 
     def test_non_pdf_data_refused(self):
         with self.assertRaises(ValueError):
@@ -310,9 +310,10 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.blocked("resolution")
 
     def test_missing_deadline_evidence_blocks(self):
-        self.manifest["evidence"] = [
-            x for x in self.manifest["evidence"] if x["topic"] != "submission.deadline"
-        ]
+        # Keep every addendum quoted, but remove deadline-topic claims.
+        for item in self.manifest["evidence"][:2]:
+            item["topic"] = "addendum.note"
+            item["value"] = "source quotation exists but no parsed deadline"
         self.manifest["resolutions"] = []
         self.blocked("deadline")
 
@@ -380,6 +381,25 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.manifest["pretend_approved"] = True
         self.blocked("package fields")
 
+    def test_deadline_fabrication_is_blocked_even_with_matching_quote_id(self):
+        # An arbitrary new future date must not be accepted solely because a
+        # real issuer paragraph exists with a different date.
+        self.manifest["evidence"][1]["value"] = "2027-12-25T18:00:00+00:00"
+        self.blocked("literally supported")
+
+    def test_event_time_fabrication_is_blocked(self):
+        self.manifest["mandatory_events"][0]["occurs_at"] = "2026-11-04T14:00:00+00:00"
+        self.blocked("literally supported")
+
+    def test_selecting_older_deadline_against_addendum_is_blocked(self):
+        self.manifest["resolutions"][0]["selected_evidence_id"] = "evidence-base"
+        self.blocked("obsolete")
+
+    def test_waiver_cannot_cite_unrelated_visit_passage(self):
+        self.manifest["mandatory_events"][0]["attendance"] = "waiver_claimed"
+        self.manifest["mandatory_events"][0]["waiver_evidence_id"] = "evidence-visit"
+        self.blocked("waiver")
+
     def test_no_release_on_any_structural_success(self):
         verdict = self.evaluate()
         self.assertNotIn("APPROVED", verdict["status"])
@@ -388,7 +408,7 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
 
     def test_issuer_url_must_be_canonical_https(self):
         self.manifest["issuer_url"] = "http://issuer.example/solicitations"
-        self.blocked("issuer URL")
+        self.blocked("HTTPS")
 
     def test_duplicate_evidence_ids_rejected(self):
         self.manifest["evidence"][1]["id"] = self.manifest["evidence"][0]["id"]
@@ -407,11 +427,21 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.blocked("required")
 
     def test_waiver_quoted_only_can_remain_on_hold(self):
-        # Still only an operator assertion pending an issuer exception check.
+        # A separately cited issuer statement is still only an operator claim.
+        waiver_quote = "This issuer addendum states the mandatory site visit requirement is waived."
+        self.addendum += " " + waiver_quote
+        raw = make_pdf(self.addendum)
+        (self.folder / "addendum-1.pdf").write_bytes(raw)
+        self.manifest["documents"][1]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.manifest["evidence"].append({
+            "id": "evidence-waiver", "topic": "mandatory.waiver",
+            "value": "waiver stated", "document_id": "addendum-1", "page": 1,
+            "quote": waiver_quote,
+        })
         self.manifest["mandatory_events"][0]["attendance"] = "waiver_claimed"
-        self.manifest["mandatory_events"][0]["waiver_evidence_id"] = "evidence-visit"
+        self.manifest["mandatory_events"][0]["waiver_evidence_id"] = "evidence-waiver"
         status = self.evaluate()
-        self.assertTrue(status["status"].startswith("HOLD"))
+        self.assertTrue(status["status"].startswith("HOLD"), status)
         self.assertFalse(status["publication_authorized"])
         self.assertIn("MANDATORY_EVENT_STATUS_REQUIRES_ISSUER_CHECK",
                       status["mandatory_event_flags"])
