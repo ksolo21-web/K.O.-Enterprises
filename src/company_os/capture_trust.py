@@ -215,7 +215,9 @@ def verify_staging_receipt(
         raise EvidenceError("invalid staged byte digest")
     if not isinstance(r["tls_peer_cert_sha256"], str) or not _SHA.fullmatch(r["tls_peer_cert_sha256"]):
         raise EvidenceError("invalid staged TLS fingerprint")
-    if type(r["bytes_received"]) is not int or not 100 <= r["bytes_received"] <= MAX_PDF_BYTES:
+    minimum = 100 if role == "pdf" else 30
+    maximum = MAX_PDF_BYTES if role == "pdf" else 512_000
+    if type(r["bytes_received"]) is not int or not minimum <= r["bytes_received"] <= maximum:
         raise EvidenceError("invalid staged byte count")
     media = "application/pdf" if role == "pdf" else "text/html"
     if r["media_type"] != media:
@@ -262,6 +264,9 @@ class StagingTrustLedger:
 
     def __init__(self, repo_root: Path | str):
         root = Path(repo_root).resolve()
+        if not root.is_dir():
+            raise EvidenceError("trust root unavailable")
+        self.root = root
         directory = root
         for part in ("state", "competitive_engine", "trust"):
             directory = directory / part
@@ -370,12 +375,32 @@ class StagingTrustLedger:
             self.db.rollback()
             raise
 
+    def _check_source_file(self, data: Mapping[str, Any]) -> None:
+        """Bind the accepted signature to the CURRENT private staged bytes."""
+        name = ("issuer-listing.html" if data["role"] == "listing"
+                else data["document_id"] + ".pdf")
+        candidate = self.root
+        for part in ("state", "competitive_engine", "capture_staging",
+                     data["package_id"], name):
+            candidate = candidate / part
+            if candidate.is_symlink() or not candidate.resolve().is_relative_to(self.root):
+                raise EvidenceError("signed receipt staged path unsafe")
+        if not candidate.is_file():
+            raise EvidenceError("signed receipt original file unavailable")
+        size = candidate.stat().st_size
+        if size != data["bytes_received"]:
+            raise EvidenceError("signed receipt file size mismatch")
+        original = candidate.read_bytes()
+        if len(original) != size or hashlib.sha256(original).hexdigest() != data["sha256"]:
+            raise EvidenceError("signed receipt original bytes mismatch")
+
     def accept_receipt(
         self, receipt: Mapping[str, Any], policy_envelope: Mapping[str, Any],
         *, now: datetime | None = None,
     ) -> dict[str, Any]:
         policy = verify_governance_policy(policy_envelope, now=now)
         data = verify_staging_receipt(receipt, policy, now=now)
+        self._check_source_file(data)
         digest = hashlib.sha256(DOMAIN_RECEIPT + canonical(data)).hexdigest()
         self.db.execute("BEGIN IMMEDIATE")
         try:
