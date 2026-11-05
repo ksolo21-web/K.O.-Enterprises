@@ -32,6 +32,8 @@ Each `documents` record contains `id`, `filename`, `sha256`, `kind`, `source_url
 
 **Mandatory-event omission check:** A conservative text-pattern check blocks a completely empty event inventory when an original PDF refers to a mandatory or required site walk, visit, walkthrough, meeting, or conference. It is a safeguard, **not** complete semantic recognition of every kind of issuer requirement. The independent critic must still review the entire package for omitted conditions.
 
+**CE-1C2 add-on:** [Signed capture receipt and issuer listing cross-check](CE1C2_SIGNED_CAPTURE_BINDING.md). The optional strict --require-capture-receipts mode refuses an unsigned local source package. All matches are STILL HOLD, never release permission.
+
 ## Critical residual gaps
 
 1. **Issuer completeness is not authenticatable from the local manifest.** An operator can omit an addendum and also incorrectly assert the number expected. Real monitored issuer portal discovery, original signatures, changes/addenda enumeration, procurement-number/contract-scope verification and independent cross-check remain future work.

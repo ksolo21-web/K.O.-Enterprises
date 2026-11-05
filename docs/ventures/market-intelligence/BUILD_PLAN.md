@@ -27,6 +27,8 @@
 
 **Partial CE-1C implementation:** [Offline PDF/addenda package preflight](../../strategy/CE1C_PDF_PACKAGE_PREFLIGHT.md) checks original local documents, source quotations and missing mandatory items. It does NOT prove issuer-portal completeness, current bidder eligibility, scanned/visual page correctness or independent source review. **CE-1/M1 remains unaccepted.**
 
+**Partial CE-1C2 improvement:** [Signed original-capture binding](../../strategy/CE1C2_SIGNED_CAPTURE_BINDING.md) checks captured issuer listing PDF links and local original PDF bytes against public-key-verified capture receipts. This is NOT genuine issuer completeness, legal source-acquisition proof, or independent review; **CE-1/M1 remains unaccepted**, as do all company launches.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope

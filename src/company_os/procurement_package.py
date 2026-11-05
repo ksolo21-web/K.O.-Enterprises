@@ -135,8 +135,11 @@ def _load_manifest(folder: Path) -> dict[str, Any]:
     return _exact(doc, _TOP_FIELDS, "package")
 
 
-def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
-    manifest = _load_manifest(folder)
+def _evaluate(
+    folder: Path, now: datetime, *, manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    # Use the exact manifest snapshot for both PDF and signed-receipt review.
+    manifest = _load_manifest(folder) if manifest is None else manifest
     if manifest["schema_version"] != "1.0":
         raise EvidenceError("unknown package schema")
     package_id = _id(manifest["package_id"], "package_id")
@@ -366,16 +369,43 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
     }
 
 
-def assess_package(folder: Path | str, *, now: datetime | None = None) -> dict[str, Any]:
-    """Return BLOCK or HOLD; there is deliberately no APPROVE state."""
+def assess_package(
+    folder: Path | str, *, now: datetime | None = None,
+    require_capture_receipts: bool = False,
+) -> dict[str, Any]:
+    """Return BLOCK or HOLD only; optional signed capture is NEVER approval.
+
+    Legacy/offline unreceipted packages remain HOLD with an explicit warning.
+    Any *present* receipt file is validated regardless of strict mode; a
+    tampered sidecar may not be silently ignored. Strict mode blocks absence.
+    """
     when = now if now is not None else datetime.now(timezone.utc)
     if when.tzinfo is None:
         return {"status": "BLOCK", "publication_authorized": False,
                 "errors": ["timezone-aware assessment time required"]}
     try:
-        return _evaluate(Path(folder), when.astimezone(timezone.utc))
+        package = Path(folder)
+        manifest = _load_manifest(package)
+        result = _evaluate(package, when.astimezone(timezone.utc), manifest=manifest)
+        receipts = package / "capture_receipts.json"
+        if receipts.exists() or receipts.is_symlink() or require_capture_receipts:
+            from .signed_capture_receipts import inspect_signed_capture_bundle
+            # Read the *same* validated manifest shape used by _evaluate.
+            capture = inspect_signed_capture_bundle(
+                package, manifest, now=when.astimezone(timezone.utc),
+            )
+            result["capture_evidence"] = capture
+        else:
+            result["capture_evidence"] = {
+                "state": "MISSING_SIGNED_ORIGINAL_CAPTURE",
+                "publication_authorized": False,
+                "limits": [
+                    "Offline operator-supplied PDFs have no authenticated source capture"
+                ],
+            }
+        return result
     except (EvidenceError, OSError, TypeError, KeyError, ValueError) as exc:
-        # We can explain a *category* without echoing source content or secrets.
+        # Do not expose underlying source pages, credentials or private data.
         return {"status": "BLOCK", "publication_authorized": False,
                 "errors": [str(exc)[:240]]}
 
@@ -383,8 +413,12 @@ def assess_package(folder: Path | str, *, now: datetime | None = None) -> dict[s
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="CE-1C private procurement PDF preflight")
     parser.add_argument("folder", help="Private package directory containing package.json and PDFs")
+    parser.add_argument(
+        "--require-capture-receipts", action="store_true",
+        help="Fail closed unless issuer listing and every PDF have signed capture evidence",
+    )
     args = parser.parse_args(argv)
-    result = assess_package(args.folder)
+    result = assess_package(args.folder, require_capture_receipts=args.require_capture_receipts)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["status"].startswith("HOLD") else 2
 
