@@ -265,7 +265,6 @@ class SignedCaptureReceiptsTests(unittest.TestCase):
     def test_stale_listing_rejected(self):
         old = (self.now - timedelta(days=2)).isoformat()
         self.listing_payload["listing_observed_at"] = old
-        self.manifest["discovery"]["issuer_listing_checked_at"] = old
         self.blocked("stale")
 
     def test_document_capture_time_mismatch_rejected(self):
