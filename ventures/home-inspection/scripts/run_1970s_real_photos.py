@@ -276,9 +276,9 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     for sev in ("URGENT SAFETY","MAJOR","FURTHER EVALUATION"):
         bucket=[x for x in rows if x["severity"]==sev]
         body.append(P(f"{sev}: {len(bucket)} photo-based example reviews","KO_Sub"))
-        if sev=="URGENT SAFETY":
-            for r in bucket:
-                body.append(P(f"{r['id']} | {r['zone']} - obtain qualified safety assessment"))
+    # A cover/priority-list spill created a near-empty page in the original
+    # real-photo artifact. Keep risk counts while avoiding repeated per-photo
+    # priority rows (all source-specific discussion is on its finding page).
     body.append(PageBreak())
     body += [P("Complete room and system coverage","KO_Title"),
              P("A photo of an example roof does not prove the fictional home's roof condition. Room-by-room site photographs and inspections are required even where these examples depict deterioration."),
@@ -287,12 +287,14 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     for line in UNVERIFIED_SPACES:
         body.append(P("OPEN | "+line))
     body.append(PageBreak())
-    body += [P("Photo-backed training findings","KO_Title"),
-             P("Each record includes the exact public source, licensed author, visible condition, scoped recommendation and two levels of simulated review. Source photos are real; case association is fictional.","KO_Body")]
+    # Do not put a tiny introductory page ahead of a tall first photo.
+    # Place the section title on the first photograph's content page.
     for index,r in enumerate(rows):
         if index:
             body.append(PageBreak())
-        body.append(P(f"{r['id']} | {r['zone']}","KO_Head"))
+        label=(f"Photo-backed training findings | {r['id']} | {r['zone']}"
+               if index == 0 else f"{r['id']} | {r['zone']}")
+        body.append(P(label,"KO_Head"))
         body.append(P(f"TRIAGE: {r['severity']} - REAL REFERENCE PHOTO, NOT CASE EVIDENCE","KO_Red"))
         img=Image.open(r["photo_path"])
         iw,ih=img.size
