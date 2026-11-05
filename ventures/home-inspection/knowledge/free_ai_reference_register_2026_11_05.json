@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "compiled_on": "2026-11-05",
+  "scope": "K.O. Enterprises private home-inspection reference research. This registry does not perform model training, source ingestion or legal clearance.",
+  "sources": [
+    {
+      "id": "cdc_healthy_housing_inspection_manual_2008",
+      "title": "Healthy Housing Inspection Manual",
+      "agency": "CDC / HUD",
+      "edition_year": 2008,
+      "format": "PDF",
+      "pages": 100,
+      "download_url": "https://stacks.cdc.gov/view/cdc/7020/cdc_7020_DS1.pdf",
+      "record_url": "https://stacks.cdc.gov/view/cdc/7020",
+      "source_rights": "CDC record explicitly marked Public Domain",
+      "proposed_use": "ingest human-authored text sections/229-item inspection framework as retrieval references",
+      "decision": "eligible_for_controlled_ingestion_after_per_page_asset_rights_and_attribution_review",
+      "notes": "Public-domain record is not a substitute for current local code or current inspection standards. Attribute CDC/HUD; no government endorsement; check third-party graphics."
+    },
+    {
+      "id": "cdc_healthy_housing_reference_manual_2006",
+      "title": "Healthy Housing Reference Manual",
+      "agency": "CDC / HUD",
+      "edition_year": 2006,
+      "format": "PDF",
+      "download_url": "https://stacks.cdc.gov/view/cdc/21748/cdc_21748_DS1.pdf",
+      "record_url": "https://stacks.cdc.gov/view/cdc/21748",
+      "source_rights": "CDC record explicitly marked Public Domain",
+      "proposed_use": "building science, environmental health, housing systems background",
+      "decision": "eligible_for_controlled_ingestion_after_per_page_asset_rights_and_attribution_review",
+      "notes": "2006 historical technical material; require current standards cross-check."
+    },
+    {
+      "id": "hud_residential_rehabilitation_inspection_2000",
+      "title": "Residential Rehabilitation Inspection Guide",
+      "agency": "HUD / National Institute of Building Sciences",
+      "edition_year": 2000,
+      "format": "PDF",
+      "download_url": "https://www.huduser.gov/portal/Publications/PDF/rehabinspect.pdf",
+      "source_rights": "Free public download; third-party illustrations explicitly reproduced with permission; contractor-authored text rights not fully established",
+      "proposed_use": "human external reference for site, building exterior/interior, structure, electrical, plumbing, HVAC and sample inspection records",
+      "decision": "reference_link_only_pending_text_and_graphics_rights_review",
+      "notes": "Do NOT bulk ingest whole PDF until rights reviewed. Old guidance is not authoritative current code."
+    },
+    {
+      "id": "epa_moisture_control_2013",
+      "title": "Moisture Control Guidance for Building Design, Construction and Maintenance",
+      "agency": "EPA",
+      "edition_year": 2013,
+      "format": "PDF",
+      "download_url": "https://www.epa.gov/sites/default/files/2014-08/documents/moisture-control.pdf",
+      "source_rights": "U.S. EPA publication; check externally contributed illustrations, copyrighted references and website terms",
+      "proposed_use": "water entry, site grading, roofing, walls, plumbing, ventilation",
+      "decision": "reference_link_only_pending_asset_rights_review"
+    },
+    {
+      "id": "hud_nspire_defect_standards",
+      "title": "National Standards for the Physical Inspection of Real Estate (NSPIRE)",
+      "agency": "HUD",
+      "edition_year": 2023,
+      "format": "HTML/PDF/ZIP",
+      "download_url": "https://www.hud.gov/reac/nspire-standards",
+      "source_rights": "Official free download; review third-party content and use rights before bulk ingestion",
+      "proposed_use": "structured defect terminology and inspection examples; NOT a direct replacement for private-home SOP or local code",
+      "decision": "reference_link_only_pending_program_and_rights_review"
+    },
+    {
+      "id": "michigan_lara_code_books",
+      "title": "Michigan adopted construction code collection",
+      "agency": "Michigan LARA",
+      "edition_year": 2026,
+      "format": "online code viewer",
+      "download_url": "https://www.michigan.gov/en/lara/bureau-list/bcc/rules-acts/codes/code-books",
+      "source_rights": "Free-to-view ICC/NFPA portals contain copyright-protected code content; no unrestricted AI ingestion permission established",
+      "proposed_use": "verify law, Michigan statewide editions and jurisdiction-specific amendments",
+      "decision": "external_reference_only_no_bulk_ingestion",
+      "notes": "LARA listed 2015 Michigan Residential Code current as of 2026-11-05; 2021 residential update paused in litigation. Separate building, electrical, plumbing and mechanical editions may differ; check authoritative site at use time."
+    },
+    {
+      "id": "code_check_complete_3rd",
+      "title": "Code Check Complete, 3rd Edition",
+      "agency": "Code Check publisher",
+      "edition_year": 2023,
+      "format": "commercial print/eBook",
+      "download_url": "https://codecheck.com/product/code-check-complete-ebook/",
+      "source_rights": "Copyright; $74.99 eBook; individual license explicitly forbids shared-network availability; no free unrestricted full edition found",
+      "proposed_use": "Optional external individual reference only if purchased, or licensed corporate rights if negotiated",
+      "decision": "blocked_for_agent_ingestion_without_explicit_license"
+    }
+  ],
+  "review_controls": {
+    "no_unlicensed_bulk_download": true,
+    "no_training_or_redistribution_without_rights": true,
+    "verify_external_rights_by_section": true,
+    "record_sha256_for_fetched_bytes": true,
+    "attribution_and_no_government_endorsement": true,
+    "distinguish_current_code_from_older_educational_guides": true,
+    "source_back_each_customer_claim": true,
+    "independent_qualified_inspector_signoff": true,
+    "never_relabel_references_as_on_site_evidence": true,
+    "customer_release_authorized": false
+  },
+  "status": "SOURCE_DISCOVERY_REGISTERED_ONLY_NOT_INGESTED_OR_APPROVED"
+}
