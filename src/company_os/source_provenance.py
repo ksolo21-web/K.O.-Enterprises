@@ -110,7 +110,8 @@ def validate_source_url(url: str, allowed_hosts: Sequence[str]) -> str:
     if (
         part.scheme != "https" or not host or part.username is not None
         or part.password is not None or part.fragment or port not in (None, 443)
-        or not part.path.startswith(("/", "")) or not part.netloc
+        or (bool(part.path) and not part.path.startswith("/"))
+        or part.path.startswith("//") or not part.netloc
     ):
         raise EvidenceError("only exact approved HTTPS origins without credentials are allowed")
     if not host.isascii() or not _HOST.fullmatch(host) or host.endswith("."):
@@ -367,12 +368,20 @@ class SourceLedger:
             raise EvidenceError("URL cannot be silently assigned to a different document ID")
         prior = same_doc[-1][1] if same_doc else None
         if prior:
+            if (prior["origin_id"] != origin or prior["publisher"] != pub
+                    or prior["source_kind"] != source_kind):
+                raise EvidenceError("issuer identity or source kind changed; reconcile explicitly")
             old = _utc(prior["observed_at"])
             if observed < old:
                 raise EvidenceError("out-of-order capture requires a separate reconciliation")
             if observed == old:
-                if prior["content_sha256"] != digest:
-                    raise EvidenceError("two different snapshots at identical observation time")
+                if (prior["content_sha256"] != digest or prior["title"] != name
+                        or prior["evidence_excerpt"] != quote
+                        or prior["acquisition_reference"] != reference
+                        or prior["complete_document_asserted"] != complete_document
+                        or prior["rights_basis"] != rights_basis
+                        or prior["acquisition_method"] != acquisition_method):
+                    raise EvidenceError("conflicting snapshots or metadata at identical time")
                 return SnapshotResult(
                     same_doc[-1][0], prior["snapshot_id"], "IDEMPOTENT",
                     prior.get("previous_snapshot_id"), prior["excerpt_offset"],
@@ -519,9 +528,12 @@ class SourceLedger:
             "latest_documents": len(documents),
             "claims": summaries,
             "active_conflicts": {k: sorted(v) for k, v in sorted(conflicts.items())},
-            "source_changes_to_review": sorted(
-                d for d, p in documents.items() if p["observation"] == "CHANGED_RECHECK_REQUIRED"
-            ),
+            # Without authenticated resolution events, retain every historical
+            # source change as an open review item, including after unchanged rechecks.
+            "source_changes_to_review": sorted({
+                p["document_id"] for p in sources_by_id.values()
+                if p["observation"] == "CHANGED_RECHECK_REQUIRED"
+            }),
             "ledger": self.audit(),
         }
 
