@@ -166,6 +166,33 @@ class ApprovedSourceFetchTests(unittest.TestCase):
                 "detroitmi.gov", "detroitmi.gov.evil.com"
             )))
 
+    def test_fetch_worker_has_only_public_verify_key(self):
+        self.assertIn("KO_SOURCE_PERMIT_PUBLIC_KEY_B64", os.environ)
+        self.assertNotIn("KO_SOURCE_ACCESS_POLICY_KEY", os.environ)
+        self.assertNotIn("KO_SOURCE_PERMIT_PRIVATE_KEY", os.environ)
+
+    def test_untrusted_private_signer_cannot_issue_permit(self):
+        permit = self.permit()
+        raw = json.dumps(permit["target"], sort_keys=True, ensure_ascii=False,
+                         separators=(",", ":"), allow_nan=False).encode()
+        rogue = Ed25519PrivateKey.generate()
+        permit["signature"] = base64.b64encode(rogue.sign(raw)).decode("ascii")
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(permit)
+
+    def test_old_signed_schema_is_not_accepted_as_new_policy(self):
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(self.permit(schema_version="1.0"))
+
+    def test_wrong_public_key_refuses_correctly_signed_permit(self):
+        permit = self.permit()
+        another = Ed25519PrivateKey.generate().public_key().public_bytes_raw()
+        os.environ["KO_SOURCE_PERMIT_PUBLIC_KEY_B64"] = base64.b64encode(
+            another
+        ).decode("ascii")
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(permit)
+
     def test_bad_key_length_fails_closed(self):
         os.environ["KO_SOURCE_PERMIT_PUBLIC_KEY_B64"] = "short"
         with self.assertRaises(EvidenceError):
