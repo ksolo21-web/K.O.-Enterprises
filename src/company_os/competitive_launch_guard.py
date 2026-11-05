@@ -81,6 +81,12 @@ MAX_SOURCE_AGE = timedelta(hours=24)
 MAX_REVIEW_AGE = timedelta(hours=1)
 MAX_ATTESTATION_BYTES = 65_536
 
+# Hard stop: a signed heartbeat cannot certify that an authenticated production
+# release controller, real external monitor and genuinely separate critic exist.
+# Change only in a separate owner-approved, independently reviewed activation PR
+# after ALL launch acceptance demonstrations in the operations blueprint.
+PRODUCTION_RELEASE_CONTROLLER_CERTIFIED = False
+
 
 @dataclass(frozen=True, slots=True)
 class EngineReadiness:
@@ -261,3 +267,20 @@ def inspect_competitive_readiness(
         engine_id=payload.get("engine_id") if nonblank("engine_id") else None,
         cycle_id=payload.get("cycle_id") if nonblank("cycle_id") else None,
     )
+
+def inspect_venture_launch_prerequisite(
+    repo_root: str | os.PathLike[str] | None = None,
+    *,
+    now: datetime | None = None,
+) -> EngineReadiness:
+    """Require both credible engine status AND separately certified release path."""
+    health = inspect_competitive_readiness(repo_root=repo_root, now=now)
+    if not PRODUCTION_RELEASE_CONTROLLER_CERTIFIED:
+        return EngineReadiness(
+            False,
+            health.reasons + ("production_release_controller_not_certified",),
+            health.checked_at,
+            health.engine_id,
+            health.cycle_id,
+        )
+    return health
