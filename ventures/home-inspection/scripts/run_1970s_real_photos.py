@@ -119,7 +119,7 @@ CASE_NOTES = {
     ),
     "P08": (
         "Darkened grout and sealant at a wet-area transition may reflect soiling, deterioration or prolonged moisture exposure; no hidden leak is visible.",
-        "Examine caulk/grout adhesion, tub-to-wall seals, ventilation and substrate moisture onsite. Do not diagnose mold species from color.",
+        "Examine caulk/grout adhesion, tub-to-wall seals, ventilation, adjacent wall finishes and substrate moisture onsite. Do not diagnose mold species from color.",
         "Classify as an unresolved bathroom finish/possible moisture concern, not as confirmation of failed waterproofing at the described home.",
     ),
     "P09": (
@@ -129,7 +129,7 @@ CASE_NOTES = {
     ),
     "P10": (
         "Ceiling-tile discoloration may reflect past or recurring moisture, but no active drip, wetness or ceiling support condition can be inferred from a still.",
-        "Inspect roof/plumbing/HVAC sources above the affected area and use moisture measurements where appropriate before replacing finishes.",
+        "Inspect roof/plumbing/HVAC sources above the affected area, document ceiling stability, and use moisture measurements where appropriate before replacing finishes.",
         "Do not assert a connection to the unrelated roof photograph. The room identity and moisture timeline are absent.",
     ),
     "P11": (
