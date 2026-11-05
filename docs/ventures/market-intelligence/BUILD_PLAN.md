@@ -21,6 +21,8 @@
 - **CE-4:** Wire every real launch/deployment connector to the same authenticated release controller and demonstrate no bypass, pause precedence, source freshness and approval.
 - **CE-5:** Only after actual production readiness demonstrations and explicit owner approval may individual K.O. businesses seek their separate launch authorization.
 
+**Partial CE-1A implementation:** The [offline source-provenance ledger](../../strategy/CE1_SOURCE_PROVENANCE.md) captures lawful operator-supplied HTML/text snapshots, checks exact quoted evidence, tracks changed source versions and contradictory structured values, and blocks independent-verification claims. This is an engineering increment only: original-source authentication, all bid attachments, competing evidence, independent review and automatic lawful collection remain unbuilt. **CE-1 / M1 is NOT complete.**
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
