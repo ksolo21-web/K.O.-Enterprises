@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**CE-1C3c isolated signer IPC prototype (not live):** [One-shot Linux signer process and authenticated local socket](docs/strategy/CE1C3C_SIGNER_PROCESS_IPC.md), with root-policy, peer UID, byte binding and unverified local receipts. Cross-UID production key custody and original issuer authentication remain unavailable.
+
 **CE-1C3b trust/revocation prototype (not live):** [Root-signed signer registry and staging-only replay audit](docs/strategy/CE1C3B_CAPTURE_TRUST.md). Verifies keys/roles/revocations, local file bytes, and non-replayed receipts without certifying original issuer authenticity or activating production.
 
 **CE-1C3a PDF staging prototype:** [Permissioned HTTPS PDF and issuer-listing capture](docs/strategy/CE1C3A_APPROVED_PDF_CAPTURE.md). V3 PDF-only signed permits, private ignored storage and no signer/release capability. Tests are simulated and `PAUSE_AUTONOMY` remains active.

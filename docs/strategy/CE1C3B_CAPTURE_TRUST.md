@@ -46,6 +46,8 @@ The **CE-1C2** bundle expects `capture_method=approved_tls_fetch` asserted by a 
 
 No external source-fetch service was activated and no production private key, live signed source receipt, copyrighted issuer document or real client data is committed.
 
+**CE-1C3c increment:** [One-request signed staging IPC prototype](CE1C3C_SIGNER_PROCESS_IPC.md) runs a bounded Unix socket signer in a separate Linux process, with client and server peer checks. Tests use the same OS UID and are not proof of production-grade key isolation. The signer still cannot certify an original issuer source.
+
 ### Next critical path
 
 **CE-1C3c:** separately isolated signer and authenticated actual retrieval-receipt handoff with revocation propagation and external durable audit anchor; cross-check the issuer's complete addenda and bid-portal versions. Then **CE-1D/CE-3:** independent reviewer on original pages, version digests and adversarial competitor intelligence. Then **CE-2/4/5:** genuinely running company-wide service and production release safeguards.

@@ -33,6 +33,8 @@
 
 **CE-1C3b partial checkpoint:** [Offline governed staging attestations](../../strategy/CE1C3B_CAPTURE_TRUST.md) add root-signed key registries, signer/receipt revocation checks, replay protection and file byte binding. Signer isolation, true issuer provenance, externally anchored audit, independent review and real production operations are **not complete**. CE-1/M1 remains unaccepted.
 
+**CE-1C3c engineering increment:** [Linux one-request signer IPC](../../strategy/CE1C3C_SIGNER_PROCESS_IPC.md) adds a distinct process, SO_PEERCRED checks and signed reply verification. CI same-UID demonstrations are NOT real production isolation, and original issuer capture, separate key custody, external audit, independent critic and overall CE-1/M1 acceptance remain blocked.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
