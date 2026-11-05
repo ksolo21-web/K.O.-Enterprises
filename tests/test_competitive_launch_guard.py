@@ -122,11 +122,21 @@ class CompetitiveLaunchGuardTests(unittest.TestCase):
         self.write_signed()
         health = inspect_competitive_readiness(self.root, now=self.time)
         self.assertTrue(health.ready, health.reasons)
-        decision = evaluate_action(
+        blocked = evaluate_action(
             ActionRequest(action="launch_business"),
             approval=self.approved("launch_business"),
             repo_root=self.root,
         )
+        self.assertFalse(blocked.allowed)
+        self.assertTrue(blocked.blocked_by_competitive_engine)
+        self.assertIn("production_release_controller_not_certified", blocked.reason)
+        # Simulates FUTURE certified controller only; not production authority.
+        with patch("company_os.competitive_launch_guard.PRODUCTION_RELEASE_CONTROLLER_CERTIFIED", True):
+            decision = evaluate_action(
+                ActionRequest(action="launch_business"),
+                approval=self.approved("launch_business"),
+                repo_root=self.root,
+            )
         self.assertTrue(decision.allowed)
         self.assertEqual(7, decision.approval_id)
 
@@ -320,11 +330,20 @@ class CompetitiveLaunchGuardTests(unittest.TestCase):
     def test_publish_authorization_needs_competitive_gate_and_approval(self):
         self.write_signed()
         action = "publish_authorized"
-        decision = evaluate_action(
+        blocked = evaluate_action(
             ActionRequest(action=action),
             approval=self.approved(action, "policy_gated"),
             repo_root=self.root,
         )
+        self.assertFalse(blocked.allowed)
+        self.assertTrue(blocked.blocked_by_competitive_engine)
+        # Simulate a certified external release controller in isolation.
+        with patch("company_os.competitive_launch_guard.PRODUCTION_RELEASE_CONTROLLER_CERTIFIED", True):
+            decision = evaluate_action(
+                ActionRequest(action=action),
+                approval=self.approved(action, "policy_gated"),
+                repo_root=self.root,
+            )
         self.assertTrue(decision.allowed)
 
     def test_launch_action_synonyms_are_gated_without_external_flag(self):
