@@ -44,6 +44,11 @@ jobs:
       - name: Run unit and safety tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
 
+      - name: Exercise separate numeric Linux UIDs and protected signer secret
+        # Opted-in on this disposable GitHub-hosted runner only. No user
+        # accounts, real issuer/network access, spending or production service.
+        run: sudo -n env GITHUB_ACTIONS=true KO_CE_CROSS_UID_TEST=1 PYTHONPATH=src COMPANY_OS_PAUSED=1 "$(command -v python)" tests/cross_uid_signer_ci.py
+
       - name: Check ImportScope comparison and export behavior
         run: node --test products/importscope/test-engine.cjs
 
