@@ -318,7 +318,16 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.blocked("deadline")
 
     def test_past_deadline_always_blocks(self):
-        self.manifest["evidence"][1]["value"] = "2026-11-01T17:00:00+00:00"
+        # Both the real parsed PDF and the manifest explicitly contain the
+        # same expired deadline: this must reach the actual expiry guard.
+        expired = "2026-11-01T17:00:00+00:00"
+        original = "2026-11-27T18:00:00+00:00"
+        altered_text = self.addendum.replace(original, expired)
+        raw = make_pdf(altered_text)
+        (self.folder / "addendum-1.pdf").write_bytes(raw)
+        self.manifest["documents"][1]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.manifest["evidence"][1]["quote"] = altered_text
+        self.manifest["evidence"][1]["value"] = expired
         self.blocked("deadline expired")
 
     def test_naive_deadline_value_blocks(self):
