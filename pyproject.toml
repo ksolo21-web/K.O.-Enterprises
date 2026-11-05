@@ -9,6 +9,9 @@ description = "Human-governed corporate operating system for K.O. Enterprises"
 requires-python = ">=3.12"
 dependencies = []
 
+[project.optional-dependencies]
+source-verification = ["cryptography==50.0.2"]
+
 [project.scripts]
 company-os = "company_os.cli:main"
 
