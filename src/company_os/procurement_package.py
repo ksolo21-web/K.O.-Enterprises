@@ -172,6 +172,7 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
     by_id: dict[str, dict[str, Any]] = {}
     total_bytes = 0
     addenda_sequences: list[int] = []
+    sequence_by_doc: dict[str, int] = {}
     for row in docs:
         d = _exact(row, _DOC_FIELDS, "document")
         doc_id = _id(d["id"], "document id")
@@ -197,6 +198,7 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
             addenda_sequences.append(seq)
         elif seq is not None:
             raise EvidenceError("non-addendum cannot declare addendum sequence")
+        sequence_by_doc[doc_id] = seq if d["kind"] == "addendum" else 0
         raw = _safe_local_pdf(folder, d["filename"])
         total_bytes += len(raw)
         if total_bytes > MAX_PACKAGE_BYTES:
@@ -246,7 +248,8 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
         if len(quote) < 16 or pages[page_number - 1].count(quote) != 1:
             raise EvidenceError("quote not uniquely present on the declared PDF page")
         entry = {"id": eid, "topic": topic, "value": value, "document_id": doc_id,
-                 "page": page_number, "sha256": by_id[doc_id]["sha256"]}
+                 "page": page_number, "quote": quote,
+                 "sha256": by_id[doc_id]["sha256"]}
         evidence[eid] = entry
         by_topic.setdefault(topic, []).append(entry)
     # Each addendum must have at least one inspected quote, including
@@ -275,12 +278,27 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
             evidence[resolution_by_topic[topic]]
             if topic in resolution_by_topic else rows[0]
         )
+        if len(distinct) > 1 and sequence_by_doc[chosen["document_id"]] < max(
+            sequence_by_doc[r["document_id"]] for r in rows
+        ):
+            raise EvidenceError("resolution selects obsolete pre-addendum evidence")
         selected_values[topic] = chosen["value"]
     if any(topic not in by_topic for topic in resolution_by_topic):
         raise EvidenceError("conflict resolution references absent topic")
     if "submission.deadline" not in selected_values:
         raise EvidenceError("submission deadline source evidence missing")
     deadline = _timestamp(selected_values["submission.deadline"])
+    # A researcher cannot assign a deadline unrelated to the exact quoted
+    # page. Only an exact ISO value in the quotation is machine checkable in
+    # this version; other printed formats remain BLOCK until an independently
+    # reviewed parser/evidence protocol handles them.
+    selected_deadline = (
+        evidence[resolution_by_topic["submission.deadline"]]
+        if "submission.deadline" in resolution_by_topic
+        else by_topic["submission.deadline"][0]
+    )
+    if selected_deadline["value"] not in selected_deadline["quote"]:
+        raise EvidenceError("deadline value is not literally supported by quoted PDF text")
     if deadline <= now:
         raise EvidenceError("submission deadline expired; no current bid advice")
     events = _list(manifest["mandatory_events"], "mandatory events", 20)
@@ -296,13 +314,16 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
         if eid not in evidence or not evidence[eid]["topic"].startswith("mandatory."):
             raise EvidenceError("mandatory event missing a matching PDF citation")
         when = _timestamp(v["occurs_at"])
+        if v["occurs_at"] not in evidence[eid]["quote"]:
+            raise EvidenceError("mandatory event time is not literally supported by cited PDF text")
         attend = v["attendance"]
         if attend not in ("unknown", "confirmed", "not_attended", "waiver_claimed"):
             raise EvidenceError("unknown mandatory event attendance state")
         waiver = v["waiver_evidence_id"]
         if attend == "waiver_claimed":
-            if not isinstance(waiver, str) or waiver not in evidence:
-                raise EvidenceError("claimed waiver lacks source-page evidence")
+            if (not isinstance(waiver, str) or waiver not in evidence
+                    or evidence[waiver]["topic"] != "mandatory.waiver"):
+                raise EvidenceError("claimed waiver lacks specifically cited waiver evidence")
         elif waiver is not None:
             raise EvidenceError("waiver citation not applicable")
         if when <= now and attend in ("unknown", "not_attended"):
