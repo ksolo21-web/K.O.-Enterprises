@@ -263,21 +263,42 @@ class StagingTrustLedger:
     Independent durable anchoring and external identity remain blockers.
     """
 
-    def __init__(self, repo_root: Path | str):
+    def __init__(
+        self, repo_root: Path | str, *,
+        shared_parent_gid: int | None = None,
+    ):
         root = Path(repo_root).resolve()
         if not root.is_dir():
             raise EvidenceError("trust root unavailable")
+        if shared_parent_gid is not None and (
+            type(shared_parent_gid) is not int or shared_parent_gid < 0
+        ):
+            raise EvidenceError("invalid protected shared group")
         self.root = root
         directory = root
         for part in ("state", "competitive_engine", "trust"):
             directory = directory / part
             if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
                 raise EvidenceError("trust state path unsafe")
-            directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+            if shared_parent_gid is not None and part != "trust":
+                # Protected provisioner creates 0710 group-executable parents.
+                # Do NOT chmod them to 0700 and break the other-UID reader.
+                if not directory.is_dir():
+                    raise EvidenceError("shared trust parent not provisioned")
+                info = directory.stat()
+                if (info.st_gid != shared_parent_gid
+                        or info.st_mode & 0o007
+                        or info.st_mode & 0o020
+                        or info.st_mode & 0o010 == 0):
+                    raise EvidenceError("shared trust parent has unsafe permissions")
+            else:
+                directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+                if os.name == "posix":
+                    directory.chmod(0o700)
             if not directory.resolve().is_relative_to(root):
                 raise EvidenceError("trust state escapes repository")
-            if os.name == "posix":
-                directory.chmod(0o700)
+        if shared_parent_gid is not None and directory.stat().st_uid != os.geteuid():
+            raise EvidenceError("signer does not own private trust directory")
         self.path = directory / "staging_trust.sqlite3"
         if self.path.is_symlink():
             raise EvidenceError("trust state database symlink forbidden")
