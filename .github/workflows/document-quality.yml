@@ -1,0 +1,56 @@
+name: Document quality (offline, no release)
+
+on:
+  pull_request:
+    paths:
+      - 'src/company_os/document_quality*.py'
+      - 'tests/test_document_quality.py'
+      - 'docs/ventures/market-intelligence/**'
+      - 'examples/intelligence-quality-demo/**'
+      - '.github/workflows/document-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: document-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-critic-tests:
+    name: Fail-closed safety and critic tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COMPANY_OS_PAUSED: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPATH: src
+    steps:
+      - name: Check out repository without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Assert emergency pause remains enabled
+        run: test -f PAUSE_AUTONOMY
+      - name: Compile new modules
+        run: python -m compileall -q -f src/company_os/document_quality.py src/company_os/document_quality_batch.py tests/test_document_quality.py
+      - name: Run adversarial and batch tests
+        run: python -m unittest discover -s tests -p 'test_document_quality.py' -v
+      - name: Deliberately unapproved synthetic draft must be blocked
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from company_os.document_quality import audit_pack
+          from datetime import date
+          result = audit_pack(Path('examples/intelligence-quality-demo'), date(2026, 11, 5), public_repo=True)
+          assert result['status'] == 'BLOCK', result
+          assert any('NO_REVIEW' in e for e in result['errors']), result
+          print('Fail-closed synthetic draft verified; no report released.')
+          PY
+      - name: Assert no tracked files were changed
+        run: git diff --exit-code -- .
