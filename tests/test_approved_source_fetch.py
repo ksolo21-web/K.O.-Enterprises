@@ -420,8 +420,8 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         for update in (
             {"permit_id":"test;injected-header"},
             {"permit_id":"bad\\path"},
-            {"publisher":"malformed\\nPublisher"},
-            {"approved_by":"bad\\nUser"},
+            {"publisher":"malformed\nPublisher"},
+            {"approved_by":"bad\nUser"},
         ):
             with self.subTest(update=update), self.assertRaises(EvidenceError):
                 inspect_source_permit(self.permit(**update))
