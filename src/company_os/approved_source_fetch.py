@@ -9,8 +9,9 @@ The transport authenticates TLS to a DNS name, not the truth of the source.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
-import hmac
 import http.client
 import ipaddress
 import json
@@ -88,12 +89,26 @@ def _canonical(payload: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
-def _source_policy_key() -> bytes:
-    raw = os.environ.get("KO_SOURCE_ACCESS_POLICY_KEY", "")
-    key = raw.encode("utf-8")
-    if len(key) < 32 or len(key) > 512:
-        raise EvidenceError("independent source-policy signing key unavailable")
-    return key
+def _verify_governance_signature(signed: bytes, signature: Any) -> None:
+    """Verify Ed25519 with a public key only; NO signer secret in fetch worker."""
+    try:
+        from cryptography.exceptions import InvalidSignature
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+    except ImportError as exc:
+        raise EvidenceError("Ed25519 verifier dependency unavailable") from exc
+
+    encoded_public = os.environ.get("KO_SOURCE_PERMIT_PUBLIC_KEY_B64", "")
+    if not isinstance(signature, str) or len(signature) != 88:
+        raise EvidenceError("source permit signature malformed")
+    try:
+        raw_public = base64.b64decode(encoded_public, validate=True)
+        raw_signature = base64.b64decode(signature, validate=True)
+        if len(raw_public) != 32 or len(raw_signature) != 64:
+            raise EvidenceError("source permit key/signature size invalid")
+        public_key = Ed25519PublicKey.from_public_bytes(raw_public)
+        public_key.verify(raw_signature, signed)
+    except (ValueError, binascii.Error, InvalidSignature) as exc:
+        raise EvidenceError("source permit signature or trusted public key invalid") from exc
 
 
 def inspect_source_permit(
@@ -103,9 +118,10 @@ def inspect_source_permit(
 ) -> dict[str, Any]:
     """Validate an exact-target permit issued by separate trusted governance.
 
-    This verifies a signature, not whether an issuer's website is truthful.
-    The signing key MUST be protected from researchers/fetcher workers in
-    production. Only a privileged approval service should issue envelopes.
+    This verifies an Ed25519 signature using a PROVISIONED PUBLIC KEY ONLY,
+    not whether an issuer's website is truthful. The private signing key must
+    stay with a separately authenticated governance issuer; the fetch worker
+    must never possess it. Key custody/rotation/revocation need live controls.
     """
     moment = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     if not isinstance(envelope, Mapping) or set(envelope) != {"target", "signature"}:
@@ -117,13 +133,9 @@ def inspect_source_permit(
     signed = _canonical(target)
     if len(signed) > POLICY_LIMIT:
         raise EvidenceError("source authorization exceeds size budget")
-    if not isinstance(signature, str) or len(signature) != 64:
-        raise EvidenceError("source authorization signature invalid")
-    expected = hmac.new(_source_policy_key(), signed, hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(signature, expected):
-        raise EvidenceError("source authorization signature invalid")
+    _verify_governance_signature(signed, signature)
 
-    if target["schema_version"] != "1.0":
+    if target["schema_version"] != "2.0":
         raise EvidenceError("unsupported source authorization schema")
     for field in ("publisher", "title", "origin_id", "approved_by", "permit_id"):
         v = target[field]
