@@ -73,6 +73,13 @@ CEO_REQUIRED_ACTIONS = frozenset(
         "delete_revenue_asset",
         "expand_permissions",
         "speak_as_ceo",
+        "launch_business",
+        "activate_business",
+        "launch_venture",
+        "launch_product",
+        "activate_product",
+        "start_revenue_operations",
+        "deploy_competitive_engine",
     }
 )
 
@@ -112,6 +119,7 @@ class PolicyDecision:
     reason: str
     approval_required: bool = False
     blocked_by_pause: bool = False
+    blocked_by_competitive_engine: bool = False
     approval_id: int | None = None
 
 
@@ -267,6 +275,27 @@ def evaluate_action(
             ),
             blocked_by_pause=True,
         )
+
+    # Every business launch, public deployment and publication must first
+    # pass the competitive engine readiness gate. Approval is not a bypass.
+    # The dedicated engine bootstrap path is separate and CEO-reserved.
+    from .competitive_launch_guard import (
+        inspect_competitive_readiness,
+        requires_competitive_engine,
+    )
+
+    if requires_competitive_engine(request.action):
+        engine_status = inspect_competitive_readiness(repo_root=repo_root)
+        if not engine_status.ready:
+            return PolicyDecision(
+                allowed=False,
+                approval_class=required_class,
+                reason=(
+                    "Competitive engine is not verified live and healthy: "
+                    + ", ".join(engine_status.reasons)
+                ),
+                blocked_by_competitive_engine=True,
+            )
 
     if required_class is ApprovalClass.AUTO_ALLOWED:
         return PolicyDecision(
