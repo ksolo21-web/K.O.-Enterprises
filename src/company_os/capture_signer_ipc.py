@@ -177,16 +177,16 @@ def serve_one(
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
             sock.settimeout(TIMEOUT_SECONDS)
             sock.bind(str(addr))
-            if shared_group_gid is None:
-                addr.chmod(0o600)
-            else:
-                # This is only valid for a root-provisioned setgid directory.
-                # Never create/change a shared group or widen parents here.
-                if addr.stat().st_gid != shared_group_gid:
-                    raise EvidenceError("signer socket inherited wrong approved group")
-                addr.chmod(0o660)
-            sock.listen(1)
             try:
+                if shared_group_gid is None:
+                    addr.chmod(0o600)
+                else:
+                    # Only valid with a preprovisioned setgid directory.
+                    # Always unlink on failure, including wrong socket group.
+                    if addr.stat().st_gid != shared_group_gid:
+                        raise EvidenceError("signer socket inherited wrong approved group")
+                    addr.chmod(0o660)
+                sock.listen(1)
                 conn, _ = sock.accept()
                 with conn:
                     conn.settimeout(TIMEOUT_SECONDS)
