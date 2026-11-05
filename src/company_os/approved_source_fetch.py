@@ -25,6 +25,7 @@ from typing import Any, Mapping
 from urllib.parse import urlsplit
 
 from .policy import ActionRequest, enforce_action
+from .pdf_evidence import MAX_PDF_BYTES
 from .source_provenance import (
     ACQUISITION_METHODS, MAX_SOURCE_BYTES, MEDIA_TYPES, RIGHTS_BASIS,
     SOURCE_KINDS, EvidenceError, SourceLedger, SnapshotResult,
@@ -42,6 +43,7 @@ _POLICY_FIELDS = frozenset({
     "source_kind", "rights_basis", "approved_by", "approved_at",
     "expires_at", "permit_id", "max_bytes",
 })
+_PDF_POLICY_FIELDS = _POLICY_FIELDS | {"media_type"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,15 +130,26 @@ def inspect_source_permit(
         raise EvidenceError("source authorization envelope must be exact")
     target = envelope.get("target")
     signature = envelope.get("signature")
-    if not isinstance(target, dict) or set(target) != _POLICY_FIELDS:
-        raise EvidenceError("source authorization fields missing or unexpected")
+    # V2 remains narrowly text/HTML-scoped. The PDF capability requires an
+    # independently issued V3 permit naming application/pdf explicitly.
+    if not isinstance(target, dict) or (
+        (target.get("schema_version") == "2.0" and set(target) != _POLICY_FIELDS)
+        or (target.get("schema_version") == "3.0" and set(target) != _PDF_POLICY_FIELDS)
+        or target.get("schema_version") not in ("2.0", "3.0")
+    ):
+        raise EvidenceError("source authorization fields or version invalid")
     signed = _canonical(target)
     if len(signed) > POLICY_LIMIT:
         raise EvidenceError("source authorization exceeds size budget")
     _verify_governance_signature(signed, signature)
 
-    if target["schema_version"] != "2.0":
-        raise EvidenceError("unsupported source authorization schema")
+    if target["schema_version"] == "3.0":
+        if target["media_type"] != "application/pdf":
+            raise EvidenceError("V3 source permit requires explicit PDF media type")
+    else:
+        # Preserve the exact old policy; never reinterpret V2 as PDF access.
+        if "media_type" in target:
+            raise EvidenceError("V2 permit cannot authorize PDF")
     for field in ("publisher", "title", "origin_id", "approved_by", "permit_id"):
         v = target[field]
         if (not isinstance(v, str) or not v.strip() or len(v) > 160
@@ -149,7 +162,9 @@ def inspect_source_permit(
     if target["rights_basis"] not in RIGHTS_BASIS:
         raise EvidenceError("unspecified lawful source access")
     limit = target["max_bytes"]
-    if type(limit) is not int or not 20 <= limit <= MAX_TARGET_BYTES:
+    maximum = MAX_PDF_BYTES if target["schema_version"] == "3.0" else MAX_TARGET_BYTES
+    minimum = 100 if target["schema_version"] == "3.0" else 20
+    if type(limit) is not int or not minimum <= limit <= maximum:
         raise EvidenceError("source size allowance outside safe bounds")
     allowed_url = target["target_url"]
     if not isinstance(allowed_url, str):
@@ -240,8 +255,20 @@ class _PinnedHTTPSConnection(http.client.HTTPSConnection):
             raise
 
 
-def _download_https(url: str, limit: int) -> tuple[bytes, str, str, str, str]:
-    """Read one *non-redirected* TLS-authenticated UTF-8 source into bounded RAM."""
+def _download_https(
+    url: str, limit: int, *, expected_media: str = "text",
+) -> tuple[bytes, str, str, str, str]:
+    """Read one bounded non-redirected TLS response with an explicit media policy.
+
+    Default remains text-only. PDF mode must be called only after a checked V3
+    signed PDF permit and company action approval.
+    """
+    if expected_media not in ("text", "application/pdf"):
+        raise EvidenceError("unsupported requested media type")
+    if type(limit) is not int or not 20 <= limit <= (
+        MAX_PDF_BYTES if expected_media == "application/pdf" else MAX_TARGET_BYTES
+    ):
+        raise EvidenceError("download limit violates media type policy")
     host = urlsplit(url).hostname
     if not host:
         raise EvidenceError("URL lacks hostname")
@@ -255,7 +282,8 @@ def _download_https(url: str, limit: int) -> tuple[bytes, str, str, str, str]:
             headers={
                 "Host": host,
                 "User-Agent": "KO-ResearchSource/0.1 (approved-bounded-read)",
-                "Accept": "text/html, text/plain",
+                "Accept": "application/pdf" if expected_media == "application/pdf"
+                          else "text/html, text/plain",
                 "Accept-Encoding": "identity",
                 "Connection": "close",
             },
@@ -299,9 +327,12 @@ def _download_https(url: str, limit: int) -> tuple[bytes, str, str, str, str]:
             raise EvidenceError("missing or ambiguous source content type")
         mime_components = [item.strip().lower() for item in types[0].split(";")]
         media_type = mime_components[0]
-        if media_type not in MEDIA_TYPES:
+        if expected_media == "application/pdf":
+            if media_type != "application/pdf" or len(mime_components) != 1:
+                raise EvidenceError("PDF source returned unexpected media type or charset")
+        elif media_type not in MEDIA_TYPES:
             raise EvidenceError("unexpected source media type")
-        if len(mime_components) > 2 or (
+        elif len(mime_components) > 2 or (
             len(mime_components) == 2
             and mime_components[1] not in ("charset=utf-8", "charset=utf8", "charset=us-ascii")
         ):
@@ -317,8 +348,12 @@ def _download_https(url: str, limit: int) -> tuple[bytes, str, str, str, str]:
         raw = response.read(limit + 1)
         if len(raw) > limit:
             raise EvidenceError("source body exceeds hard byte cap")
-        # Confirm the bytes are a valid, visible, non-binary text/HTML source.
-        extract_snapshot_text(raw, media_type)
+        if expected_media == "application/pdf":
+            if len(raw) < 100 or not raw.startswith(b"%PDF-"):
+                raise EvidenceError("PDF source body is not a valid PDF candidate")
+            # The isolated PDF parser is invoked by the staging layer.
+        else:
+            extract_snapshot_text(raw, media_type)
         return raw, media_type, ip_string, hashlib.sha256(certificate).hexdigest(), tls_version
     except (OSError, ssl.SSLError, http.client.HTTPException) as exc:
         raise EvidenceError("TLS/HTTP source retrieval failed") from exc
@@ -349,6 +384,8 @@ def fetch_and_capture(
         approval=approval, repo_root=repo_root,
     )
     allowed = inspect_source_permit(permit)
+    if allowed["schema_version"] != "2.0":
+        raise EvidenceError("text snapshot capture rejects PDF-scoped permit")
     url = allowed["target_url"]
     raw, mime, pinned_ip, cert_sha, tls = _download_https(
         url, allowed["max_bytes"],
