@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import sqlite3
@@ -12,7 +14,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from company_os.source_provenance import (
-    EvidenceError, SourceLedger, extract_snapshot_text, validate_source_url,
+    EvidenceError, SourceLedger, extract_snapshot_text, validate_source_url, main,
 )
 
 
@@ -399,6 +401,72 @@ class SourceProvenanceTests(unittest.TestCase):
             (fake_root / "state").symlink_to(other, target_is_directory=True)
             with self.assertRaises(EvidenceError):
                 SourceLedger(fake_root)
+
+    def test_cli_full_capture_claim_status_and_audit(self):
+        sample = self.root / "sample_source.html"
+        sample.write_bytes(self.raw)
+        instant = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        def run_cli(args):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                exit_code = main(["--repo-root", str(self.root), *args])
+            self.assertEqual(0, exit_code)
+            return json.loads(out.getvalue())
+        stored = run_cli([
+            "capture", "--document-id", "detroit-demo",
+            "--url", "https://detroitmi.gov/public-programs/",
+            "--allow-host", "detroitmi.gov", "--publisher", "Demo Agency",
+            "--title", "Program Listing", "--origin-id", "demo-agency",
+            "--source-kind", "issuer_primary",
+            "--acquisition-method", "operator_supplied",
+            "--acquisition-reference", "test-operator-2026",
+            "--rights-basis", "public_access",
+            "--observed-at", instant,
+            "--media-type", "text/html",
+            "--source-file", str(sample),
+            "--evidence-excerpt", "Janitorial Schedule 2 is limited to certified firms.",
+        ])
+        self.assertFalse(stored["publication_authorized"])
+        self.assertEqual(stored["observation"], "NEW")
+        claimed = run_cli([
+            "claim", "--claim-id", "claim-demo", "--claim-key", "demo.eligibility",
+            "--value", "restricted", "--text", "Demo schedule is restricted",
+            "--claim-type", "eligibility", "--snapshot-id", stored["snapshot_id"],
+            "--evidence-quote", "limited to certified firms",
+            "--reasoning", "Quoted words are present; interpretation not yet independently reviewed.",
+            "--recorded-at", instant,
+        ])
+        self.assertEqual(claimed["status"], "HOLD_INDEPENDENT_REVIEW")
+        self.assertFalse(claimed["publication_authorized"])
+        status = run_cli(["status"])
+        self.assertEqual(status["total_snapshots"], 1)
+        self.assertEqual(len(status["claims"]), 1)
+        self.assertEqual(status["claims"][0]["status"], "HOLD_INDEPENDENT_REVIEW")
+        self.assertEqual(run_cli(["audit"])["integrity"], "CHAIN_VALID_UNANCHORED")
+
+    def test_cli_missing_excerpt_refuses_capture_without_an_event(self):
+        sample = self.root / "short_source.txt"
+        sample.write_text("This is a synthetic example of a document with unrelated words.")
+        from contextlib import redirect_stderr
+        err = io.StringIO()
+        with redirect_stderr(err):
+            code = main([
+                "--repo-root", str(self.root), "capture",
+                "--document-id", "demo-doc", "--url", "https://detroitmi.gov/example",
+                "--allow-host", "detroitmi.gov",
+                "--publisher", "Example", "--title", "Example Document",
+                "--origin-id", "example-source", "--source-kind", "other",
+                "--acquisition-method", "operator_supplied",
+                "--acquisition-reference", "local-synthetic",
+                "--rights-basis", "public_access",
+                "--observed-at", datetime.now(timezone.utc).isoformat(),
+                "--media-type", "text/plain",
+                "--source-file", str(sample),
+                "--evidence-excerpt", "This exact statement is definitely absent.",
+            ])
+        self.assertEqual(code, 2)
+        self.assertEqual(json.loads(err.getvalue())["status"], "BLOCK")
+        self.assertEqual(self.ledger.audit()["events"], 0)
 
     def test_no_network_fetch_method_exposed(self):
         self.assertFalse(hasattr(self.ledger, "fetch_url"))
