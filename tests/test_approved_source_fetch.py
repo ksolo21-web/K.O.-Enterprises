@@ -391,6 +391,49 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             self.capture()
 
+    def test_duplicate_content_encoding_rejected(self):
+        response = MockResponse(headers=[
+            ("Content-Type","text/plain"),
+            ("Content-Encoding","identity"),("Content-Encoding","gzip"),
+        ])
+        self.fake_transport(response)
+        with self.assertRaises(EvidenceError):
+            self.capture()
+
+    def test_transfer_encoding_conflicts_and_unknown_values_rejected(self):
+        for headers in (
+            [("Content-Type","text/plain"),("Transfer-Encoding","gzip")],
+            [("Content-Type","text/plain"),("Transfer-Encoding","chunked"),
+             ("Content-Length","77")],
+            [("Content-Type","text/plain"),("Transfer-Encoding","chunked"),
+             ("Transfer-Encoding","chunked")],
+        ):
+            with self.subTest(headers=headers), patch(
+                "company_os.approved_source_fetch._resolve_pinned_endpoint",
+                return_value=(socket.AF_INET,("93.184.216.34",443),"93.184.216.34"),
+            ), patch("company_os.approved_source_fetch._PinnedHTTPSConnection",
+                     return_value=MockConnection(MockResponse(headers=headers))):
+                with self.assertRaises(EvidenceError):
+                    self.capture()
+
+    def test_invalid_permit_metadata_is_refused(self):
+        for update in (
+            {"permit_id":"test;injected-header"},
+            {"permit_id":"bad\\path"},
+            {"publisher":"malformed\\nPublisher"},
+            {"approved_by":"bad\\nUser"},
+        ):
+            with self.subTest(update=update), self.assertRaises(EvidenceError):
+                inspect_source_permit(self.permit(**update))
+
+    def test_permit_is_revalidated_after_network_retrieval(self):
+        self.fake_transport()
+        permit = self.permit()
+        with patch("company_os.approved_source_fetch.inspect_source_permit",
+                   wraps=inspect_source_permit) as inspected:
+            self.capture(permit=permit)
+            self.assertEqual(inspected.call_count,2)
+
     def test_pdf_content_rejected_until_ce1c(self):
         response = MockResponse(body=b"%PDF-1.7" * 15,headers=[
             ("Content-Type","application/pdf"),
