@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**Company-wide strategy standard:** [Competitor Strength, Weakness & Differentiation Standard](docs/strategy/COMPETITIVE_ADVANTAGE_STANDARD.md) — match essential incumbent strengths, outperform on verified buyer-valued weaknesses, and independently prove distinct value before claiming competitive superiority.
+
 **Saved future opportunity (not an active priority):** [K.O. Vendor Connect — B2B service matching and vendor sourcing](docs/ventures/vendor-connect/OPPORTUNITY_SCREEN.md). Its initial demand/competition screen is exploratory; implementation, client outreach and spend remain paused.
 
 
