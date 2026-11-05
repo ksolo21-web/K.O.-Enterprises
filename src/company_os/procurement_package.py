@@ -302,6 +302,19 @@ def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
     if deadline <= now:
         raise EvidenceError("submission deadline expired; no current bid advice")
     events = _list(manifest["mandatory_events"], "mandatory events", 20)
+    # This heuristic catches a common omission in otherwise tidy manifests.
+    # It cannot prove the absence of mandatory events from an issuer packet.
+    event_phrase = re.compile(
+        r"\b(?:mandatory|required)\s+(?:pre[- ]?bid\s+)?"
+        r"(?:site\s+(?:walk|visit)|walkthrough|meeting|conference)\b",
+        re.IGNORECASE,
+    )
+    event_mentioned = any(
+        event_phrase.search(page)
+        for document in by_id.values() for page in document["pages"]
+    )
+    if event_mentioned and not events:
+        raise EvidenceError("mandatory event wording in PDF was omitted from event inventory")
     event_flags: list[str] = []
     used_event_ids: set[str] = set()
     for e in events:
