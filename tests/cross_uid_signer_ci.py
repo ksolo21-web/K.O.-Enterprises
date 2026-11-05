@@ -170,6 +170,9 @@ def main() -> int:
         raise AssertionError("ephemeral test UID collides with existing host account")
 
     with tempfile.TemporaryDirectory(prefix="ko-ci-uid-", dir="/tmp") as temp:
+        # Only synthetic shared group can traverse otherwise-0700 tempfile.
+        os.chown(temp, 0, SHARED_GID)
+        os.chmod(temp, 0o710)
         root = Path(temp)/"synthetic-project"
         directory(root, 0, SHARED_GID, 0o710)
         state = root/"state"
