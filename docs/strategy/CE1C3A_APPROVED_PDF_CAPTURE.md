@@ -42,6 +42,8 @@ For tests only: network and TLS responses are mocked with synthetic PDF files. N
 - Verify that every returned result is still marked unsigned, unauthenticated, independent-critic-unapproved and publication-blocked.
 - Run all repository Python tests, Node ImportScope tests, and document-quality workflow without code changes or client data side effects.
 
+**CE-1C3b follows:** [Signed staging-only attestation and root-governed revocation/replay](CE1C3B_CAPTURE_TRUST.md). This is not a production signer or a genuine issuer TLS capture receipt.
+
 ## Remaining launch blockers
 
 1. **CE-1C3b:** Capture worker and protected signer identity boundary plus genuine immutable receipts, revocation/replay prevention, external issuer policy/rights verification and realistic end-to-end **authorized** original-source integration.

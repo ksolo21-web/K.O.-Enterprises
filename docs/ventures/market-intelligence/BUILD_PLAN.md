@@ -31,6 +31,8 @@
 
 **Partial CE-1C3a engineering:** [PDF/listing capture staging](../../strategy/CE1C3A_APPROVED_PDF_CAPTURE.md) permits single read-only PDF retrieval with distinct V3 permits, bounded isolated parsing and unsigned ignored private storage. Not a protected authorized live fetch, genuine signed receipt, issuer completeness or independently critiqued evidence. **CE-1/M1 still NOT complete.**
 
+**CE-1C3b partial checkpoint:** [Offline governed staging attestations](../../strategy/CE1C3B_CAPTURE_TRUST.md) add root-signed key registries, signer/receipt revocation checks, replay protection and file byte binding. Signer isolation, true issuer provenance, externally anchored audit, independent review and real production operations are **not complete**. CE-1/M1 remains unaccepted.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
