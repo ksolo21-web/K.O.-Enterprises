@@ -232,11 +232,11 @@ def gallery_page(c,number,entries,paths):
         line(c,x,y-282,x+cw,y-282)
         text(c,x,y-306,title,11.4,BOLD,NAVY)
         yy=paragraph(c,x,y-329,description,cw,9.25,14.3,SLATE)
-        text(c,x,min(yy-14,y-403),"SOURCE  "+pid+"  /  CREDITED IN INDEX",7.8,BOLD,TAN)
+        text(c,x,min(yy-16,y-377),"SOURCE  "+pid+"  /  CREDITED IN INDEX",7.8,BOLD,TAN)
     if len(entries)==1:
         text(c,M+cw+20,y-304,"A photograph is not a diagnosis.",11.5,BOLD,NAVY)
         paragraph(c,M+cw+20,y-330,"For a real house, condition, location, causation, measurements and repair scope must be supported by the homeowner's own evidence and appropriate field review.",cw,9.4,14.6,SLATE)
-    y=rulehead(c,y-410,"Use of these examples")
+    y=rulehead(c,y-400,"Use of these examples")
     y=paragraph(c,M,y,"The gallery preserves an explicit distinction: these are photographic comparisons only. No displayed image is being passed off as the inspected house, and no conclusions about hidden or untested materials are implied.",CW,9.5,14.4,SLATE)
     check(y,f"gallery {number}");close(c)
 
