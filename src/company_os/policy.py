@@ -280,12 +280,12 @@ def evaluate_action(
     # pass the competitive engine readiness gate. Approval is not a bypass.
     # The dedicated engine bootstrap path is separate and CEO-reserved.
     from .competitive_launch_guard import (
-        inspect_competitive_readiness,
+        inspect_venture_launch_prerequisite,
         requires_competitive_engine,
     )
 
     if requires_competitive_engine(request.action):
-        engine_status = inspect_competitive_readiness(repo_root=repo_root)
+        engine_status = inspect_venture_launch_prerequisite(repo_root=repo_root)
         if not engine_status.ready:
             return PolicyDecision(
                 allowed=False,
