@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**Protected retrieval prototype (CE-1B, not live):** [Approved DNS-pinned HTTPS source fetch](docs/strategy/CE1B_PROTECTED_SOURCE_FETCH.md) adds an approval-first, permit-scoped text/HTML retrieval path and 46 adversarial tests. CI uses mocked network responses, and no company research fetch is active under PAUSE_AUTONOMY.
+
 **Source-verification implementation (CE-1A, offline only):** [Provenance Ledger and Claim-Hold Workflow](docs/strategy/CE1_SOURCE_PROVENANCE.md). It adds local source capture, source-change tracking and conflict flags, but does not verify the original issuer or authorize client delivery.
 
 **Mandatory pre-launch infrastructure (not live yet):** [Competitive Engine Launch Prerequisite](docs/strategy/COMPETITIVE_ENGINE_LAUNCH_PREREQUISITE.md). No K.O. business may go live before the competitive engine is demonstrably running, independently reviewed and health-verified; company approval and PAUSE_AUTONOMY continue to apply. The current signed-health gate is an internal enforcement prototype, not proof of a deployed production engine.
