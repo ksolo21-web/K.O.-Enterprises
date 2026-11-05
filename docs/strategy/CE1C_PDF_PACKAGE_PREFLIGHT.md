@@ -28,6 +28,8 @@ Required root manifest keys (schema_version `1.0`): `package_id`, `issuer_url`, 
 
 Each `documents` record contains `id`, `filename`, `sha256`, `kind`, `source_url`, `observed_at`, `issuer_reference`, `sequence` (an integer for addenda, otherwise null). Each `evidence` item provides `id`, `topic`, `value`, `document_id`, `page` (1-based), and an actual `quote`. `resolutions` are explicit topic → selected evidence IDs plus a reviewer-needed rationale. Every addendum must have cited source text. `mandatory_events` use source evidence IDs and an explicitly stated attendance status. The issuer discovery record retains checked date, reference, operator-asserted completeness and any known missing records.
 
+**Deliberately strict date policy:** For this first automated preflight, a deadline or mandatory event timestamp must appear **verbatim in ISO-8601 with timezone** in its page-specific quoted PDF text. Dates written only in natural language therefore **block automated acceptance** until we build and independently verify a safe date-interpretation protocol. A conflicting value cannot be resolved by selecting an older notice over a later numbered addendum. Waiver claims need a separate cited issuer waiver statement. These checks prevent a typed value from being mistaken for original-source proof.
+
 ## Critical residual gaps
 
 1. **Issuer completeness is not authenticatable from the local manifest.** An operator can omit an addendum and also incorrectly assert the number expected. Real monitored issuer portal discovery, original signatures, changes/addenda enumeration, procurement-number/contract-scope verification and independent cross-check remain future work.
