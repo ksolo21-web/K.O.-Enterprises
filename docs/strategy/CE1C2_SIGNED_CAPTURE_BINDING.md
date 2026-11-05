@@ -45,6 +45,8 @@ A missing signed sidecar is marked MISSING_SIGNED_ORIGINAL_CAPTURE in legacy mod
 - **No genuine independent human or separate critic.** Visual original pages, bidder eligibility, mandatory attendance, semantic conclusions and buyer context are not verified by this code.
 - **No release/hosting authority.** PAUSE_AUTONOMY remains active. PRODUCTION_RELEASE_CONTROLLER_CERTIFIED=False remains the global hard lock. GitHub Actions is not continuously running production infrastructure.
 
+**CE-1C3a stage:** [Permitted PDF/HTML capture prototype](CE1C3A_APPROVED_PDF_CAPTURE.md) can produce unsigned staged original bytes, not a signed capture receipt. A separate attesting signer and authoritative issuer package collection remain mandatory.
+
 ## Next critical-path engineering
 
 CE-1C3: Build an approved, isolated source-capture worker with legal read-only PDF retrieval, trustworthy receipts from protected key custody, issuer listings and addenda change history. Then CE-1D: attach source-to-claim trace to genuine independent critic and company release controls. Keep Issues #32 and #38 open.
