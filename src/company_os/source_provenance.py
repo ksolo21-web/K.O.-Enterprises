@@ -552,6 +552,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         capture.add_argument("--" + flag, required=True)
     capture.add_argument("--allow-host", action="append", required=True)
     capture.add_argument("--complete-document", action="store_true")
+    claim_cmd = sub.add_parser("claim", help="Bind a claim to a previously captured quote; never certify it")
+    for flag in (
+        "claim-id", "claim-key", "value", "text", "claim-type", "snapshot-id",
+        "evidence-quote", "reasoning", "recorded-at",
+    ):
+        claim_cmd.add_argument("--" + flag, required=True)
     sub.add_parser("status", help="Show review holds, changes and conflicts (no approval)")
     sub.add_parser("audit", help="Validate unanchored append-only event chain")
     args = parser.parse_args(argv)
@@ -577,6 +583,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
                 result: Any = outcome.__dict__ if hasattr(outcome, "__dict__") else {
                     k: getattr(outcome, k) for k in outcome.__dataclass_fields__
+                }
+            elif args.command == "claim":
+                event_id = ledger.claim(
+                    claim_id=args.claim_id, claim_key=args.claim_key,
+                    value=args.value, text=args.text, claim_type=args.claim_type,
+                    snapshot_id=args.snapshot_id, evidence_quote=args.evidence_quote,
+                    reasoning=args.reasoning, recorded_at=args.recorded_at,
+                )
+                result = {
+                    "event_id": event_id,
+                    "status": "HOLD_INDEPENDENT_REVIEW",
+                    "publication_authorized": False,
                 }
             elif args.command == "status":
                 result = ledger.assess()
