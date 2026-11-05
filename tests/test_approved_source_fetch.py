@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import hashlib
-import hmac
+import base64
 import json
 import os
 import socket
@@ -14,6 +13,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 from company_os.approved_source_fetch import (
     MAX_DNS_ANSWERS, CaptureReceipt, _PinnedHTTPSConnection,
     _download_https, _resolve_pinned_endpoint, fetch_and_capture,
@@ -22,7 +23,6 @@ from company_os.approved_source_fetch import (
 from company_os.policy import ApprovalRequired, PauseActive
 from company_os.source_provenance import EvidenceError, SourceLedger
 
-KEY = "synthetic-governance-secret-" + "A" * 48
 URL = "https://detroitmi.gov/public/eligibility"
 
 
@@ -75,8 +75,12 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.private = Ed25519PrivateKey.generate()
+        trusted_public = base64.b64encode(
+            self.private.public_key().public_bytes_raw()
+        ).decode("ascii")
         self.env = patch.dict(os.environ, {
-            "KO_SOURCE_ACCESS_POLICY_KEY": KEY,
+            "KO_SOURCE_PERMIT_PUBLIC_KEY_B64": trusted_public,
             "KO_SOURCE_APPROVED_HOSTS": "detroitmi.gov",
             "COMPANY_OS_PAUSED": "0",
         }, clear=True)
@@ -88,7 +92,7 @@ class ApprovedSourceFetchTests(unittest.TestCase):
 
     def permit(self, **changes):
         base = {
-            "schema_version": "1.0",
+            "schema_version": "2.0",
             "target_url": URL, "publisher": "City department",
             "title": "Source listing", "origin_id": "detroit-ocp",
             "source_kind": "issuer_primary", "rights_basis": "public_access",
@@ -102,7 +106,7 @@ class ApprovedSourceFetchTests(unittest.TestCase):
                             separators=(",", ":"), allow_nan=False).encode()
         return {
             "target": base,
-            "signature": hmac.new(KEY.encode(), signed, hashlib.sha256).hexdigest(),
+            "signature": base64.b64encode(self.private.sign(signed)).decode("ascii"),
         }
 
     def approved(self):
@@ -146,7 +150,7 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         self.assertEqual(checked["max_bytes"], 4096)
 
     def test_policy_key_absent_fails_closed(self):
-        del os.environ["KO_SOURCE_ACCESS_POLICY_KEY"]
+        del os.environ["KO_SOURCE_PERMIT_PUBLIC_KEY_B64"]
         with self.assertRaises(EvidenceError):
             inspect_source_permit(self.permit())
 
@@ -162,8 +166,35 @@ class ApprovedSourceFetchTests(unittest.TestCase):
                 "detroitmi.gov", "detroitmi.gov.evil.com"
             )))
 
+    def test_fetch_worker_has_only_public_verify_key(self):
+        self.assertIn("KO_SOURCE_PERMIT_PUBLIC_KEY_B64", os.environ)
+        self.assertNotIn("KO_SOURCE_ACCESS_POLICY_KEY", os.environ)
+        self.assertNotIn("KO_SOURCE_PERMIT_PRIVATE_KEY", os.environ)
+
+    def test_untrusted_private_signer_cannot_issue_permit(self):
+        permit = self.permit()
+        raw = json.dumps(permit["target"], sort_keys=True, ensure_ascii=False,
+                         separators=(",", ":"), allow_nan=False).encode()
+        rogue = Ed25519PrivateKey.generate()
+        permit["signature"] = base64.b64encode(rogue.sign(raw)).decode("ascii")
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(permit)
+
+    def test_old_signed_schema_is_not_accepted_as_new_policy(self):
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(self.permit(schema_version="1.0"))
+
+    def test_wrong_public_key_refuses_correctly_signed_permit(self):
+        permit = self.permit()
+        another = Ed25519PrivateKey.generate().public_key().public_bytes_raw()
+        os.environ["KO_SOURCE_PERMIT_PUBLIC_KEY_B64"] = base64.b64encode(
+            another
+        ).decode("ascii")
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(permit)
+
     def test_bad_key_length_fails_closed(self):
-        os.environ["KO_SOURCE_ACCESS_POLICY_KEY"] = "short"
+        os.environ["KO_SOURCE_PERMIT_PUBLIC_KEY_B64"] = "short"
         with self.assertRaises(EvidenceError):
             inspect_source_permit(self.permit())
 
