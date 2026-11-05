@@ -35,6 +35,18 @@ COMPETITIVE_ENGINE_GATED_ACTIONS = frozenset(
 # It is still owner-approval required and PAUSE_AUTONOMY blocks it.
 COMPETITIVE_ENGINE_BOOTSTRAP_ACTION = "deploy_competitive_engine"
 
+def requires_competitive_engine(action: str) -> bool:
+    """Classify launch/publication intent without trusting caller side-effect flags."""
+    normalized = action.strip().lower()
+    if normalized == COMPETITIVE_ENGINE_BOOTSTRAP_ACTION:
+        return False
+    return (
+        normalized in COMPETITIVE_ENGINE_GATED_ACTIONS
+        or normalized.startswith(("launch_", "publish_", "go_live_", "start_revenue_", "deploy_"))
+        or normalized in {"start_business", "open_business", "activate_venture"}
+    )
+
+
 REQUIRED_CRITIC_CHECKS = frozenset(
     {
         "source_accuracy",
