@@ -135,8 +135,11 @@ def _load_manifest(folder: Path) -> dict[str, Any]:
     return _exact(doc, _TOP_FIELDS, "package")
 
 
-def _evaluate(folder: Path, now: datetime) -> dict[str, Any]:
-    manifest = _load_manifest(folder)
+def _evaluate(
+    folder: Path, now: datetime, *, manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    # Use the exact manifest snapshot for both PDF and signed-receipt review.
+    manifest = _load_manifest(folder) if manifest is None else manifest
     if manifest["schema_version"] != "1.0":
         raise EvidenceError("unknown package schema")
     package_id = _id(manifest["package_id"], "package_id")
@@ -382,13 +385,14 @@ def assess_package(
                 "errors": ["timezone-aware assessment time required"]}
     try:
         package = Path(folder)
-        result = _evaluate(package, when.astimezone(timezone.utc))
+        manifest = _load_manifest(package)
+        result = _evaluate(package, when.astimezone(timezone.utc), manifest=manifest)
         receipts = package / "capture_receipts.json"
         if receipts.exists() or receipts.is_symlink() or require_capture_receipts:
             from .signed_capture_receipts import inspect_signed_capture_bundle
             # Read the *same* validated manifest shape used by _evaluate.
             capture = inspect_signed_capture_bundle(
-                package, _load_manifest(package), now=when.astimezone(timezone.utc),
+                package, manifest, now=when.astimezone(timezone.utc),
             )
             result["capture_evidence"] = capture
         else:
