@@ -142,9 +142,12 @@ class CompetitiveLaunchGuardTests(unittest.TestCase):
 
     def test_healthy_engine_does_not_grant_authority(self):
         self.write_signed()
-        decision = evaluate_action(
-            ActionRequest(action="launch_business"), repo_root=self.root
-        )
+        # Simulate a separately certified release controller in isolation.
+        # Without this simulation, the stronger development hard stop wins.
+        with patch("company_os.competitive_launch_guard.PRODUCTION_RELEASE_CONTROLLER_CERTIFIED", True):
+            decision = evaluate_action(
+                ActionRequest(action="launch_business"), repo_root=self.root
+            )
         self.assertFalse(decision.allowed)
         self.assertTrue(decision.approval_required)
 
