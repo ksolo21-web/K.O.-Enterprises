@@ -33,6 +33,8 @@ These businesses share a **research provenance, professional-writing, independen
 - **GitHub source, not public customer storage.** Commit code, synthetic fixtures, sanitized demonstrations, documentation and review-safe test artifacts. Never commit client invoices, personal information, vendor credentials, private market intelligence, privileged client material or secrets to this public repository.
 - **Cost and autonomy restraint.** External cash ceiling remains $0 unless explicitly and authentically authorized. The root `PAUSE_AUTONOMY` marker must remain. No automated outreach, scheduled external actions, live integrations, customer sends, purchases, deploys or paid API calls without separate bounded approval.
 
+**Company-wide requirement:** Apply the [Competitor Strength/Weakness & Differentiation Standard](../../strategy/COMPETITIVE_ADVANTAGE_STANDARD.md) to each active or future venture. Preserve critical-path M1; competitor weaknesses and any purported differentiation remain hypotheses until independently sourced and buyer-validated.
+
 ## 3. Distinctive client value proposition to validate
 
 **Working positioning:** *K.O. helps smaller commercial-service businesses make more defensible decisions with original-source intelligence, quantified suitability checks, competitor-context analysis and documented reasons to pass on bad opportunities.*
