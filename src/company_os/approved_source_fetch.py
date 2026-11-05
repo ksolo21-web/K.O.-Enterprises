@@ -127,8 +127,11 @@ def inspect_source_permit(
         raise EvidenceError("unsupported source authorization schema")
     for field in ("publisher", "title", "origin_id", "approved_by", "permit_id"):
         v = target[field]
-        if not isinstance(v, str) or not v.strip() or len(v) > 160:
+        if (not isinstance(v, str) or not v.strip() or len(v) > 160
+                or any(ord(ch) < 32 or ord(ch) == 127 for ch in v)):
             raise EvidenceError("source authorization identity incomplete")
+    if not all(ch.isascii() and (ch.isalnum() or ch in "-_") for ch in target["permit_id"]):
+        raise EvidenceError("source authorization permit identifier invalid")
     if target["source_kind"] not in SOURCE_KINDS:
         raise EvidenceError("unrecognized source classification")
     if target["rights_basis"] not in RIGHTS_BASIS:
@@ -177,7 +180,8 @@ def _resolve_pinned_endpoint(host: str) -> tuple[int, tuple, str]:
             address = ipaddress.ip_address(sockaddr[0])
         except ValueError as exc:
             raise EvidenceError("DNS result is not a numeric address") from exc
-        if not address.is_global or getattr(address, "ipv4_mapped", None) is not None:
+        if (not address.is_global or "%" in sockaddr[0]
+                or getattr(address, "ipv4_mapped", None) is not None):
             raise EvidenceError("DNS returned a restricted/non-public address")
         if len(sockaddr) not in (2, 4) or sockaddr[1] != 443:
             raise EvidenceError("DNS returned a nonstandard destination")
@@ -248,9 +252,22 @@ def _download_https(url: str, limit: int) -> tuple[bytes, str, str, str, str]:
                 raise EvidenceError("invalid content length") from exc
             if announced < 0 or announced > limit:
                 raise EvidenceError("declared content exceeds allowed bytes")
-        enc = response.getheader("Content-Encoding", "identity").strip().lower()
-        if enc != "identity":
-            raise EvidenceError("compressed/encoded response not allowed")
+        encoding_headers = [
+            value for key, value in response.getheaders()
+            if key.lower() == "content-encoding"
+        ]
+        if len(encoding_headers) > 1 or (
+            encoding_headers and encoding_headers[0].strip().lower() != "identity"
+        ):
+            raise EvidenceError("ambiguous or compressed/encoded response not allowed")
+        transfer_headers = [
+            value for key, value in response.getheaders()
+            if key.lower() == "transfer-encoding"
+        ]
+        if (len(transfer_headers) > 1
+                or (transfer_headers and transfer_headers[0].strip().lower() != "chunked")
+                or (transfer_headers and length_values)):
+            raise EvidenceError("ambiguous or unsupported transfer encoding")
         types = [v for k, v in response.getheaders() if k.lower() == "content-type"]
         if len(types) != 1:
             raise EvidenceError("missing or ambiguous source content type")
@@ -310,6 +327,9 @@ def fetch_and_capture(
     raw, mime, pinned_ip, cert_sha, tls = _download_https(
         url, allowed["max_bytes"],
     )
+    # A permit that expires while the network read is underway must not be
+    # used to record newly sourced business evidence.
+    inspect_source_permit(permit)
     observed = datetime.now(timezone.utc)
     reference = (
         "approved-https:" + allowed["permit_id"]
