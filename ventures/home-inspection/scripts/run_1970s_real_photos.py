@@ -75,9 +75,80 @@ PHOTOS = [
 ("P09","garage","Attached garage door hardware","Garage door spring needs a safety cable through it.jpg","Tomwsulcer","CC0 1.0","URGENT SAFETY","An extension-type garage-door spring is shown without an obvious containment/safety cable.","Do not operate or adjust the door until a qualified garage-door technician checks spring containment, cables, safety reversal and hardware. Tensioned springs are hazardous."),
 ("P10","interior","Bedroom ceiling example","Ceiling water damage.jpg","Atomicdragon136","CC BY 3.0","MAJOR","Ceiling finish shows localized staining/discoloration consistent with prior wetting.","Identify and remedy water source; verify ceiling material stability, moisture readings and any concealed deterioration before cosmetic repairs. No active leak established from this still."),
 ("P11","attic","Accessible attic reference","AtticInsulation.jpg","Jason Dale","CC BY-SA 3.0","FURTHER EVALUATION","Insulation, ducts and roof-space materials are visible in an attic example.","A qualified onsite inspector must safely assess insulation depth/coverage, ventilation paths, roof sheathing, exhaust routing, wiring and moisture. No deficiency is conclusively established here."),
-("P13","hvac","Cooling equipment reference","Hoarders House - Abandoned Cooling (15804516978).jpg","darkday","CC BY 2.0","FURTHER EVALUATION","Photograph records neglected cooling-related equipment; serviceability is not demonstrated.","An HVAC professional should identify equipment and inspect electrical connections, refrigerant-side condition, drainage, ventilation and safe operation. Do not assign age or performance without labels and test data."),
-("P14","site","Exterior runoff and gutter drainage","Ida clogged gutter Essex 01.jpg","Destroyeraa","CC BY-SA 4.0","MAJOR","The reference photograph shows a residential roof gutter visibly obstructed by debris after heavy weather.","Arrange safe qualified clearing of blocked gutters and verify drainage, downspout discharge, foundations, and related moisture damage. This is not a measurement of actual grade or a claim about the fictional roof."),
+("P13","hvac","Abandoned mechanical components","Hoarders House - Abandoned Cooling (15804516978).jpg","darkday","CC BY 2.0","FURTHER EVALUATION","The reference image shows dusty, weathered mechanical assemblies. Their identity, connection to any HVAC system and operational status cannot be established from the photograph.","An HVAC professional could identify the equipment and determine whether any energized, refrigerant-bearing or connected components are present. Independently inspect the fictional home's actual heating and cooling equipment and rating plates."),
+("P14","site","Street-level stormwater inlet","Ida clogged gutter Essex 01.jpg","Destroyeraa","CC BY-SA 4.0","FURTHER EVALUATION","Leaves and debris visibly cover part of a curbside stormwater inlet. This is NOT a roof gutter photograph and does not document the fictional property's drainage.","For a comparable site, ask the responsible drainage authority to assess the curbside inlet. Separately inspect actual roof gutters, downspouts, grading and discharge before attributing runoff or foundation moisture to the home."),
 ]
+
+# Independent-looking review roles are explicitly SCRIPTED, not human inspectors.
+# Each note is unique to the depicted source; none proves the fictional home's state.
+CASE_NOTES = {
+    "P01": (
+        "Separated and eroded shingles could admit water, particularly at transitions. Decking condition, active leakage and roof age cannot be determined from this photograph.",
+        "Surface damage is visible in this reference; a qualified roof inspection is needed to distinguish patchable damage from widespread failure and to examine flashing.",
+        "Keep the roof concern distinct from the bedroom ceiling and attic examples. A common leak path is possible, but these images are unrelated and cannot be linked causally.",
+    ),
+    "P02": (
+        "Detached masonry at an excavated wall may indicate substantial loss of support. The photograph depicts historic masonry, not confirmed 1970s foundation construction.",
+        "A professional would assess bearing, crack/movement patterns, soil, drainage and excavation safety. This still does not establish structural stability.",
+        "Do not infer foundation failure at the imagined house. Keep structural and drainage investigations open pending authentic material, location and elevation evidence.",
+    ),
+    "P03": (
+        "Standing basement water can conceal electrical hazards and promote deterioration; the source and contamination of the water are unknown.",
+        "Do not enter or energize affected areas based on this image. Source-specific utility isolation and safe-access assessment would be needed first.",
+        "Hold all occupancy and remediation conclusions. No causal link to the separate foundation or drainage photographs is established.",
+    ),
+    "P04": (
+        "Unguarded exposed conductor ends near a distribution enclosure could create shock or fire risk if energized. No voltage or circuit identification test was performed.",
+        "Confirm enclosure condition, voltage, conductor terminations, bonding and protective devices through a qualified electrician; avoid handling the conductors.",
+        "Keep electrical status unverified. The composite photograph does not establish the wiring method, service age or electrical safety of the fictional home.",
+    ),
+    "P05": (
+        "A visible droplet at heavily corroded piping suggests leakage in this source image, with possible concealed wetting; pipe material and service remain unknown.",
+        "Determine actual pipe type, whether the drip is active and whether adjacent materials are wet; scope repairs after safe inspection, not from corrosion color alone.",
+        "Maintain a separate plumbing observation. It cannot be reconciled with the unrelated basement-water example as a proven shared leak.",
+    ),
+    "P06": (
+        "Corrosion and poor access around the pictured tank may complicate maintenance, but this photograph does not verify tank condition, fuel type or safety controls.",
+        "Request equipment nameplate, vent/flue and temperature-pressure relief discharge views plus operational assessment; no manufacturing date can be assigned.",
+        "Retain model, age, combustion and venting as unknown. Do not convert general neglect into a verified water-heater defect.",
+    ),
+    "P07": (
+        "Dark ceiling discoloration around a bathroom fan may indicate humidity, condensation or surface growth. Moisture level and microbial species are untested.",
+        "Assess bath exhaust discharge, water sources, finish integrity and moisture; the image cannot certify mold or concealed rot.",
+        "Keep the primary bathroom moisture hypothesis separate from the hall bath example. No shared source, species or system failure is established.",
+    ),
+    "P08": (
+        "Darkened grout and sealant at a wet-area transition may reflect soiling, deterioration or prolonged moisture exposure; no hidden leak is visible.",
+        "Examine caulk/grout adhesion, tub-to-wall seals, ventilation and substrate moisture onsite. Do not diagnose mold species from color.",
+        "Classify as an unresolved bathroom finish/possible moisture concern, not as confirmation of failed waterproofing at the described home.",
+    ),
+    "P09": (
+        "An extension spring without an obvious containment cable could cause injury if a tensioned spring breaks; the photograph alone does not confirm complete assembly details.",
+        "A qualified garage-door technician should check both spring ends, containment, door balance, sensor reversal and opener force without untrained adjustment.",
+        "Preserve an urgent safety follow-up if analogous hardware exists. No garage-door operation or spring specification has been verified at this home.",
+    ),
+    "P10": (
+        "Ceiling-tile discoloration may reflect past or recurring moisture, but no active drip, wetness or ceiling support condition can be inferred from a still.",
+        "Inspect roof/plumbing/HVAC sources above the affected area and use moisture measurements where appropriate before replacing finishes.",
+        "Do not assert a connection to the unrelated roof photograph. The room identity and moisture timeline are absent.",
+    ),
+    "P11": (
+        "This attic view shows insulation and framing; it does not, by itself, prove an insulation, ventilation or structural defect.",
+        "A safe onsite attic inspection would document insulation depth and coverage, moisture, sheathing, wiring and exhaust routing; image only is insufficient.",
+        "Mark attic coverage incomplete rather than promoting visible insulation to a deficiency. Attic accessibility was supplied as a scenario fact, not demonstrated.",
+    ),
+    "P13": (
+        "Dusty mechanical components appear in the photo, but actual equipment identity, connected services, condition and operation have not been established.",
+        "Confirm whether the photographed items are discarded or connected equipment before characterizing any HVAC defect. Require onsite unit and nameplate images.",
+        "Do not infer the fictional house has this type of cooling system. Keep mechanical inventory, operation and age unverified.",
+    ),
+    "P14": (
+        "Debris obstructing a street-level drain may limit local stormwater intake. It does not establish an overflowing roof gutter, poor residential grading or a basement leak.",
+        "The photograph shows a curbside stormwater inlet, not building roof drainage. Confirm the responsible public authority and actual site location.",
+        "Separate public curbside drainage from the home's roof gutters and foundation. Do not classify this as a proved defect of the fictional home.",
+    ),
+}
+
 SEVERITY_ORDER = {"URGENT SAFETY":0,"MAJOR":1,"FURTHER EVALUATION":2}
 ALLOWED_LICENCES = {"CC BY-SA 3.0","CC BY-SA 4.0","Public domain US federal","CC BY 2.0",
                     "CC BY 4.0","Public domain","CC0 1.0","CC BY 3.0"}
@@ -276,9 +347,8 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     for sev in ("URGENT SAFETY","MAJOR","FURTHER EVALUATION"):
         bucket=[x for x in rows if x["severity"]==sev]
         body.append(P(f"{sev}: {len(bucket)} photo-based example reviews","KO_Sub"))
-    # A cover/priority-list spill created a near-empty page in the original
-    # real-photo artifact. Keep risk counts while avoiding repeated per-photo
-    # priority rows (all source-specific discussion is on its finding page).
+    # Compact introduction belongs on the cover, never on its own orphan page.
+    body.append(P("Photo-backed training findings follow. Each of the 13 source-attributed images has one dedicated page with a specific risk, condition-specific Q02 challenge, Q03 disposition, and qualified follow-up.", "KO_Body"))
     body.append(PageBreak())
     body += [P("Complete room and system coverage","KO_Title"),
              P("A photo of an example roof does not prove the fictional home's roof condition. Room-by-room site photographs and inspections are required even where these examples depict deterioration."),
@@ -287,19 +357,20 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
     for line in UNVERIFIED_SPACES:
         body.append(P("OPEN | "+line))
     body.append(PageBreak())
-    # Do not put a tiny introductory page ahead of a tall first photo.
-    # Place the section title on the first photograph's content page.
+    # One whole finding per page. The introductory heading is on the cover,
+    # not a nearly blank page or mixed into the first tall photo page.
     for index,r in enumerate(rows):
         if index:
             body.append(PageBreak())
-        label=(f"Photo-backed training findings | {r['id']} | {r['zone']}"
-               if index == 0 else f"{r['id']} | {r['zone']}")
+        label=f"{r['id']} | {r['zone']}"
         body.append(P(label,"KO_Head"))
         body.append(P(f"TRIAGE: {r['severity']} - REAL REFERENCE PHOTO, NOT CASE EVIDENCE","KO_Red"))
         img=Image.open(r["photo_path"])
         iw,ih=img.size
         targetw=6.8*inch
-        targeth=3.8*inch
+        # Keep the photo large but reserve room for the entire case-specific
+        # analysis and credit on this SAME page; no spillover/orphan pages.
+        targeth=3.05*inch
         scale=min(targetw/iw,targeth/ih)
         body.append(RLImage(r["photo_path"],width=iw*scale,height=ih*scale))
         body += [
@@ -308,9 +379,9 @@ def _report(out:Path, rows:list[dict], stage:Path, qa:dict, core_pdf:Path):
             P("What it means / risk","KO_Sub"),P(r["risk"]),
             P("Recommended professional response","KO_Sub"),P(r["recommendation"]),
             P("Q02 technical challenge - simulated","KO_Sub"),
-            P("Image is compatible with this visual description, but neither cause, code compliance, full system function nor condition of the fictional home is proven."),
+            P(r["q02"]),
             P("Q03 reconciliation - simulated","KO_Sub"),
-            P("Keep this localized entry distinct. Preserve source link, independent verification and full system coverage holds; no human sign-off or customer release."),
+            P(r["q03"]),
             P("Photo source and reuse terms","KO_Sub"),
             P(f"{r['author']} | {r['license']} | Wikimedia Commons. Resized and EXIF metadata removed; downloaded-source SHA256 {r['original_sha'][:22]}...","KO_Tiny"),
             P(r["commons_url"],"KO_Tiny"),
@@ -379,14 +450,11 @@ def run(out:Path):
     for row in PHOTOS:
         ident,area,zone,title,author,license_,severity,observation,recommendation=row
         media=next(m for m in doc["media"] if m["id"]==ident)
-        risk={
-            "URGENT SAFETY":"Potential injury or serious property damage if an equivalent condition is confirmed on site. Do not touch, access or operate the affected assembly until safe.",
-            "MAJOR":"Potential water damage, functional loss or costly deterioration. Requires qualified inspection to establish extent and appropriate scope.",
-            "FURTHER EVALUATION":"Observed reference details do not establish safe operation or required features of the actual system. Additional source views and physical tests are needed.",
-        }[severity]
+        risk,q02_note,q03_note=CASE_NOTES[ident]
         records.append({
             "id":ident,"system":area,"zone":zone,"severity":severity,
-            "observation":observation,"risk":risk,"recommendation":recommendation,
+            "observation":observation,"risk":risk,"q02":q02_note,"q03":q03_note,
+            "recommendation":recommendation,
             "photo_path":str(out/"evidence"/media["path"]),
             "original_sha":media["upstream_original_sha256"],
             "normalized_sha":media["sha256"],

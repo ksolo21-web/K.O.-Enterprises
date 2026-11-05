@@ -79,12 +79,30 @@ jobs:
           detailed=root/"1970s_composite_REAL_PHOTO_DETAILED_DRY_RUN.pdf"
           pages=list(PdfReader(str(detailed)).pages)
           assert len(pages)==report["photo_case_study_PDF_pages"]
-          # Reject orphan heading / overflow-only pages: every page must carry
-          # substantial narrative, and all 13 real photo images must be inside.
-          word_counts=[len((p.extract_text() or "").split()) for p in pages]
-          assert min(word_counts)>=80, f"Near-blank composite PDF page: {word_counts}"
-          assert sum(len(p.images) for p in pages)==13
-          fulltext="\n".join(p.extract_text() or "" for p in pages)
+          # Strict source-to-page contract: 1 cover, 1 full-room-coverage
+          # page, 13 single-photo findings, and 1 disposition page.
+          # Reject orphan headings, split finding narratives, missing pictures
+          # or claims that a street-level storm drain is a roof gutter.
+          assert len(pages)==len(sources)+3, f"Unexpected overflow pages: {len(pages)}"
+          page_texts=[p.extract_text() or "" for p in pages]
+          word_counts=[len(t.split()) for t in page_texts]
+          assert min(word_counts)>=100, f"Near-blank composite PDF page: {word_counts}"
+          assert [len(p.images) for p in pages]==[0,0]+[1]*len(sources)+[0], "Finding image/page binding mismatch"
+          assert "Photo-backed training findings" in page_texts[0]
+          assert "Complete room and system coverage" in page_texts[1]
+          assert "Inspector follow-up / disposition" in page_texts[-1]
+          for index, row in enumerate(sources):
+              text=page_texts[index+2]
+              assert f"{row['id']} |" in text, f"Photo/source page mismatch at {index+3}"
+              assert "Visible photo observation" in text
+              assert "What it means / risk" in text
+              assert "Recommended professional response" in text
+              assert "Q02 technical challenge - simulated" in text
+              assert "Q03 reconciliation - simulated" in text
+              assert "Photo source and reuse terms" in text
+          fulltext="\n".join(page_texts)
+          assert "street-level" in page_texts[-2].lower()
+          assert "residential roof gutter visibly" not in fulltext.lower()
           assert "Photo-backed training findings" in fulltext
           assert "NOT A REAL PROPERTY INSPECTION" in fulltext
           assert all(row["id"] in fulltext for row in sources)

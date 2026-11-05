@@ -4,7 +4,7 @@ No network in unit tests; only the dedicated Actions dry-run downloads images.
 """
 import unittest
 from scripts.run_1970s_real_photos import (
-    PHOTOS, ALLOWED_LICENCES, SEVERITY_ORDER, UNVERIFIED_SPACES,
+    PHOTOS, ALLOWED_LICENCES, SEVERITY_ORDER, UNVERIFIED_SPACES, CASE_NOTES,
     CASE_ID, _image_url
 )
 from inspection_engine.agents import AREA_SYSTEMS, SYSTEM_OWNER
@@ -62,6 +62,35 @@ class RealPhotoCompositeContract(unittest.TestCase):
             self.assertIn(p[6],SEVERITY_ORDER)
             self.assertGreater(len(p[7]),22)
             self.assertGreater(len(p[8]),45)
+
+
+    def test_every_real_photo_has_distinct_specific_technical_challenges(self):
+        self.assertEqual(set(CASE_NOTES), {photo[0] for photo in PHOTOS})
+        for photo in PHOTOS:
+            risk, q02, q03 = CASE_NOTES[photo[0]]
+            self.assertGreaterEqual(len(risk.split()), 18)
+            self.assertGreaterEqual(len(q02.split()), 18)
+            self.assertGreaterEqual(len(q03.split()), 18)
+            self.assertNotEqual(q02, q03)
+            self.assertNotIn("confirmed safe", (risk + q02 + q03).lower())
+        self.assertEqual(len({v[1] for v in CASE_NOTES.values()}), len(PHOTOS))
+        self.assertEqual(len({v[2] for v in CASE_NOTES.values()}), len(PHOTOS))
+
+    def test_street_storm_drain_is_not_mislabeled_residential_roof_gutter(self):
+        street = next(photo for photo in PHOTOS if photo[0] == "P14")
+        self.assertIn("street", street[2].lower())
+        self.assertIn("curbside", street[7].lower())
+        self.assertIn("NOT a roof gutter", street[7])
+        self.assertEqual(street[6], "FURTHER EVALUATION")
+        self.assertIn("street-level drain", CASE_NOTES["P14"][0])
+        self.assertIn("not building roof drainage", CASE_NOTES["P14"][1])
+
+    def test_attic_and_unidentified_mechanical_components_are_not_fake_defects(self):
+        attic = next(photo for photo in PHOTOS if photo[0] == "P11")
+        mechanics = next(photo for photo in PHOTOS if photo[0] == "P13")
+        self.assertIn("No deficiency", attic[8])
+        self.assertIn("cannot be established", mechanics[7])
+        self.assertIn("before characterizing", CASE_NOTES["P13"][1].lower())
 
     def test_output_sources_are_not_synthetic_schematics(self):
         from inspect import getsource
