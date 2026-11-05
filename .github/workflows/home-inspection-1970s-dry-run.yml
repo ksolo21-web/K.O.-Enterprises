@@ -65,7 +65,7 @@ jobs:
           assert status["pages"]==len(reader.pages)
           assert status["photographs"]==14
           assert status["system_sections"]==13 and status["room_spaces"]==11
-          assert status["sample_conditions"]==39
+          assert status["sample_conditions"]==52
           assert not status["customer_release_allowed"]
           assert sum(len(p.images) for p in reader.pages)>=14
           raster=pdfium.PdfDocument(str(pdf))
