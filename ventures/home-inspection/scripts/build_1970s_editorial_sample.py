@@ -280,7 +280,7 @@ def build(root,out):
     pdf=PdfReader(str(out));n=len(pdf.pages)
     if n<32 or n>38: raise ValueError(f"Page count outside expected range: {n}")
     full="\n".join(p.extract_text() or "" for p in pdf.pages)
-    for required in ["A clearer picture","The home at a glance","The story of this house","Primary full bath (en-suite)","Room-by-room view","Garage & attached spaces","Image credits & provenance","NOT A REAL PROPERTY INSPECTION"]:
+    for required in ["A clearer picture","The home at a glance","The story of this house","Primary full bath (en-suite)","Room-by-room view","Below-grade / basement","Image credits & provenance","NOT A REAL PROPERTY INSPECTION"]:
         if required not in full:raise ValueError("Missing required content: "+required)
     report={"status":"CUSTOMER_FORMAT_SIMULATION_COMPLETE_NOT_APPROVED","pages":n,"photographs":len(sources)+1,"system_sections":len(DATA["systems"]),"room_spaces":len(DATA["rooms"]),"sample_conditions":sum(len(x[2]) for x in DATA["systems"]),"photo_source_links":len(sources)+1,"customer_release_allowed":False,"front_image_public_domain_url":front_url,"pdf_sha256":hashlib.sha256(out.read_bytes()).hexdigest()}
     (out.parent/"editorial_sample_verification.json").write_text(json.dumps(report,indent=2)+"\n")
