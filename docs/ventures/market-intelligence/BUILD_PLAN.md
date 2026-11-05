@@ -23,6 +23,8 @@
 
 **Partial CE-1A implementation:** The [offline source-provenance ledger](../../strategy/CE1_SOURCE_PROVENANCE.md) captures lawful operator-supplied HTML/text snapshots, checks exact quoted evidence, tracks changed source versions and contradictory structured values, and blocks independent-verification claims. This is an engineering increment only: original-source authentication, all bid attachments, competing evidence, independent review and automatic lawful collection remain unbuilt. **CE-1 / M1 is NOT complete.**
 
+**CE-1B increment (pending acceptance):** [Protected HTTPS source-fetch prototype](../../strategy/CE1B_PROTECTED_SOURCE_FETCH.md) requires company approval and an exact-target signed permit *before DNS*, uses public-only IP pinning and TLS hostname validation, refuses redirects and unsupported/oversized content, and records source hashes into CE-1A. Its network tests are mocked and **do not constitute live original-source verification**. Independent signer custody, authentic retrieval, full bid documents, critic and production release controls remain open. **CE-1 / M1 is NOT complete.**
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
