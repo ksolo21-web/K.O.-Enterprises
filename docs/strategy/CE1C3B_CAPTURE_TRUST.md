@@ -27,7 +27,7 @@ The signing function refuses mismatched or symlinked filenames, source URL outsi
 
 `StagingTrustLedger` keeps a private SQLite append-only SHA-256 chain beneath ignored `state/competitive_engine/trust/` with restrictive POSIX permissions and no-update/delete database triggers.
 
-- Root-signed policy revisions must increase; an older revision or changed data under the same revision is blocked. Re-reading the same policy is idempotent.
+- Root-signed policy revisions must increase; an older revision or changed data under the same revision is blocked. Re-reading the same policy is idempotent. **Revoked key IDs and receipt IDs are retained as append-only hash-chained events, and no later signed policy revision may silently reinstate them.**
 - The currently active policy revision/digest must match the policy used to accept any staging receipt.
 - A receipt ID cannot be accepted twice. Each capture signer key's signing sequence must strictly increase, preventing stale sequence replay or rollback. Invalid signatures, revoked keys and revoked receipt IDs are rejected.
 - The verifier **re-reads the original private staged bytes** before recording, so a valid signature for an earlier file cannot be used after a file replacement.
