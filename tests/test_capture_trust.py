@@ -318,6 +318,37 @@ class CaptureTrustTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             self.ledger.accept_receipt(self.receipt(), new, now=self.now)
 
+    def test_revoked_receipt_updates_existing_record_status(self):
+        p = self.active()
+        self.ledger.accept_receipt(self.receipt(), p, now=self.now)
+        self.assertEqual(self.ledger.receipt_status(
+            "receipt-original-001", p, now=self.now)["state"],
+            "STAGING_ONLY_UNVERIFIED_ORIGIN")
+        self.policy["revision"] = 2
+        self.policy["revoked_receipts"] = ["receipt-original-001"]
+        updated = self.envelope()
+        self.ledger.accept_policy(updated, now=self.now)
+        status = self.ledger.receipt_status("receipt-original-001", updated, now=self.now)
+        self.assertEqual(status["state"], "REVOKED")
+        self.assertFalse(status["publication_authorized"])
+
+    def test_revoked_signer_updates_existing_receipt_status(self):
+        p = self.active()
+        self.ledger.accept_receipt(self.receipt(), p, now=self.now)
+        self.policy["revision"] = 2
+        self.policy["revoked_keys"] = ["capture-issuer-001"]
+        updated = self.envelope()
+        self.ledger.accept_policy(updated, now=self.now)
+        self.assertEqual(self.ledger.receipt_status(
+            "receipt-original-001", updated, now=self.now)["state"], "REVOKED")
+
+    def test_receipt_status_rejects_superseded_policy(self):
+        previous = self.active()
+        self.policy["revision"] = 2
+        self.ledger.accept_policy(self.envelope(), now=self.now)
+        with self.assertRaises(EvidenceError):
+            self.ledger.receipt_status("receipt-original-001", previous, now=self.now)
+
     def test_original_pdf_byte_change_blocks_signed_receipt_at_acceptance(self):
         p = self.active()
         receipt = self.receipt()
