@@ -104,6 +104,8 @@ The preflight on this branch is **necessary but not sufficient**. A future execu
 
 No launch date is assigned until these *real* acceptance demonstrations are performed. Internal test scores alone cannot grant business activation.
 
+**CE-1A engineering increment (not full CE-1):** [Offline original-source capture and provenance ledger](CE1_SOURCE_PROVENANCE.md). It does not fetch URLs or authenticate issuer content, and every factual claim stays held for independent review. Keep the production hard stop and all CE-1 through CE-5 acceptance requirements.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |
