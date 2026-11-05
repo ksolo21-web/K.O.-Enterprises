@@ -269,8 +269,8 @@ class SourceProvenanceTests(unittest.TestCase):
                          now=self.now + timedelta(minutes=1))
 
     def test_source_kind_cannot_be_assumed_from_domain(self):
-        self.capture(source_kind="company_self_claim")
-        self.claim()
+        captured = self.capture(source_kind="company_self_claim")
+        self.claim(captured.snapshot_id)
         flags = self.ledger.assess(now=self.now)["claims"][0]["flags"]
         self.assertIn("ATTRIBUTED_COMPANY_CLAIM", flags)
         self.assertIn("NOT_INDEPENDENTLY_AUTHENTICATED", flags)
