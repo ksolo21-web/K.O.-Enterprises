@@ -334,6 +334,12 @@ class ProcurementPackagePreflightTests(unittest.TestCase):
         self.manifest["evidence"][1]["value"] = "2026-11-27T17:00:00"
         self.blocked("timezone")
 
+    def test_omitted_mandatory_event_inventory_blocks(self):
+        # The PDF explicitly says a mandatory site walk happened; an empty
+        # event list must not mask an eligibility disqualifier.
+        self.manifest["mandatory_events"] = []
+        self.blocked("mandatory event wording")
+
     def test_mandatory_event_missed_blocks(self):
         self.manifest["mandatory_events"][0]["attendance"] = "not_attended"
         self.blocked("mandatory event elapsed")
