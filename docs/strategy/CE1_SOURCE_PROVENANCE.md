@@ -44,6 +44,19 @@ python -m company_os.source_provenance --repo-root . capture \
 The timestamp is illustrative; actual operation must use the **real observation time**, not reuse the example. `--complete-document` can be set only when the analyst truly reviewed the entire source; it remains an **unverified operator assertion**, not final publication authority. The URL is exact-publisher metadata; the module does not certify the host's server or anything outside the supplied bytes.
 
 ```bash
+# The capture command prints a snapshot_id. Analysts can register an
+# interpretation against that exact snapshot without granting publication:
+python -m company_os.source_provenance --repo-root . claim \
+  --claim-id claim-detroit-eligibility \
+  --claim-key detroit.janitorial.eligibility \
+  --value "detroit-certified" \
+  --text "The program webpage describes janitorial RFQQs as restricted" \
+  --claim-type eligibility \
+  --snapshot-id REPLACE_WITH_ACTUAL_CAPTURED_SNAPSHOT_ID \
+  --evidence-quote "open only to Detroit-certified businesses" \
+  --reasoning "Exact webpage phrase; the live bidder portal and complete package remain unchecked." \
+  --recorded-at REPLACE_WITH_ACTUAL_UTC_TIMESTAMP
+
 python -m company_os.source_provenance --repo-root . status
 python -m company_os.source_provenance --repo-root . audit
 python -m unittest discover -s tests -p 'test_source_provenance.py' -v
