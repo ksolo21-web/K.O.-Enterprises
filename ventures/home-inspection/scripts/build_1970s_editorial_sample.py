@@ -51,7 +51,7 @@ def photo(c,path,x,y,w,h):
         im=ImageOps.exif_transpose(im).convert("RGB")
         pix=ImageOps.fit(im,(round(w*2.5),round(h*2.5)),Image.Resampling.LANCZOS,centering=(.5,.49))
         b=io.BytesIO();pix.save(b,format="JPEG",quality=87,optimize=True)
-        c.drawImage(ImageReader(b.getvalue()),x,y,w,h)
+        c.drawImage(ImageReader(io.BytesIO(b.getvalue())),x,y,w,h)
 def pageframe(c,topic,caption="",number=True):
     text(c,M,753,"K.O.  /  HOME INSPECTIONS",9,BOLD,NAVY)
     text(c,W-M-128,753,"PROPERTY REPORT   |   SAMPLE",8,REG,SLATE)
@@ -132,7 +132,7 @@ def reading(c):
     ]
     for title,body in groups:
         text(c,M,y,title,12,BOLD,NAVY)
-        y=paragraph(c,M,y-19,body,CW-5,10,15)-31
+        y=paragraph(c,M,y-19,body,CW-5,10,15)-18
     y=rulehead(c,y-3,"Evidence boundary")
     y=paragraph(c,M,y,"Every example condition in this edition is a scenario assumption. Reference images support only descriptions of what is visible in those original photographs. Real reports should identify inspected, not inspected, inaccessible and not applicable areas independently and retain source-to-finding traceability.",CW,10.3,15.7)
     check(y,"guide");close(c)
@@ -180,7 +180,7 @@ def gallery_page(c,number,entries,paths):
         path=paths[pid]; y-=5
         with Image.open(path) as im:
             iw,ih=im.size
-        h=164 if len(entries)>1 else 238
+        h=235 if len(entries)>1 else 285
         photo(c,path,M,y-h,CW,h)
         y-=h+18
         text(c,M,y,title,12,BOLD,NAVY)
@@ -220,9 +220,9 @@ def credits(c,front_url,source_json):
     y=header(c,"Photographic sources","Image credits & provenance","All photographic source credits are visible here for auditability; the photographs are not of the fictional subject property.")
     y=paragraph(c,M,y,f"Cover: 'SIMPLERANCH1.JPG' by Mcheath. Public domain. {front_url}",CW,8.7,12.8,SLATE)-24
     for row in source_json:
-        title=f"{row['id']}  /  {row['photographer']}  /  {row['license']}"
+        title=f"{row['id']}  /  {row['author']}  /  {row['license']}"
         text(c,M,y,title,8.7,BOLD,NAVY)
-        y=paragraph(c,M,y-14,row["upstream_source_page"],CW,7.8,10.5,SLATE)-10
+        y=paragraph(c,M,y-14,row["commons_url"],CW,7.8,10.5,SLATE)-10
         if y<115:
             close(c);y=header(c,"Photographic sources","Credits, continued")
     check(y,"credits")
@@ -256,12 +256,12 @@ def build(root,out):
     chunks=[DATA["rooms"][0:3],DATA["rooms"][3:6],DATA["rooms"][6:9],DATA["rooms"][9:]]
     for i,rs in enumerate(chunks,1):room_page(c,i,rs)
     # Pair images; protect against orphaned final image by dedicating one page.
-    for i in range(0,len(DATA["photos"]),2):
-        gallery_page(c,i//2+1,DATA["photos"][i:i+2],paths)
+    for i in range(len(DATA["photos"])):
+        gallery_page(c,i+1,[DATA["photos"][i]],paths)
     plan(c);owner_info(c);credits(c,front_url,sources);final(c)
     c.save()
     pdf=PdfReader(str(out));n=len(pdf.pages)
-    if n<31 or n>35: raise ValueError(f"Page count outside expected range: {n}")
+    if n<39 or n>45: raise ValueError(f"Page count outside expected range: {n}")
     full="\n".join(p.extract_text() or "" for p in pdf.pages)
     for required in ["A clearer picture","The home at a glance","The story of this house","Primary full bath (en-suite)","Room-by-room view","Garage & attached spaces","Image credits & provenance","NOT A REAL PROPERTY INSPECTION"]:
         if required not in full:raise ValueError("Missing required content: "+required)
