@@ -324,7 +324,7 @@ class StagingTrustLedger:
                                  "generation":generation,"record_sha":digest})
             expected = hashlib.sha256(prev.encode() + b"\n" + content).hexdigest()
             if (seq != pos or prior != prev or event_hash != expected
-                    or kind not in ("policy", "receipt")):
+                    or kind not in ("policy", "receipt", "revoked_key", "revoked_receipt")):
                 raise EvidenceError("trust audit chain integrity failure")
             prev = event_hash
         return entries
@@ -358,6 +358,14 @@ class StagingTrustLedger:
                 if row[1] == "policy" and row[2] != policy["policy_id"]:
                     raise EvidenceError("governance policy id changed unexpectedly")
             histories = [row for row in rows if row[1] == "policy"]
+            # Permanently record revocations as signed-policy-derived chain
+            # events. No newer revision may silently restore a revoked key or
+            # receipt, even with a valid new governance root signature.
+            prior_revoked_keys = {row[2] for row in rows if row[1] == "revoked_key"}
+            prior_revoked_receipts = {row[2] for row in rows if row[1] == "revoked_receipt"}
+            if (not prior_revoked_keys.issubset(set(policy["revoked_keys"]))
+                    or not prior_revoked_receipts.issubset(set(policy["revoked_receipts"]))):
+                raise EvidenceError("governance revocation rollback forbidden")
             if histories:
                 last = histories[-1]
                 if policy["revision"] < last[4] or (
@@ -369,6 +377,12 @@ class StagingTrustLedger:
                     return {"state": "SAME_POLICY_RECHECKED", "publication_authorized": False}
             self._append("policy", policy["policy_id"], "root-governance",
                          policy["revision"], digest)
+            for key_id in sorted(set(policy["revoked_keys"]) - prior_revoked_keys):
+                self._append("revoked_key", key_id, "root-governance",
+                             policy["revision"], digest)
+            for receipt_id in sorted(set(policy["revoked_receipts"]) - prior_revoked_receipts):
+                self._append("revoked_receipt", receipt_id, "root-governance",
+                             policy["revision"], digest)
             self.db.commit()
             return {"state": "POLICY_RECORDED_UNANCHORED", "publication_authorized": False}
         except Exception:
