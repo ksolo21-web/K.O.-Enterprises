@@ -194,6 +194,26 @@ class SignedCaptureReceiptsTests(unittest.TestCase):
         v = self.verdict(strict=False)
         self.assertEqual(v["status"], "BLOCK")
 
+    def test_original_pdf_byte_change_rejected_at_receipt_boundary(self):
+        self.write()
+        candidate = self.folder / "attachment-1.pdf"
+        original = candidate.read_bytes()
+        candidate.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+        # Call directly to isolate the second-read defense, rather than
+        # relying on the earlier PDF extraction/hash check.
+        with self.assertRaises(EvidenceError) as ctx:
+            inspect_signed_capture_bundle(self.folder, self.manifest, now=self.now)
+        self.assertIn("original PDF bytes differ", str(ctx.exception))
+
+    def test_a_single_manifest_snapshot_drives_both_review_layers(self):
+        self.write()
+        import company_os.procurement_package as package_module
+        with patch.object(package_module, "_load_manifest",
+                          wraps=package_module._load_manifest) as loaded:
+            verdict = self.verdict()
+        self.assertTrue(verdict["status"].startswith("HOLD"), verdict)
+        self.assertEqual(loaded.call_count, 1)
+
     def test_signed_pdf_hash_not_matching_local_manifest_rejected(self):
         self.documents_payload[0]["sha256"] = "f" * 64
         self.blocked("hash differs")
