@@ -43,6 +43,14 @@ Explicit approval is required before:
 - destructive migration, irreversible deletion, shutdown of a revenue asset, or other hard-to-reverse action;
 - an exception to any root policy.
 
+## Mandatory competitive engine launch prerequisite
+
+**Company-wide owner directive (2026-11-05):** Before any K.O. Enterprises business launches, publishes a commercial offer or deploys a production-facing venture, the shared competitive engine must already be live on approved protected infrastructure, current, source-verifiable, separately reviewed, continuously monitored, and correctly integrated with all real release paths. See [the engine launch decision](docs/strategy/COMPETITIVE_ENGINE_LAUNCH_PREREQUISITE.md).
+
+The company policy evaluator now has a fail-closed signed-health preflight for launch/publication/deployment actions; **its passing result does not grant publication authority**. Actual launch still requires a scoped, authentic CEO approval and the remaining confidentiality, security, independent-critic, legal, cost and client-fit controls. Any missing, failed, expired or forged readiness check **blocks** launch irrespective of an approval record.
+
+A narrowly named `deploy_competitive_engine` bootstrap action is exempt from the *engine-already-live* prerequisite only to avoid circular dependency. It still requires explicit CEO authorization for its exact host, credentials, cost, data, permissions and rollback, and cannot run while `PAUSE_AUTONOMY` is active. A design preference is **not** an approval to deploy or spend.
+
 ## Required approval packet
 
 Use `docs/company/APPROVAL_PACKET_TEMPLATE.md`. At minimum state:
