@@ -1,6 +1,6 @@
 # K.O. Enterprises — Competitor Strength/Weakness & Differentiation Standard
 
-**Policy ID:** KO-STRATEGY-COMPETITIVE-ADVANTAGE-v1.0  
+**Policy ID:** KO-STRATEGY-COMPETITIVE-ADVANTAGE-v1.1  
 **Established:** 2026-11-05  
 **Scope:** **Every proposed, parked, active and future K.O. Enterprises business**.  
 **Authority:** Operating research standard subordinate to `CORPORATE_CONSTITUTION.md`, `CEO_APPROVAL_POLICY.md`, privacy safeguards, and `PAUSE_AUTONOMY`.  
@@ -13,6 +13,20 @@
 Competitors may be better funded or operate at a scale we cannot match. Do **not** promise parity in every dimension. Identify minimum credible customer expectations (hygiene factors), then choose 1–3 meaningful, demonstrably superior differences. A missing competitor feature is **not** automatically a market gap. A complaint is **not** evidence that enough buyers will pay to fix it.
 
 Apply this in **both directions**: study what strong incumbents *do well* and how to preserve those customer expectations; investigate where *specific buyers* find alternatives inadequate. Our goal is a better fit for a chosen segment, not unsupported universal superiority claims.
+
+## v1.1 — Required competitive proof, not just competitive positioning
+
+Every venture evaluation must use the [Competitive Advantage Validation Playbook](COMPETITIVE_VALIDATION_PLAYBOOK.md) and its [blank, source-aware competitor battlecard](templates/COMPETITIVE_BATTLECARD_TEMPLATE.md). These requirements prevent a plausible-sounding gap from being mistaken for a commercially viable advantage:
+
+- **Source evidence grades (A/B/C/D):** separate independently inspected facts, independent corroboration, attributed self-claims and assumptions; document opposing evidence and expiration. Never allege a competitor's failing as proven without properly bounded support.
+- **Root-cause check:** ask *why* the alleged weakness persists. Competitors may avoid a feature because customers will not pay, legal constraints apply, or delivery would be unprofitable. Verify rather than assume.
+- **Switching-friction check:** record what buyers would give up by leaving incumbents, including trust, integrations, contracts, migration, service history and onboarding requirements.
+- **Fair side-by-side experiment:** compare equivalent services on the same brief, source cutoff and objectively defined success/failure criteria. Keep actual measurements separate from invented or hypothetical examples.
+- **Distribution and retention:** show how we can reach a specific buyer at sustainable cost and why they would remain; superior feature quality does not itself produce sales.
+- **Unit economics at quality:** count research, support, source licensing, human critic, privacy, corrections and rework. Price advantage without sustainable delivery is not a defensible win.
+- **Evidence-readiness and hard stops:** strategic scores rank **evidenced** options only. Missing evidence means **UNSCORED**, and any failed legal, source, privacy, client-fit or critic requirement blocks readiness regardless of a weighted score.
+
+**Acceptance outcome:** Every selected differentiation claim must trace from *specific buyer pain → proof that the alternative underserves it → our testable fix → fair comparison → actual customer value and willingness to pay → sustainable delivery cost*. Until that chain is evidenced, the advantage remains a hypothesis. This is a stronger standard, **not** evidence we have already beaten any competitor.
 
 ## Mandatory research process for EACH business idea
 
