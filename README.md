@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**CE-1C3a PDF staging prototype:** [Permissioned HTTPS PDF and issuer-listing capture](docs/strategy/CE1C3A_APPROVED_PDF_CAPTURE.md). V3 PDF-only signed permits, private ignored storage and no signer/release capability. Tests are simulated and `PAUSE_AUTONOMY` remains active.
+
 **CE-1C2 signed-source binding (offline, not live):** [Captured issuer listing and per-PDF receipt integrity gate](docs/strategy/CE1C2_SIGNED_CAPTURE_BINDING.md). Matches source HTML links and PDF bytes against separately signed capture metadata; still blocks issuer/eligibility approval and publication.
 
 **CE-1C PDF package preflight (not live):** [Original PDFs, attachments and addenda](docs/strategy/CE1C_PDF_PACKAGE_PREFLIGHT.md). Reviews synthetic and permitted local PDF packages for missing records, mismatched hashes, conflicting source-page evidence, deadlines and mandatory events; final status is always BLOCK or HOLD, never customer authorization.
