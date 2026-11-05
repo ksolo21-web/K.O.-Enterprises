@@ -142,9 +142,20 @@ def inspect_source_permit(
     allowed_url = target["target_url"]
     if not isinstance(allowed_url, str):
         raise EvidenceError("source URL missing")
-    host = urlsplit(allowed_url).hostname
-    if not host or validate_source_url(allowed_url, (host,)) != allowed_url:
-        raise EvidenceError("source authorization URL is not canonical")
+    try:
+        host = urlsplit(allowed_url).hostname
+    except ValueError as exc:
+        raise EvidenceError("source authorization URL has invalid authority") from exc
+    # A signed exact URL alone is not a trusted-source registry. An additional
+    # host policy must be provisioned by the approved protected operator.
+    raw_hosts = os.environ.get("KO_SOURCE_APPROVED_HOSTS", "")
+    if not raw_hosts or len(raw_hosts) > 2048:
+        raise EvidenceError("independent exact-host source registry unavailable")
+    registered_hosts = tuple(x.strip() for x in raw_hosts.split(","))
+    if len(registered_hosts) > 32 or any(not x or x != x.lower() for x in registered_hosts):
+        raise EvidenceError("invalid trusted-source host registry")
+    if not host or validate_source_url(allowed_url, registered_hosts) != allowed_url:
+        raise EvidenceError("source authorization URL is not exact-host approved")
 
     approved_at = _utc(target["approved_at"])
     expires_at = _utc(target["expires_at"])
@@ -180,7 +191,10 @@ def _resolve_pinned_endpoint(host: str) -> tuple[int, tuple, str]:
             address = ipaddress.ip_address(sockaddr[0])
         except ValueError as exc:
             raise EvidenceError("DNS result is not a numeric address") from exc
-        if (not address.is_global or "%" in sockaddr[0]
+        if (not address.is_global or address.is_multicast or address.is_reserved
+                or address.is_unspecified or address.is_link_local
+                or address.is_loopback or address.is_private
+                or "%" in sockaddr[0]
                 or getattr(address, "ipv4_mapped", None) is not None):
             raise EvidenceError("DNS returned a restricted/non-public address")
         if len(sockaddr) not in (2, 4) or sockaddr[1] != 443:
