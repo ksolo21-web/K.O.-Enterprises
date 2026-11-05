@@ -150,6 +150,18 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             inspect_source_permit(self.permit())
 
+    def test_separate_approved_hosts_list_is_mandatory(self):
+        del os.environ["KO_SOURCE_APPROVED_HOSTS"]
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(self.permit())
+
+    def test_similar_lookalike_domains_rejected(self):
+        self.assertEqual(inspect_source_permit(self.permit())["target_url"], URL)
+        with self.assertRaises(EvidenceError):
+            inspect_source_permit(self.permit(target_url=URL.replace(
+                "detroitmi.gov", "detroitmi.gov.evil.com"
+            )))
+
     def test_bad_key_length_fails_closed(self):
         os.environ["KO_SOURCE_ACCESS_POLICY_KEY"] = "short"
         with self.assertRaises(EvidenceError):
