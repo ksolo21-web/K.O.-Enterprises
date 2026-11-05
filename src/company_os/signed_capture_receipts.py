@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlsplit
 
+from .pdf_evidence import MAX_PDF_BYTES
 from .source_provenance import EvidenceError, validate_source_url
 
 MAX_CAPTURE_BUNDLE = 128 * 1024
@@ -326,7 +327,20 @@ def inspect_signed_capture_bundle(
         _digest(item["tls_certificate_sha256"], "TLS certificate hash")
         if item["sha256"] != d["sha256"]:
             raise EvidenceError("document capture hash differs from manifest PDF")
-        filesize = (root / d["filename"]).stat().st_size
+        # Re-read actual bytes at the receipt verification boundary. A file
+        # must not be replaced between the earlier pypdf preflight and this
+        # signed-capture check without failing. There is no publication path.
+        local_pdf = root / d["filename"]
+        if local_pdf.is_symlink() or not local_pdf.is_file():
+            raise EvidenceError("signed original PDF missing or unsafe")
+        filesize = local_pdf.stat().st_size
+        if not 100 <= filesize <= MAX_PDF_BYTES:
+            raise EvidenceError("signed original PDF exceeds size policy")
+        current_pdf = local_pdf.read_bytes()
+        if len(current_pdf) != filesize:
+            raise EvidenceError("signed original PDF changed during check")
+        if hashlib.sha256(current_pdf).hexdigest() != item["sha256"]:
+            raise EvidenceError("original PDF bytes differ from signed capture receipt")
         if type(item["bytes_received"]) is not int or item["bytes_received"] != filesize:
             raise EvidenceError("document capture size differs from original PDF")
         ip_text = _short(item["pinned_ip"], "pinned IP", 64)
