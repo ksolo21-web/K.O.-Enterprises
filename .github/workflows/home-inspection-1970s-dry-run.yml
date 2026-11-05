@@ -59,11 +59,11 @@ jobs:
           sources=json.loads((root/"photo_sources_and_findings.json").read_text())
           assert report["status"]=="REAL_PHOTO_COMPOSITE_E2E_EXECUTED_RELEASE_BLOCKED"
           assert len(sources)==report["photographs_downloaded"]==13
-          assert len({x["commons_url"] for x in sources})==15
-          assert len({x["normalized_sha"] for x in sources})==15
+          assert len({x["commons_url"] for x in sources})==13
+          assert len({x["normalized_sha"] for x in sources})==13
           assert report["pipeline_completed"]==["specialists","q02","q03","report"]
           assert report["Q03_status"]=="ADJUDICATION_HOLD" and report["Q03_holds"]>0
-          assert report["report_holds"]>0 and report["specialist_work_orders"]==15
+          assert report["report_holds"]>0 and report["specialist_work_orders"]==13
           assert report["m4_private_PDF_pages"]>=10
           assert report["photo_case_study_PDF_pages"]>=17
           assert not report["customer_release_allowed"]
