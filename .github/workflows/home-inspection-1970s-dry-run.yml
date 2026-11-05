@@ -1,10 +1,13 @@
-# Whole-house regression using 20 GENERATED SCHEMATICS, never real client photos.
-# Three explicitly scripted providers exercise M4 routing, Q02/Q03, private report.
+# Whole-house recheck: 20 baseline schematics AND 15 source-attributed REAL public photos.
+# All public examples are from DIFFERENT properties, with scripted Q02/Q03 holds.
+# No real customer evidence, independent model recognition or inspector signoff.
 name: Home Inspection - 1970s 1500 sqft Full Synthetic Dry Run
 on:
   push:
     branches: [home-inspection-1970s-house-dryrun]
     paths:
+      - 'ventures/home-inspection/scripts/run_1970s_real_photos.py'
+      - 'ventures/home-inspection/tests/test_1970s_realphotos.py'
       - 'ventures/home-inspection/scripts/run_1970s_house_dry_run.py'
       - 'ventures/home-inspection/tests/test_1970s_house_dryrun.py'
       - '.github/workflows/home-inspection-1970s-dry-run.yml'
@@ -18,7 +21,7 @@ permissions:
 jobs:
   whole-house-synthetic-dryrun:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     defaults:
       run:
         working-directory: ventures/home-inspection
@@ -38,6 +41,45 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_1970s_house_dryrun.py' -v
       - name: Execute full source custody to Q01 specialist Q02 Q03 private PDF and visual audit
         run: python -m scripts.run_1970s_house_dry_run --out-dir "$RUNNER_TEMP/1970s-house-e2e"
+      - name: Validate photographic case specification and provenance
+        run: python -m unittest discover -s tests -p 'test_1970s_realphotos.py' -v
+      - name: Download 15 real licensed photographs and exercise entire M4 case + professional-style PDF
+        run: python -m scripts.run_1970s_real_photos --out-dir "$RUNNER_TEMP/real-photo-1970s-case"
+      - name: Verify genuine image evidence and fail-closed M4 composite
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          from pypdf import PdfReader
+          import json,os
+          root=Path(os.environ["RUNNER_TEMP"])/"real-photo-1970s-case"
+          report=json.loads((root/"photo_composite_dryrun_summary.json").read_text())
+          sources=json.loads((root/"photo_sources_and_findings.json").read_text())
+          assert report["status"]=="REAL_PHOTO_COMPOSITE_E2E_EXECUTED_RELEASE_BLOCKED"
+          assert len(sources)==report["photographs_downloaded"]==15
+          assert len({x["commons_url"] for x in sources})==15
+          assert len({x["normalized_sha"] for x in sources})==15
+          assert report["pipeline_completed"]==["specialists","q02","q03","report"]
+          assert report["Q03_status"]=="ADJUDICATION_HOLD" and report["Q03_holds"]>0
+          assert report["report_holds"]>0 and report["specialist_work_orders"]==15
+          assert report["m4_private_PDF_pages"]>=10
+          assert report["photo_case_study_PDF_pages"]>=17
+          assert not report["customer_release_allowed"]
+          assert not report["original_house_photographs"]
+          assert not report["AI_vision_model_inference_performed"]
+          assert not report["independent_Q02_Q03_human_review_performed"]
+          assert not report["qualified_inspector_signed"]
+          assert len(report["missing_real_case_coverage"])>=10
+          for n in range(1,16):
+              with Image.open(root/"evidence"/"media"/("P%02d.jpg"%n)) as img:
+                  assert img.format=="JPEG" and min(img.size)>=250
+                  img.verify()
+          detailed=root/"1970s_composite_REAL_PHOTO_DETAILED_DRY_RUN.pdf"
+          assert len(PdfReader(str(detailed)).pages)==report["photo_case_study_PDF_pages"]
+          assert (root/"m4_private_case"/"page_raster_audit"/"all_pages_contact_sheet.png").exists()
+          print("VERIFIED_REAL_LICENSED_PHOTO_COMPOSITE",len(sources),
+                report["photo_case_study_PDF_pages"],report["Q03_holds"])
+          PY
       - name: Verify all generated report and safety audit artifacts
         run: |
           python - <<'PY'
@@ -69,6 +111,22 @@ jobs:
         with:
           name: simulated-1970s-home-1500sqft-complete-dryrun
           path: |
+            ${{ runner.temp }}/real-photo-1970s-case/photo_composite_dryrun_summary.json
+            ${{ runner.temp }}/real-photo-1970s-case/photo_sources_and_findings.json
+            ${{ runner.temp }}/real-photo-1970s-case/1970s_composite_REAL_PHOTO_DETAILED_DRY_RUN.pdf
+            ${{ runner.temp }}/real-photo-1970s-case/evidence/composite_project.json
+            ${{ runner.temp }}/real-photo-1970s-case/evidence/media/*.jpg
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/case_state.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/specialist_dossier.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/staged_project.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/technical_review.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/adjudication.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/adjudicated_project.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/report_receipt.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/option2_draft/*.pdf
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/option2_draft/*.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/page_raster_audit/audit.json
+            ${{ runner.temp }}/real-photo-1970s-case/m4_private_case/page_raster_audit/all_pages_contact_sheet.png
             ${{ runner.temp }}/1970s-house-e2e/dry_run_summary.json
             ${{ runner.temp }}/1970s-house-e2e/source/synthetic_project.json
             ${{ runner.temp }}/1970s-house-e2e/source/media/*.png
