@@ -88,8 +88,8 @@ def cover(c,front):
     line(c,M,725,W-M,725,NAVY,.8)
     photo(c,front,M,273,CW,418)
     text(c,M,256,"FRONT ELEVATION REFERENCE  /  1974 RANCH PHOTOGRAPH - DIFFERENT PROPERTY",7.4,REG,SLATE)
-    text(c,M,195,"A clearer picture",32,LIGHT,NAVY)
-    text(c,M,159,"of the whole home.",32,LIGHT,NAVY)
+    text(c,M,195,"Home inspection",32,LIGHT,NAVY)
+    text(c,M,159,"report.",32,LIGHT,NAVY)
     line(c,M,133,W-M,133,TAN,2)
     text(c,M,111,"Residential property review  |  Illustrative client-format edition",10,REG,DARK)
     text(c,M,87,"1,500 sq ft   ·   3 bedrooms   ·   2 full baths   ·   basement   ·   attached garage",9.4,REG,SLATE)
@@ -157,6 +157,40 @@ def summary(c):
         y=paragraph(c,M,y-19,body,CW,10,15)-21
     y=paragraph(c,M,y,"A thoughtful report also records conditions that appear normal when actually observed. No favorable or deficient condition on these pages has been confirmed at this fictional address.",CW,9.4,14,SLATE)
     check(y,"summary");close(c)
+FIELD_LOG=json.loads("[[\"Site / rear downspout\",\"Simulated 12-inch discharge outlet beside foundation wall; runoff channel not established.\",\"Check site grade and roof-to-ground drainage together before planning correction.\"],[\"Roof / rear slope\",\"Simulated scuffed, weathered covering with two raised tabs near a vent.\",\"Qualified roofer to check flashings, deck exposure and material scope.\"],[\"Attic / accessible hatch\",\"Simulated uneven insulation and old brown sheathing marks; no active dampness test.\",\"Confirm present moisture and bath-exhaust discharge by safe onsite examination.\"],[\"Basement / northwest corner\",\"Simulated mineral deposits and lower-wall discoloration over approximately 3 feet.\",\"Trace water pathways, inspect accessible cracks and compare during wet weather.\"],[\"Electrical / utility wall\",\"Simulated uncovered opening adjacent to the panel; no energized-part testing performed.\",\"Restrict contact and request licensed electrical evaluation of guarding and wiring.\"],[\"Plumbing / kitchen base cabinet\",\"Simulated slow drip at slip-joint during a short sink run; cabinet floor shows wear.\",\"Qualified plumber to confirm leak source, connections and extent of wet materials.\"],[\"Primary bath / exhaust\",\"Simulated ceiling spotting near fan grille; fan operation audible but termination not traced.\",\"Assess exhaust route, humidity, caulking and finishes; do not diagnose mold species.\"],[\"Hall full bath / tub joint\",\"Simulated split sealant at wet-wall transition and older grout.\",\"Check water tightness and underlying condition before resealing or finish repair.\"],[\"Primary bedroom / ceiling\",\"Simulated faint 18-inch stain without dripping at time of hypothetical walkthrough.\",\"Identify source from plumbing/roof above; verify dryness before cosmetic work.\"],[\"HVAC / service cabinet\",\"Simulated dirty return filter; no heating capacity or combustion test.\",\"Record unit nameplate and maintenance history; arrange qualified service if indicated.\"],[\"Water heating / utility room\",\"Simulated corrosion around a threaded connector; model and installation year unknown.\",\"Check actual fittings, tank, discharge and vent installation with qualified personnel.\"],[\"Attached garage / door spring\",\"Simulated extension spring without visible containment cable; reversal test not done.\",\"Have a garage technician confirm spring safety, sensors and force adjustment.\"]]")
+def case_notes(c,part,entries):
+    y=header(c,f"Illustrative field log / {part}","Location-based observations",
+             "The following records are invented training scenarios to demonstrate the specificity expected in a real report. They are NOT readings, results or observations from an inspected home.")
+    for j,(loc,condition,response) in enumerate(entries):
+        y-=5
+        line(c,M,y+7,W-M,y+7)
+        text(c,M,y-11,loc,11.8,BOLD,NAVY)
+        y=paragraph(c,M,y-30,condition,CW,9.5,13.7)-6
+        y=paragraph(c,M,y,"Suggested response: "+response,CW,8.9,13.2,SLATE)-15
+    check(y,"simulated field log");close(c)
+def equipment_page(c):
+    y=header(c,"House information / equipment","Equipment and utility register",
+             "A credible real inspection does not skip equipment details. This training case shows the record fields that remain unverified because no subject-property nameplates or tests exist.")
+    rows=[
+      ("Electrical service","Panel make, circuit directory, service rating, protective devices"),
+      ("Space heating","System type, capacity, fuel, make/model/serial, thermostat and service date"),
+      ("Air conditioning","Presence, condenser/air handler details, model, refrigerant and age"),
+      ("Water heater","Fuel type, capacity, installation year, nameplate and visible safety piping"),
+      ("Water source / supply","Municipal or well, service material, accessible shutoff and pressure"),
+      ("Wastewater","Public sewer or on-site disposal, visible drain material and cleanouts"),
+      ("Laundry & ventilation","Dryer exhaust, bath exhaust termination and visible air movement"),
+      ("Garage door","Door configuration, opener model, spring system, sensors and test record")
+    ]
+    for n,(title,fields) in enumerate(rows):
+        if n%2==0:
+            fill(c,PALE);c.rect(M,y-43,CW,48,stroke=0,fill=1)
+        text(c,M+10,y-10,title,10.5,BOLD,NAVY)
+        paragraph(c,M+197,y-10,fields,CW-212,9.1,13,SLATE)
+        text(c,M+10,y-28,"SUBJECT PROPERTY: NOT RECORDED",7.8,REG,SLATE)
+        y-=49
+    y-=14
+    y=paragraph(c,M,y,"In a real customer report, verified ratings, serials, accessible shutoffs, dates, test conditions and limitations should populate these entries. None should be guessed from a home’s age.",CW,9.5,14.2,SLATE)
+    check(y,"equipment log");close(c)
 def systems_page(c,index,info):
     name,overview,items,limit=info
     y=header(c,f"System {index:02d} of 13",name,overview)
@@ -268,9 +302,9 @@ def build(root,out):
     c=canvas.Canvas(str(out),pagesize=letter,pageCompression=1)
     c.setTitle("K.O. Home Inspections | Whole-Home Editorial Sample | 1970s Property")
     c.setAuthor("K.O. Enterprises | synthetic editorial test")
-    cover(c,cover_image);intro(c);profile(c);reading(c);summary(c)
+    cover(c,cover_image);intro(c);profile(c);reading(c);summary(c);case_notes(c,1,FIELD_LOG[:6]);case_notes(c,2,FIELD_LOG[6:]);equipment_page(c)
     for i,s in enumerate(DATA["systems"],1):systems_page(c,i,s)
-    chunks=[DATA["rooms"][0:3],DATA["rooms"][3:6],DATA["rooms"][6:9],DATA["rooms"][9:]]
+    chunks=[DATA["rooms"][0:4],DATA["rooms"][4:8],DATA["rooms"][8:]]
     for i,rs in enumerate(chunks,1):room_page(c,i,rs)
     # Pair images; protect against orphaned final image by dedicating one page.
     for i in range(0,len(DATA["photos"]),2):
@@ -278,9 +312,9 @@ def build(root,out):
     plan(c);owner_info(c);credits(c,front_url,sources);final(c)
     c.save()
     pdf=PdfReader(str(out));n=len(pdf.pages)
-    if n<32 or n>38: raise ValueError(f"Page count outside expected range: {n}")
+    if n<34 or n>40: raise ValueError(f"Page count outside expected range: {n}")
     full="\n".join(p.extract_text() or "" for p in pdf.pages)
-    for required in ["A clearer picture","The home at a glance","The story of this house","Primary full bath (en-suite)","Room-by-room view","Below-grade / basement","Image credits & provenance","NOT A REAL PROPERTY INSPECTION"]:
+    for required in ["Home inspection","The home at a glance","The story of this house","Primary full bath (en-suite)","Room-by-room view","Below-grade / basement","Equipment and utility register","Location-based observations","Image credits & provenance","NOT A REAL PROPERTY INSPECTION"]:
         if required not in full:raise ValueError("Missing required content: "+required)
     report={"status":"CUSTOMER_FORMAT_SIMULATION_COMPLETE_NOT_APPROVED","pages":n,"photographs":len(sources)+1,"system_sections":len(DATA["systems"]),"room_spaces":len(DATA["rooms"]),"sample_conditions":sum(len(x[2]) for x in DATA["systems"]),"photo_source_links":len(sources)+1,"customer_release_allowed":False,"front_image_public_domain_url":front_url,"pdf_sha256":hashlib.sha256(out.read_bytes()).hexdigest()}
     (out.parent/"editorial_sample_verification.json").write_text(json.dumps(report,indent=2)+"\n")
