@@ -30,6 +30,8 @@ Each `documents` record contains `id`, `filename`, `sha256`, `kind`, `source_url
 
 **Deliberately strict date policy:** For this first automated preflight, a deadline or mandatory event timestamp must appear **verbatim in ISO-8601 with timezone** in its page-specific quoted PDF text. Dates written only in natural language therefore **block automated acceptance** until we build and independently verify a safe date-interpretation protocol. A conflicting value cannot be resolved by selecting an older notice over a later numbered addendum. Waiver claims need a separate cited issuer waiver statement. These checks prevent a typed value from being mistaken for original-source proof.
 
+**Mandatory-event omission check:** A conservative text-pattern check blocks a completely empty event inventory when an original PDF refers to a mandatory or required site walk, visit, walkthrough, meeting, or conference. It is a safeguard, **not** complete semantic recognition of every kind of issuer requirement. The independent critic must still review the entire package for omitted conditions.
+
 ## Critical residual gaps
 
 1. **Issuer completeness is not authenticatable from the local manifest.** An operator can omit an addendum and also incorrectly assert the number expected. Real monitored issuer portal discovery, original signatures, changes/addenda enumeration, procurement-number/contract-scope verification and independent cross-check remain future work.
