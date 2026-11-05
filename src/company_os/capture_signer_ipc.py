@@ -9,14 +9,13 @@ Production requires separate OS users, ACL, key vault and audit anchoring.
 
 from __future__ import annotations
 
+import base64
 import dataclasses
 import json
 import os
 import secrets
 import socket
-import stat
 import struct
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -139,7 +138,7 @@ def serve_one(
     trusted = [r for r in policy["trusted_keys"] if r["key_id"] == key_id]
     if (len(trusted) != 1 or key_id in policy["revoked_keys"]):
         raise EvidenceError("signing identity absent or revoked")
-    if signer.public_key().public_bytes_raw() != __import__("base64").b64decode(
+    if signer.public_key().public_bytes_raw() != base64.b64decode(
         trusted[0]["public_key_b64"], validate=True
     ):
         raise EvidenceError("injected signer key mismatches root-signed trust registry")
@@ -202,11 +201,27 @@ def serve_one(
 
 
 def request_staging_signature(
-    repo_root: Path | str, staged: StagedSource,
+    repo_root: Path | str,
+    staged: StagedSource,
+    policy_envelope: Mapping[str, Any],
+    *,
+    expected_signer_uid: int,
+    test_only_same_uid: bool = False,
 ) -> dict[str, Any]:
-    """Unprivileged local IPC client. It has zero key or approval controls."""
+    """Unprivileged IPC client; checks peer UID, root policy and signed bytes.
+
+    SAME UID is rejected in production mode. Passing test_only_same_uid=True
+    verifies only the local protocol for tests, not real deployment isolation.
+    """
     if not isinstance(staged, StagedSource):
         raise EvidenceError("unrecognized staging request data")
+    if type(expected_signer_uid) is not int or expected_signer_uid < 0:
+        raise EvidenceError("expected signer OS UID missing")
+    if expected_signer_uid == os.geteuid() and not test_only_same_uid:
+        raise EvidenceError("expected signer UID must be separately restricted")
+    if is_paused(repo_root):
+        raise EvidenceError("company emergency pause blocks signer client")
+    verified_policy = verify_governance_policy(policy_envelope)
     addr = (Path(repo_root).resolve() / "state" / "competitive_engine"
             / "signer_ipc" / "staging-signer.sock")
     if addr.is_symlink():
@@ -218,12 +233,32 @@ def request_staging_signature(
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as conn:
         conn.settimeout(TIMEOUT_SECONDS)
         conn.connect(str(addr))
+        if _peer_uid(conn) != expected_signer_uid:
+            raise EvidenceError("unexpected signer process identity")
         _send_message(conn, body)
         response = _read_message_response(conn)
     if (response.get("status") != "STAGING_ONLY_UNVERIFIED_ORIGIN"
             or response.get("publication_authorized") is not False
             or response.get("original_issuer_authenticated") is not False):
         raise EvidenceError("signer did not return a safe unverified result")
+    receipt = verify_staging_receipt(response.get("receipt"), verified_policy)
+    expected = {
+        "package_id": staged.package_id,
+        "document_id": staged.document_id,
+        "source_url": staged.source_url,
+        "sha256": staged.sha256,
+        "bytes_received": staged.size_bytes,
+        "media_type": staged.media_type,
+        "permit_id": staged.approved_source_permit_id,
+        "pinned_ip": staged.pinned_ip,
+        "tls_peer_cert_sha256": staged.tls_peer_cert_sha256,
+    }
+    if any(receipt.get(k) != v for k, v in expected.items()):
+        raise EvidenceError("signed staging response does not match requested original file")
+    if response.get("ledger_state") != "LOCAL_STAGING_RECEIPT_RECORDED_UNVERIFIED_ORIGIN":
+        raise EvidenceError("signer did not confirm staging-only local audit")
+    if not isinstance(response.get("audit_head"), str) or len(response["audit_head"]) != 64:
+        raise EvidenceError("signer audit hash unavailable")
     return response
 
 
