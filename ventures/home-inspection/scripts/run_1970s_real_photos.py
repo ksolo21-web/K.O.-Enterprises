@@ -76,10 +76,10 @@ PHOTOS = [
 ("P10","interior","Bedroom ceiling example","Ceiling water damage.jpg","Atomicdragon136","CC BY 3.0","MAJOR","Ceiling finish shows localized staining/discoloration consistent with prior wetting.","Identify and remedy water source; verify ceiling material stability, moisture readings and any concealed deterioration before cosmetic repairs. No active leak established from this still."),
 ("P11","attic","Accessible attic reference","AtticInsulation.jpg","Jason Dale","CC BY-SA 3.0","FURTHER EVALUATION","Insulation, ducts and roof-space materials are visible in an attic example.","A qualified onsite inspector must safely assess insulation depth/coverage, ventilation paths, roof sheathing, exhaust routing, wiring and moisture. No deficiency is conclusively established here."),
 ("P13","hvac","Cooling equipment reference","Hoarders House - Abandoned Cooling (15804516978).jpg","darkday","CC BY 2.0","FURTHER EVALUATION","Photograph records neglected cooling-related equipment; serviceability is not demonstrated.","An HVAC professional should identify equipment and inspect electrical connections, refrigerant-side condition, drainage, ventilation and safe operation. Do not assign age or performance without labels and test data."),
-("P14","site","Patio/foundation edge","Mortar to keep basement dry.jpg","Tomwsulcer","CC0 1.0","FURTHER EVALUATION","An exterior patio-to-building junction is shown with applied mortar and potential water-management context.","Inspect actual finished grade, downspouts, hardscape slope and wall penetrations under real conditions. A photograph of a repaired seam does not establish drainage performance."),
+("P14","site","Exterior runoff and gutter drainage","Ida clogged gutter Essex 01.jpg","Destroyeraa","CC BY-SA 4.0","MAJOR","The reference photograph shows a residential roof gutter visibly obstructed by debris after heavy weather.","Arrange safe qualified clearing of blocked gutters and verify drainage, downspout discharge, foundations, and related moisture damage. This is not a measurement of actual grade or a claim about the fictional roof."),
 ]
 SEVERITY_ORDER = {"URGENT SAFETY":0,"MAJOR":1,"FURTHER EVALUATION":2}
-ALLOWED_LICENCES = {"CC BY-SA 3.0","Public domain US federal","CC BY 2.0",
+ALLOWED_LICENCES = {"CC BY-SA 3.0","CC BY-SA 4.0","Public domain US federal","CC BY 2.0",
                     "CC BY 4.0","Public domain","CC0 1.0","CC BY 3.0"}
 
 
