@@ -260,13 +260,47 @@ class CaptureTrustTests(unittest.TestCase):
         self.policy["revoked_receipts"] = []
         with self.assertRaises(EvidenceError):
             self.ledger.accept_policy(self.envelope(), now=self.now)
-        self.assertEqual(self.ledger.audit()["events"], 2)
+        self.assertEqual(self.ledger.audit()["events"], 3)
 
     def test_same_revision_changed_revocation_is_blocked(self):
         self.active()
         self.policy["revoked_receipts"] = ["receipt-original-001"]
         with self.assertRaises(EvidenceError):
             self.ledger.accept_policy(self.envelope(), now=self.now)
+
+    def test_revoked_receipt_cannot_be_unrevoked_in_new_signed_revision(self):
+        self.active()
+        self.policy["revision"] = 2
+        self.policy["revoked_receipts"] = ["receipt-original-001"]
+        self.ledger.accept_policy(self.envelope(), now=self.now)
+        self.assertEqual(self.ledger.audit()["events"], 3)
+        self.policy["revision"] = 3
+        self.policy["revoked_receipts"] = []
+        with self.assertRaises(EvidenceError):
+            self.ledger.accept_policy(self.envelope(), now=self.now)
+        self.assertEqual(self.ledger.audit()["events"], 3)
+
+    def test_compromised_key_cannot_be_reenabled_by_new_policy(self):
+        self.active()
+        self.policy["revision"] = 2
+        self.policy["revoked_keys"] = ["capture-issuer-001"]
+        self.ledger.accept_policy(self.envelope(), now=self.now)
+        self.policy["revision"] = 3
+        self.policy["revoked_keys"] = []
+        with self.assertRaises(EvidenceError):
+            self.ledger.accept_policy(self.envelope(), now=self.now)
+
+    def test_tampered_revocation_event_detected_in_audit_chain(self):
+        self.active()
+        self.policy["revision"] = 2
+        self.policy["revoked_keys"] = ["capture-issuer-001"]
+        self.ledger.accept_policy(self.envelope(), now=self.now)
+        self.ledger.db.execute("DROP TRIGGER block_event_update")
+        self.ledger.db.execute(
+            "UPDATE events SET reference_id='fake' WHERE kind='revoked_key'"
+        )
+        with self.assertRaises(EvidenceError):
+            self.ledger.audit()
 
     def test_latest_policy_must_be_active_before_receipt(self):
         p = self.envelope()
