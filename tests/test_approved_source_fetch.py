@@ -77,6 +77,7 @@ class ApprovedSourceFetchTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.env = patch.dict(os.environ, {
             "KO_SOURCE_ACCESS_POLICY_KEY": KEY,
+            "KO_SOURCE_APPROVED_HOSTS": "detroitmi.gov",
             "COMPANY_OS_PAUSED": "0",
         }, clear=True)
         self.env.start()
