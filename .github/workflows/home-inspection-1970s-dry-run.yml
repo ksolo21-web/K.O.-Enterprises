@@ -7,6 +7,7 @@ on:
     branches: [home-inspection-1970s-house-dryrun]
     paths:
       - 'ventures/home-inspection/scripts/run_1970s_real_photos.py'
+      - 'ventures/home-inspection/scripts/build_1970s_editorial_sample.py'
       - 'ventures/home-inspection/tests/test_1970s_realphotos.py'
       - 'ventures/home-inspection/scripts/run_1970s_house_dry_run.py'
       - 'ventures/home-inspection/tests/test_1970s_house_dryrun.py'
@@ -46,6 +47,42 @@ jobs:
       - name: Download 13 real licensed photographs and exercise entire M4 case + professional-style PDF
         if: github.event_name == 'push'
         run: python -m scripts.run_1970s_real_photos --out-dir "$RUNNER_TEMP/real-photo-1970s-case"
+      - name: Build complete photo-led Option 2 editorial sample (synthetic, not customer-authorized)
+        if: github.event_name == 'push'
+        run: |
+          python -m scripts.build_1970s_editorial_sample \
+            --source-dir "$RUNNER_TEMP/real-photo-1970s-case" \
+            --out-pdf "$RUNNER_TEMP/real-photo-1970s-case/KO_Whole_Home_Option2_Editorial_1970s_Sample.pdf"
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          from pypdf import PdfReader
+          import pypdfium2 as pdfium, json, os
+          root=Path(os.environ["RUNNER_TEMP"])/"real-photo-1970s-case"
+          status=json.loads((root/"editorial_sample_verification.json").read_text())
+          pdf=root/"KO_Whole_Home_Option2_Editorial_1970s_Sample.pdf"
+          reader=PdfReader(str(pdf))
+          assert status["pages"]==len(reader.pages)
+          assert status["photographs"]==14
+          assert status["system_sections"]==13 and status["room_spaces"]==11
+          assert status["sample_conditions"]==39
+          assert not status["customer_release_allowed"]
+          assert sum(len(p.images) for p in reader.pages)>=14
+          raster=pdfium.PdfDocument(str(pdf))
+          thumbs=[]
+          for i in range(len(raster)):
+              page=raster[i]
+              image=page.render(scale=.62).to_pil().convert("RGB")
+              assert image.size[0]>350 and image.size[1]>450
+              thumbs.append(image)
+          tw,th=thumbs[0].size;cols=5;rows=(len(thumbs)+4)//5
+          sheet=Image.new("RGB",(tw*cols,th*rows),"#EEEEED")
+          for k,im in enumerate(thumbs):
+              sheet.paste(im,((k%cols)*tw,(k//cols)*th))
+          sheet.save(root/"KO_Whole_Home_Option2_All_Pages_Review.png",optimize=True)
+          assert sheet.size[0]>1500
+          print("EDITORIAL_SAMPLE_RENDER_VALIDATED",len(reader.pages),"pages",status["sample_conditions"],"observations")
+          PY
       - name: Verify genuine image evidence and fail-closed M4 composite
         if: github.event_name == 'push'
         run: |
@@ -142,6 +179,10 @@ jobs:
         with:
           name: simulated-1970s-home-1500sqft-complete-dryrun
           path: |
+            ${{ runner.temp }}/real-photo-1970s-case/KO_Whole_Home_Option2_Editorial_1970s_Sample.pdf
+            ${{ runner.temp }}/real-photo-1970s-case/KO_Whole_Home_Option2_All_Pages_Review.png
+            ${{ runner.temp }}/real-photo-1970s-case/editorial_sample_verification.json
+            ${{ runner.temp }}/real-photo-1970s-case/cover_front_1974_public_domain.jpg
             ${{ runner.temp }}/real-photo-1970s-case/photo_composite_dryrun_summary.json
             ${{ runner.temp }}/real-photo-1970s-case/photo_sources_and_findings.json
             ${{ runner.temp }}/real-photo-1970s-case/1970s_composite_REAL_PHOTO_DETAILED_DRY_RUN.pdf
