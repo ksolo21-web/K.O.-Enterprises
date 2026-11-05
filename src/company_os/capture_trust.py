@@ -173,15 +173,16 @@ def verify_governance_policy(
         start, end = _date(row["valid_from"], "valid_from"), _date(row["valid_until"], "valid_until")
         if end <= start or end - start > _KEY_WINDOW:
             raise EvidenceError("capture signer key validity invalid")
-    for field, allowed in (("revoked_keys", key_ids), ("revoked_receipts", None)):
+    # Retired keys must be revocable without retaining their public key in
+    # the at-most-32 currently trusted key list. Revoked IDs are monotonic
+    # within this ledger and can never be reused for a newly trusted signer.
+    for field in ("revoked_keys", "revoked_receipts"):
         values = body[field]
         if not isinstance(values, list) or len(values) > 2000:
             raise EvidenceError("revocation list invalid")
         parsed = [_id(value, field) for value in values]
         if len(parsed) != len(set(parsed)):
             raise EvidenceError("duplicate revocation")
-        if allowed is not None and not set(parsed) <= allowed:
-            raise EvidenceError("revoked key absent from trusted policy")
     return body
 
 
@@ -335,6 +336,34 @@ class StagingTrustLedger:
                 "events": len(entries),
                 "head_sha256": entries[-1][-1] if entries else "GENESIS",
                 "publication_authorized": False}
+
+    def receipt_status(
+        self, receipt_id: str, policy_envelope: Mapping[str, Any],
+        *, now: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Reflect CURRENT signed revocations; a historic accepted receipt is
+        never grandfathered into trusted source verification or publication.
+        """
+        rid = _id(receipt_id, "receipt id")
+        policy = verify_governance_policy(policy_envelope, now=now)
+        rows = self._read()
+        historical = [r for r in rows if r[1] == "policy"]
+        digest = hashlib.sha256(DOMAIN_POLICY + canonical(policy)).hexdigest()
+        if (not historical or historical[-1][4] != policy["revision"]
+                or historical[-1][5] != digest):
+            raise EvidenceError("current signed governance policy not active")
+        found = [r for r in rows if r[1] == "receipt" and r[2] == rid]
+        if not found:
+            result = "NOT_RECORDED"
+        elif rid in policy["revoked_receipts"] or found[-1][3] in policy["revoked_keys"]:
+            result = "REVOKED"
+        else:
+            result = "STAGING_ONLY_UNVERIFIED_ORIGIN"
+        return {
+            "receipt_id": rid, "state": result, "publication_authorized": False,
+            "original_issuer_authenticated": False,
+            "independent_critic_approved": False,
+        }
 
     def _append(self, kind: str, reference: str, key: str, generation: int, digest: str) -> None:
         old = self._read()
