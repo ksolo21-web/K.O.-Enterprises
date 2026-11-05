@@ -43,6 +43,9 @@ with SourceLedger(Path(".")) as ledger:
 
 **Do not put credentials, private client data, full copyrighted records, permit-signing secrets or unapproved automated workers in a public repository.**
 
+
+**Additional tested control:** `KO_SOURCE_APPROVED_HOSTS` must enumerate trusted exact hostnames separately from the signed URL permit. The DNS filter also excludes multicast and reserved addresses. Test results do not prove a live authorized issuer fetch.
+
 ## Verified vs unverified (critical distinction)
 
 **Offline tested:** refusal of absent approval and active pause *before DNS*, exact URL and permit-signature validation, expiration and size checks, mixed public/private DNS rejection, IP pinning, host TLS SNI with certificate checks, redirect and bad-content rejection, header ambiguity controls, private ledger integration and held review state. Network responses and certificates in these tests are **synthetic mocks**. Source content correctness is not proven.
