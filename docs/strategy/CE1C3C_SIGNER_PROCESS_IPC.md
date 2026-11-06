@@ -24,6 +24,8 @@ The tests use two actual Linux processes **under the same CI OS user**, and ther
 
 The local audit hash chain is not externally anchored, cannot independently prove true issuer authenticity, and is not a real-time permissioned issuer portal collector. Only the pre-existing CE-1C2 *offline* original package checker can assess PDF inventory, and it cannot guarantee hidden bid portal addenda are complete. Nothing here issues CE-1C2 authenticated-live-original receipts.
 
+**CE-1C3d follows:** [Signer-owned private key and real cross-UID CI reference](CE1C3D_CROSS_UID_SIGNER.md). Only a preprovisioned, opt-in shared-group path allows distinct UIDs; the previous owner-only default is retained. This is a disposable runner test, not an approved production deployment.
+
 ## Acceptance evidence / blockers
 
 - Verify full repo Python and Node tests, including child-process signing, wrong signer/peer UID, forged local socket, changed PDF, malformed/truncated/oversized IPC, no-repeat socket, pause enforcement and no publication.

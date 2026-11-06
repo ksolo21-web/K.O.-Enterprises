@@ -230,7 +230,9 @@ class SignerIpcProcessTests(unittest.TestCase):
             )
 
     def test_wrong_client_uid_rejected_by_actual_kernel_peer_check(self):
-        process, queue, addr = self.spawn(uid=os.geteuid()+1, test_mode=False)
+        # Same-UID disposable fixture still checks the kernel's *wrong client*
+        # result. Production cross-UID mode is separately exercised in CI.
+        process, queue, addr = self.spawn(uid=os.geteuid()+1, test_mode=True)
         self.assertTrue(addr.is_socket())
         with self.assertRaises((EvidenceError, OSError, ConnectionError)):
             request_staging_signature(
@@ -239,6 +241,20 @@ class SignerIpcProcessTests(unittest.TestCase):
             )
         status = self.collect(process, queue)
         self.assertIn("unapproved local signer peer identity", status[1])
+
+    def test_production_signer_refuses_missing_preprovisioned_group(self):
+        # A different allowed UID is not enough. Without a protected shared
+        # group/path, the signer must refuse before creating a socket.
+        with self.assertRaises(EvidenceError):
+            serve_one(
+                repo_root=self.root, policy_envelope=self.signed_policy(),
+                signer=self.capture_key, key_id="capture-ipc-001",
+                allowed_client_uid=os.geteuid()+1,
+                test_only_same_uid=False, shared_group_gid=None,
+            )
+        self.assertFalse(
+            (self.root/"state"/"competitive_engine"/"signer_ipc").exists()
+        )
 
     def test_corrupted_original_pdf_fails_without_receipt(self):
         process, queue, addr = self.spawn()
