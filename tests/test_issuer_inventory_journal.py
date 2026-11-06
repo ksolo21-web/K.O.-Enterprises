@@ -175,8 +175,9 @@ class IssuerInventoryJournalTests(unittest.TestCase):
         return listing, record
 
     def check(self, name="pkg-one", **kwargs):
+        assessment_time = kwargs.pop("now", self.now)
         return self.journal.inspect_session(
-            self.issuer, name, now=self.now, **kwargs,
+            self.issuer, name, now=assessment_time, **kwargs,
         )
 
     def assert_block(self, name="pkg-one", fragment=None, **kwargs):
@@ -281,11 +282,15 @@ class IssuerInventoryJournalTests(unittest.TestCase):
 
     def test_expired_or_future_signed_permit_fails_closed(self):
         listing = self.stage()
-        for delta in (timedelta(minutes=-1), timedelta(minutes=50)):
-            with self.subTest(delta=delta):
-                wrong = self.permit(
-                    listing, expires_at=(self.now+delta).isoformat(),
-                )
+        for wrong in (
+            self.permit(listing, expires_at=(self.now-timedelta(minutes=1)).isoformat()),
+            self.permit(
+                listing,
+                approved_at=(self.now+timedelta(minutes=50)).isoformat(),
+                expires_at=(self.now+timedelta(minutes=80)).isoformat(),
+            ),
+        ):
+            with self.subTest(permit=wrong["target"]["approved_at"]):
                 with self.assertRaises(EvidenceError):
                     self.record(listing, permit=wrong)
 
