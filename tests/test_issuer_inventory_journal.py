@@ -359,6 +359,14 @@ class IssuerInventoryJournalTests(unittest.TestCase):
         with self.assertRaises(EvidenceError):
             self.record(replace(changed, source_url=BASE+"other.pdf"))
 
+    def test_pdf_url_cannot_be_rekeyed_as_new_document_id_across_sessions(self):
+        self.package(docs=("notice",))
+        self.now += timedelta(seconds=3)
+        self.record(self.stage("pkg-two", links=("notice",), timestamp=self.now))
+        renamed = self.stage("pkg-two", doc="renamed-notice", timestamp=self.now)
+        with self.assertRaisesRegex(EvidenceError, "remapped"):
+            self.record(replace(renamed, source_url=BASE+"notice.pdf"))
+
     def test_document_content_revision_flagged_not_silently_overwritten(self):
         self.package(docs=("notice",))
         self.now += timedelta(seconds=3)
