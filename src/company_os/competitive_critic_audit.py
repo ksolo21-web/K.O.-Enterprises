@@ -168,10 +168,11 @@ class CriticReviewLedger:
     def accept_review(
         self, dossier: Mapping[str, Any], artifact_sha256: str,
         policy_envelope: Mapping[str, Any], review_envelope: Mapping[str, Any],
-        *, now: datetime | None = None,
+        *, artifact_pdf_path: Path | str, now: datetime | None = None,
     ) -> dict[str, Any]:
         reviewed = assess_signed_review(
-            dossier, artifact_sha256, policy_envelope, review_envelope, now=now,
+            dossier, artifact_sha256, policy_envelope, review_envelope,
+            artifact_pdf_path=artifact_pdf_path, now=now,
         )
         if reviewed["state"] == "BLOCK":
             return reviewed
