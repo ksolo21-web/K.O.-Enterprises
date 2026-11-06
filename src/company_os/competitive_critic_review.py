@@ -15,6 +15,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Mapping
 
 from cryptography.exceptions import InvalidSignature
@@ -23,6 +24,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from .competitive_evidence_engine import canonical as dossier_canonical
 from .competitive_launch_guard import REQUIRED_CRITIC_CHECKS
 from .source_provenance import EvidenceError
+from .pdf_evidence import inspect_pdf_bytes, MAX_PDF_BYTES
 
 POLICY_DOMAIN = b"KO-INDEPENDENT-CRITIC-GOV-POLICY-V1\n"
 REVIEW_DOMAIN = b"KO-INDEPENDENT-CRITIC-REVIEW-V1\n"
@@ -184,6 +186,7 @@ def inspect_signed_critic_review(
     dossier: Mapping[str, Any], artifact_sha256: str,
     policy_envelope: Mapping[str, Any],
     review_envelope: Mapping[str, Any], *,
+    artifact_pdf_path: Path | str,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Validate signed review metadata, not actual human independence or truth.
@@ -196,6 +199,16 @@ def inspect_signed_critic_review(
         raise EvidenceError("critic dossier missing")
     digest = hashlib.sha256(dossier_canonical(dossier)).hexdigest()
     artifact_digest = _sha(artifact_sha256, "artifact")
+    pdf_path = Path(artifact_pdf_path)
+    if (pdf_path.is_symlink() or not pdf_path.is_file()
+            or not 100 <= pdf_path.stat().st_size <= MAX_PDF_BYTES):
+        raise EvidenceError("critic original PDF is missing, unsafe or oversized")
+    original_pdf = pdf_path.read_bytes()
+    if hashlib.sha256(original_pdf).hexdigest() != artifact_digest:
+        raise EvidenceError("critic actual PDF artifact bytes differ from supplied digest")
+    actual_pdf = inspect_pdf_bytes(original_pdf)
+    if actual_pdf["pdf_sha256"] != artifact_digest:
+        raise EvidenceError("critic PDF parser digest mismatch")
     if not isinstance(review_envelope, Mapping) or set(review_envelope) != {"review", "signature"}:
         raise EvidenceError("critic review signature envelope malformed")
     review = review_envelope["review"]
@@ -292,8 +305,8 @@ def inspect_signed_critic_review(
             raise EvidenceError("critic PDF page invalid, duplicate or unbounded")
         page_set.add(num)
         _sha(page["screenshot_sha256"], "PDF screenshot")
-    if sorted(page_set) != list(range(1, max(page_set) + 1)):
-        raise EvidenceError("critic page review must cover every page from page one")
+    if sorted(page_set) != list(range(1, actual_pdf["page_count"] + 1)):
+        raise EvidenceError("critic page review must cover every actual PDF page")
 
     return {
         "state": "SIGNED_REVIEW_METADATA_VALID_EXTERNAL_INDEPENDENCE_UNVERIFIED",
@@ -303,6 +316,8 @@ def inspect_signed_critic_review(
         "artifact_sha256": artifact_digest,
         "signed_source_inspections": len(observed),
         "reviewer_claimed_visual_pages": len(page_set),
+        "actual_pdf_pages_parsed": actual_pdf["page_count"],
+        "rendered_pdf_pixels_independently_inspected": False,
         "mandatory_checks_true": len(REQUIRED_CRITIC_CHECKS),
         "score_asserted": float(score),
         "original_source_truth_independently_verified": False,
@@ -316,11 +331,13 @@ def assess_signed_review(
     dossier: Mapping[str, Any], artifact_sha256: str,
     policy_envelope: Mapping[str, Any],
     review_envelope: Mapping[str, Any], *,
+    artifact_pdf_path: Path | str,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     try:
         return inspect_signed_critic_review(
-            dossier, artifact_sha256, policy_envelope, review_envelope, now=now,
+            dossier, artifact_sha256, policy_envelope, review_envelope,
+            artifact_pdf_path=artifact_pdf_path, now=now,
         )
     except (EvidenceError, TypeError, KeyError, ValueError, OverflowError) as exc:
         return {
