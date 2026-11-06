@@ -40,8 +40,8 @@ SIGNALS: tuple[tuple[str, str], ...] = (
     ("payment_or_checkout", r"\b(?:stripe|paypal|squareup|checkout_session|payment_intent)\b"),
     ("shell_execution", r"\b(?:subprocess\.(?:Popen|run|call)|os\.system|os\.exec)\s*\("),
     ("remote_deployment", r"\b(?:kubectl|terraform|gh\s+release|docker\s+push|npm\s+publish|git\s+push|gcloud\s+run|aws\s+ecs|curl\b|Invoke-WebRequest)\b"),
-    ("workflow_action", r"(?m)^\s*uses\s*:\s*[^#\n]+"),
-    ("workflow_shell", r"(?m)^\s*run\s*:\s*[^#\n]+"),
+    ("workflow_action", r"(?m)^[ \t]*(?:-[ \t]*)?uses[ \t]*:[ \t]*[^#\n]+"),
+    ("workflow_shell", r"(?m)^[ \t]*(?:-[ \t]*)?run[ \t]*:[ \t]*[^#\n]+"),
 )
 _COMPILED = tuple((name, re.compile(expr, re.IGNORECASE)) for name, expr in SIGNALS)
 
