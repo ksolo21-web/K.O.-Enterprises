@@ -21,7 +21,9 @@ from .source_provenance import EvidenceError
 
 SCAN_AREAS = ("src", "products", "scripts", ".github/workflows")
 SOURCE_EXTENSIONS = frozenset({
-    ".py", ".js", ".cjs", ".mjs", ".ts", ".tsx", ".sh", ".bash", ".yml", ".yaml",
+    ".py", ".js", ".jsx", ".cjs", ".mjs", ".ts", ".tsx",
+    ".go", ".rs", ".java", ".kt", ".rb", ".php", ".ps1", ".sql",
+    ".sh", ".bash", ".yml", ".yaml",
 })
 MAX_FILES = 4000
 MAX_FILE_BYTES = 2_000_000
@@ -29,12 +31,15 @@ MAX_HITS_PER_FILE = 80
 SIGNALS: tuple[tuple[str, str], ...] = (
     ("http_mutation", r"\b(?:requests|httpx)\.(?:post|put|patch|delete)\s*\("),
     ("http_generic", r"\b(?:requests|httpx)\.(?:request|get)\s*\("),
-    ("raw_http", r"\b(?:http\.client|urllib\.request|urllib3|aiohttp)\b"),
+    ("js_fetch", r"\bfetch\s*\("),
+    ("node_http", r"\b(?:axios\.(?:post|put|patch|delete|request|get)|https?\.request)\s*\("),
+    ("websocket", r"\b(?:new\s+WebSocket\s*\(|WebSocket\s*\()"),
+    ("raw_http", r"\b(?:http\.client|urllib\.request|urllib3|aiohttp|XMLHttpRequest)\b"),
     ("raw_socket", r"\bsocket\.(?:socket|create_connection)\s*\("),
     ("email_or_messaging", r"\b(?:smtplib|sendgrid|mailgun|twilio|postmark|smtp)\b"),
     ("payment_or_checkout", r"\b(?:stripe|paypal|squareup|checkout_session|payment_intent)\b"),
     ("shell_execution", r"\b(?:subprocess\.(?:Popen|run|call)|os\.system|os\.exec)\s*\("),
-    ("remote_deployment", r"\b(?:kubectl|terraform|gh\s+release|docker\s+push|npm\s+publish|git\s+push|gcloud\s+run|aws\s+ecs)\b"),
+    ("remote_deployment", r"\b(?:kubectl|terraform|gh\s+release|docker\s+push|npm\s+publish|git\s+push|gcloud\s+run|aws\s+ecs|curl\b|Invoke-WebRequest)\b"),
     ("workflow_action", r"(?m)^\s*uses\s*:\s*[^#\n]+"),
     ("workflow_shell", r"(?m)^\s*run\s*:\s*[^#\n]+"),
 )
