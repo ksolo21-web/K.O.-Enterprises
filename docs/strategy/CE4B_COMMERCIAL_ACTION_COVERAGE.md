@@ -11,7 +11,8 @@ The prior launch guard explicitly recognized launch, deploy and publish action p
 
 - Customer-facing report delivery, sales proposals and quotes.
 - Marketing email, public social promotion, advertising and solicitation.
-- Checkout creation/activation, payment-link creation, storefront opening, new orders and charging new customers.
+- Checkout and subscription creation/activation, payment-link and invoice creation, storefront opening, new orders and charging new customers. The first CI run exposed an omitted `activate_subscription_service` alias; the rule and dedicated regression case were corrected before final acceptance.
+- Unqualified generic email, SMS, direct messaging, proposal, contract and invoice-sending verbs. Explicitly named existing-customer transactional messaging remains governed under separate policy rather than being mistaken for a new launch.
 - Existing generic launch, deployment, go-live, revenue-start and publishing actions.
 
 Additionally, a **previously unknown action** marked as `external=True` now requires competitive-engine readiness, even if it presents a CEO approval or calls itself low risk. This is deliberately conservative until a real authenticated host can classify side effects.
