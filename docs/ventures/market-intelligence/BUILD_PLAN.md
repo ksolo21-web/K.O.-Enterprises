@@ -39,6 +39,8 @@
 
 **CE-1C3e partial implementation:** [Offline issuer inventory and change journal](../../strategy/CE1C3E_ISSUER_INVENTORY_JOURNAL.md) binds signed permits, real staged PDF/listing bytes and optional root-governed local signatures; detects missing, removed, changed or superseded issuer documents. **No authenticated original-source transport, full dynamic portal discovery, separate critic or automatic live operation. CE-1/M1 remains unaccepted.**
 
+**CE-1F/CE-2A internal workbench:** [Deterministic competitive evidence checks and durable offline queue](../../strategy/CE1F_CE2A_COMPETITIVE_WORKBENCH.md), including 100 synthetic dossier processing with a deliberate defective input and bounded replay-safe work leases. This does NOT establish authenticated real market data, real independent review, supervised production hosting, or company launch authorization.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
