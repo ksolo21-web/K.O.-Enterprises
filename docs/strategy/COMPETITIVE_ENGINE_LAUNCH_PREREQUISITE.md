@@ -106,6 +106,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-1A engineering increment (not full CE-1):** [Offline original-source capture and provenance ledger](CE1_SOURCE_PROVENANCE.md). It does not fetch URLs or authenticate issuer content, and every factual claim stays held for independent review. Keep the production hard stop and all CE-1 through CE-5 acceptance requirements.
 
+**CE-1F/CE-2A implementation checkpoint:** [Offline competitive workbench](CE1F_CE2A_COMPETITIVE_WORKBENCH.md) builds factual-evidence/counterevidence validation, balanced comparator checks, buyer signal and economic plausibility checks, and a durable local internal queue. Neither component independently verifies real market facts, runs continuously nor allows publication or release. CE-1 through CE-5 completion still requires real independent operational evidence.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |
