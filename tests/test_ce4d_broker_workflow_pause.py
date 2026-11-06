@@ -24,6 +24,10 @@ def has_precredential_pause_guard(source: str) -> bool:
     guard_at = source.find(GUARD_TITLE)
     if guard_at < 0 or source.count(GUARD_TITLE) != 1 or guard_at >= first_use:
         return False
+    checkout_at = source.find("- name: Check out reviewed source")
+    checked_out_at = source.find("persist-credentials: false", checkout_at)
+    if not (0 <= checkout_at < checked_out_at < guard_at):
+        return False
     next_step = source.find("\n      - name:", guard_at + len(GUARD_TITLE))
     guard_step = source[guard_at:next_step if next_step >= 0 else len(source)]
     return (
@@ -77,9 +81,26 @@ class BrokerWorkflowPauseTests(unittest.TestCase):
         )
         self.assertFalse(has_precredential_pause_guard(source))
 
+    def test_guard_before_checkout_is_rejected(self):
+        source = (
+            "steps:\n      " + GUARD_TITLE + "\n"
+            "        env:\n          " + REQUIRED_ENV + "\n"
+            "        run: |\n          if " + REQUIRED_CONDITION + "; then\n"
+            "            exit 1\n          fi\n"
+            "      - name: Check out reviewed source\n"
+            "        uses: actions/checkout@pinned\n"
+            "        with:\n          persist-credentials: false\n"
+            "      - name: Probe\n"
+            "        env:\n          TOKEN: ${{ secrets.OANDA_demo_API_token }}\n"
+        )
+        self.assertFalse(has_precredential_pause_guard(source))
+
     def test_weakened_guard_is_rejected(self):
         original = (
-            "steps:\n      " + GUARD_TITLE + "\n"
+            "steps:\n      - name: Check out reviewed source\n"
+            "        uses: actions/checkout@pinned\n"
+            "        with:\n          persist-credentials: false\n"
+            "      " + GUARD_TITLE + "\n"
             "        env:\n          " + REQUIRED_ENV + "\n"
             "        run: |\n          if " + REQUIRED_CONDITION + "; then\n"
             "            exit 1\n          fi\n"
