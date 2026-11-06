@@ -47,6 +47,8 @@
 
 **CE-2B offline worker:** [Finite internal queue runner and never-ready health probe](../../strategy/CE2B_INTERNAL_WORKER_HEALTH.md) add bounded manual batches, local leader lock and repeated 100-dossier dry-run acceptance. This is NOT automatically supervised production hosting, authenticated market data, external monitoring or independent critic work. CE-2 remains OPEN.
 
+**CE-4B additional safeguards:** [Known and unknown external commercial action coverage](../../strategy/CE4B_COMMERCIAL_ACTION_COVERAGE.md) closes named marketing, proposal, quote, checkout, payment-link and new-customer outreach bypasses at company policy entrypoints. A bypass-capable unmanaged connector remains a launch blocker. Production hard lock and company pause unchanged.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
