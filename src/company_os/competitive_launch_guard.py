@@ -29,6 +29,31 @@ COMPETITIVE_ENGINE_GATED_ACTIONS = frozenset(
         "deploy_authorized",
         "publish_authorized",
         "publish_regulated_claim",
+        # New prospect/client-facing commercial commitments must not bypass the
+        # shared engine simply because they are not named "launch" or "publish".
+        "send_client_report",
+        "send_sales_proposal",
+        "send_quote",
+        "send_marketing_email",
+        "post_social_ad",
+        "create_checkout",
+        "create_payment_link",
+        "activate_checkout",
+        "activate_subscription",
+        "send_email",
+        "send_sms",
+        "send_dm",
+        "send_message",
+        "send_proposal",
+        "send_contract",
+        "send_invoice",
+        "create_invoice",
+        "issue_invoice",
+        "open_storefront",
+        "advertise_business",
+        "solicit_customers",
+        "charge_new_customer",
+        "accept_new_order",
     }
 )
 # Special engine-only bootstrap action is deliberately NOT in the above set.
@@ -42,7 +67,17 @@ def requires_competitive_engine(action: str) -> bool:
         return False
     return (
         normalized in COMPETITIVE_ENGINE_GATED_ACTIONS
-        or normalized.startswith(("launch_", "publish_", "go_live_", "start_revenue_", "deploy_"))
+        or normalized.startswith((
+            "launch_", "publish_", "go_live_", "start_revenue_", "deploy_",
+            "advertise_", "promote_business_", "solicit_", "send_marketing_",
+            "send_sales_", "send_proposal_", "send_quote_", "send_client_report_",
+            "post_social_", "post_marketing_", "create_checkout_",
+            "create_payment_link_", "activate_checkout_", "open_storefront_",
+            "activate_subscription_", "start_subscription_",
+            "send_email_", "send_sms_", "send_dm_", "send_message_",
+            "send_contract_", "send_invoice_", "create_invoice_", "issue_invoice_",
+            "start_sales_", "accept_new_order_", "charge_new_customer_",
+        ))
         or normalized in {"start_business", "open_business", "activate_venture"}
     )
 

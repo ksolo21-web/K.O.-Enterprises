@@ -15,6 +15,7 @@ from company_os.policy import (
     ApprovalClass,
     ApprovalRequired,
     PauseActive,
+    PolicyViolation,
     classify_action,
     enforce_action,
     evaluate_action,
@@ -177,13 +178,18 @@ class PolicyTests(unittest.TestCase):
                 with self.subTest(request=request):
                     decision = evaluate_action(request, repo_root=directory)
                     self.assertFalse(decision.allowed)
-                    self.assertTrue(decision.approval_required)
                     self.assertEqual(
                         ApprovalClass.CEO_APPROVAL_REQUIRED,
                         decision.approval_class,
                     )
-                    with self.assertRaises(ApprovalRequired):
-                        enforce_action(request, repo_root=directory)
+                    if request.external:
+                        self.assertTrue(decision.blocked_by_competitive_engine)
+                        with self.assertRaises(PolicyViolation):
+                            enforce_action(request, repo_root=directory)
+                    else:
+                        self.assertTrue(decision.approval_required)
+                        with self.assertRaises(ApprovalRequired):
+                            enforce_action(request, repo_root=directory)
 
     def test_requested_class_can_escalate_but_never_downgrade_policy(self) -> None:
         unknown_claiming_auto = ActionRequest(

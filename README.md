@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**CE-4B expanded commercial action gate (not live):** [Customer reports, proposals, advertising, checkout, payment links and new outbound actions](docs/strategy/CE4B_COMMERCIAL_ACTION_COVERAGE.md) must not bypass the shared engine by renaming a launch. Root pause and production controller hard-lock stay active; execution paths remain unverified.
+
 **CE-2B internal worker and nonproduction probe:** [Bounded manual queue runner, leader lock and always-NOT-READY telemetry](docs/strategy/CE2B_INTERNAL_WORKER_HEALTH.md). Scheduled execution and production health certification remain blocked.
 
 **CE-4A digest-bound release preflight (deny-only, not live):** [Scoped queued dossier, actual PDF, signed critic and CEO release refusal](docs/strategy/CE4A_COMPETITIVE_RELEASE_PREFLIGHT.md). Rejects altered recipient/scope/cost, reviewer revocation and missing launch readiness. No external execution capability or release allowance.

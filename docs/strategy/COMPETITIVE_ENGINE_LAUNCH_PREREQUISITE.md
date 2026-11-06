@@ -114,6 +114,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-2B worker checkpoint:** [Manual bounded internal worker and nonproduction telemetry](CE2B_INTERNAL_WORKER_HEALTH.md) exercise local queue recoverability, 100 synthetic internal comparisons and lockout of scheduled work under company pause. A local heartbeat is deliberately NEVER accepted as genuine protected continuous production readiness. CE-2 and all launch gates remain BLOCKED.
 
+**CE-4B action coverage hardening (offline):** [Commercial sales, promotion and payment activation verbs](CE4B_COMMERCIAL_ACTION_COVERAGE.md) now trigger the same pre-launch competitive readiness gate, even with caller-supplied `external=False`; unknown external verbs fail closed. This does not certify the release controller at actual external executor boundaries, and all operating stages remain unaccepted.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |

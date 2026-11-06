@@ -284,7 +284,14 @@ def evaluate_action(
         requires_competitive_engine,
     )
 
-    if requires_competitive_engine(request.action):
+    # Unknown outbound operations cannot evade the competitive-engine
+    # prerequisite simply by choosing a novel verb. Existing specifically
+    # classified bootstrap/research/continuity actions retain their separate
+    # CEO/policy gates, so the engine can be built before first launch.
+    action_key = request.action.strip().lower()
+    known_actions = AUTO_ALLOWED_ACTIONS | POLICY_GATED_ACTIONS | CEO_REQUIRED_ACTIONS
+    unknown_outbound_action = request.external and action_key not in known_actions
+    if requires_competitive_engine(request.action) or unknown_outbound_action:
         engine_status = inspect_venture_launch_prerequisite(repo_root=repo_root)
         if not engine_status.ready:
             return PolicyDecision(
