@@ -285,6 +285,11 @@ class IssuerInventoryJournal:
             historical = self._events()
             if len(historical) >= MAX_EVENTS:
                 raise EvidenceError("issuer capture event budget exhausted")
+            if any(
+                row["package_id"] == staged.package_id and row["issuer_id"] != iid
+                for row in historical
+            ):
+                raise EvidenceError("capture package ID already belongs to another issuer")
             same_issuer = [r for r in historical if r["issuer_id"] == iid]
             current = [r for r in same_issuer if r["package_id"] == staged.package_id]
             if any(r["document_id"] == staged.document_id for r in current):
@@ -299,6 +304,11 @@ class IssuerInventoryJournal:
                     raise EvidenceError("issuer listing must be captured before package documents")
                 if prior_listing and staged.source_url != prior_listing["source_url"]:
                     raise EvidenceError("issuer listing URL changed without source reconciliation")
+                if prior_listing and (
+                    scope["origin_id"] != prior_listing["permit_origin_id"]
+                    or scope["publisher"] != prior_listing["permit_publisher"]
+                ):
+                    raise EvidenceError("issuer listing identity differs from prior signed permit")
                 if prior_listing and _utc(staged.observed_at, "capture date") <= _utc(
                     prior_listing["observed_at"], "prior listing date",
                 ):
@@ -308,6 +318,12 @@ class IssuerInventoryJournal:
                     raise EvidenceError("PDF must belong to a previously captured issuer listing")
                 if staged.source_url not in package_listing["listed_urls"]:
                     raise EvidenceError("captured PDF was not in the original issuer listing")
+                if (scope["origin_id"] != package_listing["permit_origin_id"]
+                        or scope["publisher"] != package_listing["permit_publisher"]
+                        or urlsplit(staged.source_url).hostname != urlsplit(
+                            package_listing["source_url"]
+                        ).hostname):
+                    raise EvidenceError("PDF issuer identity/host differs from signed listing scope")
                 if any(
                     r["source_url"] == staged.source_url for r in current
                     if r["document_id"] != "issuer-listing"
@@ -347,6 +363,8 @@ class IssuerInventoryJournal:
                 "permit_id": scope["permit_id"],
                 "signed_permit_sha256": _sha256(canonical(permit)),
                 "permit_rights_basis_asserted": scope["rights_basis"],
+                "permit_origin_id": scope["origin_id"],
+                "permit_publisher": scope["publisher"],
                 "listed_urls": links,
                 "link_changes": changes,
                 "staging_attestation_state": attestation_state,
@@ -398,6 +416,11 @@ class IssuerInventoryJournal:
             if len(listings) != 1:
                 raise EvidenceError("issuer session has no unique captured listing")
             listing = listings[0]
+            all_issuer_listings = [
+                row for row in same if row["document_id"] == "issuer-listing"
+            ]
+            if all_issuer_listings[-1]["sequence"] != listing["sequence"]:
+                raise EvidenceError("issuer snapshot superseded by a newer listing capture")
             if not -CLOCK_SKEW <= moment - _utc(listing["observed_at"], "listing date") <= LISTING_LIFETIME:
                 raise EvidenceError("issuer listing expired or future dated")
             links = set(listing["listed_urls"])
@@ -419,9 +442,15 @@ class IssuerInventoryJournal:
                 if event["original_issuer_authenticated"] or event["publication_authorized"]:
                     raise EvidenceError("issuer inventory contains impossible approval claim")
                 name = event["filename"]
-                original = self.root / "state" / "competitive_engine" / "capture_staging" / package / name
-                if original.is_symlink() or not original.is_file() or not original.resolve().is_relative_to(self.root):
-                    raise EvidenceError("source file missing or path unsafe during inventory check")
+                original = self.root
+                for part in (
+                    "state", "competitive_engine", "capture_staging", package, name,
+                ):
+                    original = original / part
+                    if original.is_symlink() or not original.resolve().is_relative_to(self.root):
+                        raise EvidenceError("source file path unsafe during inventory check")
+                if not original.is_file():
+                    raise EvidenceError("source file missing during inventory check")
                 bytes_now = original.read_bytes()
                 if len(bytes_now) != event["bytes"] or _sha256(bytes_now) != event["sha256"]:
                     raise EvidenceError("source file changed since issuer inventory recording")
