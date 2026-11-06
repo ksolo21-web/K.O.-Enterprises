@@ -39,7 +39,10 @@ NAMED_COMMERCIAL_ACTIONS = (
     "create_checkout", "create_checkout_session",
     "create_payment_link", "create_payment_link_for_customer",
     "activate_checkout", "activate_checkout_gateway",
-    "activate_subscription_service", "open_storefront", "open_storefront_online",
+    "activate_subscription_service", "activate_subscription", "start_subscription_new",
+    "send_email", "send_email_new_prospect", "send_sms", "send_dm", "send_message",
+    "send_proposal", "send_contract", "send_invoice", "create_invoice", "issue_invoice",
+    "open_storefront", "open_storefront_online",
     "start_sales_campaign", "accept_new_order", "accept_new_order_online",
     "charge_new_customer", "charge_new_customer_subscription",
 )
@@ -72,6 +75,15 @@ class CommercialActionCoverageTests(unittest.TestCase):
             "estimated_cost_cents": 10_000_000,
             "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
         }
+
+    def test_subscription_activation_would_have_bypassed_without_this_fix(self):
+        request = ActionRequest(action="activate_subscription_service", external=False)
+        decision = evaluate_action(
+            request, approval=self.approval("activate_subscription_service"),
+            repo_root=self.root,
+        )
+        self.assertFalse(decision.allowed)
+        self.assertTrue(decision.blocked_by_competitive_engine)
 
     def test_all_named_commercial_actions_are_gated_without_side_effect_flags(self):
         for action in NAMED_COMMERCIAL_ACTIONS:
