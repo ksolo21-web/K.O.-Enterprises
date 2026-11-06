@@ -8,7 +8,7 @@
 
 The five OANDA broker-connected Actions workflows previously included credential-bearing token resolution and issuer API reads but no explicit `PAUSE_AUTONOMY` check **before** the credential-bearing steps. Their triggers included manual dispatch, and the forward Practice scan also has a push trigger on its feature branch. A read-only broker API call still needs to obey the global emergency stop.
 
-All five workflows now perform a first-step, fail-closed check after source checkout and **before** secret references or broker scripts:
+All five workflows now perform an immediate post-checkout, fail-closed check and **before** secret references or broker scripts:
 
 - A present repository `PAUSE_AUTONOMY` marker blocks immediately.
 - A step-local `COMPANY_OS_PAUSED: "1"` is deliberately hardcoded so removing the marker alone cannot enable broker API calls.
@@ -22,7 +22,7 @@ Affected workflows: `oanda-practice-research.yml`, `oanda-forward-scan.yml`, `oa
 
 - `main` HEAD inspected at `9772daeee7e46b4c7c5e19a958da888f5233bf67`. GitHub reports `main.protected=false` and branch protection disabled; the repository rulesets list was empty. **This is a separate P0 administrative blocker.**
 - The previous CE-4C scan reported 42 files, 11 potential-execution files, 83 indicators. Heuristic flags are not independent no-bypass proof.
-- Only the five workflow files are changed in this patch; this does **not** govern manual GitHub dispatch from other branches, external SaaS dashboards, plugins, browser actions, unknown repositories, production hosts, trading infrastructure, or non-GitHub credentials.
+- Only the five workflow definitions, an adversarial test file and this note are changed in this patch; this does **not** govern manual GitHub dispatch from other branches, external SaaS dashboards, plugins, browser actions, unknown repositories, production hosts, trading infrastructure, or non-GitHub credentials.
 - GitHub administrators must establish an independently enforced repository ruleset / branch protection: PR-only changes, separate required reviewer, required successful CI and document checks, restrictions on bypass and changes to `.github/workflows` plus control-plane security files. Verify protected status from GitHub itself after configuration.
 - No broker secrets are read or changed, no trade is placed, no customer data accessed, and no external workflow is executed by this patch.
 - **No change** to `PAUSE_AUTONOMY`, `PRODUCTION_RELEASE_CONTROLLER_CERTIFIED=False`, CE-1–CE-5 production acceptance status, CEO authority or release-controller certification.
@@ -36,3 +36,7 @@ Affected workflows: `oanda-practice-research.yml`, `oanda-forward-scan.yml`, `oa
 5. An authenticated, scoped owner acceptance after compliance, privacy, budget and incident-review gates. Emergency pause and hard production lock remain until those conditions are genuinely met.
 
 **Disposition:** internal hardening only. **NO-GO** for production, sales, marketing, broker-connected research while paused, or any K.O. venture launch.
+
+## Internal review correction
+
+Initial PR review found the guard placed *before* `actions/checkout`, which meant a repository pause marker could not yet be examined. The hardcoded deny-by-default environment value still stopped the jobs, but the marker check was ineffective. All five guards were moved to immediately after checkout and before any broker credential use. An adversarial test now rejects this precise incorrect ordering. This was an **internal review**, not a separate independently authenticated critic.
