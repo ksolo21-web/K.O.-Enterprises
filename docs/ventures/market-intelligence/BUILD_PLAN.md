@@ -43,6 +43,8 @@
 
 **CE-3A offline critic trust increment:** [Reviewer key governance, 12-check and source/report digest gate](../../strategy/CE3A_ROOT_GOVERNED_CRITIC_REVIEW.md) rejects forged reviewer keys, stale/altered review, incomplete visual-page records and revoked attestations; all valid metadata still HELD. Operationally independent human/agent reviewer **not deployed**. This does not accept CE-3 or authorize client release.
 
+**CE-4A deny-only integration:** [Release packet preflight](../../strategy/CE4A_COMPETITIVE_RELEASE_PREFLIGHT.md) cross-checks one exact held queue item, original PDF bytes, current signed reviewer status, recipient, scope and attempted CEO approval before invoking global company launch policy. This is not authenticated CEO approval, installed side-effect enforcement or a complete release controller. **CE-4 remains blocked**.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
