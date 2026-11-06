@@ -108,6 +108,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-1F/CE-2A implementation checkpoint:** [Offline competitive workbench](CE1F_CE2A_COMPETITIVE_WORKBENCH.md) builds factual-evidence/counterevidence validation, balanced comparator checks, buyer signal and economic plausibility checks, and a durable local internal queue. Neither component independently verifies real market facts, runs continuously nor allows publication or release. CE-1 through CE-5 completion still requires real independent operational evidence.
 
+**CE-3A partial reviewer-identity work:** [Root-governed Ed25519 review metadata verifier](CE3A_ROOT_GOVERNED_CRITIC_REVIEW.md) validates signed reviewer assertions against the exact dossier/output digest and all 12 mandatory quality checks, but a valid signature by itself cannot demonstrate independent original-source inspection, professional competence or page visual evidence. CE-3 remains OPEN pending authentic separately executed review.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |

@@ -4,6 +4,8 @@
 
 The active, cross-chat, evidence-first build roadmap is **[K.O. Market Intelligence & Shared Quality Platform Build Plan](docs/ventures/market-intelligence/BUILD_PLAN.md)**. It governs two currently prioritized business lines: K.O. Market Intelligence and K.O. Contractor Operations Desk. See [Phase 2 blockers and acceptance checks](https://github.com/ksolo21-web/K.O.-Enterprises/issues/32). The prior quality-gate prototype is not production authorization; `PAUSE_AUTONOMY` stays enabled, client delivery remains blocked, and real independently authenticated critic/source verification remains to be implemented. Read that plan before resuming cross-session work.
 
+**CE-3A signed independent-review metadata gate (offline, not independent operational review):** [Root-governed reviewer signature and exact digest validation](docs/strategy/CE3A_ROOT_GOVERNED_CRITIC_REVIEW.md) checks all 12 critic criteria, review score >9, source/page records, current key revocations and replay. Still no proof a real separate critic inspected sources.
+
 **CE-1F/CE-2A offline competitive workbench:** [Evidence-balanced competitor comparison and durable internal queue](docs/strategy/CE1F_CE2A_COMPETITIVE_WORKBENCH.md) with counterevidence, source freshness, buyer value, unit-economics checks and a synthetic 100-dossier dry run. Every output remains BLOCK or HOLD, never release.
 
 **CE-1C3e issuer inventory/change journal (offline, not live):** [Permit-bound listing and PDF source history](docs/strategy/CE1C3E_ISSUER_INVENTORY_JOURNAL.md) flags omitted original links, removed addenda, changed bytes and superseded captures; optional current staging signature verification. Never authenticates original issuer or grants launch authority.
