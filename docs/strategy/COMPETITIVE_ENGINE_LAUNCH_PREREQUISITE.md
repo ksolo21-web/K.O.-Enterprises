@@ -110,6 +110,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-3A partial reviewer-identity work:** [Root-governed Ed25519 review metadata verifier](CE3A_ROOT_GOVERNED_CRITIC_REVIEW.md) validates signed reviewer assertions against the exact dossier/output digest and all 12 mandatory quality checks, but a valid signature by itself cannot demonstrate independent original-source inspection, professional competence or page visual evidence. CE-3 remains OPEN pending authentic separately executed review.
 
+**CE-4A internal preflight:** [Scope/digest-bound release refusal](CE4A_COMPETITIVE_RELEASE_PREFLIGHT.md) checks exact held competitive dossier/report evidence, signed reviewer metadata, recipient/cost/CEO-scope fields and global launch controls, and logs only denials. Does NOT authorize or carry out any external action, and cannot establish universal connector coverage. CE-4 and production activation remain blocked.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |
