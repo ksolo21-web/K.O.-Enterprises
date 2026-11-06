@@ -45,6 +45,8 @@
 
 **CE-4A deny-only integration:** [Release packet preflight](../../strategy/CE4A_COMPETITIVE_RELEASE_PREFLIGHT.md) cross-checks one exact held queue item, original PDF bytes, current signed reviewer status, recipient, scope and attempted CEO approval before invoking global company launch policy. This is not authenticated CEO approval, installed side-effect enforcement or a complete release controller. **CE-4 remains blocked**.
 
+**CE-2B offline worker:** [Finite internal queue runner and never-ready health probe](../../strategy/CE2B_INTERNAL_WORKER_HEALTH.md) add bounded manual batches, local leader lock and repeated 100-dossier dry-run acceptance. This is NOT automatically supervised production hosting, authenticated market data, external monitoring or independent critic work. CE-2 remains OPEN.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
