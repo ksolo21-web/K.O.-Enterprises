@@ -143,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         # Do not print secret paths, policy payload, source bytes, or traceback.
         print("signer refused or could not complete protected one-shot request")
         return 2
-    print("unverified local staging attestation completed; no issuer certification")
+    print("staging-only unverified local attestation completed; no issuer certification")
     return 0
 
 
