@@ -12,6 +12,7 @@ from experiments.oanda_demo.forward_lab import (
     INSTRUMENTS,
     MAX_UNITS,
     MAX_VIRTUAL_RISK_USD,
+    _in_blocked_time,
     ForwardPracticeClient,
     MarketFeatures,
     build_plan,
@@ -177,6 +178,8 @@ class OandaForwardLabTests(TestCase):
             side_effect=lambda instrument, payload: (
                 features if instrument == "EUR_USD" else market(instrument, efficiency=0.35)
             ),
+        ), patch(
+            "experiments.oanda_demo.forward_lab._in_blocked_time", return_value=False
         ):
             plan = build_plan(client)
         self.assertTrue(plan["eligible"])
@@ -188,6 +191,14 @@ class OandaForwardLabTests(TestCase):
         serialized = json.dumps(plan)
         self.assertNotIn("101-001-1234567-001", serialized)
         self.assertNotIn("private-token", serialized)
+
+    def test_real_market_hours_remain_blocked_at_restricted_times(self):
+        # Deterministic negative cases preserve the original live risk gate.
+        self.assertTrue(_in_blocked_time(datetime(2026, 11, 5, 20, tzinfo=timezone.utc)))
+        self.assertTrue(_in_blocked_time(datetime(2026, 11, 5, 21, tzinfo=timezone.utc)))
+        self.assertTrue(_in_blocked_time(datetime(2026, 11, 6, 18, tzinfo=timezone.utc)))
+        self.assertTrue(_in_blocked_time(datetime(2026, 11, 7, 12, tzinfo=timezone.utc)))
+        self.assertFalse(_in_blocked_time(datetime(2026, 11, 5, 16, tzinfo=timezone.utc)))
 
     def test_existing_trade_blocks_plan_before_market_scanning(self):
         client = FakeClient()
