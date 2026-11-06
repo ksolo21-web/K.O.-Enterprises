@@ -334,6 +334,15 @@ class IssuerInventoryJournal:
                     - _utc(package_listing["observed_at"], "listing time")
                 ) <= MAX_SESSION_WINDOW):
                     raise EvidenceError("PDF capture outside issuer listing observation window")
+                # Persist the issuer's URL-to-document-ID binding across
+                # sessions as well as the document-ID-to-URL binding. Renaming
+                # an ID must not hide an amended original or evade comparisons.
+                if any(
+                    row["source_url"] == staged.source_url
+                    and row["document_id"] not in (staged.document_id, "issuer-listing")
+                    for row in same_issuer
+                ):
+                    raise EvidenceError("original PDF URL remapped to another document ID")
                 prior_document = [
                     row for row in same_issuer if row["document_id"] == staged.document_id
                 ]
