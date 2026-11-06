@@ -52,5 +52,11 @@ jobs:
       - name: Check ImportScope comparison and export behavior
         run: node --test products/importscope/test-engine.cjs
 
+      - name: Inventory release execution surfaces (explicit production no-go)
+        # This step succeeds only when root pause/hardlock are present and the
+        # inventory explicitly reports BLOCK_REQUIRED_INDEPENDENT_EXECUTION_REVIEW.
+        # A green CI run never becomes a production deployment certificate.
+        run: python -m company_os.release_surface_audit --repo-root . --expect-not-ready
+
       - name: Confirm tests did not alter tracked files
         run: git diff --exit-code -- .
