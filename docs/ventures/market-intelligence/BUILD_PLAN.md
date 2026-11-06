@@ -37,6 +37,8 @@
 
 **CE-1C3d offline increment:** [Real distinct-UID signer test and host entrypoint](../../strategy/CE1C3D_CROSS_UID_SIGNER.md) adds an opt-in preprovisioned shared-group IPC, signer-owned 0400 key outside repo, and disposable Linux cross-UID CI. Still no production signer/KMS, live issuer capture, external audit or independent critic. **CE-1/M1 not accepted; all ventures blocked.**
 
+**CE-1C3e partial implementation:** [Offline issuer inventory and change journal](../../strategy/CE1C3E_ISSUER_INVENTORY_JOURNAL.md) binds signed permits, real staged PDF/listing bytes and optional root-governed local signatures; detects missing, removed, changed or superseded issuer documents. **No authenticated original-source transport, full dynamic portal discovery, separate critic or automatic live operation. CE-1/M1 remains unaccepted.**
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
