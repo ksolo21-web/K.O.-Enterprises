@@ -47,6 +47,38 @@ class ReleaseSurfaceAuditTests(unittest.TestCase):
         self.assertIn("email_or_messaging", indicators)
         self.assertFalse(report["out_of_repository_connectors_verified"])
 
+    def test_browser_fetch_and_websocket_require_manual_boundary_review(self):
+        app = self.root / "products" / "sample" / "client.jsx"
+        app.parent.mkdir(parents=True)
+        app.write_text(
+            "fetch('/api/new-customer-order', {method: 'POST'});\n"
+            "const alerts = new WebSocket('wss://example.invalid/events');\n"
+        )
+        report = self.inspect()
+        results = [row for row in report["candidates"]
+                   if row["path"] == "products/sample/client.jsx"]
+        self.assertEqual(len(results), 1)
+        indicators = {x["indicator"] for x in results[0]["indicators"]}
+        self.assertIn("js_fetch", indicators)
+        self.assertIn("websocket", indicators)
+        self.assertFalse(report["release_authorized"])
+
+    def test_node_axios_and_shell_curl_are_inventory_indicators(self):
+        node = self.root / "scripts" / "sales.js"
+        node.parent.mkdir()
+        node.write_text(
+            "axios.post('https://example.invalid/billing', payload);\n"
+        )
+        shell = self.root / "scripts" / "new-release.sh"
+        shell.write_text("curl -X POST https://example.invalid/deploy\n")
+        report = self.inspect()
+        results = {x["path"]: x for x in report["candidates"]}
+        self.assertIn("node_http", {x["indicator"] for x in
+                      results["scripts/sales.js"]["indicators"]})
+        self.assertIn("remote_deployment", {x["indicator"] for x in
+                      results["scripts/new-release.sh"]["indicators"]})
+        self.assertFalse(report["protected_host_release_boundaries_verified"])
+
     def test_textual_policy_reference_is_not_treated_as_authorized(self):
         self.source.write_text(
             "# enforce_action(...) will eventually be integrated\n"
