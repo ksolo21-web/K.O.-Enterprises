@@ -19,6 +19,14 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+      - name: Enforce global emergency pause before broker credentials
+        env:
+          COMPANY_OS_PAUSED: "1"
+        run: |
+          if [ -f PAUSE_AUTONOMY ] || [ "$COMPANY_OS_PAUSED" != "0" ]; then
+            echo "::error::Broker-connected GitHub workflow is paused; independent release approval required"
+            exit 1
+          fi
       - name: Set up Python 3.12
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
