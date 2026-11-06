@@ -24,6 +24,7 @@ from company_os.competitive_critic_audit import CriticReviewLedger
 from company_os.competitive_launch_guard import REQUIRED_CRITIC_CHECKS
 from company_os.source_provenance import EvidenceError
 import test_competitive_engine_pipeline as fixture_support
+import test_procurement_package as pdf_fixture
 
 
 class CompetitiveCriticReviewTests(unittest.TestCase):
@@ -33,7 +34,13 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.dossier = fixture_support.synthetic_dossier(self.now)
-        self.artifact = hashlib.sha256(b"synthetic PDF generated in offline test").hexdigest()
+        raw_pdf = pdf_fixture.make_pdf(
+            "Synthetic critic review PDF: original sources unverified; no client use.",
+            pages=2,
+        )
+        self.pdf_path = self.root / "synthetic-report.pdf"
+        self.pdf_path.write_bytes(raw_pdf)
+        self.artifact = hashlib.sha256(raw_pdf).hexdigest()
         self.root_key = Ed25519PrivateKey.generate()
         self.reviewer_key = Ed25519PrivateKey.generate()
         self.environment = patch.dict(os.environ, {
@@ -121,7 +128,8 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
         return assess_signed_review(
             dossier or self.dossier, artifact or self.artifact,
             policy or self.policy_envelope(),
-            report or self.review_envelope(), now=self.now,
+            report or self.review_envelope(),
+            artifact_pdf_path=self.pdf_path, now=self.now,
         )
 
     def assert_block(self, phrase=None, **kwargs):
@@ -228,7 +236,7 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
 
     def test_report_edit_invalidates_review_digest(self):
         mutated_artifact=hashlib.sha256(b"edited PDF after review").hexdigest()
-        self.assert_block("another report",artifact=mutated_artifact)
+        self.assert_block("artifact",artifact=mutated_artifact)
 
     def test_dossier_edit_invalidates_review(self):
         changed=copy.deepcopy(self.dossier)
@@ -257,7 +265,30 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
 
     def test_incomplete_visual_page_inspection_blocks(self):
         self.review["page_inspections"]=self.review["page_inspections"][1:]
-        self.assert_block("every page")
+        self.assert_block("every actual PDF page")
+
+    def test_underreported_real_pdf_page_count_blocks(self):
+        self.review["page_inspections"] = self.review["page_inspections"][:1]
+        self.assert_block("every actual PDF page")
+
+    def test_pdf_changed_after_signature_blocks_even_if_review_json_unchanged(self):
+        old = self.pdf_path.read_bytes()
+        self.pdf_path.write_bytes(old[:-1] + bytes([old[-1] ^ 1]))
+        self.assert_block("actual PDF artifact bytes differ")
+
+    def test_symlinked_review_pdf_is_unacceptable(self):
+        alias = self.root / "report-alias.pdf"
+        alias.symlink_to(self.pdf_path)
+        result = assess_signed_review(
+            self.dossier, self.artifact,
+            self.policy_envelope(), self.review_envelope(),
+            artifact_pdf_path=alias, now=self.now,
+        )
+        self.assertEqual(result["state"], "BLOCK")
+
+    def test_non_pdf_report_bytes_are_not_valid_review_artifact(self):
+        self.pdf_path.write_bytes(b"not a PDF" * 100)
+        self.assert_block("actual PDF artifact bytes differ")
 
     def test_duplicate_visual_page_blocks(self):
         self.review["page_inspections"][1]["page_number"]=1
@@ -279,7 +310,7 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
     def test_critic_review_registered_only_as_local_attestation(self):
         p=self.policy_envelope()
         self.ledger.accept_policy(p,now=self.now)
-        r=self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),now=self.now)
+        r=self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),artifact_pdf_path=self.pdf_path,now=self.now)
         self.assertEqual(r["state"],"REVIEW_ATTESTATION_RECORDED_LOCAL_ONLY")
         self.assertFalse(r["external_publication_authorized"])
         self.assertEqual(self.ledger.audit_status()["entries"],2)
@@ -291,14 +322,14 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
     def test_cannot_accept_same_review_id_twice(self):
         p=self.policy_envelope()
         self.ledger.accept_policy(p,now=self.now)
-        self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),now=self.now)
+        self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),artifact_pdf_path=self.pdf_path,now=self.now)
         with self.assertRaises(EvidenceError):
-            self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),now=self.now)
+            self.ledger.accept_review(self.dossier,self.artifact,p,self.review_envelope(),artifact_pdf_path=self.pdf_path,now=self.now)
 
     def test_review_cannot_be_accepted_without_active_policy(self):
         with self.assertRaises(EvidenceError):
             self.ledger.accept_review(self.dossier,self.artifact,
-                                      self.policy_envelope(),self.review_envelope(),now=self.now)
+                                      self.policy_envelope(),self.review_envelope(),artifact_pdf_path=self.pdf_path,now=self.now)
 
     def test_policy_rollback_and_revision_collision_block(self):
         self.ledger.accept_policy(self.policy_envelope(),now=self.now)
@@ -325,7 +356,7 @@ class CompetitiveCriticReviewTests(unittest.TestCase):
     def test_reviewer_review_revocation_changes_status(self):
         original=self.policy_envelope()
         self.ledger.accept_policy(original,now=self.now)
-        self.ledger.accept_review(self.dossier,self.artifact,original,self.review_envelope(),now=self.now)
+        self.ledger.accept_review(self.dossier,self.artifact,original,self.review_envelope(),artifact_pdf_path=self.pdf_path,now=self.now)
         self.policy["revision"]=2
         self.policy["revoked_review_ids"]=["review-001"]
         updated=self.policy_envelope()
