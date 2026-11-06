@@ -49,6 +49,8 @@
 
 **CE-4B additional safeguards:** [Known and unknown external commercial action coverage](../../strategy/CE4B_COMMERCIAL_ACTION_COVERAGE.md) closes named marketing, proposal, quote, checkout, payment-link and new-customer outreach bypasses at company policy entrypoints. A bypass-capable unmanaged connector remains a launch blocker. Production hard lock and company pause unchanged.
 
+**CE-4C internal security inventory:** [Bounded repository execution-channel scan](../../strategy/CE4C_RELEASE_SURFACE_INVENTORY.md) identifies possible HTTP, messaging, payment, shell and GitHub workflow execution points, with source digests and source-line indicators. No independent actual external boundary coverage, live source evidence or production release approval is claimed.
+
 **Status:** No K.O. venture currently qualifies for external activation. A signed synthetic test, existing internal CI or an approval record does **not** establish a live engine. The existing emergency stop remains active. This requirement adds a **global dependency**; it does not remove any other release, privacy, legal or buyer-validation requirement or change the current priority of Market Intelligence M1.
 
 ## 1. Agreed business scope
