@@ -18,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      - name: Enforce global emergency pause before broker credentials
+        env:
+          COMPANY_OS_PAUSED: "1"
+        run: |
+          if [ -f PAUSE_AUTONOMY ] || [ "$COMPANY_OS_PAUSED" != "0" ]; then
+            echo "::error::Broker-connected GitHub workflow is paused; independent release approval required"
+            exit 1
+          fi
       - name: Check out reviewed source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
