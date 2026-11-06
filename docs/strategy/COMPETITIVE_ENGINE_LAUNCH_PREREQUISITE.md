@@ -112,6 +112,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-4A internal preflight:** [Scope/digest-bound release refusal](CE4A_COMPETITIVE_RELEASE_PREFLIGHT.md) checks exact held competitive dossier/report evidence, signed reviewer metadata, recipient/cost/CEO-scope fields and global launch controls, and logs only denials. Does NOT authorize or carry out any external action, and cannot establish universal connector coverage. CE-4 and production activation remain blocked.
 
+**CE-2B worker checkpoint:** [Manual bounded internal worker and nonproduction telemetry](CE2B_INTERNAL_WORKER_HEALTH.md) exercise local queue recoverability, 100 synthetic internal comparisons and lockout of scheduled work under company pause. A local heartbeat is deliberately NEVER accepted as genuine protected continuous production readiness. CE-2 and all launch gates remain BLOCKED.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |
