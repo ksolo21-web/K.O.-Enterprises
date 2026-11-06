@@ -350,6 +350,44 @@ class CompetitiveWorkQueue:
             self.db.rollback()
             raise
 
+    def verified_snapshot(self, job_id: str) -> dict[str, Any]:
+        """Verify persisted queued dossier/result hashes before release review.
+
+        Delivers NO work product or private client data, only verified digests.
+        A malicious edit of either SQLite payload or held output is detected.
+        """
+        ident = _id(job_id, "job")
+        self._audit()
+        row = self.db.execute(
+            "SELECT state,payload,payload_sha,output,output_sha FROM jobs WHERE id=?",
+            (ident,),
+        ).fetchone()
+        if not row:
+            raise EvidenceError("release dossier not found in private work queue")
+        state, payload, payload_sha, output, output_sha = row
+        if hashlib.sha256(payload.encode()).hexdigest() != payload_sha:
+            raise EvidenceError("queued dossier payload changed after submission")
+        if state != "HELD" or not output or not output_sha:
+            raise EvidenceError("queued dossier has no completed held review")
+        if hashlib.sha256(output.encode()).hexdigest() != output_sha:
+            raise EvidenceError("held evaluator result changed after completion")
+        try:
+            parsed = json.loads(output)
+            dossier = json.loads(payload)
+        except ValueError as exc:
+            raise EvidenceError("held dossier JSON invalid") from exc
+        if (parsed.get("status") != "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW"
+                or parsed.get("publication_authorized") is not False
+                or parsed.get("dossier_sha256") != payload_sha
+                or dossier.get("dossier_id") != ident):
+            raise EvidenceError("held job output is not bound to original dossier")
+        return {
+            "state": "HELD_VERIFIED_DIGEST_ONLY",
+            "job_id": ident, "dossier_sha256": payload_sha,
+            "analysis_sha256": output_sha,
+            "publication_authorized": False,
+        }
+
     def status(self, job_id: str) -> dict[str, Any]:
         ident = _id(job_id, "job")
         row = self.db.execute(
