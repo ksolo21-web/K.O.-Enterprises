@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import pwd
+import shutil
 import stat
 import subprocess
 import sys
@@ -21,9 +22,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_procurement_package import make_pdf
 
 from company_os.approved_pdf_capture import StagedSource
 from company_os.capture_trust import DOMAIN_POLICY, canonical
@@ -59,12 +57,13 @@ def child_command(uid: int, argv: list[str], *, env: dict[str, str]):
         [sys.executable, *argv], text=True,
         stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         env=env, preexec_fn=drop_identity(uid),
+        cwd=os.environ["KO_CE_CROSS_UID_TEST_ROOT"],
     )
 
 
 def invoke_client(root: Path, staged_path: Path, policy_path: Path, *, uid: int):
     return child_command(uid, [
-        str(Path(__file__).resolve()), "--client", str(root),
+        os.environ["KO_CE_CROSS_UID_CLIENT_SCRIPT"], "--client", str(root),
         str(staged_path), str(policy_path),
     ], env=child_env())
 
@@ -73,7 +72,7 @@ def child_env() -> dict[str, str]:
     env = dict(os.environ)
     env["COMPANY_OS_PAUSED"] = "0"
     env["PYTHONDONTWRITEBYTECODE"] = "1"
-    env["PYTHONPATH"] = str(Path.cwd() / "src")
+    env["PYTHONPATH"] = os.environ["KO_CE_CROSS_UID_CODE_ROOT"]
     return env
 
 
@@ -173,6 +172,30 @@ def main() -> int:
         # Only synthetic shared group can traverse otherwise-0700 tempfile.
         os.chown(temp, 0, SHARED_GID)
         os.chmod(temp, 0o710)
+        os.environ["KO_CE_CROSS_UID_TEST_ROOT"] = temp
+        # Never change the checkout's file/directory permissions. Numeric UIDs
+        # cannot traverse /home/runner; copy only nonsecret Python source into
+        # root-controlled, group-readable ephemeral test storage.
+        runtime = Path(temp)/"verified-public-code"
+        package = runtime/"company_os"
+        shutil.copytree(Path.cwd()/"src"/"company_os", package,
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        for p in (runtime, *package.rglob("*"), package):
+            if p.is_dir():
+                os.chown(p, 0, SHARED_GID)
+                os.chmod(p, 0o750)
+            elif p.is_file():
+                os.chown(p, 0, SHARED_GID)
+                os.chmod(p, 0o640)
+        copy_script = Path(temp)/"cross_uid_client.py"
+        shutil.copyfile(Path(__file__), copy_script)
+        os.chown(copy_script, 0, SHARED_GID)
+        os.chmod(copy_script, 0o640)
+        os.environ["KO_CE_CROSS_UID_CODE_ROOT"] = str(runtime)
+        os.environ["KO_CE_CROSS_UID_CLIENT_SCRIPT"] = str(copy_script)
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_procurement_package import make_pdf
         root = Path(temp)/"synthetic-project"
         directory(root, 0, SHARED_GID, 0o710)
         state = root/"state"
@@ -242,7 +265,7 @@ def main() -> int:
         key_path = secret_root/"ed25519-raw-seed.bin"
         write_secure(key_path, signing.private_bytes_raw(), SIGNER_UID, SIGNER_UID, 0o400)
         probe = child_command(
-            CAPTURE_UID, [str(Path(__file__).resolve()), "--key-probe", str(key_path)],
+            CAPTURE_UID, [os.environ["KO_CE_CROSS_UID_CLIENT_SCRIPT"], "--key-probe", str(key_path)],
             env=child_env(),
         )
         out, err = probe.communicate(timeout=5)
