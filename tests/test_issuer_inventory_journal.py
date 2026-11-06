@@ -422,6 +422,55 @@ class IssuerInventoryJournalTests(unittest.TestCase):
         self.assertFalse(state["publication_authorized"])
         self.assertIn("UNANCHORED", state["status"])
 
+    def test_superseded_issuer_snapshot_cannot_be_considered_current(self):
+        self.package(docs=("notice",))
+        self.now += timedelta(seconds=3)
+        self.package(name="pkg-two", docs=("notice", "addendum"))
+        self.assert_block("pkg-one", fragment="superseded")
+
+    def test_package_id_cannot_belong_to_two_different_issuers(self):
+        listing = self.stage()
+        self.record(listing)
+        with self.assertRaisesRegex(EvidenceError, "another issuer"):
+            self.record(listing, issuer="other-issuer")
+
+    def test_pdf_signed_permit_issuer_identity_mismatch_refused(self):
+        self.record(self.stage())
+        doc = self.stage(doc="notice")
+        wrong = self.permit(doc, origin_id="other-authority")
+        with self.assertRaisesRegex(EvidenceError, "issuer identity"):
+            self.record(doc, permit=wrong)
+
+    def test_listing_signed_permit_issuer_drift_across_sessions_refused(self):
+        self.package(docs=("notice",))
+        self.now += timedelta(seconds=3)
+        listing = self.stage("pkg-two", links=("notice",))
+        wrong = self.permit(listing, publisher="Impersonating another issuer")
+        with self.assertRaisesRegex(EvidenceError, "identity differs"):
+            self.record(listing, permit=wrong)
+
+    def test_unapproved_cross_host_document_cannot_borrow_listing_identity(self):
+        os.environ["KO_SOURCE_APPROVED_HOSTS"] = "issuer.example,other.example"
+        cross = BASE.replace("issuer.example", "other.example") + "notice.pdf"
+        listing = self.stage(links=("notice",), content=(
+            "<html><body><h1>Alternate host PDF listing</h1>"
+            "<a href='" + cross + "'>Not the same original issuer host</a></body></html>"
+        ).encode())
+        self.record(listing)
+        doc = self.stage(doc="notice")
+        altered = replace(doc, source_url=cross)
+        with self.assertRaisesRegex(EvidenceError, "issuer identity/host"):
+            self.record(altered)
+
+    def test_intermediate_symlink_swap_refused_during_session_inspection(self):
+        self.package(docs=("notice",))
+        base = self.root/"state"/"competitive_engine"/"capture_staging"
+        current = base/"pkg-one"
+        moved = base/"moved-original"
+        current.rename(moved)
+        current.symlink_to(moved, target_is_directory=True)
+        self.assert_block(fragment="path unsafe")
+
     def test_no_network_fetch_or_release_methods_in_journal(self):
         self.assertFalse(hasattr(self.journal,"fetch_url"))
         self.assertFalse(hasattr(self.journal,"publish"))
