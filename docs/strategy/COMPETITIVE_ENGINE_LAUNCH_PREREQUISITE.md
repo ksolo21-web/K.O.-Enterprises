@@ -116,6 +116,8 @@ No launch date is assigned until these *real* acceptance demonstrations are perf
 
 **CE-4B action coverage hardening (offline):** [Commercial sales, promotion and payment activation verbs](CE4B_COMMERCIAL_ACTION_COVERAGE.md) now trigger the same pre-launch competitive readiness gate, even with caller-supplied `external=False`; unknown external verbs fail closed. This does not certify the release controller at actual external executor boundaries, and all operating stages remain unaccepted.
 
+**CE-4C executable-surface inventory:** [Read-only repository source/workflow scanner](CE4C_RELEASE_SURFACE_INVENTORY.md) records possible outbound execution boundaries and their hashes for manual independent review. CI requires root pause, literal production controller hard-lock and explicit NO-GO. This is **not** exhaustive external connector coverage or a production no-bypass certificate; CE-4 remains blocked.
+
 ## Development milestones, dependencies and checkpoint
 
 | Stage | Work | Required proof | State |
