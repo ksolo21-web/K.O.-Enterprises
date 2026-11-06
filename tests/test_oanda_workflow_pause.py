@@ -37,9 +37,13 @@ class ForwardPracticeWorkflowStopTests(unittest.TestCase):
 
     def test_precheckout_or_removed_pause_rejected(self):
         source = PATH.read_text(encoding="utf-8")
-        precheckout = source.replace(
+        start = source.index("      " + MARKER)
+        end = source.index("      - name:", start + len(MARKER))
+        guard_step = source[start:end]
+        without_guard = source[:start] + source[end:]
+        precheckout = without_guard.replace(
             "      - name: Check out reviewed source",
-            "      " + MARKER + "\n      - name: Check out reviewed source",
+            guard_step + "      - name: Check out reviewed source",
             1,
         )
         self.assertFalse(protected_before_credential(precheckout))
