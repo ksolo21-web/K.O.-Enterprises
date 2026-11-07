@@ -190,6 +190,18 @@ class ComparatorAttributionTests(unittest.TestCase):
         self.dossier["sources"][0]["verified_by_issuer"] = True
         self.assert_blocked()
 
+    def test_same_source_url_reassigned_to_second_competitor_blocks(self):
+        vendor_one = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        vendor_two = next(s for s in self.dossier["sources"] if s["id"] == "vendor-2")
+        vendor_two["url"] = vendor_one["url"]
+        self.assert_blocked()
+
+    def test_same_source_bytes_reassigned_to_second_competitor_blocks(self):
+        vendor_one = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        vendor_two = next(s for s in self.dossier["sources"] if s["id"] == "vendor-2")
+        vendor_two["sha256"] = vendor_one["sha256"]
+        self.assert_blocked()
+
     def test_attributed_data_does_not_change_global_release_controls(self):
         from company_os.competitive_launch_guard import (
             PRODUCTION_RELEASE_CONTROLLER_CERTIFIED,
