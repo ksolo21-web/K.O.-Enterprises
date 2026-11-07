@@ -185,6 +185,10 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
     hosts = _hosts()
 
     source_meta: dict[str, dict[str, Any]] = {}
+    # The exact same record cannot be presented as evidence for two different
+    # vendors merely by assigning it fresh local source IDs.
+    attributed_urls: dict[str, str] = {}
+    attributed_digests: dict[str, str] = {}
     for sid, src in sources.items():
         _description(src["publisher"], "publisher")
         origin = _id(src["origin_id"], "original source origin")
@@ -213,6 +217,12 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
                 _id(subject, "source comparator subject")
                 if subject not in alternatives:
                     raise EvidenceError("source refers to missing comparator subject")
+                for key, seen in ((url, attributed_urls),
+                                  (src["sha256"], attributed_digests)):
+                    other = seen.get(key)
+                    if other is not None and other != subject:
+                        raise EvidenceError("same original source reused across competitors")
+                    seen[key] = subject
         source_meta[sid] = {
             "subject": subject,
             "origin": origin, "grade": src["grade"], "age": age,
