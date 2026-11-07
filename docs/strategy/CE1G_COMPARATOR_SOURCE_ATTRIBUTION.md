@@ -21,6 +21,7 @@ The same bounded dossier shape supports \`schema_version: "1.1"\`, with one extr
 - For generic buyer-value, cost or general market context, use JSON \`null\`. Generic evidence cannot be used to prove a named competitor strength or weakness.
 - A \`strength\` or \`weakness\` claim must identify exactly one alternative. All its cited supporting sources and counter-sources must carry the same subject ID.
 - A reported competitor **strength** needs at least one subject-matching \`vendor_original\` source, still only **operator-claimed** as original, not certified.
+- Subject-specific records with an identical original URL or SHA-256 byte digest cannot claim to describe different competitors merely by changing local IDs; repeated original evidence across different vendors is a **BLOCK**. This checks exact repeats, not authenticity or ownership.
 - Every competitor row's \`strength_claim_ids\` and \`weakness_claim_ids\` must refer to claims bound to that exact row's ID. Sharing a strength/weakness claim across multiple competitors, using a rival's page, applying a buyer complaint to the wrong firm, or using a rival counterexample is a **BLOCK**.
 - Existing independent-origin, contradiction, stale-source, rights, finite-value, input-limit, positive contribution margin and mandatory counterevidence rules remain in force.
 - Unknown, non-string, omitted, or extra subject fields are rejected. \`1.0\` cannot include new fields to spoof an upgrade.
