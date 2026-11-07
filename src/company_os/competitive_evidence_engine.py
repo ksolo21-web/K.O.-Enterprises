@@ -33,10 +33,12 @@ _SOURCE_KEYS = frozenset({
     "id", "publisher", "origin_id", "url", "observed_at", "sha256",
     "kind", "grade", "rights_basis", "excerpt", "capture_type",
 })
+_SOURCE_KEYS_V11 = _SOURCE_KEYS | frozenset({"applies_to_alternative_id"})
 _CLAIM_KEYS = frozenset({
     "id", "text", "source_ids", "counter_source_ids",
     "classification", "materiality", "fact_key", "observed_value", "limitations",
 })
+_CLAIM_KEYS_V11 = _CLAIM_KEYS | frozenset({"applies_to_alternative_id"})
 _ALTERNATIVE_KEYS = frozenset({
     "id", "name", "offering_tier", "buyer_segment", "geography",
     "strength_claim_ids", "weakness_claim_ids",
@@ -160,8 +162,9 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
     if not isinstance(dossier, dict) or set(dossier) != _ROOT_KEYS:
         raise EvidenceError("competitive dossier required fields missing or unexpected")
     digest = hashlib.sha256(canonical(dossier)).hexdigest()
-    if dossier["schema_version"] != "1.0":
+    if dossier["schema_version"] not in ("1.0", "1.1"):
         raise EvidenceError("competitive dossier schema unsupported")
+    attributed = dossier["schema_version"] == "1.1"
     for k in ("dossier_id", "venture_id", "author_id"):
         _id(dossier[k], k)
     for k in ("buyer_segment", "buyer_problem", "geography", "limitations"):
@@ -169,8 +172,10 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
     prepared = _date(dossier["prepared_at"], "prepared_at")
     if not timedelta(minutes=-2) <= moment - prepared <= timedelta(days=1):
         raise EvidenceError("competitive dossier time is future or stale")
-    sources = _map(dossier["sources"], _SOURCE_KEYS, "source", MAX_SOURCES)
-    claims = _map(dossier["claims"], _CLAIM_KEYS, "claim", MAX_CLAIMS)
+    sources = _map(dossier["sources"], _SOURCE_KEYS_V11 if attributed else _SOURCE_KEYS,
+                   "source", MAX_SOURCES)
+    claims = _map(dossier["claims"], _CLAIM_KEYS_V11 if attributed else _CLAIM_KEYS,
+                  "claim", MAX_CLAIMS)
     alternatives = _map(dossier["alternatives"], _ALTERNATIVE_KEYS,
                         "alternative", MAX_ALTERNATIVES)
     advantages = _map(dossier["advantages"], _ADVANTAGE_KEYS,
@@ -201,12 +206,24 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
         age = moment - observed
         if not timedelta(minutes=-2) <= age <= timedelta(days=30):
             raise EvidenceError("source is future or older than thirty days")
+        subject = None
+        if attributed:
+            subject = src["applies_to_alternative_id"]
+            if subject is not None:
+                _id(subject, "source comparator subject")
+                if subject not in alternatives:
+                    raise EvidenceError("source refers to missing comparator subject")
         source_meta[sid] = {
+            "subject": subject,
             "origin": origin, "grade": src["grade"], "age": age,
             "observed": observed, "kind": src["kind"], "url": url,
         }
 
     issues: list[str] = []
+    if not attributed:
+        # Historical v1.0 packs lack exact comparator/source subject binding.
+        # Do not silently treat their three competitor rows as validated.
+        issues.append("legacy_comparator_attribution_unverified")
     evidence_origins: set[str] = set()
     contradiction_groups: dict[str, set[str]] = {}
     for cid, claim in claims.items():
@@ -220,6 +237,21 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
             raise EvidenceError("claim citation references unknown source")
         if claim["classification"] not in _CLASSIFICATIONS or claim["materiality"] not in _MATERIALITY:
             raise EvidenceError("claim classification or materiality not permitted")
+        if attributed:
+            subject = claim["applies_to_alternative_id"]
+            if subject is not None:
+                _id(subject, "claim comparator subject")
+                if subject not in alternatives:
+                    raise EvidenceError("claim refers to missing comparator subject")
+            if claim["classification"] in ("strength", "weakness"):
+                if subject is None:
+                    raise EvidenceError("competitor claim must name one comparator")
+                if any(source_meta[sid]["subject"] != subject for sid in linked + contrary):
+                    raise EvidenceError("competitor claim source attribution disagrees")
+                if (claim["classification"] == "strength" and not any(
+                    source_meta[sid]["kind"] == "vendor_original" for sid in linked
+                )):
+                    raise EvidenceError("competitor strength lacks vendor-original evidence")
         key = _id(claim["fact_key"], "claim comparable fact key")
         value = _description(claim["observed_value"], "comparable observed value", maximum=160)
         contradiction_groups.setdefault(key, set()).add(value.casefold().strip())
@@ -269,6 +301,10 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
             raise EvidenceError("incumbent strength must cite a strength claim")
         if any(claims[x]["classification"] != "weakness" for x in weaknesses):
             raise EvidenceError("competitor weakness must cite a weakness claim")
+        if attributed and any(
+            claims[x]["applies_to_alternative_id"] != aid for x in strengths + weaknesses
+        ):
+            raise EvidenceError("competitor cited another comparator's claim")
         all_strengths.update(strengths)
         all_weaknesses.update(weaknesses)
 
