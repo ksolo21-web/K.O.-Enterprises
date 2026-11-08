@@ -202,6 +202,89 @@ class ComparatorAttributionTests(unittest.TestCase):
         vendor_two["sha256"] = vendor_one["sha256"]
         self.assert_blocked()
 
+    def test_generic_buyer_claim_cannot_cite_named_vendor_source(self):
+        claim = next(c for c in self.dossier["claims"] if c["id"] == "cbuyer")
+        claim["source_ids"] = ["vendor-1"]
+        self.assert_blocked()
+
+    def test_generic_cost_claim_cannot_cite_named_vendor_source(self):
+        claim = next(c for c in self.dossier["claims"] if c["id"] == "ccost")
+        claim["source_ids"] = ["vendor-2"]
+        self.assert_blocked()
+
+    def test_generic_contrary_claim_cannot_cite_named_counterexample(self):
+        claim = next(c for c in self.dossier["claims"] if c["id"] == "ccounter")
+        claim["source_ids"] = ["counter-1"]
+        self.assert_blocked()
+
+    def test_named_cost_claim_accepts_matching_source_but_not_publication(self):
+        claim = next(c for c in self.dossier["claims"] if c["id"] == "ccost")
+        claim["applies_to_alternative_id"] = "alternative-1"
+        claim["source_ids"] = ["vendor-1"]
+        report = self.assess()
+        self.assertEqual(report["status"], "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW")
+        self.assertFalse(report["publication_authorized"])
+
+    def test_named_cost_claim_rejects_other_vendor_source(self):
+        claim = next(c for c in self.dossier["claims"] if c["id"] == "ccost")
+        claim["applies_to_alternative_id"] = "alternative-1"
+        claim["source_ids"] = ["vendor-2"]
+        self.assert_blocked()
+
+    def test_generic_record_cannot_reuse_named_vendor_url(self):
+        generic = next(s for s in self.dossier["sources"] if s["id"] == "svendor2")
+        named = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        generic["url"] = named["url"]
+        self.assert_blocked()
+
+    def test_generic_record_cannot_reuse_named_vendor_digest(self):
+        generic = next(s for s in self.dossier["sources"] if s["id"] == "svendor2")
+        named = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        generic["sha256"] = named["sha256"]
+        self.assert_blocked()
+
+    def test_named_vendor_cannot_reuse_generic_record_url(self):
+        generic = next(s for s in self.dossier["sources"] if s["id"] == "svendor2")
+        named = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        named["url"] = generic["url"]
+        self.assert_blocked()
+
+    def test_advantage_cannot_support_claim_about_uncompared_vendor(self):
+        self.dossier["advantages"][0]["support_claim_ids"].append("strength-3")
+        self.assert_blocked()
+
+    def test_advantage_cannot_hide_uncompared_vendor_in_counter_claim(self):
+        self.dossier["advantages"][0]["contrary_claim_ids"].append("weakness-3")
+        self.assert_blocked()
+
+    def test_advantage_can_use_named_claim_for_compared_vendor(self):
+        self.dossier["advantages"][0]["support_claim_ids"].append("strength-1")
+        report = self.assess()
+        self.assertEqual(report["status"], "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW")
+        self.assertFalse(report["publication_authorized"])
+
+    def test_same_fact_key_with_different_vendors_is_not_a_contradiction(self):
+        first = next(c for c in self.dossier["claims"] if c["id"] == "strength-1")
+        second = next(c for c in self.dossier["claims"] if c["id"] == "strength-2")
+        first["fact_key"] = second["fact_key"] = "shared-feature"
+        first["observed_value"] = "present"
+        second["observed_value"] = "absent"
+        report = self.assess()
+        self.assertEqual(report["status"], "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW")
+        self.assertFalse(any(s.startswith("contradictory_unreconciled_values") for s in report["issues"]))
+
+    def test_conflicting_values_about_same_vendor_still_block(self):
+        first = next(c for c in self.dossier["claims"] if c["id"] == "strength-1")
+        second = next(c for c in self.dossier["claims"] if c["id"] == "weakness-1")
+        second["fact_key"] = first["fact_key"]
+        second["observed_value"] = "incompatible-value"
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn(
+            "contradictory_unreconciled_values:alternative-1:strength-1",
+            report["issues"],
+        )
+
     def test_attributed_data_does_not_change_global_release_controls(self):
         from company_os.competitive_launch_guard import (
             PRODUCTION_RELEASE_CONTROLLER_CERTIFIED,
