@@ -195,6 +195,16 @@ class CompetitiveWorkQueue:
             "SELECT bindings_json,bindings_sha FROM source_bindings WHERE job_id=?",
             (job_id,),
         ).fetchone()
+        submission = [
+            event for event in self._audit()
+            if event["job_id"] == job_id
+            and event["event"] in ("submitted", "submitted_bound")
+        ]
+        if len(submission) != 1:
+            raise EvidenceError("queued job has no unique original submission audit")
+        was_bound = submission[0]["event"] == "submitted_bound"
+        if was_bound != (receipt is not None):
+            raise EvidenceError("source binding receipt deleted or forged after submission")
         if receipt is None:
             return False
         bound_json, bound_sha = receipt
@@ -203,11 +213,7 @@ class CompetitiveWorkQueue:
             if (canonical_bindings(manifest) != bound_json
                     or hashlib.sha256(bound_json.encode()).hexdigest() != bound_sha):
                 raise EvidenceError("queue source binding record no longer canonical")
-            if not any(
-                event["event"] == "submitted_bound"
-                and event["job_id"] == job_id and event["metadata"] == bound_sha
-                for event in self._audit()
-            ):
+            if submission[0]["metadata"] != bound_sha:
                 raise EvidenceError("source binding no longer matches queue audit")
             proof = inspect_source_bindings(self.root, dossier, manifest, now=instant)
             if proof["dossier_sha256"] != dossier_sha:
@@ -253,8 +259,16 @@ class CompetitiveWorkQueue:
                 prior_binding = self.db.execute(
                     "SELECT bindings_sha FROM source_bindings WHERE job_id=?", (ident,)
                 ).fetchone()
-                if ((prior_binding is None) != (binding_sha is None)
-                        or (prior_binding is not None and prior_binding[0] != binding_sha)):
+                original = [
+                    event for event in self._audit() if event["job_id"] == ident
+                    and event["event"] in ("submitted", "submitted_bound")
+                ]
+                if (len(original) != 1
+                        or (original[0]["event"] == "submitted_bound") != (prior_binding is not None)
+                        or (prior_binding is None) != (binding_sha is None)
+                        or (prior_binding is not None and
+                            (prior_binding[0] != binding_sha
+                             or original[0]["metadata"] != prior_binding[0]))):
                     raise EvidenceError("existing queued job cannot switch provenance bindings")
                 self.db.commit()
                 return {
