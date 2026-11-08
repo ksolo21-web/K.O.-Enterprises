@@ -341,6 +341,8 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
         )
         if not set(support + contrary) <= set(claims) or not set(buyer_sources) <= set(sources):
             raise EvidenceError("advantage evidence points to unknown claim or source")
+        if attributed and any(source_meta[sid]["subject"] is not None for sid in buyer_sources):
+            raise EvidenceError("rival buyer evidence cannot establish own paid pilot")
         if attributed and any(
             claims[cid]["applies_to_alternative_id"] is not None
             and claims[cid]["applies_to_alternative_id"] not in comparators
