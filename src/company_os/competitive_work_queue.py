@@ -21,6 +21,7 @@ from .competitive_evidence_engine import (
     assess_competitive_dossier, canonical as canonical_dossier,
 )
 from .source_provenance import EvidenceError
+from .competitive_source_binding import canonical_bindings, inspect_source_bindings
 
 _ID = re.compile(r"^[a-z][a-z0-9_-]{2,79}$")
 MAX_ATTEMPTS = 3
@@ -64,6 +65,7 @@ class CompetitiveWorkQueue:
 
     def __init__(self, repo_root: Path | str) -> None:
         root = Path(repo_root).resolve()
+        self.root = root
         if not root.is_dir():
             raise EvidenceError("queue project root unavailable")
         folder = root
@@ -92,6 +94,14 @@ class CompetitiveWorkQueue:
                 created_at TEXT NOT NULL, available_at TEXT NOT NULL,
                 lease_owner TEXT, lease_until TEXT,
                 output_sha TEXT, output TEXT, last_error TEXT
+            )""")
+        self.db.execute("""
+            CREATE TABLE IF NOT EXISTS source_bindings (
+                job_id TEXT PRIMARY KEY,
+                bindings_json TEXT NOT NULL,
+                bindings_sha TEXT NOT NULL,
+                initial_ledger_head_sha TEXT NOT NULL,
+                FOREIGN KEY(job_id) REFERENCES jobs(id)
             )""")
         self.db.execute("""
             CREATE TABLE IF NOT EXISTS events (
@@ -174,6 +184,7 @@ class CompetitiveWorkQueue:
 
     def submit(
         self, dossier: Mapping[str, Any], *, now: datetime | None = None,
+        source_bindings: Mapping[str, str] | None = None,
     ) -> dict[str, Any]:
         moment = _when(now)
         result = assess_competitive_dossier(dossier, now=moment)
@@ -183,6 +194,16 @@ class CompetitiveWorkQueue:
                 "issues": result["issues"],
                 "publication_authorized": False,
             }
+        # CE-1J is explicit opt-in for *internal* provenance-bound work.
+        # Old synthetic queue fixtures remain unbound and never releaseable.
+        binding_data = None
+        binding_sha = None
+        ledger_head = None
+        if source_bindings is not None:
+            proof = inspect_source_bindings(self.root, dossier, source_bindings, now=moment)
+            binding_data = canonical_bindings(dict(source_bindings))
+            binding_sha = proof["bindings_sha256"]
+            ledger_head = proof["ledger_head_sha256"]
         ident = _id(dossier["dossier_id"], "job identifier")
         blob = canonical_dossier(dossier).decode("utf-8")
         digest = hashlib.sha256(blob.encode()).hexdigest()
@@ -195,6 +216,12 @@ class CompetitiveWorkQueue:
             if existing:
                 if existing[0] != digest:
                     raise EvidenceError("job ID reused for different dossier content")
+                prior_binding = self.db.execute(
+                    "SELECT bindings_sha FROM source_bindings WHERE job_id=?", (ident,)
+                ).fetchone()
+                if ((prior_binding is None) != (binding_sha is None)
+                        or (prior_binding is not None and prior_binding[0] != binding_sha)):
+                    raise EvidenceError("existing queued job cannot switch provenance bindings")
                 self.db.commit()
                 return {
                     "state": "IDEMPOTENT_EXISTING_" + existing[1],
@@ -208,7 +235,14 @@ class CompetitiveWorkQueue:
                 (ident, blob, digest, "QUEUED", 0, 0,
                  moment.isoformat(), moment.isoformat()),
             )
-            self._append("submitted", ident, moment, 0, digest)
+            if binding_data is not None:
+                self.db.execute(
+                    "INSERT INTO source_bindings VALUES(?,?,?,?)",
+                    (ident, binding_data, binding_sha, ledger_head),
+                )
+            self._append("submitted_bound" if binding_data is not None else "submitted",
+                         ident, moment, 0,
+                         binding_sha if binding_sha is not None else digest)
             self.db.commit()
             return {
                 "state": "QUEUED_INTERNAL_ONLY",
@@ -300,7 +334,38 @@ class CompetitiveWorkQueue:
         self.db.execute("BEGIN IMMEDIATE")
         try:
             row = self._check_lease(ident, worker, generation, instant)
-            report = assess_competitive_dossier(json.loads(row[4]), now=instant)
+            dossier = json.loads(row[4])
+            report = assess_competitive_dossier(dossier, now=instant)
+            receipt = self.db.execute(
+                "SELECT bindings_json,bindings_sha FROM source_bindings WHERE job_id=?",
+                (ident,),
+            ).fetchone()
+            if receipt:
+                try:
+                    bound_json, bound_sha = receipt
+                    manifest = json.loads(bound_json)
+                    if (canonical_bindings(manifest) != bound_json
+                            or hashlib.sha256(bound_json.encode()).hexdigest() != bound_sha):
+                        raise EvidenceError("queue source binding record no longer canonical")
+                    if not any(
+                        item["event"] == "submitted_bound"
+                        and item["job_id"] == ident and item["metadata"] == bound_sha
+                        for item in self._audit()
+                    ):
+                        raise EvidenceError("source binding no longer matches queue audit")
+                    proof = inspect_source_bindings(
+                        self.root, dossier, manifest, now=instant,
+                    )
+                    if proof["dossier_sha256"] != row[5]:
+                        raise EvidenceError("source binding no longer matches queued dossier")
+                except (EvidenceError, ValueError, TypeError, KeyError, OSError):
+                    # A changed, expired or deleted source must not quietly
+                    # complete as a held, valid internal result.
+                    report = {
+                        "status": "BLOCK", "issues": ["provenance_binding_not_current"],
+                        "publication_authorized": False,
+                        "original_sources_independently_authenticated": False,
+                    }
             if report["status"] not in ("BLOCK", "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW"):
                 raise EvidenceError("competitive evaluator produced unauthorized state")
             outcome = "BLOCKED" if report["status"] == "BLOCK" else "HELD"
