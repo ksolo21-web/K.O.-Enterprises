@@ -203,6 +203,40 @@ class ProvenanceBoundQueueTests(unittest.TestCase):
         )
         self.assertEqual(self.complete()["state"], "BLOCKED")
 
+    def test_deleted_binding_row_cannot_downgrade_queued_job(self):
+        self.submit()
+        self.queue.db.execute(
+            "DELETE FROM source_bindings WHERE job_id=?", (self.d["dossier_id"],),
+        )
+        self.assertEqual(self.complete()["state"], "BLOCKED")
+
+    def test_deleted_binding_row_blocks_held_digest_access(self):
+        self.submit()
+        self.assertEqual(self.complete()["state"], "HELD")
+        self.queue.db.execute(
+            "DELETE FROM source_bindings WHERE job_id=?", (self.d["dossier_id"],),
+        )
+        with self.assertRaises(EvidenceError):
+            self.queue.verified_snapshot(self.d["dossier_id"])
+
+    def test_forged_binding_row_cannot_upgrade_legacy_internal_job(self):
+        self.queue.submit(self.d, now=self.now)
+        manifest = json.dumps(self.bindings, sort_keys=True, separators=(",", ":"))
+        self.queue.db.execute(
+            "INSERT INTO source_bindings VALUES(?,?,?,?)",
+            (self.d["dossier_id"], manifest,
+             hashlib.sha256(manifest.encode()).hexdigest(), "0"*64),
+        )
+        self.assertEqual(self.complete()["state"], "BLOCKED")
+
+    def test_deleted_binding_row_cannot_silently_replay_as_unbound(self):
+        self.submit()
+        self.queue.db.execute(
+            "DELETE FROM source_bindings WHERE job_id=?", (self.d["dossier_id"],),
+        )
+        with self.assertRaises(EvidenceError):
+            self.queue.submit(self.d, now=self.now)
+
     def test_tampered_source_ledger_is_blocked_on_completion(self):
         self.submit()
         self.ledger.connection.execute("DROP TRIGGER events_no_update")
