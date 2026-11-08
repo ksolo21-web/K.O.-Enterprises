@@ -71,13 +71,20 @@ def _check_png_structure(png: bytes) -> None:
                 raise EvidenceError("original page PNG header is invalid")
             width = int.from_bytes(payload[:4], "big")
             height = int.from_bytes(payload[4:8], "big")
+            depth, color = payload[8], payload[9]
+            allowed = {
+                0: (1, 2, 4, 8, 16),
+                2: (8, 16), 3: (1, 2, 4, 8),
+                4: (8, 16), 6: (8, 16),
+            }
             if (not 64 <= width <= 8192 or not 64 <= height <= 8192
-                    or payload[10] != 0 or payload[11] not in (0, 1)
+                    or depth not in allowed.get(color, ())
+                    or payload[10] != 0 or payload[11] != 0
                     or payload[12] not in (0, 1)):
                 raise EvidenceError("original page PNG dimensions or header invalid")
         elif kind == b"IHDR":
             raise EvidenceError("duplicate PNG header chunk")
-        if kind == b"IDAT":
+        if kind == b"IDAT" and n:
             have_pixels = True
         if kind == b"IEND":
             if n != 0 or not have_pixels or end != len(png):
