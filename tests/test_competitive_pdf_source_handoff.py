@@ -16,14 +16,14 @@ from company_os.competitive_pdf_source_handoff import inspect_issuer_pdf_handoff
 from company_os.pdf_evidence import inspect_pdf_bytes
 from company_os.source_provenance import EvidenceError
 from test_competitive_comparator_attribution import attributed_dossier
-from test_issuer_inventory_journal import IssuerInventoryJournalTests
+import test_issuer_inventory_journal as issuer_fixture
 
 
 class IssuerPdfHandoffTests(unittest.TestCase):
     def setUp(self):
         # Reuse the full real-bytes, permit, signed-staging and issuer journal
         # synthetic fixture without re-running its inherited test suite.
-        self.fx = IssuerInventoryJournalTests(
+        self.fx = issuer_fixture.IssuerInventoryJournalTests(
             "test_full_local_link_inventory_stays_on_issuer_review_hold"
         )
         self.fx.setUp()
