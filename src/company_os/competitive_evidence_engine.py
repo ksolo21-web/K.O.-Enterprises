@@ -187,8 +187,8 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
     source_meta: dict[str, dict[str, Any]] = {}
     # The exact same record cannot be presented as evidence for two different
     # vendors merely by assigning it fresh local source IDs.
-    attributed_urls: dict[str, str] = {}
-    attributed_digests: dict[str, str] = {}
+    attributed_urls: dict[str, str | None] = {}
+    attributed_digests: dict[str, str | None] = {}
     for sid, src in sources.items():
         _description(src["publisher"], "publisher")
         origin = _id(src["origin_id"], "original source origin")
@@ -217,12 +217,14 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
                 _id(subject, "source comparator subject")
                 if subject not in alternatives:
                     raise EvidenceError("source refers to missing comparator subject")
-                for key, seen in ((url, attributed_urls),
-                                  (src["sha256"], attributed_digests)):
-                    other = seen.get(key)
-                    if other is not None and other != subject:
-                        raise EvidenceError("same original source reused across competitors")
-                    seen[key] = subject
+            # A generic (null-subject) record may not duplicate the original
+            # URL or byte digest of an attributed vendor record either.
+            # Compare key existence, since None is itself a valid subject.
+            for key, seen in ((url, attributed_urls),
+                              (src["sha256"], attributed_digests)):
+                if key in seen and seen[key] != subject:
+                    raise EvidenceError("same original source reused across different subjects")
+                seen[key] = subject
         source_meta[sid] = {
             "subject": subject,
             "origin": origin, "grade": src["grade"], "age": age,
@@ -235,7 +237,7 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
         # Do not silently treat their three competitor rows as validated.
         issues.append("legacy_comparator_attribution_unverified")
     evidence_origins: set[str] = set()
-    contradiction_groups: dict[str, set[str]] = {}
+    contradiction_groups: dict[tuple[str | None, str], set[str]] = {}
     for cid, claim in claims.items():
         _description(claim["text"], "claim")
         _description(claim["limitations"], "claim scope", maximum=400)
@@ -253,18 +255,23 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
                 _id(subject, "claim comparator subject")
                 if subject not in alternatives:
                     raise EvidenceError("claim refers to missing comparator subject")
+            # All claim classifications must match both supporting and
+            # counter-source subjects; not only strengths and weaknesses.
+            # Otherwise a generic buyer/cost/contrary claim could launder a
+            # named competitor's page back into an unattributed assertion.
+            if any(source_meta[sid]["subject"] != subject for sid in linked + contrary):
+                raise EvidenceError("claim source comparator attribution disagrees")
             if claim["classification"] in ("strength", "weakness"):
                 if subject is None:
                     raise EvidenceError("competitor claim must name one comparator")
-                if any(source_meta[sid]["subject"] != subject for sid in linked + contrary):
-                    raise EvidenceError("competitor claim source attribution disagrees")
                 if (claim["classification"] == "strength" and not any(
                     source_meta[sid]["kind"] == "vendor_original" for sid in linked
                 )):
                     raise EvidenceError("competitor strength lacks vendor-original evidence")
         key = _id(claim["fact_key"], "claim comparable fact key")
         value = _description(claim["observed_value"], "comparable observed value", maximum=160)
-        contradiction_groups.setdefault(key, set()).add(value.casefold().strip())
+        fact_subject = claim["applies_to_alternative_id"] if attributed else None
+        contradiction_groups.setdefault((fact_subject, key), set()).add(value.casefold().strip())
         if claim["materiality"] in {"deadline", "safety", "financial", "critical"}:
             if not any(source_meta[sid]["kind"] in {
                 "issuer_original", "vendor_original", "buyer_firsthand"
@@ -286,9 +293,10 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
             issues.append("unverified_hypothesis_support:" + cid)
         for sid in linked:
             evidence_origins.add(source_meta[sid]["origin"])
-    for key, values in contradiction_groups.items():
+    for (fact_subject, key), values in contradiction_groups.items():
         if len(values) > 1:
-            issues.append("contradictory_unreconciled_values:" + key)
+            scope = (fact_subject + ":") if fact_subject is not None else ""
+            issues.append("contradictory_unreconciled_values:" + scope + key)
 
     alternative_names: set[str] = set()
     all_strengths: set[str] = set()
@@ -333,6 +341,14 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
         )
         if not set(support + contrary) <= set(claims) or not set(buyer_sources) <= set(sources):
             raise EvidenceError("advantage evidence points to unknown claim or source")
+        if attributed and any(source_meta[sid]["subject"] is not None for sid in buyer_sources):
+            raise EvidenceError("rival buyer evidence cannot establish own paid pilot")
+        if attributed and any(
+            claims[cid]["applies_to_alternative_id"] is not None
+            and claims[cid]["applies_to_alternative_id"] not in comparators
+            for cid in support + contrary
+        ):
+            raise EvidenceError("advantage uses evidence about a non-compared competitor")
         for field in ("expected_price_cents", "estimated_delivery_cost_cents"):
             if type(advantage[field]) is not int or not 0 <= advantage[field] <= 10_000_000:
                 raise EvidenceError("advantage monetary inputs require bounded integer cents")
