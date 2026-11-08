@@ -121,6 +121,33 @@ def _map(items: Any, fields: frozenset[str], name: str, cap: int) -> dict[str, d
     return output
 
 
+
+def _independent_original_count(ids: list[str], meta: dict[str, dict[str, Any]]) -> int:
+    """Count structurally separate original-source clusters, not local IDs.
+
+    Shared origin, publisher, exact URL or captured-byte digest implies
+    dependency. This is a conservative *operator-supplied* lower bound: even
+    separate clusters are not independently authenticated sources.
+    The input list is limited to 30 IDs by _ids().
+    """
+    clusters: list[set[str]] = []
+    for sid in ids:
+        row = meta[sid]
+        identity = {
+            "origin:" + row["origin"],
+            "publisher:" + row["publisher"],
+            "url:" + row["url"],
+            "bytes:" + row["sha256"],
+        }
+        matching = [group for group in clusters if not identity.isdisjoint(group)]
+        if matching:
+            for group in matching:
+                identity.update(group)
+                clusters.remove(group)
+        clusters.append(identity)
+    return len(clusters)
+
+
 def _hosts() -> tuple[str, ...]:
     raw = __import__("os").environ.get("KO_SOURCE_APPROVED_HOSTS", "")
     hosts = tuple(x.strip() for x in raw.split(","))
@@ -226,7 +253,8 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
                     raise EvidenceError("same original source reused across different subjects")
                 seen[key] = subject
         source_meta[sid] = {
-            "subject": subject,
+            "subject": subject, "publisher": src["publisher"].strip().casefold(),
+            "sha256": src["sha256"],
             "origin": origin, "grade": src["grade"], "age": age,
             "observed": observed, "kind": src["kind"], "url": url,
         }
@@ -247,6 +275,14 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
             raise EvidenceError("same source cannot count as both support and counterevidence")
         if not set(linked + contrary) <= set(sources):
             raise EvidenceError("claim citation references unknown source")
+        # Different local source IDs must never let one original record
+        # become both the supporting and disconfirming evidence.
+        if any(
+            source_meta[support]["url"] == source_meta[rebuttal]["url"]
+            or source_meta[support]["sha256"] == source_meta[rebuttal]["sha256"]
+            for support in linked for rebuttal in contrary
+        ):
+            raise EvidenceError("same original evidence used as support and counterevidence")
         if claim["classification"] not in _CLASSIFICATIONS or claim["materiality"] not in _MATERIALITY:
             raise EvidenceError("claim classification or materiality not permitted")
         if attributed:
@@ -280,8 +316,10 @@ def _assess(dossier: Any, moment: datetime) -> dict[str, Any]:
             if any(source_meta[sid]["age"] > timedelta(days=1) for sid in linked):
                 issues.append("material_claim_source_older_than_one_day:" + cid)
         if claim["classification"] == "weakness":
-            independent_origins = {source_meta[sid]["origin"] for sid in linked}
-            if len(independent_origins) < 2:
+            # Two IDs or distinct claimed origin names are not two
+            # independent observations when their original bytes, URLs or
+            # stated publisher trace back to the same evidence.
+            if _independent_original_count(linked, source_meta) < 2:
                 issues.append("weakness_lacks_independent_corrob:" + cid)
             if not contrary:
                 issues.append("weakness_missing_counterevidence:" + cid)
