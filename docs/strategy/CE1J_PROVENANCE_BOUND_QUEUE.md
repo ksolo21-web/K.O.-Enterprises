@@ -13,7 +13,7 @@ This change joins **source capture → source-ledger chain → exact source-to-s
 - `competitive_source_binding.inspect_source_bindings(root, dossier, bindings, now)` takes a complete mapping of **each dossier source ID to one 64-character snapshot ID**. It verifies the CE-1A local chain and latest record for the source, rejects prior changed/superseded captures, checks <=7-day freshness and complete-document **operator assertion**, and checks exact URL, original byte digest, publisher, origin ID, observation time, normalized excerpt, source kind, acquisition type, and public-access basis. No missing, extra, aliased or duplicate snapshot mapping is accepted.
 - `CompetitiveWorkQueue.submit(dossier, source_bindings=...)` is an **explicit internal-only** mode. It checks the mapping before enqueueing and atomically stores canonical binding JSON and its digest with the job, linked into the append-only *local* queue audit.
 - Leased job completion rechecks the current source ledger and the binding digest. Missing/revised/expired or tampered evidence produces an internal `BLOCKED` job, **not** a legitimate held source analysis. `verified_snapshot(job_id)` also refresh-checks a bound job before returning its digests, avoiding a previously held result becoming silently reusable after source changes.
-- Previously supported unbound synthetic/dry-run jobs remain available for internal simulation and **never** grant release authority. Attempting to downgrade a bound job to unbound (or silently upgrade an existing unbound job to bound) under the same job ID is refused.
+- Previously supported unbound synthetic/dry-run jobs remain available for internal simulation and **never** grant release authority. Attempting to downgrade a bound job to unbound (or silently upgrade an existing unbound job to bound) under the same job ID is refused. The original queue audit entry also detects **deleted or forged binding database rows**, including after a held result was created.
 
 ## Non-substitutable limitations
 
@@ -26,7 +26,7 @@ This change joins **source capture → source-ledger chain → exact source-to-s
 ## Acceptance checks
 
 - [ ] Exact GitHub CI on this PR's final head: complete Python 3.12 safety/unit tests, Linux cross-UID, Node, release-surface inventory and offline document quality.
-- [ ] 21 new targeted cases show matching private snapshots enter/complete to HOLD; missing, forged, duplicated or altered records fail; mid-queue revisions and post-HOLD changes block.
+- [ ] 25 targeted cases show matching private snapshots enter/complete to HOLD; missing, forged, duplicated or altered records fail; mid-queue revisions and post-HOLD changes block.
 - [ ] Verified `main` merge with root `PAUSE_AUTONOMY` present, `PRODUCTION_RELEASE_CONTROLLER_CERTIFIED=False` unchanged.
 - [ ] Classify review as **internal**; no separate authenticated factual critic ran. The source-binding bridge remains an unfinished CE-1/M1 increment even if its code tests pass.
 
