@@ -182,6 +182,40 @@ class CompetitiveWorkQueue:
             "publication_authorized": False,
         }
 
+    def _verify_source_binding(
+        self, job_id: str, dossier: Mapping[str, Any],
+        dossier_sha: str, instant: datetime,
+    ) -> bool:
+        """Revalidate persisted receipt against current local capture history.
+
+        False means an old internal-only unbound job. True means structural
+        capture linkage only; NEVER factual authentication or release approval.
+        """
+        receipt = self.db.execute(
+            "SELECT bindings_json,bindings_sha FROM source_bindings WHERE job_id=?",
+            (job_id,),
+        ).fetchone()
+        if receipt is None:
+            return False
+        bound_json, bound_sha = receipt
+        try:
+            manifest = json.loads(bound_json)
+            if (canonical_bindings(manifest) != bound_json
+                    or hashlib.sha256(bound_json.encode()).hexdigest() != bound_sha):
+                raise EvidenceError("queue source binding record no longer canonical")
+            if not any(
+                event["event"] == "submitted_bound"
+                and event["job_id"] == job_id and event["metadata"] == bound_sha
+                for event in self._audit()
+            ):
+                raise EvidenceError("source binding no longer matches queue audit")
+            proof = inspect_source_bindings(self.root, dossier, manifest, now=instant)
+            if proof["dossier_sha256"] != dossier_sha:
+                raise EvidenceError("source binding no longer matches queued dossier")
+        except (ValueError, TypeError, KeyError, OSError) as exc:
+            raise EvidenceError("provenance binding corrupt or unavailable") from exc
+        return True
+
     def submit(
         self, dossier: Mapping[str, Any], *, now: datetime | None = None,
         source_bindings: Mapping[str, str] | None = None,
@@ -336,36 +370,16 @@ class CompetitiveWorkQueue:
             row = self._check_lease(ident, worker, generation, instant)
             dossier = json.loads(row[4])
             report = assess_competitive_dossier(dossier, now=instant)
-            receipt = self.db.execute(
-                "SELECT bindings_json,bindings_sha FROM source_bindings WHERE job_id=?",
-                (ident,),
-            ).fetchone()
-            if receipt:
-                try:
-                    bound_json, bound_sha = receipt
-                    manifest = json.loads(bound_json)
-                    if (canonical_bindings(manifest) != bound_json
-                            or hashlib.sha256(bound_json.encode()).hexdigest() != bound_sha):
-                        raise EvidenceError("queue source binding record no longer canonical")
-                    if not any(
-                        item["event"] == "submitted_bound"
-                        and item["job_id"] == ident and item["metadata"] == bound_sha
-                        for item in self._audit()
-                    ):
-                        raise EvidenceError("source binding no longer matches queue audit")
-                    proof = inspect_source_bindings(
-                        self.root, dossier, manifest, now=instant,
-                    )
-                    if proof["dossier_sha256"] != row[5]:
-                        raise EvidenceError("source binding no longer matches queued dossier")
-                except (EvidenceError, ValueError, TypeError, KeyError, OSError):
-                    # A changed, expired or deleted source must not quietly
-                    # complete as a held, valid internal result.
-                    report = {
-                        "status": "BLOCK", "issues": ["provenance_binding_not_current"],
-                        "publication_authorized": False,
-                        "original_sources_independently_authenticated": False,
-                    }
+            try:
+                self._verify_source_binding(ident, dossier, row[5], instant)
+            except EvidenceError:
+                # Changed, expired or missing original capture must not
+                # complete with a held, structurally valid source assertion.
+                report = {
+                    "status": "BLOCK", "issues": ["provenance_binding_not_current"],
+                    "publication_authorized": False,
+                    "original_sources_independently_authenticated": False,
+                }
             if report["status"] not in ("BLOCK", "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW"):
                 raise EvidenceError("competitive evaluator produced unauthorized state")
             outcome = "BLOCKED" if report["status"] == "BLOCK" else "HELD"
@@ -446,6 +460,7 @@ class CompetitiveWorkQueue:
                 or parsed.get("dossier_sha256") != payload_sha
                 or dossier.get("dossier_id") != ident):
             raise EvidenceError("held job output is not bound to original dossier")
+        self._verify_source_binding(ident, dossier, payload_sha, _when(None))
         return {
             "state": "HELD_VERIFIED_DIGEST_ONLY",
             "job_id": ident, "dossier_sha256": payload_sha,
