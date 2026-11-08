@@ -274,6 +274,47 @@ class SourcePageReviewTests(unittest.TestCase):
         self.receipt["page_inspections"][0]["screenshot_sha256"] = hashlib.sha256(data).hexdigest()
         self.assert_blocked()
 
+    def test_invalid_png_crc_blocks_even_if_signed_hash_matches(self):
+        key = next(iter(self.pngs))
+        image = bytearray(self.pngs[key])
+        image[-5] ^= 1
+        data = bytes(image)
+        self.pngs[key] = data
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(data).hexdigest()
+        )
+        self.assert_blocked()
+
+    def test_png_trailing_hidden_bytes_blocks_even_if_signed_hash_matches(self):
+        key = next(iter(self.pngs))
+        data = self.pngs[key] + b"hidden-trailing-data"
+        self.pngs[key] = data
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(data).hexdigest()
+        )
+        self.assert_blocked()
+
+    def test_header_only_fabricated_png_blocks(self):
+        key = next(iter(self.pngs))
+        data = self.pngs[key][:32] + b"Z" * 64
+        self.pngs[key] = data
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(data).hexdigest()
+        )
+        self.assert_blocked()
+
+    def test_png_tiny_dimensions_with_recomputed_crc_blocks(self):
+        key = next(iter(self.pngs))
+        image = bytearray(self.pngs[key])
+        image[16:20] = (1).to_bytes(4, "big")
+        image[29:33] = (zlib.crc32(bytes(image[12:29])) & 0xffffffff).to_bytes(4, "big")
+        data = bytes(image)
+        self.pngs[key] = data
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(data).hexdigest()
+        )
+        self.assert_blocked()
+
     def test_original_pdf_source_inspection_missing_blocks(self):
         self.receipt["source_inspections"] = []
         self.assert_blocked()
