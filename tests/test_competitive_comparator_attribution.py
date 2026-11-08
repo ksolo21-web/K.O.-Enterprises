@@ -289,6 +289,89 @@ class ComparatorAttributionTests(unittest.TestCase):
             report["issues"],
         )
 
+    def test_weakness_cannot_count_duplicate_url_as_independent_source(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        second["url"] = buyer["url"]
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn("weakness_lacks_independent_corrob:weakness-1", report["issues"])
+
+    def test_weakness_cannot_count_identical_bytes_as_second_origin(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        second["sha256"] = buyer["sha256"]
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn("weakness_lacks_independent_corrob:weakness-1", report["issues"])
+
+    def test_weakness_cannot_count_alias_publisher_as_independent(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        second["publisher"] = buyer["publisher"].swapcase()
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn("weakness_lacks_independent_corrob:weakness-1", report["issues"])
+
+    def test_weakness_cannot_count_reused_origin_id_as_independent(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        second["origin_id"] = buyer["origin_id"]
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn("weakness_lacks_independent_corrob:weakness-1", report["issues"])
+
+    def test_same_original_url_cannot_support_and_rebut_claim(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        rebuttal = next(s for s in self.dossier["sources"] if s["id"] == "counter-1")
+        rebuttal["url"] = buyer["url"]
+        self.assert_blocked()
+
+    def test_same_original_bytes_cannot_support_and_rebut_claim(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        rebuttal = next(s for s in self.dossier["sources"] if s["id"] == "counter-1")
+        rebuttal["sha256"] = buyer["sha256"]
+        self.assert_blocked()
+
+    def test_transitively_related_originals_are_one_source_group(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        vendor = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
+        second["publisher"] = buyer["publisher"]
+        vendor["sha256"] = second["sha256"]
+        weakness = next(c for c in self.dossier["claims"] if c["id"] == "weakness-1")
+        weakness["source_ids"].append("vendor-1")
+        report = self.assess()
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertIn("weakness_lacks_independent_corrob:weakness-1", report["issues"])
+
+    def test_third_distinct_original_restores_structural_two_source_requirement(self):
+        buyer = next(s for s in self.dossier["sources"] if s["id"] == "buyer-1")
+        second = next(s for s in self.dossier["sources"] if s["id"] == "secondary-1")
+        second["publisher"] = buyer["publisher"]
+        weakness = next(c for c in self.dossier["claims"] if c["id"] == "weakness-1")
+        weakness["source_ids"].append("vendor-1")
+        report = self.assess()
+        self.assertEqual(report["status"], "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW")
+        self.assertFalse(report["publication_authorized"])
+
+    def test_different_originals_on_same_host_remain_structurally_distinct(self):
+        # A shared host alone is not cryptographic proof of one publisher.
+        # This is still only an operator-claimed two-source HOLD.
+        report = self.assess()
+        self.assertEqual(report["status"], "HOLD_INDEPENDENT_SOURCE_BUYER_AND_CRITIC_REVIEW")
+        self.assertFalse(report["original_sources_independently_authenticated"])
+
+    def test_same_original_rebuttal_rejected_in_legacy_schema(self):
+        from test_competitive_engine_pipeline import synthetic_dossier
+        legacy = synthetic_dossier(self.now, 881)
+        original = next(s for s in legacy["sources"] if s["id"] == "sbuyer")
+        counter = next(s for s in legacy["sources"] if s["id"] == "scounter")
+        counter["sha256"] = original["sha256"]
+        report = self.assess(legacy)
+        self.assertEqual(report["status"], "BLOCK")
+        self.assertFalse(report["publication_authorized"])
+
     def test_attributed_data_does_not_change_global_release_controls(self):
         from company_os.competitive_launch_guard import (
             PRODUCTION_RELEASE_CONTROLLER_CERTIFIED,
