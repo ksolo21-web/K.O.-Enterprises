@@ -8,6 +8,7 @@ No network, rendering, signing-key custody, broker, payments or side effects.
 from __future__ import annotations
 
 import hashlib
+import zlib
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Mapping
@@ -43,6 +44,49 @@ MAX_SOURCE_TASKS = 80
 MAX_PAGE_TASKS = 1200
 MAX_REVIEW_AGE = timedelta(hours=1)
 PNG_HEADER = b"\x89PNG\r\n\x1a\n"
+
+
+
+def _check_png_structure(png: bytes) -> None:
+    """Validate bounded PNG chunks/CRCs, NOT screenshot/PDF page fidelity."""
+    if not isinstance(png, bytes) or not 70 <= len(png) <= MAX_SCREENSHOT_BYTES:
+        raise EvidenceError("original page PNG bytes absent or too large")
+    if not png.startswith(PNG_HEADER):
+        raise EvidenceError("original page image is not a PNG")
+    offset, pieces, have_pixels, have_end = 8, 0, False, False
+    while offset < len(png):
+        if offset + 12 > len(png) or pieces >= 2048:
+            raise EvidenceError("original page PNG chunk layout incomplete")
+        n = int.from_bytes(png[offset:offset + 4], "big")
+        end = offset + 12 + n
+        if end > len(png) or n > MAX_SCREENSHOT_BYTES:
+            raise EvidenceError("original page PNG chunk length invalid")
+        kind = png[offset + 4:offset + 8]
+        payload = png[offset + 8:offset + 8 + n]
+        expected_crc = int.from_bytes(png[end - 4:end], "big")
+        if zlib.crc32(kind + payload) & 0xffffffff != expected_crc:
+            raise EvidenceError("original page PNG chunk CRC mismatch")
+        if pieces == 0:
+            if kind != b"IHDR" or n != 13:
+                raise EvidenceError("original page PNG header is invalid")
+            width = int.from_bytes(payload[:4], "big")
+            height = int.from_bytes(payload[4:8], "big")
+            if (not 64 <= width <= 8192 or not 64 <= height <= 8192
+                    or payload[10] != 0 or payload[11] not in (0, 1)
+                    or payload[12] not in (0, 1)):
+                raise EvidenceError("original page PNG dimensions or header invalid")
+        elif kind == b"IHDR":
+            raise EvidenceError("duplicate PNG header chunk")
+        if kind == b"IDAT":
+            have_pixels = True
+        if kind == b"IEND":
+            if n != 0 or not have_pixels or end != len(png):
+                raise EvidenceError("original page PNG incomplete or has appended bytes")
+            have_end = True
+            break
+        offset, pieces = end, pieces + 1
+    if not have_end:
+        raise EvidenceError("original page PNG has no complete ending")
 
 
 def _note(raw: Any, name: str) -> None:
@@ -209,16 +253,9 @@ def inspect_signed_source_pdf_review(
         screenshot_hashes.add(shot)
         name = doc + ":" + str(num)
         png = original_page_pngs.get(name)
-        if (not isinstance(png, bytes) or
-                not 50 <= len(png) <= MAX_SCREENSHOT_BYTES or
-                not png.startswith(PNG_HEADER) or
-                png[12:16] != b"IHDR" or
-                hashlib.sha256(png).hexdigest() != shot):
-            raise EvidenceError("original PDF page reviewer PNG missing, unsafe or changed")
-        width = int.from_bytes(png[16:20], "big")
-        height = int.from_bytes(png[20:24], "big")
-        if not 64 <= width <= 8192 or not 64 <= height <= 8192:
-            raise EvidenceError("original PDF page PNG dimensions too small or unbounded")
+        if not isinstance(png, bytes) or hashlib.sha256(png).hexdigest() != shot:
+            raise EvidenceError("original PDF page reviewer PNG missing or changed")
+        _check_png_structure(png)
     if (seen_pages != set(expected_pages) or len(original_page_pngs) != len(seen_pages)
             or set(original_page_pngs) != {doc + ":" + str(num) for doc, num in seen_pages}):
         raise EvidenceError("reviewer original-PDF page screenshots missing or unexpected")
