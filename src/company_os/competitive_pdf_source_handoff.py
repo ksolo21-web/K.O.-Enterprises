@@ -20,7 +20,7 @@ from .pdf_evidence import inspect_pdf_bytes
 from .source_provenance import EvidenceError, _normalize_space
 
 MAX_HANDOFF_SOURCES = 80
-MAX_HANDOFF_BYTES = 100_000
+MAX_HANDOFF_BYTES = 512_000
 
 
 def _current(now: datetime | None) -> datetime:
