@@ -231,6 +231,10 @@ class ComparatorAttributionTests(unittest.TestCase):
         claim["source_ids"] = ["vendor-2"]
         self.assert_blocked()
 
+    def test_rival_buyer_statement_cannot_substitute_for_own_paid_pilot(self):
+        self.dossier["advantages"][0]["buyer_payment_evidence_ids"] = ["buyer-1"]
+        self.assert_blocked()
+
     def test_generic_record_cannot_reuse_named_vendor_url(self):
         generic = next(s for s in self.dossier["sources"] if s["id"] == "svendor2")
         named = next(s for s in self.dossier["sources"] if s["id"] == "vendor-1")
