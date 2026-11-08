@@ -8,13 +8,13 @@ The CE-1K source-PDF worklist had no cryptographically bound source-page critic 
 
 `inspect_signed_source_pdf_review` re-executes CE-1K against **current private actual PDF bytes and currently signed/revocation-checked issuer inventory**, rechecks the existing CE-3A signed report/reviewer policy against actual output-PDF bytes, and validates a **new domain-separated Ed25519 source/page receipt** signed under the same reviewer governance policy.
 
-The signed new receipt must match the exact dossier SHA-256, current issuer inventory chain head, current CE-1K worklist SHA-256, linked CE-3A report review ID, reviewer/key, venture, author and timing. It must cover **all** cited issuer-original source IDs and *every* original PDF page, matching each exact original PDF byte digest, page number, extracted-page text digest, source excerpt digest and quoted source page. It refuses duplicate, omitted, invented, out-of-scope, stale or revoked evidence. Original-page PNG evidence bytes must be provided with expected identifier, accepted PNG header/dimensions and SHA-256 matching the signed page receipt; reusing one image hash under two pages is rejected.
+The signed new receipt must match the exact dossier SHA-256, current issuer inventory chain head, current CE-1K worklist SHA-256, linked CE-3A report review ID, reviewer/key, venture, author and timing. It must cover **all** cited issuer-original source IDs and *every* original PDF page, matching each exact original PDF byte digest, page number, extracted-page text digest, source excerpt digest and quoted source page. It refuses duplicate, omitted, invented, out-of-scope, stale or revoked evidence. Original-page PNG evidence bytes must be provided with expected identifier, bounded PNG chunk structure and CRCs, legal image dimensions, and SHA-256 matching the signed page receipt; reusing one image hash under two pages is rejected.
 
 The existing signed report reviewer must still meet **all twelve mandatory checks**, declared score strictly **above 9.0**, zero unresolved critical findings, valid short-lived trusted key and relevant venture. CE-1L additionally requires separate limited source/page review notes; it does not rewrite, downgrade or substitute for CE-3A checks. There is no private signing key in the implementation.
 
 ## Strict evidence boundary
 
-A reviewer signing a claimed inspection does **not** establish that the reviewer actually inspected the original, is independent, or is qualified. PNG existence, header and hash validation do **not** establish that pixels represent the correct PDF page, that the page was actually rendered, or that a competent reviewer checked it. The synthetic test PNGs are **not** screenshots of actual PDF pages. CE-1L's successful result explicitly states:
+A reviewer signing a claimed inspection does **not** establish that the reviewer actually inspected the original, is independent, or is qualified. PNG existence, structural CRC and hash validation do **not** establish that pixels represent the correct PDF page, that the page was actually rendered, or that a competent reviewer checked it. The synthetic test PNGs are **not** screenshots of actual PDF pages. CE-1L's successful result explicitly states:
 
 - `state=HOLD_SIGNED_SOURCE_PAGE_METADATA_EXTERNAL_INDEPENDENCE_UNVERIFIED`;
 - `rendered_source_pages_independently_verified=false`;
@@ -27,7 +27,7 @@ A real qualifying production critic must later inspect actual source-PDF renders
 
 ## Acceptance checks
 
-- [ ] Exact final PR-head full Python 3.12 CI passes, including **31 new adversarial and positive cases**.
+- [ ] Exact final PR-head full Python 3.12 CI passes, including **35 new adversarial and positive cases**.
 - [ ] Document quality and release inventory checks pass and confirm production no-go.
 - [ ] Internal patch/code review, corrections and exact-head retest completed.
 - [ ] Merge only the verified PR head; re-read `main`, verify root pause and false controller certification.
