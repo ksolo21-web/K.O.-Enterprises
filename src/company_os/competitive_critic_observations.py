@@ -20,6 +20,7 @@ from .competitive_critic_review import (
 from .competitive_critic_room import (
     MAX_MANIFEST_BYTES, _file_name, _bytes, inspect_sealed_critic_room,
 )
+from .competitive_critic_audit import CriticReviewLedger
 from .source_provenance import EvidenceError
 
 OBSERVATION_DOMAIN = b"KO-ORIGINAL-PAGE-AND-CLAIM-OBSERVATIONS-V1\n"
@@ -143,7 +144,8 @@ def inspect_signed_observation_receipt(
     room: Path | str, expected_manifest_sha256: str,
     policy_envelope: Mapping[str, Any],
     observation_envelope: Mapping[str, Any],
-    *, now: datetime | None = None,
+    *, critic_audit_ledger: CriticReviewLedger,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """Verify signed assertions tied to ALL exact room pages and dossier claims.
 
@@ -153,7 +155,13 @@ def inspect_signed_observation_receipt(
     moment = _now(now)
     digest = _sha(expected_manifest_sha256, "out-of-band room")
     packet = _get_room_packet(room, digest)
+    if not isinstance(critic_audit_ledger, CriticReviewLedger):
+        raise EvidenceError("critic observations require a current local governance ledger")
     policy = inspect_review_policy(policy_envelope, now=moment)
+    audit = critic_audit_ledger.inspect_current_policy(policy_envelope, now=moment)
+    if (audit["state"] != "LOCAL_CRITIC_POLICY_CURRENT_NOT_EXTERNALLY_ANCHORED"
+            or audit["externally_anchored"] is not False):
+        raise EvidenceError("critic governance policy is not current in local audit")
     if (not isinstance(observation_envelope, Mapping)
             or set(observation_envelope) != {"receipt", "signature"}):
         raise EvidenceError("review observations require exact signed envelope")
@@ -282,6 +290,9 @@ def inspect_signed_observation_receipt(
         "issuer_inventory_head_sha256": packet["issuer_inventory_head_sha256"],
         "receipt_id": rid,
         "reviewer_id": reviewer,
+        "local_governance_audit_head_sha256": audit["audit_head_sha256"],
+        "reviewer_policy_current_locally": True,
+        "governance_audit_externally_anchored": False,
         "all_original_pdf_pages_accounted_for": len(seen_pages),
         "all_dossier_claims_accounted_for": len(seen_claims),
         "reported_page_problems": problem_pages,
