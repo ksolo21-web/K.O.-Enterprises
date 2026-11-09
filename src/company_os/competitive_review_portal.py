@@ -149,7 +149,7 @@ _JS = r"""
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
-    a.style.display = "none";
+    a.hidden = true;
     document.body.append(a);
     a.click();
     a.remove();
@@ -477,8 +477,7 @@ def inspect_private_visual_portal(
             or {x.name for x in directory.iterdir()}!={"index.html"}):
         raise EvidenceError("private visual portal directory missing, changed or writable")
     raw=_check_metadata_file(page,maximum=MAX_HTML_BYTES)
-    if (not raw.startswith(b"<!doctype html>") or hashlib.sha256(raw).hexdigest()!=expected
-            or b"PRIVATE_OFFLINE" in raw[:0]):
+    if not raw.startswith(b"<!doctype html>") or hashlib.sha256(raw).hexdigest()!=expected:
         raise EvidenceError("private visual portal HTML different from supplied digest")
     return {
         "state":"PRIVATE_OFFLINE_VIEWER_BYTES_VALID_REVIEW_NOT_PERFORMED",
