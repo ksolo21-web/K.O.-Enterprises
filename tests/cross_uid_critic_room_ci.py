@@ -184,12 +184,12 @@ def main() -> int:
             # private HTML. The reviewer can read it, but cannot alter its bytes;
             # other numeric UIDs do not have access to the whole interface.
             viewer_probe = (
-                "import hashlib,json,sys; "
+                "import hashlib,json,sys,html; "
                 "from pathlib import Path; "
                 "raw=Path(sys.argv[1]).read_bytes(); "
                 "print(json.dumps({'sha256':hashlib.sha256(raw).hexdigest(),"
                 "'page_images':raw.count(b'data:image/png;base64,'),"
-                "'offline':b\"connect-src 'none'\" in raw,"
+                "'offline':\"connect-src 'none'\" in html.unescape(raw.decode('utf-8')),"
                 "'unsigned':b'UNSIGNED-REVIEW-OBSERVATIONS' in raw}))"
             )
             view_result = _child(
