@@ -305,9 +305,23 @@ def inspect_sealed_critic_room(
             or work.get("issuer_inventory_head_sha256")
                 != packet.get("issuer_inventory_head_sha256")):
         raise EvidenceError("reviewer packet dossier and page worklist chain broken")
+    listed = packet.get("pages")
+    if (not isinstance(listed, list) or not 1 <= len(listed) <= MAX_ROOM_PAGES):
+        raise EvidenceError("critic room page listing absent or unbounded")
+    file_ids: set[str] = set()
+    for item in listed:
+        if not isinstance(item, dict) or set(item) != {"file", "sha256", "size_bytes"}:
+            raise EvidenceError("critic page file metadata malformed")
+        name = item["file"]
+        if (not isinstance(name, str)
+                or not re.fullmatch(r"[a-z][a-z0-9_-]{2,79}-page-[0-9]{3}[.]png", name)
+                or name in file_ids):
+            raise EvidenceError("critic page filename unsafe or duplicated")
+        file_ids.add(name)
+    # Validate all names BEFORE ever joining one to a private filesystem path.
     expected_pages = _page_inventory(work, {
-        item["file"]: _check_metadata_file(pages / item["file"], maximum=MAX_SINGLE_IMAGE_BYTES)
-        for item in packet["pages"]
+        name: _check_metadata_file(pages / name, maximum=MAX_SINGLE_IMAGE_BYTES)
+        for name in file_ids
     })
     if expected_pages != packet["pages"]:
         raise EvidenceError("critic room evidence image manifest altered")
