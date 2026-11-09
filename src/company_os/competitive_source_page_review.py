@@ -19,6 +19,7 @@ from .competitive_critic_review import (
     inspect_review_policy, inspect_signed_critic_review,
 )
 from .competitive_pdf_source_handoff import inspect_issuer_pdf_handoff
+from .pdf_page_render import RENDER_PROFILE
 from .source_provenance import EvidenceError
 
 SOURCE_PAGE_REVIEW_DOMAIN = b"KO-CRITIC-SOURCE-PDF-PAGES-V1\n"
@@ -263,6 +264,11 @@ def inspect_signed_source_pdf_review(
         if not isinstance(png, bytes) or hashlib.sha256(png).hexdigest() != shot:
             raise EvidenceError("original PDF page reviewer PNG missing or changed")
         _check_png_structure(png)
+        if (goal.get("renderer_profile") != RENDER_PROFILE
+                or shot != goal.get("rendered_png_sha256")
+                or int.from_bytes(png[16:20], "big") != goal.get("rendered_png_width")
+                or int.from_bytes(png[20:24], "big") != goal.get("rendered_png_height")):
+            raise EvidenceError("reviewer page PNG is not the actual reproducible PDF page render")
     if (seen_pages != set(expected_pages) or len(original_page_pngs) != len(seen_pages)
             or set(original_page_pngs) != {doc + ":" + str(num) for doc, num in seen_pages}):
         raise EvidenceError("reviewer original-PDF page screenshots missing or unexpected")
@@ -278,6 +284,8 @@ def inspect_signed_source_pdf_review(
         "signed_sources_matched": len(seen_sources),
         "signed_original_pdf_pages_matched": len(seen_pages),
         "png_evidence_byte_hashes_matched": len(screenshot_hashes),
+        "original_pdf_rendered_pngs_exactly_matched": len(screenshot_hashes),
+        "renderer_profile": RENDER_PROFILE,
         "report_review_score_asserted": report["score_asserted"],
         "reported_checks_true": report["mandatory_checks_true"],
         "rendered_source_pages_independently_verified": False,
