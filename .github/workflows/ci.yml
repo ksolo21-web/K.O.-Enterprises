@@ -35,8 +35,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pinned Ed25519 verification dependency
-        run: python -m pip install --disable-pip-version-check --no-input "cryptography==50.0.2" "pypdf==6.21.4"
+      - name: Install pinned source-verification, PDF text and rendering dependencies
+        run: python -m pip install --disable-pip-version-check --no-input "cryptography==50.0.2" "pypdf==6.21.4" "pypdfium2==5.15.1" "Pillow==12.3.0"
 
       - name: Compile source and tests
         run: python -m compileall -q -f src tests

@@ -21,6 +21,7 @@ from company_os.competitive_source_page_review import (
     inspect_signed_source_pdf_review,
 )
 from company_os.competitive_critic_review import canonical
+from company_os.pdf_page_render import RENDER_PROFILE, render_pdf_page
 from company_os.source_provenance import EvidenceError
 import test_competitive_pdf_source_handoff as original_fixture
 import test_competitive_critic_review as critic_fixture
@@ -109,7 +110,11 @@ class SourcePageReviewTests(unittest.TestCase):
         self.pngs = {}
         for idx, page in enumerate(tasks["all_issuer_pdf_pages"], 1):
             name = page["document_id"] + ":" + str(page["page_number"])
-            png = synthetic_png(idx)
+            path = (
+                self.original.fx.root / "state" / "competitive_engine"
+                / "capture_staging" / "pkg-one" / (page["document_id"] + ".pdf")
+            )
+            png = render_pdf_page(path.read_bytes(), page["page_number"])
             self.pngs[name] = png
             self.receipt["page_inspections"].append({
                 "document_id": page["document_id"],
@@ -183,6 +188,8 @@ class SourcePageReviewTests(unittest.TestCase):
         self.assertEqual(result["signed_sources_matched"], 1)
         self.assertEqual(result["signed_original_pdf_pages_matched"], 2)
         self.assertEqual(result["png_evidence_byte_hashes_matched"], 2)
+        self.assertEqual(result["original_pdf_rendered_pngs_exactly_matched"], 2)
+        self.assertEqual(result["renderer_profile"], RENDER_PROFILE)
         self.assertEqual(result["report_review_score_asserted"], 9.75)
         self.assertEqual(result["reported_checks_true"], 12)
         self.assertFalse(result["rendered_source_pages_independently_verified"])
@@ -190,6 +197,43 @@ class SourcePageReviewTests(unittest.TestCase):
         self.assertFalse(result["reviewer_independence_operationally_proven"])
         self.assertFalse(result["independent_critic_approved"])
         self.assertFalse(result["publication_authorized"])
+
+    def test_real_original_pdf_render_hash_is_bound_into_handoff(self):
+        for task in self.handoff["critic_worklist"]["all_issuer_pdf_pages"]:
+            name = task["document_id"] + ":" + str(task["page_number"])
+            self.assertEqual(task["renderer_profile"], RENDER_PROFILE)
+            self.assertEqual(
+                task["rendered_png_sha256"], hashlib.sha256(self.pngs[name]).hexdigest(),
+            )
+            self.assertFalse(task["visual_page_inspection_completed"])
+
+    def test_alternative_valid_png_with_valid_review_signature_is_rejected(self):
+        key = next(iter(self.pngs))
+        candidate = synthetic_png(101)
+        self.pngs[key] = candidate
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(candidate).hexdigest()
+        )
+        self.assert_blocked()
+
+    def test_swapped_original_pdf_page_render_with_valid_signature_is_rejected(self):
+        names = list(self.pngs)
+        candidate = self.pngs[names[1]]
+        self.pngs[names[0]] = candidate
+        self.receipt["page_inspections"][0]["screenshot_sha256"] = (
+            hashlib.sha256(candidate).hexdigest()
+        )
+        self.assert_blocked()
+
+    def test_byte_identical_rerender_of_original_document(self):
+        for page in self.handoff["critic_worklist"]["all_issuer_pdf_pages"]:
+            path = (
+                self.original.fx.root / "state" / "competitive_engine"
+                / "capture_staging" / "pkg-one" / (page["document_id"] + ".pdf")
+            )
+            actual = render_pdf_page(path.read_bytes(), page["page_number"])
+            key = page["document_id"] + ":" + str(page["page_number"])
+            self.assertEqual(actual, self.pngs[key])
 
     def test_source_page_signature_tampering_blocks(self):
         env = self.source_envelope()

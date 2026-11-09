@@ -12,6 +12,7 @@ dependencies = []
 [project.optional-dependencies]
 source-verification = ["cryptography==50.0.2"]
 procurement-pdf = ["pypdf==6.21.4"]
+source-pdf-render = ["pypdfium2==5.15.1", "Pillow==12.3.0"]
 
 [project.scripts]
 company-os = "company_os.cli:main"
