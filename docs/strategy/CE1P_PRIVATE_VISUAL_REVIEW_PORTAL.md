@@ -28,6 +28,7 @@ Reviewers can **save an unsigned private draft**, reopen it only when it matches
 
 - [ ] Exact final PR-head Python 3.12 full suite, including **27 new visual portal tests**, passes; source and tests compile.
 - [ ] The existing real Linux distinct-UID signer and reviewer room exercises pass, with the **new viewer HTML** actually read by reviewer UID, denied to capture/unrelated UIDs and non-writable by reviewer.
+- [ ] Synthetic-only, actual **headless Chrome** responsive screenshot smoke passes for desktop pages, mobile pages, desktop claims/counterevidence, and desktop export section. Verify screenshots are nonblank/styled under offline CSP; delete private fixture/screenshots afterward. No assertion of an independently operated critic.
 - [ ] Exact-page PNG digest and HTML CSP hashes, complete original/claim coverage, safe source text, no default favorable values, offline-only export/draft paths, private mode, no overwrite/injection/path traversal/symlink acceptance validated.
 - [ ] Node ImportScope, offline document quality, clean tracked files and release-surface audit succeed with hard NO-GO.
 - [ ] Internal code critique, fix/retest, final exact-head merge, merged `main` root emergency pause and literal false release-controller certification verified.
