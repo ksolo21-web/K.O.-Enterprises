@@ -1,0 +1,47 @@
+name: P0 owner-approved disable of registered OANDA Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Deliberately disable five registered OANDA workflows for every ref; never enables"
+        required: true
+        type: choice
+        default: "CANCEL_NO_CHANGES"
+        options:
+          - CANCEL_NO_CHANGES
+          - DISABLE_ALL_FIVE_OANDA_WORKFLOWS
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: ko-p0-broker-workflow-containment
+  cancel-in-progress: false
+
+jobs:
+  disable:
+    name: Repository-wide OANDA Actions containment (owner approval required)
+    if: >-
+      github.actor == 'ksolo21-web' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == 'ksolo21-web/K.O.-Enterprises' &&
+      inputs.confirm == 'DISABLE_ALL_FIVE_OANDA_WORKFLOWS'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      COMPANY_OS_PAUSED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONPATH: src
+    steps:
+      - name: Check out reviewed default branch with no saved credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Disable exact registered OANDA workflow IDs and verify final states
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KO_WORKFLOW_ADMIN_PRODUCTION_DISABLE: "1"
+          KO_OWNER_APPROVAL: ${{ inputs.confirm }}
+        run: python -m company_os.github_broker_workflow_containment
