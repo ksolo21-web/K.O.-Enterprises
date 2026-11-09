@@ -17,6 +17,7 @@ from .capture_trust import StagingTrustLedger
 from .competitive_evidence_engine import assess_competitive_dossier
 from .issuer_inventory_journal import IssuerInventoryJournal
 from .pdf_evidence import inspect_pdf_bytes
+from .pdf_page_render import page_image_evidence
 from .source_provenance import EvidenceError, _normalize_space
 
 MAX_HANDOFF_SOURCES = 80
@@ -139,8 +140,13 @@ def inspect_issuer_pdf_handoff(
             raise EvidenceError("PDF inspection and original capture digest disagree")
         analyzed[document_id] = parsed
         for page_number, page_text in enumerate(parsed["pages"], 1):
+            rendered = page_image_evidence(contents, page_number)
             package_page_requirements.append({
                 "document_id": document_id,
+                "renderer_profile": rendered["renderer_profile"],
+                "rendered_png_sha256": rendered["rendered_png_sha256"],
+                "rendered_png_width": rendered["rendered_png_width"],
+                "rendered_png_height": rendered["rendered_png_height"],
                 "document_sha256": event["sha256"],
                 "page_number": page_number,
                 "extracted_text_sha256": hashlib.sha256(
