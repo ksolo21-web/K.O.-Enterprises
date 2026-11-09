@@ -33,9 +33,12 @@ class OriginalPdfRenderTests(unittest.TestCase):
     def test_identical_original_page_renders_identically_twice(self):
         self.assertEqual(render_pdf_page(self.raw, 1), render_pdf_page(self.raw, 1))
 
-    def test_separate_pdf_pages_have_distinct_rendered_png_hashes(self):
+    def test_distinct_original_pdf_documents_have_distinct_rendered_png_hashes(self):
         first = hashlib.sha256(render_pdf_page(self.raw, 1)).hexdigest()
-        second = hashlib.sha256(render_pdf_page(self.raw, 2)).hexdigest()
+        unrelated = pdf_fixture.make_pdf(
+            "Different synthetic original notice: different page content for reviewer.",
+        )
+        second = hashlib.sha256(render_pdf_page(unrelated, 1)).hexdigest()
         self.assertNotEqual(first, second)
 
     def test_render_evidence_binds_page_and_original_pdf_sha(self):
