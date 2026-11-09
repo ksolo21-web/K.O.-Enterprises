@@ -45,6 +45,7 @@ class SignedObservationTests(unittest.TestCase):
         self.critic.setUp()
         self.addCleanup(self.critic.doCleanups)
         self.now = self.critic.now
+        self.critic.ledger.accept_policy(self.critic.policy_envelope(), now=self.now)
         pending = build_pending_observation_worklist(
             self.path, expected_manifest_sha256=self.digest,
         )
@@ -107,6 +108,7 @@ class SignedObservationTests(unittest.TestCase):
     def inspect(self, **overrides):
         args = {
             "now": self.now,
+            "critic_audit_ledger": self.critic.ledger,
         }
         args.update(overrides)
         return inspect_signed_observation_receipt(
@@ -120,6 +122,7 @@ class SignedObservationTests(unittest.TestCase):
             self.digest if digest is None else digest,
             self.critic.policy_envelope() if policy is None else policy,
             self.signed() if envelope is None else envelope,
+            critic_audit_ledger=self.critic.ledger,
             now=self.now if now is None else now,
         )
         self.assertEqual(result["state"], "BLOCK", result)
@@ -189,15 +192,46 @@ class SignedObservationTests(unittest.TestCase):
 
     def test_reviewer_scope_requires_exact_venture(self):
         self.critic.policy["reviewers"][0]["venture_ids"] = ["other-venture"]
+        self.critic.policy["revision"] = 2
+        self.critic.ledger.accept_policy(self.critic.policy_envelope(), now=self.now)
         self.blocked()
 
     def test_expired_reviewer_key_rejected(self):
         self.critic.policy["revoked_key_ids"] = ["critic-key-001"]
+        self.critic.policy["revision"] = 2
+        self.critic.ledger.accept_policy(self.critic.policy_envelope(), now=self.now)
         self.blocked()
 
     def test_revoked_observation_receipt_rejected(self):
         self.critic.policy["revoked_review_ids"] = ["obs-review-001"]
+        self.critic.policy["revision"] = 2
+        self.critic.ledger.accept_policy(self.critic.policy_envelope(), now=self.now)
         self.blocked()
+
+    def test_signed_old_policy_cannot_rollback_new_revocation(self):
+        earlier = self.critic.policy_envelope()
+        self.critic.policy["revision"] = 2
+        self.critic.policy["revoked_key_ids"] = ["critic-key-001"]
+        self.critic.ledger.accept_policy(self.critic.policy_envelope(), now=self.now)
+        self.blocked(policy=earlier)
+
+    def test_unsigned_current_local_governance_missing_blocks(self):
+        import company_os.competitive_critic_audit as audit
+        empty_root = self.room_fx.root / "another-audit-ledger"
+        empty_root.mkdir()
+        with audit.CriticReviewLedger(empty_root) as empty:
+            result = assess_signed_observation_receipt(
+                self.path, self.digest, self.critic.policy_envelope(),
+                self.signed(), critic_audit_ledger=empty, now=self.now,
+            )
+        self.assertEqual(result["state"], "BLOCK")
+        self.assertFalse(result["publication_authorized"])
+
+    def test_local_governance_checkpoint_cannot_be_claimed_external(self):
+        result = self.inspect()
+        self.assertTrue(result["reviewer_policy_current_locally"])
+        self.assertFalse(result["governance_audit_externally_anchored"])
+        self.assertEqual(len(result["local_governance_audit_head_sha256"]), 64)
 
     def test_wrong_trusted_governance_root_rejected(self):
         key = Ed25519PrivateKey.generate()
