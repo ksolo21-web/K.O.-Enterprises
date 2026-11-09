@@ -57,6 +57,12 @@ jobs:
       - name: Check ImportScope comparison and export behavior
         run: node --test products/importscope/test-engine.cjs
 
+      - name: Exercise actual offline reviewer JS draft and unsigned export controls
+        # Extract only static first-party UI code; no real source or secret material.
+        run: |
+          python -c 'import os; from pathlib import Path; from company_os.competitive_review_portal import _JS; Path(os.environ["RUNNER_TEMP"], "ce1p-client-ui.js").write_text(_JS, encoding="utf-8")'
+          CE1P_CLIENT_JS="$RUNNER_TEMP/ce1p-client-ui.js" node --test tests/competitive_review_portal_ui.test.cjs
+
       - name: Render synthetic private PDF review portal in real Chrome desktop/mobile use states
         # Only fictional CI fixtures; screenshots are discarded, not uploaded.
         # No real publisher, independent critic, client data or network review.
