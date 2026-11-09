@@ -41,7 +41,7 @@ The owner-triggered workflow:
 ## Acceptance and remaining blockers
 
 - [ ] New owner-only workflow and allowlisted transport pass GitHub CI on exact PR head.
-- [ ] 21 offline tests exercise successful synthetic disable, retry idempotence, unauthorized actor/ref/event/confirmation, missing pause/lock, unknown registered workflows, wrong status, changed preflight, partial API failure and prohibited API endpoints.
+- [ ] 24 offline tests exercise successful synthetic disable, retry idempotence, unauthorized actor/ref/event/confirmation, missing or symlinked pause/lock, manual-only workflow source, unknown registered workflows, wrong status, changed preflight, partial API failure and prohibited API endpoints.
 - [ ] Exact PR-head document quality and existing release-surface no-go audit succeed.
 - [ ] Internal review, fix/retest, merge and verify \`main\` still paused.
 - [ ] **Owner separately approves and runs** the manual control. Independently verify all five *real* GitHub registered workflow states are disabled using admin-authorized access and verify effective credentials/env exposure. No approval is implied by PR merge.
