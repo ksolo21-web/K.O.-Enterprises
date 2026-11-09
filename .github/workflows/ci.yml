@@ -49,6 +49,11 @@ jobs:
         # accounts, real issuer/network access, spending or production service.
         run: sudo -n env GITHUB_ACTIONS=true KO_CE_CROSS_UID_TEST=1 PYTHONPATH=src COMPANY_OS_PAUSED=1 "$(command -v python)" tests/cross_uid_signer_ci.py
 
+      - name: Exercise distinct Linux reviewer UID and immutable original-page room
+        # Disposable root test provisioner only; no real independent critic,
+        # no company credentials, issuer network or publication.
+        run: sudo -n env GITHUB_ACTIONS=true KO_CE_REVIEWER_ROOM_CI=1 PYTHONPATH=src COMPANY_OS_PAUSED=1 "$(command -v python)" tests/cross_uid_critic_room_ci.py
+
       - name: Check ImportScope comparison and export behavior
         run: node --test products/importscope/test-engine.cjs
 
