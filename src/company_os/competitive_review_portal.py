@@ -267,7 +267,7 @@ def _source_cards(claim: Mapping[str, Any], sources: Mapping[str, Any],
             quote = _escape(item.get("excerpt", ""))
             citation = citations.get(sid)
             if citation:
-                anchor = "page-" + citation["document_id"] + "-" + str(citation["page_number"])
+                anchor = "page-" + citation["document_id"] + "-" + str(citation["exact_excerpt_page"])
                 evidence = (
                     '<span class="badge">Original excerpt page in this packet</span> '
                     '<a href="#'+_escape(anchor)+'">View cited image</a>'
