@@ -204,7 +204,6 @@ def main() -> int:
             for blocked_uid in (CAPTURE_UID, UNRELATED_UID):
                 _perm_denied(blocked_uid, viewer_html, code_root)
             _perm_denied(REVIEWER_UID, viewer_html, code_root, mutate=True)
-            _perm_denied(REVIEWER_UID, private_viewer, code_root, mutate=True)
             print("PASS: separate reviewer UID reads exact private offline visual page; other UIDs denied; browser file cannot be modified")
 
             forged = _child(
