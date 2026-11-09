@@ -165,6 +165,26 @@ class CriticReviewLedger:
             raise EvidenceError("critic current policy missing or superseded")
         return rows
 
+    def inspect_current_policy(
+        self, envelope: Mapping[str, Any], *, now: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Require a valid root-signed policy that matches latest local generation.
+
+        Unlike signature/expiry alone, this detects rollback after a locally
+        recorded reviewer-key or review-ID revocation. The local database is
+        NOT externally anchored and does not prove genuine separate custody.
+        """
+        policy = inspect_review_policy(envelope, now=now)
+        rows = self._policy_current(policy)
+        return {
+            "state": "LOCAL_CRITIC_POLICY_CURRENT_NOT_EXTERNALLY_ANCHORED",
+            "policy_id": policy["policy_id"],
+            "revision": policy["revision"],
+            "audit_head_sha256": rows[-1][-1] if rows else "GENESIS",
+            "externally_anchored": False,
+            "external_publication_authorized": False,
+        }
+
     def accept_review(
         self, dossier: Mapping[str, Any], artifact_sha256: str,
         policy_envelope: Mapping[str, Any], review_envelope: Mapping[str, Any],
