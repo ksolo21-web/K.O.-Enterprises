@@ -73,3 +73,35 @@ jobs:
 
       - name: Confirm tests did not alter tracked files
         run: git diff --exit-code -- .
+
+  portal-smoke:
+    name: Offline source-review UI and Linux access (synthetic only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      COMPANY_OS_PAUSED: "1"
+      PYTHONPATH: src
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Check out source without retained credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned offline PDF and source-verification dependencies
+        run: python -m pip install --disable-pip-version-check --no-input "cryptography==50.0.2" "pypdf==6.21.4" "pypdfium2==5.15.1" "Pillow==12.3.0"
+      - name: Run focused sealed reviewer visual UI tests
+        run: python -m unittest discover -s tests -p "test_competitive_review_portal.py" -v
+      - name: Exercise real JavaScript reviewer draft and unsigned export controls
+        run: |
+          python -c 'import os; from pathlib import Path; from company_os.competitive_review_portal import _JS; Path(os.environ["RUNNER_TEMP"], "ce1p-client-ui.js").write_text(_JS, encoding="utf-8")'
+          CE1P_CLIENT_JS="$RUNNER_TEMP/ce1p-client-ui.js" node --test tests/competitive_review_portal_ui.test.cjs
+      - name: Render actual Chrome desktop/mobile visual states
+        run: KO_CE_PORTAL_BROWSER_CI=1 python tests/visual_review_portal_browser_ci.py
+      - name: Exercise cross-UID offline viewer access denial
+        run: sudo -n env GITHUB_ACTIONS=true KO_CE_REVIEWER_ROOM_CI=1 PYTHONPATH=src COMPANY_OS_PAUSED=1 "$(command -v python)" tests/cross_uid_critic_room_ci.py
+      - name: Preserve production NO-GO and emergency pause
+        run: python -m company_os.release_surface_audit --repo-root . --expect-not-ready
