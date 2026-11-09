@@ -88,6 +88,7 @@ def main() -> int:
             raise AssertionError("synthetic UID collides with host account")
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import test_competitive_critic_room as fixture_module
+    from company_os.competitive_review_portal import stage_private_visual_portal
 
     fx = fixture_module.SealedCriticRoomTests(
         "test_complete_actual_PDF_page_packet_stays_reviewer_pending"
@@ -95,6 +96,11 @@ def main() -> int:
     fx.setUp()
     try:
         staged = fx.stage(room="crossuid-review-room")
+        portal = stage_private_visual_portal(
+            Path(staged["workroom"]), fx.parent,
+            "crossuid-private-visual-interface",
+            expected_manifest_sha256=staged["manifest_sha256"],
+        )
         with tempfile.TemporaryDirectory(prefix="ko-ce1n-crossuid-", dir="/tmp") as temp:
             root = Path(temp)
             os.chmod(root, 0o711)
@@ -131,6 +137,11 @@ def main() -> int:
 
             reviewer_room = root/"review-room"
             _provision_owned_critic_packet(Path(staged["workroom"]), reviewer_room)
+            private_viewer = root/"private-review-viewer"
+            _provision_owned_critic_packet(Path(portal["portal"]), private_viewer)
+            viewer_html = private_viewer/"index.html"
+            assert stat.S_IMODE(viewer_html.stat().st_mode) == 0o440
+
             manifest = reviewer_room/"manifest.json"
             page = next((reviewer_room/"pages").iterdir())
             sha = staged["manifest_sha256"]
@@ -168,6 +179,32 @@ def main() -> int:
                 _perm_denied(REVIEWER_UID, readonly, code_root, mutate=True)
                 _perm_denied(CAPTURE_UID, readonly, code_root)
             print("PASS: reviewer denied capture originals, signer key and reviewer packet writes")
+
+            # CE-1P: the actual self-contained page images are present in the
+            # private HTML. The reviewer can read it, but cannot alter its bytes;
+            # other numeric UIDs do not have access to the whole interface.
+            viewer_probe = (
+                "import hashlib,json,sys,html; "
+                "from pathlib import Path; "
+                "raw=Path(sys.argv[1]).read_bytes(); "
+                "print(json.dumps({'sha256':hashlib.sha256(raw).hexdigest(),"
+                "'page_images':raw.count(b'data:image/png;base64,'),"
+                "'offline':\"connect-src 'none'\" in html.unescape(raw.decode('utf-8')),"
+                "'unsigned':b'UNSIGNED-REVIEW-OBSERVATIONS' in raw}))"
+            )
+            view_result = _child(
+                REVIEWER_UID, ["-c", viewer_probe, str(viewer_html)],
+                code_root=code_root,
+            )
+            assert view_result.returncode == 0, view_result.stderr[:200]
+            viewer_evidence = json.loads(view_result.stdout)
+            assert viewer_evidence["sha256"] == portal["index_sha256"]
+            assert viewer_evidence["page_images"] == 2
+            assert viewer_evidence["offline"] and viewer_evidence["unsigned"]
+            for blocked_uid in (CAPTURE_UID, UNRELATED_UID):
+                _perm_denied(blocked_uid, viewer_html, code_root)
+            _perm_denied(REVIEWER_UID, viewer_html, code_root, mutate=True)
+            print("PASS: separate reviewer UID reads exact private offline visual page; other UIDs denied; browser file cannot be modified")
 
             forged = _child(
                 REVIEWER_UID,
