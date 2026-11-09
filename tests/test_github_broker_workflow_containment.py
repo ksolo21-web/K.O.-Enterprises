@@ -146,6 +146,36 @@ class BrokerWorkflowContainmentTests(unittest.TestCase):
             self.run_admin()
         self.assertEqual(self.api.operations, [])
 
+    def test_symlinked_emergency_pause_is_rejected(self):
+        pause = self.root / "PAUSE_AUTONOMY"
+        original = self.root / "test-safety-pause"
+        original.write_text(pause.read_text())
+        pause.unlink()
+        pause.symlink_to(original)
+        with self.assertRaises(ContainmentError):
+            self.run_admin()
+        self.assertEqual(self.api.operations, [])
+
+    def test_owner_containment_workflow_is_manual_only_with_no_broker_secrets(self):
+        path = (Path(__file__).resolve().parents[1] / ".github/workflows"
+                / "p0-owner-disable-oanda.yml")
+        text = path.read_text("utf-8")
+        self.assertIn("on:\n  workflow_dispatch:", text)
+        for forbidden in ("\n  push:", "\n  pull_request:", "\n  schedule:",
+                          "secrets.OANDA", "secrets.OANDA_DEMO", "/enable"):
+            self.assertNotIn(forbidden, text)
+        self.assertIn("default: \"CANCEL_NO_CHANGES\"", text)
+        self.assertIn("actions: write", text)
+        self.assertIn("github.actor == 'ksolo21-web'", text)
+        self.assertIn("github.ref == 'refs/heads/main'", text)
+        self.assertIn("inputs.confirm == 'DISABLE_ALL_FIVE_OANDA_WORKFLOWS'", text)
+
+    def test_successful_disable_does_not_assert_all_refs_or_secrets_verified(self):
+        result = self.run_admin()
+        self.assertFalse(result["all_branches_and_tags_independently_audited"])
+        self.assertFalse(result["effective_secret_scopes_independently_verified"])
+        self.assertFalse(result["release_authorized"])
+
     def test_missing_registered_target_blocks_without_disabling_anything(self):
         self.api.states.pop(1005)
         with self.assertRaises(ContainmentError):
