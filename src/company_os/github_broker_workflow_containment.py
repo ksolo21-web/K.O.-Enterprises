@@ -54,7 +54,8 @@ def _require_identity(
         or env.get("KO_OWNER_APPROVAL") != CONFIRMATION
     ):
         raise ContainmentError("owner-approved main-only containment invocation required")
-    if not root.is_dir() or not (root / "PAUSE_AUTONOMY").is_file():
+    pause = root / "PAUSE_AUTONOMY"
+    if root.is_symlink() or not root.is_dir() or pause.is_symlink() or not pause.is_file():
         raise ContainmentError("root emergency pause is absent or unsafe")
     guard_file = root / "src/company_os/competitive_launch_guard.py"
     if (guard_file.is_symlink() or not guard_file.is_file()
