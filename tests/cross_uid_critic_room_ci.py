@@ -162,6 +162,14 @@ def main() -> int:
                 assert response.returncode != 0, "unapproved UID read critic room"
             print("PASS: capture UID and unrelated UID cannot read reviewer room")
 
+            # Exercise the exact access gate used before opening the CE-1P desktop.
+            gate = ["-c", "from pathlib import Path; import sys; "
+                    "from company_os.competitive_visual_review import reviewer_access; "
+                    "reviewer_access(Path(sys.argv[1]))", str(reviewer_room)]
+            for uid in (REVIEWER_UID, CAPTURE_UID, UNRELATED_UID):
+                access = _child(uid, gate, code_root=code_root)
+                assert (access.returncode == 0) == (uid == REVIEWER_UID), uid
+
             for protected in (key, raw_pdf, private_signer, private_capture):
                 _perm_denied(REVIEWER_UID, protected, code_root)
             for readonly in (manifest, page):
