@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OAKX Seller Suite — Local-first profit and import software for e-commerce sellers</title>
+<meta name="description" content="OAKX Seller Suite: offline TrueNet profit auditing and ImportScope Shopify CSV pre-flight checks for Shopify, TikTok Shop, Amazon, and Etsy sellers. $9/month or $79/year, flat all-in pricing, tax included where applicable.">
+<meta name="theme-color" content="#FAF9F6">
+<meta property="og:title" content="OAKX Seller Suite">
+<meta property="og:description" content="Know your true profit before fees and returns erase it. Offline e-commerce software — your files never leave your computer.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0F241F"/><circle cx="16" cy="16" r="8.25" fill="none" stroke="#FAF9F6" stroke-width="2.75"/><path d="M12.6 12.6l6.8 6.8M19.4 12.6l-6.8 6.8" stroke="#B4832C" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1.5 1.5 0 0 1 0 2.1l-6.6 6.6a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8" cy="8" r="1.4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V7"/><path d="M17 16v-3"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8"/><path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8"/><path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16"/><path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M8 9.5h8M8 12h8M8 14.5h5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 0 1-13.1 5"/><path d="M4.5 12a7.5 7.5 0 0 1 13.1-5"/><path d="M17.8 3.5v3.7h-3.7"/><path d="M6.2 20.5v-3.7h3.7"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></symbol>
+    <symbol id="i-back" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8H3M7 4L3 8l4 4"/></symbol>
+    <symbol id="i-play" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v9l7-4.5z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></symbol>
+    <symbol id="i-x" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l8 8M11 3l-8 8"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 6h13M3.5 10h13M3.5 14h13"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.3v3.7M8 5v.1"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.2l7.3 12.6a.9.9 0 0 1-.8 1.4H3.5a.9.9 0 0 1-.8-1.4z"/><path d="M10 8v3.6M10 14.2v.1"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l7 2.6v5.6c0 4.3-2.9 7.6-7 8.8-4.1-1.2-7-4.5-7-8.8V6.1z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="top">
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="OAKX home">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>
+      <span class="brand-word">OAKX</span><span class="brand-sub">Seller Suite</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#demo">Live Demo</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#policies">Policies</a></li>
+      </ul>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="#pricing">Get Founding Access</a>
+      <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links" id="menu-btn"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Founding Membership · Offline seller software</span>
+      <h1>Know your true profit before fees and returns <em>erase it.</em></h1>
+      <p class="lede">Offline e-commerce software. <strong>Your files never leave your computer.</strong> OAKX Seller Suite audits real margins across Shopify, TikTok Shop, Amazon, and Etsy, and pre-flights your Shopify product CSVs before they touch a live store.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#demo"><svg><use href="#i-play"/></svg>Try the live demo</a>
+        <a class="btn btn-ghost" href="#pricing">See Founding Pricing<svg><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="hero-meta">
+        <span><svg><use href="#i-check"/></svg>No store login or OAuth</span>
+        <span><svg><use href="#i-check"/></svg>Runs in your browser</span>
+        <span><svg><use href="#i-check"/></svg>Cancel anytime</span>
+      </div>
+    </div>
+    <aside class="suite-card" aria-label="Founding Suite summary">
+      <div class="suite-head"><span class="label">The Founding Suite</span><span class="pill gold">Founding pricing</span></div>
+      <div class="suite-body">
+        <div class="suite-row"><span class="ico"><svg><use href="#i-chart"/></svg></span><div><h3>TrueNet by OAKX</h3><p>True net profit after fees, tariffs, shipping, and return reserves.</p></div></div>
+        <div class="suite-row"><span class="ico"><svg><use href="#i-scan"/></svg></span><div><h3>ImportScope by OAKX</h3><p>Shopify product CSV pre-flight checks before you upload.</p></div></div>
+        <div class="suite-row"><span class="ico"><svg><use href="#i-refresh"/></svg></span><div><h3>Monthly rule updates</h3><p>Fee and return-window presets kept current as platforms change.</p></div></div>
+      </div>
+      <div class="suite-foot">
+        <div class="price-big">$9<small> /month</small></div>
+        <div class="fine">or $79/year · flat all-in pricing,<br>tax included where applicable</div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="trust" aria-label="Why OAKX">
+  <div class="wrap trust-grid">
+    <div class="pillar"><span class="ico"><svg><use href="#i-lock"/></svg></span><div><h3>Local-first privacy</h3><p>Runs 100% in your browser. No store OAuth, no cloud uploads, no account to connect.</p></div></div>
+    <div class="pillar"><span class="ico"><svg><use href="#i-tag"/></svg></span><div><h3>Flat all-in pricing</h3><p>One price. No per-order tiers, order-volume caps, or hidden add-ons.</p></div></div>
+    <div class="pillar"><span class="ico"><svg><use href="#i-grid"/></svg></span><div><h3>Built for multi-channel sellers</h3><p>Fee presets for Shopify, TikTok Shop, Amazon, and Etsy in one workbench.</p></div></div>
+  </div>
+</section>
+
+<section class="section" id="tools">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">What's included</div>
+      <h2>Two focused tools. One flat membership.</h2>
+      <p>Each tool does one job well, opens from a single offline HTML file, and shows its math line by line so you can audit every number.</p>
+    </div>
+    <div class="tools-grid">
+      <article class="tool">
+        <span class="ico"><svg><use href="#i-chart"/></svg></span>
+        <h3>TrueNet by OAKX</h3>
+        <div class="tag">Real-profit auditor</div>
+        <p class="desc">See what a sale actually earns after channel fees, landed cost, tariffs, campaign fees, shipping, and a return reserve, across Shopify, TikTok Shop, Amazon, and Etsy.</p>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Tariff and landed-cost adjustments</li>
+          <li><svg><use href="#i-check"/></svg>Campaign-fee and return-reserve modeling</li>
+          <li><svg><use href="#i-check"/></svg>Bulk SKU CSV auditing</li>
+          <li><svg><use href="#i-check"/></svg>Exportable HTML and CSV reports</li>
+        </ul>
+        <div class="tool-foot"><span class="mono">truenet · offline HTML/JS kit</span></div>
+      </article>
+      <article class="tool">
+        <span class="ico"><svg><use href="#i-scan"/></svg></span>
+        <h3>ImportScope by OAKX</h3>
+        <div class="tag">Shopify CSV pre-flight</div>
+        <p class="desc">Check a Shopify product CSV offline before you upload it to a live store, and see every problem with a row number and a plain-English fix.</p>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Header errors and misspelled columns</li>
+          <li><svg><use href="#i-check"/></svg>Duplicate handles and variant combinations</li>
+          <li><svg><use href="#i-check"/></svg>Missing or invalid prices</li>
+          <li><svg><use href="#i-check"/></svg>Variant and barcode mismatches</li>
+        </ul>
+        <div class="tool-foot"><span class="mono">importscope · offline HTML/JS kit</span></div>
+      </article>
+      <article class="tool">
+        <span class="ico"><svg><use href="#i-refresh"/></svg></span>
+        <h3>Rule Updates &amp; Roadmap</h3>
+        <div class="tag">Included every month</div>
+        <p class="desc">Platforms change fees and return windows often. Members get updated presets by email, plus Founding Member priority for upcoming OAKX tools.</p>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Monthly fee-preset updates</li>
+          <li><svg><use href="#i-check"/></svg>Return-window changes as platforms publish them</li>
+          <li><svg><use href="#i-check"/></svg>Priority access: ShopAnchor (in development)</li>
+          <li><svg><use href="#i-check"/></svg>Priority access: YearEnd (in development)</li>
+        </ul>
+        <div class="tool-foot"><span class="mono">delivered by email · monthly</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section demo-section" id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Live sample demo</div>
+      <h2>Try it right here. Nothing is uploaded.</h2>
+      <p>Both previews run entirely in this browser tab. Change a number or edit a CSV row and watch the results update instantly.</p>
+    </div>
+    <div class="bench">
+      <div class="bench-bar">
+        <div class="tabs" role="tablist" aria-label="Demo tools">
+          <button class="tab" role="tab" id="tab-truenet" aria-controls="panel-truenet" aria-selected="true"><svg><use href="#i-chart"/></svg>TrueNet<span class="hide-sm">&nbsp;margin preview</span></button>
+          <button class="tab" role="tab" id="tab-importscope" aria-controls="panel-importscope" aria-selected="false" tabindex="-1"><svg><use href="#i-scan"/></svg>ImportScope<span class="hide-sm">&nbsp;CSV pre-flight</span></button>
+        </div>
+        <span class="bench-status"><i></i>Running locally · 0 bytes uploaded</span>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-truenet" aria-labelledby="tab-truenet">
+        <div class="tn-grid">
+          <form class="fieldset" id="tn-form" autocomplete="off" onsubmit="return false">
+            <h4>Holiday Gift Bundle</h4>
+            <div class="field">
+              <label>Sales channel</label>
+              <div class="seg" id="tn-channel" role="group" aria-label="Sales channel">
+                <button type="button" data-ch="tiktok" aria-pressed="true">TikTok</button>
+                <button type="button" data-ch="shopify" aria-pressed="false">Shopify</button>
+                <button type="button" data-ch="amazon" aria-pressed="false">Amazon</button>
+                <button type="button" data-ch="etsy" aria-pressed="false">Etsy</button>
+              </div>
+            </div>
+            <div class="two">
+              <div class="field"><label for="tn-price">Sale price</label><div class="input has-pre"><span class="pre">$</span><input id="tn-price" type="number" inputmode="decimal" min="0" step="0.01" value="40.00"></div></div>
+              <div class="field"><label for="tn-cogs">Unit COGS</label><div class="input has-pre"><span class="pre">$</span><input id="tn-cogs" type="number" inputmode="decimal" min="0" step="0.01" value="12.00"></div></div>
+            </div>
+            <div class="two">
+              <div class="field"><label for="tn-tariff">Tariff / landed</label><div class="input has-suf"><input id="tn-tariff" type="number" inputmode="decimal" min="0" step="0.5" value="25"><span class="suf">%</span></div></div>
+              <div class="field"><label for="tn-ship">Shipping cost</label><div class="input has-pre"><span class="pre">$</span><input id="tn-ship" type="number" inputmode="decimal" min="0" step="0.01" value="4.95"></div></div>
+            </div>
+            <div class="two">
+              <div class="field"><label for="tn-return">Return rate</label><div class="input has-suf"><input id="tn-return" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="8"><span class="suf">%</span></div></div>
+              <div class="field"><label for="tn-retcost">Cost per return</label><div class="input has-pre"><span class="pre">$</span><input id="tn-retcost" type="number" inputmode="decimal" min="0" step="0.01" value="7.00"></div></div>
+            </div>
+            <label class="toggle-row" id="tn-campaign-row"><input type="checkbox" id="tn-campaign" checked> TikTok campaign service fee (1%)</label>
+            <div class="field" id="tn-fba-row" hidden style="margin-top:12px"><label for="tn-fba">FBA / fulfillment fee <span class="hint">per unit</span></label><div class="input has-pre"><span class="pre">$</span><input id="tn-fba" type="number" inputmode="decimal" min="0" step="0.01" value="0.00"></div></div>
+          </form>
+
+          <div>
+            <div class="kpis" aria-live="polite">
+              <div class="kpi"><div class="k">Paper profit</div><div class="v num" id="kpi-paper">$0.00</div><div class="s">Price − COGS</div></div>
+              <div class="kpi hl"><div class="k">True net profit</div><div class="v num" id="kpi-net">$0.00</div><div class="s" id="kpi-net-s">per order</div></div>
+              <div class="kpi"><div class="k">True margin</div><div class="v num" id="kpi-margin">0.0%</div><div class="s">of sale price</div></div>
+              <div class="kpi"><div class="k">Break-even price</div><div class="v num" id="kpi-be">$0.00</div><div class="s" id="kpi-be-s">on this channel</div></div>
+            </div>
+            <div class="gap-banner" id="tn-gap"><svg><use href="#i-alert"/></svg><span id="tn-gap-text"></span></div>
+            <div class="split">
+              <div class="box">
+                <h4><span>Per-order ledger</span><span class="mono" id="tn-ch-label">TikTok Shop</span></h4>
+                <table class="ledger" id="tn-ledger"><tbody></tbody></table>
+              </div>
+              <div class="box">
+                <h4><span>Channel comparison</span><span class="mono">true net per order</span></h4>
+                <div class="bars" id="tn-bars"></div>
+                <p class="bars-note">Same product, same costs. Only each channel's fee structure changes. Pick a channel to see its full ledger.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="demo-note"><svg><use href="#i-info"/></svg><span>Interactive single-SKU preview. The full offline TrueNet kit adds bulk SKU CSV audits, custom fee presets, and HTML/CSV report exports. Fee defaults are planning estimates (TikTok Shop 6% referral, Shopify Payments 2.9% + $0.30, Amazon 15% referral, Etsy 6.5% + 3% + $0.25 + $0.20 listing); confirm your live rates.</span></p>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-importscope" aria-labelledby="tab-importscope" hidden>
+        <div class="is-grid">
+          <div>
+            <div class="csv-head"><label for="is-csv">Sample Shopify product CSV <span class="mono" style="color:var(--muted);font-weight:500">(editable)</span></label><button type="button" class="linkbtn" id="is-reset">Reset sample</button></div>
+            <textarea class="csv" id="is-csv" spellcheck="false" aria-describedby="is-meta"></textarea>
+            <div class="is-actions">
+              <button type="button" class="btn btn-primary" id="is-run"><svg><use href="#i-play"/></svg>Run Sample Shopify CSV Audit</button>
+              <span class="mono" id="is-meta"></span>
+            </div>
+          </div>
+          <div class="results" aria-live="polite">
+            <div class="results-head"><strong id="is-title">Pre-flight results</strong><div class="counts" id="is-counts"></div></div>
+            <div class="empty" id="is-empty"><div><svg><use href="#i-file"/></svg>Run the audit to check this CSV.<br>Results appear here in milliseconds.</div></div>
+            <ul class="findings" id="is-findings" hidden></ul>
+          </div>
+        </div>
+        <p class="demo-note"><svg><use href="#i-info"/></svg><span>Sample preview of core checks. The full offline ImportScope kit also compares your proposed import against your current store export and flags price, option, and inventory changes before you upload.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Founding Membership</div>
+      <h2>Simple pricing. The whole suite.</h2>
+      <p>$9/month or $79/year — flat all-in pricing, tax included where applicable. Cancel anytime.</p>
+    </div>
+    <div class="price-wrap">
+      <article class="plan">
+        <h3>Monthly</h3>
+        <div class="sub">Full suite, billed monthly</div>
+        <div class="amount"><span class="n">$9</span><span class="per">/month</span></div>
+        <div class="eq">No surprise checkout fees</div>
+        <button type="button" class="btn btn-ghost" data-plan="monthly">Join Founding Access — Monthly</button>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>TrueNet + ImportScope offline kits</li>
+          <li><svg><use href="#i-check"/></svg>Monthly platform-rule updates</li>
+          <li><svg><use href="#i-check"/></svg>Email support</li>
+          <li><svg><use href="#i-check"/></svg>Cancel anytime</li>
+        </ul>
+      </article>
+      <article class="plan featured">
+        <span class="badge">Save 27%</span>
+        <h3>Annual</h3>
+        <div class="sub">Full suite, billed yearly</div>
+        <div class="amount"><span class="n">$79</span><span class="per">/year</span></div>
+        <div class="eq">Works out to <b>$6.58/month</b> vs. $108 paid monthly</div>
+        <button type="button" class="btn btn-primary" data-plan="annual">Join Founding Access — Annual</button>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Everything in Monthly</li>
+          <li><svg><use href="#i-check"/></svg>Founding Member priority for ShopAnchor and YearEnd</li>
+          <li><svg><use href="#i-check"/></svg>One payment a year</li>
+          <li><svg><use href="#i-check"/></svg>Cancel anytime</li>
+        </ul>
+      </article>
+    </div>
+    <p class="tax-line">$9/month or $79/year — flat all-in pricing, tax included where applicable. No surprise checkout fees.</p>
+    <div class="price-legal">
+      <div><svg><use href="#i-mail"/></svg><span><b>Delivered by email</b>Offline software kits arrive by email within 1 business day.</span></div>
+      <div><svg><use href="#i-cal"/></svg><span><b>Monthly rule updates</b>Updated fee and return presets are included.</span></div>
+      <div><svg><use href="#i-shield"/></svg><span><b>14-day refund</b>No questions asked. See the <a href="refunds.html">Refund Policy</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" style="padding-top:0">
+  <div class="wrap faq-grid">
+    <div class="section-head" style="margin-bottom:0">
+      <div class="kicker">FAQ</div>
+      <h2>Straight answers.</h2>
+      <p>Anything else? Email <a href="mailto:ksolo21@gmail.com">ksolo21@gmail.com</a> and you'll hear back within 1 business day.</p>
+    </div>
+    <div class="faq-list">
+      <details open><summary>How does offline delivery work?<span class="pm"><svg><use href="#i-plus"/></svg></span></summary><div class="ans">After checkout, you receive an email with the OAKX Seller Suite kits as a ZIP within 1 business day. Unzip it and open <span class="mono">index.html</span> in Chrome, Edge, Safari, or Firefox. There is nothing to install and no account to create.</div></details>
+      <details><summary>Why is no store login required?<span class="pm"><svg><use href="#i-plus"/></svg></span></summary><div class="ans">OAKX tools work from numbers you type and CSV files you export yourself. All processing happens inside your browser on your own computer, so we never need access to your Shopify, TikTok Shop, Amazon, or Etsy account, and your files are never uploaded to us.</div></details>
+      <details><summary>How do updates work?<span class="pm"><svg><use href="#i-plus"/></svg></span></summary><div class="ans">When platforms change fees or return windows, we update the presets and email members the latest kit, at least monthly while your membership is active. Replace your old folder with the new one and you're current.</div></details>
+      <details><summary>What is the refund policy?<span class="pm"><svg><use href="#i-plus"/></svg></span></summary><div class="ans">If OAKX isn't right for you, email us within 14 days of your first payment for a full refund, no questions asked. Details are in our <a href="refunds.html">Refund Policy</a>.</div></details>
+      <details><summary>How do I cancel?<span class="pm"><svg><use href="#i-plus"/></svg></span></summary><div class="ans">Email <a href="mailto:ksolo21@gmail.com">ksolo21@gmail.com</a> or use the billing link in your receipt. Cancellation stops future renewals; you keep access to the kits you've already received.</div></details>
+    </div>
+  </div>
+</section>
+
+<section aria-label="Get started">
+  <div class="wrap">
+    <div class="cta-band">
+      <div>
+        <h2>Stop guessing what each order earns.</h2>
+        <p>Founding Membership: the full suite for $9/month or $79/year, flat all-in pricing.</p>
+      </div>
+      <div class="acts">
+        <a class="btn btn-ghost" href="#demo">Try the live demo</a>
+        <button type="button" class="btn btn-primary" data-plan="annual">Get Founding Access<svg><use href="#i-arrow"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer" id="policies">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top"><svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg><span class="brand-word">OAKX</span></a>
+        <p class="foot-about">OAKX is a K.O. Enterprise software brand based in Michigan, USA. Local-first offline software for e-commerce sellers.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="#tools">Tools</a></li><li><a href="#demo">Live Demo</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div><h4>Policies</h4><ul><li><a href="terms.html">Terms of Service</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="refunds.html">Refund Policy</a></li></ul></div>
+      <div><h4>Contact</h4><ul><li><a href="mailto:ksolo21@gmail.com">ksolo21@gmail.com</a></li><li>Replies within 1 business day</li><li>Michigan, USA</li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© <span id="year">2026</span> OAKX, operated by K.O. Enterprise · Michigan, USA</span><span>Shopify, TikTok Shop, Amazon, and Etsy are trademarks of their respective owners. OAKX is not affiliated with them.</span></div>
+  </div>
+</footer>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-card">
+    <button class="modal-close" type="button" aria-label="Close" data-close><svg><use href="#i-x"/></svg></button>
+    <span class="pill gold">Founding Access</span>
+    <h3 id="modal-title">Reserve your Founding Membership</h3>
+    <p>Secure online checkout opens shortly. Send one email to reserve your spot and lock in Founding pricing. When checkout opens, you'll get your payment link, and your Founding Member kit is delivered by email within 1 business day of payment.</p>
+    <div class="modal-summary">
+      <div><span>Plan</span><span id="modal-plan">Annual · $79/year</span></div>
+      <div><span>Includes</span><span>TrueNet + ImportScope + monthly updates</span></div>
+      <div><span>Pricing</span><span>Flat all-in, tax included where applicable</span></div>
+      <div><span>Refund</span><span>14 days, no questions asked</span></div>
+    </div>
+    <a class="btn btn-primary" id="modal-mail" href="mailto:ksolo21@gmail.com"><svg><use href="#i-mail"/></svg>Email to reserve my spot</a>
+    <p class="fine">Opens your email app with a prefilled message to ksolo21@gmail.com. No payment is taken now.</p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
