@@ -1,11 +1,9 @@
 /* OAKX Seller Suite — public site script.
- * Live Stripe Payment Links (acct_1UCihrElsifkJRkk, livemode: true).
- * If a URL is missing, that plan's buttons open the Founding Access email modal instead. */
-const CHECKOUT_CONFIG = {
-  monthlyUrl: 'https://buy.stripe.com/3cI14nbXIgKf8hjfvP3Je00',
-  annualUrl: 'https://buy.stripe.com/eVq14n7Hs8dJdBD2J33Je01',
-  supportEmail: 'ksolo21@gmail.com'
-};
+ * Checkout buttons in index.html are plain links to the live Stripe Payment Links
+ * (acct_1UCihrElsifkJRkk, livemode: true):
+ *   Monthly $9/mo  https://buy.stripe.com/3cI14nbXIgKf8hjfvP3Je00
+ *   Annual  $79/yr https://buy.stripe.com/eVq14n7Hs8dJdBD2J33Je01
+ */
 
 (function () {
   'use strict';
@@ -288,25 +286,4 @@ const CHECKOUT_CONFIG = {
   $('is-run').addEventListener('click', runAudit);
   $('is-reset').addEventListener('click', () => { csvEl.value = SAMPLE_CSV; runAudit(); });
   $('is-meta').textContent = SAMPLE_CSV.split('\n').length - 1 + ' sample rows · edit anything, then run';
-
-  /* ---------- Checkout / Founding Access ---------- */
-  const modal = $('modal'); let lastFocus = null;
-  const PLANS = { monthly: 'Monthly · $9/month', annual: 'Annual · $79/year' };
-  function openModal(plan) {
-    lastFocus = document.activeElement;
-    $('modal-plan').textContent = PLANS[plan];
-    const subject = 'OAKX Founding Access — ' + (plan === 'annual' ? 'Annual ($79/year)' : 'Monthly ($9/month)');
-    const body = 'Hi OAKX,\n\nPlease reserve a Founding Membership for me on the ' + PLANS[plan] + ' plan and send my checkout link when it opens.\n\nName:\nStore / channels (Shopify, TikTok Shop, Amazon, Etsy):\n\nThanks!';
-    $('modal-mail').href = 'mailto:' + CHECKOUT_CONFIG.supportEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-    modal.hidden = false; document.body.style.overflow = 'hidden';
-    modal.querySelector('.modal-close').focus();
-  }
-  function closeModal() { modal.hidden = true; document.body.style.overflow = ''; if (lastFocus) lastFocus.focus(); }
-  modal.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', closeModal));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
-  document.querySelectorAll('[data-plan]').forEach((b) => b.addEventListener('click', () => {
-    const plan = b.dataset.plan;
-    const url = plan === 'annual' ? CHECKOUT_CONFIG.annualUrl : CHECKOUT_CONFIG.monthlyUrl;
-    if (url) window.location.href = url; else openModal(plan);
-  }));
 })();

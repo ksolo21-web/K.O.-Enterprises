@@ -225,6 +225,8 @@ textarea.csv:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,36,31,.0
 .price-legal svg{width:18px;height:18px;flex:none;color:var(--ink);margin-top:2px}
 .price-legal b{display:block;color:var(--ink);font-weight:600}
 .tax-line{max-width:900px;margin-top:18px;font-size:14.5px;color:var(--ink);font-weight:500}
+.tax-line.checkout-note{color:var(--body);font-weight:500}
+.tax-line.checkout-note a{font-weight:600}
 
 /* FAQ */
 .faq-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:64px}

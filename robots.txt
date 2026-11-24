@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ksolo21-web.github.io/K.O.-Enterprises/sitemap.xml
