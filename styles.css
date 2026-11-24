@@ -361,3 +361,19 @@ details .ans{padding:0 40px 24px 0;font-size:15.5px}
 #pricing .tax-line{text-align:center}
 @media (min-width:961px){.cta-band .acts{flex-wrap:nowrap}}
 @media (max-width:760px){.hide-sm{display:none}}
+
+/* GiftTally consumer section */
+.gift-section{padding-top:0}
+.gift-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:32px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.gift-card::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:repeating-linear-gradient(90deg,#8E2C3A 0 18px,var(--gold) 18px 36px,#1F5C46 36px 54px)}
+.gift-card .ico{width:44px;height:44px;margin-bottom:18px;color:#8E2C3A}
+.gift-card .ico svg{width:22px;height:22px}
+.gift-card h3{font-size:20px}
+.gift-card .tag{font-size:13px;color:var(--muted);margin-top:4px;font-weight:500}
+.gift-buy{display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--line-2);padding-left:32px}
+.gift-buy .amount{display:flex;align-items:baseline;gap:6px}
+.gift-buy .amount .n{font:700 52px/1 var(--sans);color:var(--ink);letter-spacing:-.045em}
+.gift-buy .amount .per{font-size:15px;color:var(--muted);font-weight:500}
+.gift-buy .sub{font-size:14px;color:var(--muted);margin-bottom:6px}
+.gift-buy .btn{width:100%}
+@media (max-width:760px){.gift-card{grid-template-columns:1fr;padding:24px;gap:24px}.gift-buy{border-left:0;padding-left:0;border-top:1px solid var(--line-2);padding-top:22px}}
