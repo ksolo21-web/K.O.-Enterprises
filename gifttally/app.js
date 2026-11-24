@@ -1,7 +1,7 @@
 /* GiftTally by OAKX — UI. Builds every node with textContent; never injects user text as HTML. */
 (function(){
  'use strict';
- const EDITION={preview:true,maxPeople:3,buyUrl:'https://buy.stripe.com/4gMfZhgdY9hN7df83n3Je02'}; // build step rewrites this line for the free preview
+ const EDITION={preview:true,maxPeople:3,buyUrl:'https://buy.stripe.com/fZueVd1j48dJdBD6Zj3Je03'}; // build step rewrites this line for the free preview
  const E=window.GiftTally,$=id=>document.getElementById(id);
  const STORE_KEY=EDITION.preview?'oakx-gifttally-preview-v1':'oakx-gifttally-v1';
  const PAGE={people:20,shopping:25,summary:100,needs:12};
