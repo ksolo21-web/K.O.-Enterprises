@@ -1,9 +1,9 @@
 /* OAKX Seller Suite — public site script.
- * Drop the two LIVE Stripe Payment Links in here once live checkout is activated.
- * While a value is null, that plan's buttons open the Founding Access email modal instead. */
+ * Live Stripe Payment Links (acct_1UCihrElsifkJRkk, livemode: true).
+ * If a URL is missing, that plan's buttons open the Founding Access email modal instead. */
 const CHECKOUT_CONFIG = {
-  monthlyUrl: null, // e.g. 'https://buy.stripe.com/xxxxxxxx'
-  annualUrl: null,  // e.g. 'https://buy.stripe.com/yyyyyyyy'
+  monthlyUrl: 'https://buy.stripe.com/3cI14nbXIgKf8hjfvP3Je00',
+  annualUrl: 'https://buy.stripe.com/eVq14n7Hs8dJdBD2J33Je01',
   supportEmail: 'ksolo21@gmail.com'
 };
 
