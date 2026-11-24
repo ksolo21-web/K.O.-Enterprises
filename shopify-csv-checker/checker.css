@@ -1,0 +1,72 @@
+/* Page-specific styles for the free Shopify CSV Import Checker.
+   Site chrome, type, buttons, findings, pricing, FAQ, and footer come from ../styles.css. */
+
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+.privacy-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font:600 12.5px/1.2 var(--mono);
+  color:var(--pos);background:var(--pos-soft);
+  border:1px solid #CDEBD6;padding:7px 12px;border-radius:999px;
+}
+.privacy-badge svg{width:14px;height:14px;flex:none}
+
+.hero-check{padding-bottom:48px}
+.hero-check .lede{max-width:620px}
+.catch-list{list-style:none;margin:0;padding:8px 0 4px}
+.catch-list li{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line-2);font-size:14.5px;color:var(--body)}
+.catch-list li:last-child{border-bottom:0}
+.catch-list svg{width:16px;height:16px;flex:none;margin-top:3px;color:var(--pos)}
+
+.checker-section{padding-top:48px;padding-bottom:96px}
+.checker-shell{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden}
+.checker-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 22px;border-bottom:1px solid var(--line);background:#FBFAF7;flex-wrap:wrap}
+.checker-bar h2{font-size:18px;letter-spacing:-.015em}
+.checker-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}
+.pane-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.pane-head label{font-size:13.5px;font-weight:600;color:var(--ink)}
+.pane-head .hint{font-size:12.5px;color:var(--muted)}
+
+.dropzone{border:1px dashed #D9DCE1;border-radius:14px;background:#FCFBF9;padding:8px;transition:border-color .15s,background .15s,box-shadow .15s}
+.dropzone.drag{border-color:var(--ink);background:#F5F7F6;box-shadow:0 0 0 3px rgba(15,36,31,.08)}
+.dropzone textarea.csv{min-height:240px;border-color:transparent;background:transparent;padding:10px 12px}
+.dropzone textarea.csv:focus{box-shadow:none;border-color:transparent}
+.file-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 8px 6px;flex-wrap:wrap}
+.file-row .mono{font-size:12px;color:var(--muted)}
+
+.checker-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 24px}
+.threshold{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:var(--body);margin-left:auto}
+.threshold label{font-weight:600;color:var(--ink)}
+.threshold input{width:72px;font:500 14px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);background:var(--card);border:1px solid #D9DCE1;border-radius:9px;padding:8px 10px;outline:none}
+.threshold input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(15,36,31,.08)}
+.cap-always{padding:0 24px 22px;font-size:13.5px;color:var(--muted);line-height:1.55}
+
+.results-panel{grid-column:1/-1;border:1px solid var(--line);border-radius:12px;background:var(--card);min-height:200px;display:flex;flex-direction:column;overflow:hidden}
+.results-panel .results-head{padding:14px 16px}
+.check-error{margin:0 16px 14px;padding:12px 14px;border-radius:10px;background:var(--neg-soft);color:var(--neg);font-size:14px;line-height:1.5}
+.cap-banner{margin:0 16px 12px;padding:12px 14px;border-radius:10px;background:var(--gold-soft);color:#6E4E17;font-size:14px;border:1px solid #EBDCBF;line-height:1.5}
+.cap-banner a{color:#6E4E17;font-weight:600}
+
+.prose{max-width:760px}
+.prose h2{font-size:clamp(26px,3.2vw,36px);letter-spacing:-.03em;margin:0}
+.prose h3{font-size:21px;letter-spacing:-.015em;margin:36px 0 12px}
+.prose p{font-size:17px;line-height:1.7;margin-top:16px}
+.prose p.lead{font-size:18px;color:var(--body)}
+.prose ul,.prose ol{padding-left:22px;margin:14px 0 0;display:grid;gap:8px}
+.prose li{font-size:17px;line-height:1.7}
+.prose strong{color:var(--ink);font-weight:600}
+.guide-section,.errors-section{padding:24px 0 72px}
+.errors-section{padding-top:8px}
+
+.upsell-note{max-width:760px;margin:0 auto 36px;font-size:17px;line-height:1.7}
+
+@media (max-width:960px){
+  .checker-grid{grid-template-columns:1fr}
+  .threshold{margin-left:0;width:100%}
+  .checker-actions .btn{flex:1 1 auto}
+}
+@media (max-width:720px){
+  .checker-bar{padding:14px 16px}
+  .checker-grid,.checker-actions,.cap-always{padding-left:16px;padding-right:16px}
+  .dropzone textarea.csv{min-height:200px}
+}

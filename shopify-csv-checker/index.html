@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; connect-src https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self'; font-src 'self' https://fonts.gstatic.com; style-src 'self' https://fonts.googleapis.com; script-src 'self' 'nonce-o4kxCsv1'">
+<title>Free Shopify CSV Import Checker: catch price and SKU errors before you upload</title>
+<meta name="description" content="Free Shopify product CSV checker. Catch Shopify CSV import errors — blank prices, duplicate SKUs, and overwrite risks — in your browser before you upload. Export first so you can revert prices after Black Friday. 0 bytes uploaded.">
+<meta name="theme-color" content="#FAF9F6">
+<link rel="canonical" href="https://ksolo21-web.github.io/K.O.-Enterprises/shopify-csv-checker/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Free Shopify CSV Import Checker: catch price and SKU errors before you upload">
+<meta property="og:description" content="Check a Shopify product CSV in your browser before you upload. Catch blank prices, duplicate SKUs, and overwrite risks. 0 bytes uploaded. $9/month or $79/year for the full suite, flat all-in pricing, tax included where applicable.">
+<meta property="og:url" content="https://ksolo21-web.github.io/K.O.-Enterprises/shopify-csv-checker/">
+<meta property="og:image" content="https://ksolo21-web.github.io/K.O.-Enterprises/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="OAKX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Shopify CSV Import Checker: catch price and SKU errors before you upload">
+<meta name="twitter:description" content="Check a Shopify product CSV in your browser before you upload. Catch blank prices, duplicate SKUs, and overwrite risks. 0 bytes uploaded.">
+<meta name="twitter:image" content="https://ksolo21-web.github.io/K.O.-Enterprises/og-image.png">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="checker.css">
+<script type="application/ld+json" nonce="o4kxCsv1">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://ksolo21-web.github.io/K.O.-Enterprises/shopify-csv-checker/#webpage",
+      "url": "https://ksolo21-web.github.io/K.O.-Enterprises/shopify-csv-checker/",
+      "name": "Free Shopify CSV Import Checker: catch price and SKU errors before you upload",
+      "description": "Free Shopify product CSV checker. Catch Shopify CSV import errors — blank prices, duplicate SKUs, and overwrite risks — in your browser before you upload.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "OAKX",
+        "url": "https://ksolo21-web.github.io/K.O.-Enterprises/"
+      },
+      "primaryImageOfPage": "https://ksolo21-web.github.io/K.O.-Enterprises/og-image.png"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Shopify CSV Import Checker",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web browser",
+      "isAccessibleForFree": true,
+      "description": "Free, in-browser Shopify product CSV checker that flags blank or invalid prices, compare-at errors, duplicate handles and SKUs, and large price changes before you upload.",
+      "url": "https://ksolo21-web.github.io/K.O.-Enterprises/shopify-csv-checker/",
+      "image": "https://ksolo21-web.github.io/K.O.-Enterprises/og-image.png",
+      "brand": { "@type": "Brand", "name": "OAKX" },
+      "author": { "@type": "Organization", "name": "K.O. Enterprise" },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does this Shopify product CSV checker upload my file?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The file is read in your browser only. 0 bytes are uploaded. You can disconnect from the internet after the page has loaded and the checker still runs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can this revert Shopify prices after Black Friday for me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. This page only checks a CSV. You still import in Shopify admin. Export a dated copy before you change prices, use a thin file, test 3–5 products, and revert from that pre-sale export after Cyber Monday."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is the free version capped at 200 rows?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This landing-page tool is a lite preview of ImportScope. The full ImportScope kit in OAKX Seller Suite reviews 10,000+ rows and adds reports and exports."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What columns does a thin price or revert file need?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Handle, the Option name and value columns your variants use, Variant Price, and Variant Compare At Price if you show a compare-at. You do not need Title, Cost, inventory, or images in a price-only update."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What if my prices use dollar signs or thousands separators?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Shopify product CSVs expect a plain decimal such as 12.00 or 1299.99. This checker flags $12.00, 1,299.99, and values like N/A so you can fix them before you upload."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0F241F"/><circle cx="16" cy="16" r="8.25" fill="none" stroke="#FAF9F6" stroke-width="2.75"/><path d="M12.6 12.6l6.8 6.8M19.4 12.6l-6.8 6.8" stroke="#B4832C" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8"/><path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8"/><path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16"/><path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M8 9.5h8M8 12h8M8 14.5h5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 6h13M3.5 10h13M3.5 14h13"/></symbol>
+    <symbol id="i-info" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.3v3.7M8 5v.1"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l7 2.6v5.6c0 4.3-2.9 7.6-7 8.8-4.1-1.2-7-4.5-7-8.8V6.1z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="top">
+  <div class="wrap nav">
+    <a class="brand" href="../index.html" aria-label="OAKX home">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg>
+      <span class="brand-word">OAKX</span><span class="brand-sub">Seller Suite</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links" id="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="#checker">CSV Checker</a></li>
+        <li><a href="#guide">BFCM guide</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="../privacy.html">Policies</a></li>
+      </ul>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="#pricing">Subscribe</a>
+      <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links" id="menu-btn"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero hero-check">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Free Shopify product CSV checker</span>
+      <h1>Free Shopify CSV Import Checker: catch price and SKU errors <em>before you upload.</em></h1>
+      <p class="lede">Paste or drop a proposed Shopify product CSV, optionally compare it to your current export, and catch blank prices, duplicate SKUs, and overwrite risks in your browser — before they reach a live store.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#checker"><svg><use href="#i-scan"/></svg>Check a CSV now</a>
+        <a class="btn btn-ghost" href="#guide">BFCM price-revert guide<svg><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="hero-meta">
+        <span class="privacy-badge"><svg><use href="#i-lock"/></svg>0 bytes uploaded, runs in your browser</span>
+      </div>
+    </div>
+    <aside class="suite-card" aria-label="What this checker flags">
+      <div class="suite-head"><span class="label">ImportScope Lite</span><span class="pill">First 200 rows free</span></div>
+      <div class="suite-body">
+        <ul class="catch-list">
+          <li><svg><use href="#i-check"/></svg>Blank or invalid Variant Price</li>
+          <li><svg><use href="#i-check"/></svg>Compare At Price lower than price</li>
+          <li><svg><use href="#i-check"/></svg>Duplicate Handle + option combinations</li>
+          <li><svg><use href="#i-check"/></svg>Duplicate Variant SKUs and missing handles</li>
+          <li><svg><use href="#i-check"/></svg>Price changes over a threshold, including 2× jumps</li>
+        </ul>
+      </div>
+      <div class="suite-foot">
+        <div class="fine">A planted-error sample loads automatically so you can see the checker work before you paste your own file.</div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="section checker-section" id="checker">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Runs in this tab</div>
+      <h2>Check your Shopify CSV before it touches a live store.</h2>
+      <p>Nothing is uploaded. The free checker reviews the first 200 data rows. Full ImportScope in OAKX Seller Suite handles 10,000+ rows, reports, and exports.</p>
+    </div>
+    <div class="checker-shell">
+      <div class="checker-bar">
+        <h2>Shopify CSV Import Checker</h2>
+        <span class="privacy-badge"><svg><use href="#i-lock"/></svg>0 bytes uploaded, runs in your browser</span>
+      </div>
+      <div class="checker-grid">
+        <div>
+          <div class="pane-head">
+            <label for="proposed-csv">Proposed import CSV</label>
+            <span class="hint">Required · paste or drop a file</span>
+          </div>
+          <div class="dropzone" id="proposed-drop">
+            <textarea class="csv" id="proposed-csv" spellcheck="false" aria-describedby="proposed-name" placeholder="Handle,Option1 Name,Option1 Value,Variant Price,Variant Compare At Price"></textarea>
+            <div class="file-row">
+              <button type="button" class="linkbtn" id="proposed-browse">Choose a .csv file</button>
+              <span class="mono" id="proposed-name">No file chosen — paste is fine</span>
+              <input type="file" id="proposed-file" accept=".csv,text/csv,text/plain,.txt" hidden>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="pane-head">
+            <label for="current-csv">Current store export</label>
+            <span class="hint">Optional · used to flag price changes</span>
+          </div>
+          <div class="dropzone" id="current-drop">
+            <textarea class="csv" id="current-csv" spellcheck="false" aria-describedby="current-name" placeholder="Optional: paste your current Shopify product export to compare prices"></textarea>
+            <div class="file-row">
+              <button type="button" class="linkbtn" id="current-browse">Choose a .csv file</button>
+              <span class="mono" id="current-name">No file chosen</span>
+              <input type="file" id="current-file" accept=".csv,text/csv,text/plain,.txt" hidden>
+            </div>
+          </div>
+        </div>
+        <div class="results-panel" aria-live="polite">
+          <div class="results-head">
+            <strong id="results-title">Pre-flight results</strong>
+            <div class="counts" id="results-counts"></div>
+          </div>
+          <div class="check-error" id="check-error" hidden></div>
+          <div class="cap-banner" id="cap-banner" hidden></div>
+          <div class="empty" id="results-empty">
+            <div><svg><use href="#i-file"/></svg>Run the checker to review this CSV.<br>Results appear here in this tab.</div>
+          </div>
+          <div class="allclear" id="results-clear" hidden>No issues in the rows reviewed. Still test 3–5 products in Shopify before a full import.</div>
+          <ul class="findings" id="results-findings" hidden></ul>
+        </div>
+      </div>
+      <div class="checker-actions">
+        <button type="button" class="btn btn-primary" id="run-btn"><svg><use href="#i-scan"/></svg>Check CSV</button>
+        <button type="button" class="btn btn-ghost" id="sample-btn">Load sample with planted errors</button>
+        <button type="button" class="linkbtn" id="reset-btn">Clear</button>
+        <div class="threshold">
+          <label for="threshold">Flag price drops of at least</label>
+          <input id="threshold" type="number" min="1" max="100" step="1" value="20">
+          <span>%</span>
+        </div>
+      </div>
+      <p class="cap-always">The free version reviews the first 200 data rows. The full ImportScope tool in OAKX Seller Suite handles 10,000+ rows, written reports, and CSV/HTML exports. $9/month or $79/year — flat all-in pricing, tax included where applicable.</p>
+    </div>
+  </div>
+</section>
+
+<article class="guide-section" id="guide">
+  <div class="wrap prose">
+    <div class="kicker">Black Friday · Cyber Monday</div>
+    <h2>How to safely change and revert Shopify prices with a CSV</h2>
+    <p class="lead">Shopify does not keep a price history for you. If you change Variant Price with a product CSV this week, the only reliable way to <strong>revert Shopify prices after Black Friday</strong> is a file you saved before the sale.</p>
+    <p>Export all products — or at least every product you plan to discount — and keep a dated copy. That export is your revert file after Cyber Monday. Without it, you are reconstructing sale prices from memory, screenshots, or a spreadsheet that may already have been edited.</p>
+    <p>When you change prices, use a thin CSV instead of re-uploading a full catalog export. Include <strong>Handle</strong>, <strong>Option1 Name</strong>, <strong>Option1 Value</strong> (plus Option2 and Option3 if those variants use them), <strong>Variant Price</strong>, and <strong>Variant Compare At Price</strong> if you show a compare-at. Leave Cost, inventory, images, and descriptions out. A thinner file cannot roll back a supplier cost you updated mid-sale, and it is easier to review line by line. A price CSV overwrites the prices themselves; it is not a scheduled automatic discount, and it will not put those prices back on its own.</p>
+    <p>Test 3–5 products first. Upload the small file, open the live product pages, and confirm both the selling price and the compare-at. Only then import the rest of the catalog. After Cyber Monday, revert with another thin file built from your pre-sale export — again Handle, option columns, Variant Price, and Variant Compare At Price only. If you changed a price by hand during the sale, fix that row before you revert, or the old export will overwrite your mid-sale edit.</p>
+  </div>
+</article>
+
+<section class="errors-section" id="errors">
+  <div class="wrap prose">
+    <h2>Common Shopify CSV import errors and how to fix them</h2>
+    <p>Blank or invalid Variant Price values are among the most damaging <strong>Shopify CSV import errors</strong>. An empty price can import as $0.00 and briefly list a product for free. Values such as $12.00, 1,299.99, or N/A are not plain decimals; type 12.00 or 1299.99 instead.</p>
+    <p>Compare-at price should be higher than the selling price if you want a sale comparison to display. When Compare At Price is lower than or equal to Variant Price, the markdown will not show as intended.</p>
+    <p>Duplicate Handle plus option combinations mean two rows claim the same variant, and Shopify cannot apply both reliably. Keep one row per Handle and option set. Duplicate Variant SKUs are allowed in some stores, but they make fulfillment and later matching ambiguous — give each variant its own SKU when you can.</p>
+    <p>A missing Handle cannot be matched to a product. Handles also cannot contain spaces. Unexpected price jumps of 2× or 10×, or drops far below your planned discount, often mean a misplaced decimal — 189.00 becoming 18.90 or 1890.00.</p>
+    <p>A product CSV can also <strong>overwrite prices</strong> you did not mean to touch if the column is present and a cell is blank, or if you import a wide export that a spreadsheet resorted. Review the columns you include, keep each product’s variant rows together, and run a <strong>Shopify product CSV checker</strong> before you upload.</p>
+  </div>
+</section>
+
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">OAKX Seller Suite</div>
+      <h2>Need more than 200 rows, reports, and exports?</h2>
+      <p class="upsell-note">This free checker reviews the first 200 rows entirely in your browser. The full ImportScope tool in OAKX Seller Suite handles 10,000+ rows, compares a proposed import against your current export with a written finding report, and exports CSV and HTML reviews you can keep with your sale paperwork. The suite also includes TrueNet, which shows true net profit after fees, tariffs, shipping, and return reserves across Shopify, TikTok Shop, Amazon, and Etsy. Both tools run offline on your computer. There is no store login or OAuth. Membership is $9/month or $79/year, flat all-in pricing, tax included where applicable.</p>
+    </div>
+    <div class="price-wrap">
+      <article class="plan">
+        <h3>Monthly</h3>
+        <div class="sub">Full suite, billed monthly</div>
+        <div class="amount"><span class="n">$9</span><span class="per">/month</span></div>
+        <div class="eq">No surprise checkout fees</div>
+        <a class="btn btn-ghost" href="https://buy.stripe.com/3cI14nbXIgKf8hjfvP3Je00">Start monthly — $9/mo</a>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>TrueNet + ImportScope offline kits</li>
+          <li><svg><use href="#i-check"/></svg>10,000+ row CSV checks, reports, and exports</li>
+          <li><svg><use href="#i-check"/></svg>Monthly platform-rule updates</li>
+          <li><svg><use href="#i-check"/></svg>Cancel anytime</li>
+        </ul>
+      </article>
+      <article class="plan featured">
+        <span class="badge">Save 27%</span>
+        <h3>Annual</h3>
+        <div class="sub">Full suite, billed yearly</div>
+        <div class="amount"><span class="n">$79</span><span class="per">/year</span></div>
+        <div class="eq">Works out to <b>$6.58/month</b> vs. $108 paid monthly</div>
+        <a class="btn btn-primary" href="https://buy.stripe.com/eVq14n7Hs8dJdBD2J33Je01">Get annual — $79/yr</a>
+        <ul class="checks">
+          <li><svg><use href="#i-check"/></svg>Everything in Monthly</li>
+          <li><svg><use href="#i-check"/></svg>Founding Member priority for upcoming tools</li>
+          <li><svg><use href="#i-check"/></svg>One payment a year</li>
+          <li><svg><use href="#i-check"/></svg>Cancel anytime</li>
+        </ul>
+      </article>
+    </div>
+    <p class="tax-line">$9/month or $79/year — flat all-in pricing, tax included where applicable. No surprise checkout fees.</p>
+    <p class="tax-line checkout-note">Secure checkout is handled by Stripe. Your kit is emailed within 1 business day of payment. Cancel anytime from the <a href="https://billing.stripe.com/p/login/3cI14nbXIgKf8hjfvP3Je00" target="_blank" rel="noopener noreferrer">billing portal</a>.</p>
+    <div class="price-legal">
+      <div><svg><use href="#i-mail"/></svg><span><b>Delivered by email</b>Offline software kits arrive by email within 1 business day.</span></div>
+      <div><svg><use href="#i-cal"/></svg><span><b>Monthly rule updates</b>Updated fee and return presets are included.</span></div>
+      <div><svg><use href="#i-shield"/></svg><span><b>14-day refund</b>No questions asked. See the <a href="../refunds.html">Refund Policy</a>.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap faq-grid">
+    <div class="section-head">
+      <div class="kicker">FAQ</div>
+      <h2>Questions about this free checker</h2>
+      <p>Short answers about uploads, Black Friday price reverts, the 200-row cap, and thin CSV columns.</p>
+    </div>
+    <div class="faq-list">
+      <details open>
+        <summary>Does this Shopify product CSV checker upload my file?<span class="pm" aria-hidden="true"><svg><use href="#i-plus"/></svg></span></summary>
+        <div class="ans">No. The file is read in your browser only. 0 bytes are uploaded. You can disconnect from the internet after the page has loaded and the checker still runs.</div>
+      </details>
+      <details>
+        <summary>Can this revert Shopify prices after Black Friday for me?<span class="pm" aria-hidden="true"><svg><use href="#i-plus"/></svg></span></summary>
+        <div class="ans">No. This page only checks a CSV. You still import in Shopify admin. Export a dated copy before you change prices, use a thin file, test 3–5 products, and revert from that pre-sale export after Cyber Monday.</div>
+      </details>
+      <details>
+        <summary>Why is the free version capped at 200 rows?<span class="pm" aria-hidden="true"><svg><use href="#i-plus"/></svg></span></summary>
+        <div class="ans">This landing-page tool is a lite preview of ImportScope. The full ImportScope kit in OAKX Seller Suite reviews 10,000+ rows and adds reports and exports. $9/month or $79/year, flat all-in pricing, tax included where applicable.</div>
+      </details>
+      <details>
+        <summary>What columns does a thin price or revert file need?<span class="pm" aria-hidden="true"><svg><use href="#i-plus"/></svg></span></summary>
+        <div class="ans">Handle, the Option name and value columns your variants use, Variant Price, and Variant Compare At Price if you show a compare-at. You do not need Title, Cost, inventory, or images in a price-only update.</div>
+      </details>
+      <details>
+        <summary>What if my prices use dollar signs or thousands separators?<span class="pm" aria-hidden="true"><svg><use href="#i-plus"/></svg></span></summary>
+        <div class="ans">Shopify product CSVs expect a plain decimal such as 12.00 or 1299.99. This checker flags $12.00, 1,299.99, and values like N/A so you can fix them before you upload.</div>
+      </details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer" id="policies">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="../index.html"><svg class="brand-mark" aria-hidden="true"><use href="#logo"/></svg><span class="brand-word">OAKX</span></a>
+        <p class="foot-about">OAKX is a K.O. Enterprise software brand based in Michigan, USA. Local-first offline software for e-commerce sellers.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="../index.html">Home</a></li><li><a href="#checker">CSV Checker</a></li><li><a href="../index.html#pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div><h4>Policies</h4><ul><li><a href="../terms.html">Terms of Service</a></li><li><a href="../privacy.html">Privacy Policy</a></li><li><a href="../refunds.html">Refund Policy</a></li></ul></div>
+      <div><h4>Contact</h4><ul><li><a href="mailto:ksolo21@gmail.com">ksolo21@gmail.com</a></li><li><a href="https://billing.stripe.com/p/login/3cI14nbXIgKf8hjfvP3Je00" target="_blank" rel="noopener noreferrer">Manage subscription</a></li><li>Replies within 1 business day</li><li>Michigan, USA</li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 OAKX, operated by K.O. Enterprise · Michigan, USA</span><span>Shopify is a trademark of Shopify Inc. OAKX is not affiliated with Shopify.</span></div>
+  </div>
+</footer>
+
+<script src="lite-engine.js"></script>
+<script src="checker.js"></script>
+</body>
+</html>
