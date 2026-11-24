@@ -1,6 +1,0 @@
-Handle,Title,Option1 Name,Option1 Value,Variant SKU,Variant Price,Variant Compare At Price,Status,Published,Vendor,Tags
-linen-shirt,Linen Shirt,Size,S,LIN-S,8.90,,active,TRUE,North Studio,summer
-linen-shirt,,Size,M,LIN-M,89.00,,,,,
-ceramic-mug,Ceramic Mug,Color,Ink,MUG-INK,24.00,20.00,draft,TRUE,Clay House,gifts
-canvas-tote,Canvas Tote,Title,Default Title,TOTE-01,32.00,,active,TRUE,,essentials
-travel-pouch,Travel Pouch,Color,Navy,POUCH-N,18.00,,active,TRUE,North Studio,travel
